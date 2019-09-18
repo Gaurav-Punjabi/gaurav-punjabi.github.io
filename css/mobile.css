@@ -1,0 +1,52 @@
+@media only screen and (max-width: 768px) {
+    .demo-3 {
+        --font-size-menu: 5vmax;
+    }
+
+    /*******************************************************************************************************************
+                                                    HOME SECTION STYLES
+     ******************************************************************************************************************/
+    .home-container {
+        flex-direction: column-reverse;
+    }
+    .home-container .logo {
+        width: 15vw;
+    }
+    .home-container .summary {
+        margin-bottom: 30px;
+    }
+    .home-vector {
+        margin-bottom: 30px;
+    }
+    .vector-container {
+        padding: 5vw;
+    }
+
+    /*******************************************************************************************************************
+                                                    ABOUT SECTION STYLES
+     ******************************************************************************************************************/
+    #about .main-container {
+        flex-direction: column;
+    }
+    #about .about-container__left-section {
+        padding-top: 9vh;
+        padding-bottom: 2vh;
+    }
+    #about .about-container__left-section .job-profile {
+        margin-bottom: 10px;
+    }
+    .fun-facts {
+        margin: 0 9vw;
+    }
+    #about .about-container__left-section .fun-facts .fun-fact i {
+        font-size: 36px!important;
+    }
+
+    #about .about-container__right-section {
+        padding-top: 3vh;
+    }
+    #about .about-vector {
+        flex: none;
+        display: none;
+    }
+}
