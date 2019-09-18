@@ -3,7 +3,7 @@
     const gNavItems                     =   document.querySelectorAll('.global-menu__item');
     const elmOverlay                    =   document.querySelector('.shape-overlays');
     const overlay                       =   new ShapeOverlays(elmOverlay);
-    let currentPage                     =   $('#about');
+    let currentPage                     =   $('#home');
     let menuLinks                       =   $('.menu-link');
     $('section').hide();
     currentPage.show();
