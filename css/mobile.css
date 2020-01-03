@@ -8,6 +8,7 @@
      ******************************************************************************************************************/
     .home-container {
         flex-direction: column-reverse;
+        padding: 8vh 8vw;
     }
     .home-container .logo {
         width: 15vw;
