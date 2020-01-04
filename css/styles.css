@@ -10,11 +10,11 @@
 }
 
 @font-face {
-    font-family: "Circular Std Medium";
+    font-family: circularMedium;
     src: url("./assets/fonts/CircularStd-Medium.woff");
 }
 @font-face {
-    font-family: "Circular Std Black";
+    font-family: circularBlack;
     src: url("./assets/fonts/CircularStd-Black.woff");
 }
 
@@ -23,7 +23,7 @@ p, span, div {
 }
 
 small, h1, h2, h3, h4, h5, h6, p, span, button, a {
-    font-family: 'Circular Std Black', sans-serif;
+    font-family: 'circularBlack', sans-serif;
 }
 
 .numbers {
@@ -68,7 +68,7 @@ body {
     --font-weight-title: 600;
     --color-menu: #000;
     --color-menu-hover: #fff;
-    font-family: 'Circular Std Black', 'Muli', sans-serif;
+    font-family: 'circularBlack', 'Muli', sans-serif;
     --font-size-menu: 4vmax;
     --font-weight-menu: 900;
     --button-bg: #FFF236;
@@ -306,7 +306,7 @@ main {
 .global-menu__item {
     color: var(--color-menu);
     width: fit-content;
-    font-family: 'Circular Std Black', sans-serif;
+    font-family: 'circularBlack', sans-serif;
     font-size: var(--font-size-menu);
     font-weight: var(--font-weight-menu);
     opacity: 0;
@@ -547,7 +547,7 @@ main {
     margin-bottom: 30px;
 }
 .social-caption {
-    font-family: 'Circular Std Medium'!important;
+    font-family: 'circularMedium'!important;
     font-weight: 600;
     font-size: 16px;
 
