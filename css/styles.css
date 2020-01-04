@@ -8,6 +8,16 @@
     -webkit-overflow-scrolling: touch !important;
 
 }
+
+@font-face {
+    font-family: "Circular Std Medium";
+    src: url("./assets/fonts/CircularStd-Medium.woff");
+}
+@font-face {
+    font-family: "Circular Std Black";
+    src: url("./assets/fonts/CircularStd-Black.woff");
+}
+
 p, span, div {
 	font-family: "Muli", san-serif;
 }
@@ -19,6 +29,7 @@ small, h1, h2, h3, h4, h5, h6, p, span, button, a {
 .numbers {
     font-family: "Roboto", sans-serif !important;
 }
+
 
 html {
     background: #000;
