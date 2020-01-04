@@ -11,6 +11,8 @@
 {
     setTimeout(() => document.body.classList.add('render'), 60);
     const navdemos = Array.from(document.querySelectorAll('nav.demos > .demo'));
+    var frankVector = document.getElementById("frank-vector");
+    var socialIcons = document.getElementById("social-icons");
     const total = navdemos.length;
     const current = navdemos.findIndex(el => el.classList.contains('demo--current'));
     const navigate = (linkEl) => {
@@ -65,6 +67,8 @@ class ShapeOverlays {
     open() {
         this.isOpened = true;
         this.elm.classList.add('is-opened');
+        frankVector.classList.add('is-opened');
+        socialIcons.classList.add('is-opened');
         this.timeStart = Date.now();
         this.renderLoop();
     }
@@ -72,6 +76,8 @@ class ShapeOverlays {
     close() {
         this.isOpened = false;
         this.elm.classList.remove('is-opened');
+        frankVector.classList.remove('is-opened');
+        socialIcons.classList.remove('is-opened');
         this.timeStart = Date.now();
         this.renderLoop();
     }

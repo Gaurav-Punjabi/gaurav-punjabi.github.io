@@ -1,6 +1,34 @@
 @media only screen and (max-width: 768px) {
     .demo-3 {
-        --font-size-menu: 5vmax;
+        --font-size-menu: 6vmax;
+    }
+
+    .brand-logo {
+        width: 9.5vw;
+        height: 9.5vw;
+        top: 1.5em;
+        left: 8vw;
+    }
+    .social-icons-wrapper {
+        margin-left: 3.5vw;
+        bottom: 5vh;
+        left: 2vw;
+        top: unset;
+        height: fit-content;
+    }
+    .social-icons {
+        flex-direction: row;
+    }
+    .social-icons > i {
+        font-size: 16px!important;
+        margin-right: 30px;
+        margin-bottom: 0;
+    }
+    .vertical-line {
+        display: none;
+    }
+    .frank {
+        width: 35vw;
     }
 
     /*******************************************************************************************************************

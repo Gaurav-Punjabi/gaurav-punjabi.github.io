@@ -31,24 +31,24 @@
         }
     });
 
-    menuLinks.click(function() {
-        if (overlay.isAnimating) {
-            return false;
-        }
-        overlay.toggle();
-
-        elmHamburger.classList.remove('is-opened-navi');
-
-        let requestedPage = $(this).attr('id');
-        console.log(`Requested page : ${requestedPage}`);
-        requestedPage = $(requestedPage);
-
-        for (var i = 0; i < gNavItems.length; i++) {
-            gNavItems[i].classList.remove('is-opened');
-        }
-        currentPage.hide();
-        requestedPage.show();
-        requestedPage.addClass("animated").addClass("slideInDown");
-        currentPage = requestedPage;
-    })
+    // menuLinks.click(function() {
+    //     if (overlay.isAnimating) {
+    //         return false;
+    //     }
+    //     overlay.toggle();
+    //
+    //     elmHamburger.classList.remove('is-opened-navi');
+    //
+    //     let requestedPage = $(this).attr('id');
+    //     console.log(`Requested page : ${requestedPage}`);
+    //     requestedPage = $(requestedPage);
+    //
+    //     for (var i = 0; i < gNavItems.length; i++) {
+    //         gNavItems[i].classList.remove('is-opened');
+    //     }
+    //     currentPage.hide();
+    //     requestedPage.show();
+    //     requestedPage.addClass("animated").addClass("slideInDown");
+    //     currentPage = requestedPage;
+    // })
 }());
