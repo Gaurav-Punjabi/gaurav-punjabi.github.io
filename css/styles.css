@@ -68,7 +68,7 @@ body {
     --font-weight-title: 600;
     --color-menu: #000;
     --color-menu-hover: #fff;
-    font-family: 'Circular Std Black', sans-serif;
+    font-family: 'Circular Std Black', 'Muli', sans-serif;
     --font-size-menu: 4vmax;
     --font-weight-menu: 900;
     --button-bg: #FFF236;
