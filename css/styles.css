@@ -11,19 +11,23 @@
 
 @font-face {
     font-family: circularMedium;
-    src: url("./assets/fonts/CircularStd-Medium.woff");
+    src: url("../assets/fonts/CircularStd-Medium.woff");
 }
 @font-face {
     font-family: circularBlack;
-    src: url("./assets/fonts/CircularStd-Black.woff");
+    src: url("../assets/fonts/CircularStd-Black.woff");
 }
 
-p, span, div {
-	font-family: "Muli", san-serif;
-}
 
-small, h1, h2, h3, h4, h5, h6, p, span, button, a {
-    font-family: 'circularBlack', sans-serif;
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-title);
+    font-family: var(--font-family-title);
+    font-weight: var(--font-weight-title);
+}
+p, button, a, small, div, span {
+    color: var(--color-title);
+    font-family: 'Muli', sans-serif;
 }
 
 .numbers {
@@ -51,22 +55,22 @@ body {
 
 
 .demo-3 {
-    --color-default: #000;
+    --color-default: #031B4E;
     ---color-accent: #3CF1B7;
     --color-text: #fff;
     --color-bg: #fff;
     --color-link: #4d4f5f;
-    --color-link-hover: #bfb5b5;
+    --color-link-hover: #999;
     --color-info: #333;
     --color-main-bg: #fff;
     --path-fill-1: #000;
     --path-fill-2: #1d1d1f;
     --path-fill-3: #FFF236;
     --color-title: #031B4E;
-    --font-family-title: 'circularBlack', 'Muli', sans-serif;
+    --font-family-title: circularBlack, sans-serif;
     --font-size-title: 5vmax;
-    --font-weight-title: 600;
-    --color-menu: #000;
+    --font-weight-title: 900;
+    --color-menu: #031B4E;
     --color-menu-hover: #fff;
     font-family: 'circularBlack', 'Muli', sans-serif;
     --font-size-menu: 4vmax;
@@ -411,28 +415,28 @@ main {
 }
 
 .menu-link.active::before {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    left: -2.5%;
-    top: 70%;
-    -webkit-transform: translateY(-50%);
-    -moz-transform: translateY(-50%);
-    -ms-transform: translateY(-50%);
-    -o-transform: translateY(-50%);
-    transform: translateY(-50%);
-    height: 35%;
-    width: 105%;
-    background: var(---color-accent);
-    -webkit-background-size: 0% 100%;
-    -moz-background-size: 0% 100%;
-    background-size: 0% 100%;
-    opacity: 1;
-    will-change: transform, opacity;
-    -moz-transition: all 0.3s ease-in-out;
-    -o-transition: all 0.3s ease-in-out;
-    -webkit-transition: all 0.3s ease-in-out;
-    transition: all 0.3s ease-in-out
+    /*content: '';*/
+    /*position: absolute;*/
+    /*z-index: -1;*/
+    /*left: -2.5%;*/
+    /*top: 70%;*/
+    /*-webkit-transform: translateY(-50%);*/
+    /*-moz-transform: translateY(-50%);*/
+    /*-ms-transform: translateY(-50%);*/
+    /*-o-transform: translateY(-50%);*/
+    /*transform: translateY(-50%);*/
+    /*height: 35%;*/
+    /*width: 105%;*/
+    /*background: var(---color-accent);*/
+    /*-webkit-background-size: 0% 100%;*/
+    /*-moz-background-size: 0% 100%;*/
+    /*background-size: 0% 100%;*/
+    /*opacity: 1;*/
+    /*will-change: transform, opacity;*/
+    /*-moz-transition: all 0.3s ease-in-out;*/
+    /*-o-transition: all 0.3s ease-in-out;*/
+    /*-webkit-transition: all 0.3s ease-in-out;*/
+    /*transition: all 0.3s ease-in-out*/
 }
 
 .shape-overlays {
@@ -460,9 +464,6 @@ main {
     fill: var(--path-fill-3);
 }
 
-.shape-overlays__path:nth-of-type(4) {
-    fill: var(--path-fill-4);
-}
 
 .menu-vector {
     width: 30vw;
@@ -1026,26 +1027,183 @@ main {
 
 
 /***********************************************************************************************************************
-													HOME SECTION STYLES
+													ABOUT SECTION STYLES
  ***********************************************************************************************************************/
 #about {
-    /*background-image:  url("../assets/images/bg-doodle.jpg");*/
-    /*background-size: contain;*/
-    /*background-repeat: no-repeat;*/
+    width: 100vw;
+    min-height: 100vh;
+    background-color: #F7F7F7;
+    position: relative;
+    top: 0;
+    left: 0;
+
+}
+#about .heading {
+    color: var(--color-title);
+    font-family: var(--font-family-title);
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-title);
 }
 
-.profile-container {
-    margin: 0 0;
+.header-container {
+    background-color: #fff;
+    padding: 10% 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+.header-container div {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.profile-picture {
-    /*box-shadow: ;*/
+.description {
+    color: var(--color-title);
+    font-family: "Open Sans", sans-serif;
+    font-size: 1.3rem;
+
+    padding-right: 20%;
 }
 
-.profile-vector {
-    width: 30%;
+.about-container {
+    background-color: var(--button-bg) ;
+    background-image: url("../assets/images/doodle.png");
+    background-size: contain;
+    background-repeat: repeat-x;
+
+    width: 100%;
+    height: 50vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.about-container::after {
+    content: '';
+    width: 100%;
+    height: 100%;
+}
+
+.about-vector {
+    padding: 3% 0;
+    width: 35%;
+}
+
+.info-container {
+    background-color: white;
+    border-radius: 20px;
+    width: 60vw;
+    margin: -150px auto 15px;
+    padding: 8% 0 1%;
+    display: flex;
+    flex-direction: column;;
+    justify-content: center;
+    align-items: center;
+    -webkit-box-shadow: 0px 0px 89px 31px rgba(153,153,153,0.23);
+    -moz-box-shadow: 0px 0px 89px 31px rgba(153,153,153,0.23);
+    box-shadow: 0px 0px 89px 25px rgba(153,153,153,0.23);
+}
+
+.info-container .profile-container {
     position: absolute;
-    right: 1%;
-    bottom: 1%;
+    flex: 1;
+
 }
+.profile-wrapper {
+    margin-bottom: 40px;
+}
+
+.image-container {
+    width: 15vw;
+    height: 15vw;
+    background: #fff;
+    border-radius: 7.5vw;
+    margin-top: calc(-120px - 7.5vw);
+    padding: 5%;
+    -webkit-box-shadow: 0px 0px 89px 31px rgba(153,153,153,0.23);
+    -moz-box-shadow: 0px 0px 89px 31px rgba(153,153,153,0.23);
+    box-shadow: 0px 0px 89px 31px rgba(153,153,153,0.23);
+    margin-bottom: 15px;
+
+}
+
+.image-container .profile-picture {
+    width: 100%;
+    height: 100%;
+    border-radius: 7.5vw;
+}
+
+.details-wrapper {
+    align-self: stretch;
+    display: grid;
+    grid-template-columns: 35% 35%;
+    justify-content: space-around;
+}
+
+
+.details-wrapper > .detail-block {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 35px;
+}
+
+.detail-block .title {
+    margin-bottom: 5px;
+}
+.detail-block .caption {
+    color: var(--color-link-hover);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.quote-container {
+    background: #FBFBFB;
+    width: 51vw;
+    padding: 5% 10% ;
+    border-left: 10px solid var(---color-accent);
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.facts-container {
+    padding: 5% 10%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.facts-container > .facts-vector {
+    width: 40%;
+}
+.facts-container .facts {
+    flex: 1;
+}
+
+.fact {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8%;
+}
+
+.fact .fact-count {
+    flex: 1;
+}
+.fact .description {
+    flex: 1;
+    padding-right: 5%;
+}
+.fact .fact-count .count {
+    font-size: 6rem;
+    margin-bottom: 10px;
+}
+.fact .fact-count .fact-name {
+    font-size: 1.5rem;
+    font-family: inherit;
+    font-weight: inherit;;
+    display: block;
+}
+
 
