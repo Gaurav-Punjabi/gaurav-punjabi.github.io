@@ -4,7 +4,7 @@
     const elmOverlay                    =   document.querySelector('.shape-overlays');
     const overlay                       =   new ShapeOverlays(elmOverlay);
     const coverImage                    =   $(".cover-image");
-    let currentPage                     =   $('#about');
+    let currentPage                     =   $('#home');
     let menuLinks                       =   $('.menu-link');
     let prevLink                        =   currentPage;
     prevLink.addClass("active");
