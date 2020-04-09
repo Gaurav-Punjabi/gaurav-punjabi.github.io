@@ -1,0 +1,490 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>TestBlockReorder xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_javadoccomment"> * Licensed to the Apache Software Foundation (ASF) under one</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_javadoccomment"> * or more contributor license agreements.  See the NOTICE file</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_javadoccomment"> * distributed with this work for additional information</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_javadoccomment"> * regarding copyright ownership.  The ASF licenses this file</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_javadoccomment"> * to you under the Apache License, Version 2.0 (the</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_javadoccomment"> * "License"); you may not use this file except in compliance</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_javadoccomment"> * with the License.  You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_javadoccomment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_javadoccomment"> * Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_javadoccomment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_javadoccomment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_javadoccomment"> * See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_javadoccomment"> * limitations under the License.</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">package</strong> org.apache.hadoop.hbase.fs;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> java.io.FileNotFoundException;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.lang.reflect.Field;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.lang.reflect.InvocationTargetException;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.lang.reflect.Method;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> java.net.BindException;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.net.ServerSocket;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.CountDownLatch;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.logging.Log;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.logging.LogFactory;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.logging.impl.Log4JLogger;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.conf.Configuration;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.fs.BlockLocation;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.fs.FSDataInputStream;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.fs.FSDataOutputStream;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.fs.FileStatus;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.fs.FileSystem;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.fs.Path;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.ipc.RemoteException;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.HBaseTestingUtility;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.HConstants;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.testclassification.LargeTests;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.MiniHBaseCluster;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.TableName;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.client.Put;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.client.Table;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.HRegion;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.HRegionServer;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.Region;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.wal.WALActionsListener;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.wal.DefaultWALProvider;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.FSUtils;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hdfs.DFSClient;
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hdfs.DistributedFileSystem;
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hdfs.MiniDFSCluster;
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hdfs.protocol.ClientProtocol;
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hdfs.protocol.DatanodeInfo;
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hdfs.protocol.DirectoryListing;
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hdfs.protocol.HdfsFileStatus;
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hdfs.protocol.LocatedBlock;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hdfs.protocol.LocatedBlocks;
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hdfs.server.datanode.DataNode;
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <strong class="jxr_keyword">import</strong> org.apache.log4j.Level;
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <strong class="jxr_keyword">import</strong> org.junit.After;
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <strong class="jxr_keyword">import</strong> org.junit.Assert;
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <strong class="jxr_keyword">import</strong> org.junit.Before;
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <strong class="jxr_keyword">import</strong> org.junit.experimental.categories.Category;
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment"> * Tests for the hdfs fix from HBASE-6435.</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  @Category(LargeTests.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> TestBlockReorder {
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Log LOG = LogFactory.getLog(TestBlockReorder.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>    <strong class="jxr_keyword">static</strong> {
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>      ((Log4JLogger) DFSClient.LOG).getLogger().setLevel(Level.ALL);
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>      ((Log4JLogger) HFileSystem.LOG).getLogger().setLevel(Level.ALL);
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>    }
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>    <strong class="jxr_keyword">private</strong> Configuration conf;
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>    <strong class="jxr_keyword">private</strong> MiniDFSCluster cluster;
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>    <strong class="jxr_keyword">private</strong> HBaseTestingUtility htu;
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>    <strong class="jxr_keyword">private</strong> DistributedFileSystem dfs;
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String host1 = <span class="jxr_string">"host1"</span>;
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String host2 = <span class="jxr_string">"host2"</span>;
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String host3 = <span class="jxr_string">"host3"</span>;
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>    @Before
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setUp() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>      htu = <strong class="jxr_keyword">new</strong> HBaseTestingUtility();
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>      htu.getConfiguration().setInt(<span class="jxr_string">"dfs.blocksize"</span>, 1024);<em class="jxr_comment">// For the test with multiple blocks</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>      htu.getConfiguration().setBoolean(<span class="jxr_string">"dfs.support.append"</span>, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>      htu.getConfiguration().setInt(<span class="jxr_string">"dfs.replication"</span>, 3);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>      htu.startMiniDFSCluster(3,
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>          <strong class="jxr_keyword">new</strong> String[]{<span class="jxr_string">"/r1"</span>, <span class="jxr_string">"/r2"</span>, <span class="jxr_string">"/r3"</span>}, <strong class="jxr_keyword">new</strong> String[]{host1, host2, host3});
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>     conf = htu.getConfiguration();
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>     cluster = htu.getDFSCluster();
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>     dfs = (DistributedFileSystem) FileSystem.get(conf);
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>   }
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>   @After
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> tearDownAfterClass() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>     htu.shutdownMiniCluster();
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>   }
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment">   * Test that we're can add a hook, and that this hook works when we try to read the file in HDFS.</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>   @Test
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testBlockLocationReorder() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>     Path p = <strong class="jxr_keyword">new</strong> Path(<span class="jxr_string">"hello"</span>);
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>     Assert.assertTrue((<strong class="jxr_keyword">short</strong>) cluster.getDataNodes().size() &gt; 1);
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> repCount = 2;
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>     <em class="jxr_comment">// Let's write the file</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>     FSDataOutputStream fop = dfs.create(p, (<strong class="jxr_keyword">short</strong>) repCount);
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> toWrite = 875.5613;
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>     fop.writeDouble(toWrite);
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>     fop.close();
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>     <em class="jxr_comment">// Let's check we can read it when everybody's there</em>
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>     <strong class="jxr_keyword">long</strong> start = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>     FSDataInputStream fin = dfs.open(p);
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>     Assert.assertTrue(toWrite == fin.readDouble());
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>     <strong class="jxr_keyword">long</strong> end = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>     LOG.info(<span class="jxr_string">"readtime= "</span> + (end - start));
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>     fin.close();
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>     Assert.assertTrue((end - start) &lt; 30 * 1000);
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>     <em class="jxr_comment">// Let's kill the first location. But actually the fist location returned will change</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>     <em class="jxr_comment">// The first thing to do is to get the location, then the port</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>     FileStatus f = dfs.getFileStatus(p);
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>     BlockLocation[] lbs;
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>     <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>       lbs = dfs.getFileBlockLocations(f, 0, 1);
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>     } <strong class="jxr_keyword">while</strong> (lbs.length != 1 &amp;&amp; lbs[0].getLength() != repCount);
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>     <strong class="jxr_keyword">final</strong> String name = lbs[0].getNames()[0];
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>     Assert.assertTrue(name.indexOf(':') &gt; 0);
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>     String portS = name.substring(name.indexOf(':') + 1);
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> port = Integer.parseInt(portS);
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>     LOG.info(<span class="jxr_string">"port= "</span> + port);
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>     <strong class="jxr_keyword">int</strong> ipcPort = -1;
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>     <em class="jxr_comment">// Let's find the DN to kill. cluster.getDataNodes(int) is not on the same port, so we need</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>     <em class="jxr_comment">// to iterate ourselves.</em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>     <strong class="jxr_keyword">boolean</strong> ok = false;
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>     <strong class="jxr_keyword">final</strong> String lookup = lbs[0].getHosts()[0];
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>     StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>     <strong class="jxr_keyword">for</strong> (DataNode dn : cluster.getDataNodes()) {
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>       <strong class="jxr_keyword">final</strong> String dnName = getHostName(dn);
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>       sb.append(dnName).append(' ');
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>       <strong class="jxr_keyword">if</strong> (lookup.equals(dnName)) {
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>         ok = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>         LOG.info(<span class="jxr_string">"killing datanode "</span> + name + <span class="jxr_string">" / "</span> + lookup);
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>         ipcPort = dn.ipcServer.getListenerAddress().getPort();
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>         dn.shutdown();
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>         LOG.info(<span class="jxr_string">"killed datanode "</span> + name + <span class="jxr_string">" / "</span> + lookup);
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>       }
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>     }
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>     Assert.assertTrue(
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>         <span class="jxr_string">"didn't find the server to kill, was looking for "</span> + lookup + <span class="jxr_string">" found "</span> + sb, ok);
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>     LOG.info(<span class="jxr_string">"ipc port= "</span> + ipcPort);
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>     <em class="jxr_comment">// Add the hook, with an implementation checking that we don't use the port we've just killed.</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>     Assert.assertTrue(HFileSystem.addLocationsOrderInterceptor(conf,
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>         <strong class="jxr_keyword">new</strong> HFileSystem.ReorderBlocks() {
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>           @Override
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>           <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> reorderBlocks(Configuration c, LocatedBlocks lbs, String src) {
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>             <strong class="jxr_keyword">for</strong> (LocatedBlock lb : lbs.getLocatedBlocks()) {
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>               <strong class="jxr_keyword">if</strong> (lb.getLocations().length &gt; 1) {
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>                 DatanodeInfo[] infos = lb.getLocations();
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>                 <strong class="jxr_keyword">if</strong> (infos[0].getHostName().equals(lookup)) {
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>                   LOG.info(<span class="jxr_string">"HFileSystem bad host, inverting"</span>);
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>                   DatanodeInfo tmp = infos[0];
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>                   infos[0] = infos[1];
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>                   infos[1] = tmp;
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>                 }
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>               }
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>             }
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>           }
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>         }));
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> retries = 10;
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>     ServerSocket ss = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>     ServerSocket ssI;
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>       ss = <strong class="jxr_keyword">new</strong> ServerSocket(port);<em class="jxr_comment">// We're taking the port to have a timeout issue later.</em>
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>       ssI = <strong class="jxr_keyword">new</strong> ServerSocket(ipcPort);
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>     } <strong class="jxr_keyword">catch</strong> (BindException be) {
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>       LOG.warn(<span class="jxr_string">"Got bind exception trying to set up socket on "</span> + port + <span class="jxr_string">" or "</span> + ipcPort +
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>           <span class="jxr_string">", this means that the datanode has not closed the socket or"</span> +
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>           <span class="jxr_string">" someone else took it. It may happen, skipping this test for this time."</span>, be);
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>       <strong class="jxr_keyword">if</strong> (ss != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>         ss.close();
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>       }
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>       <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>     }
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>     <em class="jxr_comment">// Now it will fail with a timeout, unfortunately it does not always connect to the same box,</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>     <em class="jxr_comment">// so we try retries times;  with the reorder it will never last more than a few milli seconds</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; retries; i++) {
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>       start = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> 
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>       fin = dfs.open(p);
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>       Assert.assertTrue(toWrite == fin.readDouble());
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>       fin.close();
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>       end = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>       LOG.info(<span class="jxr_string">"HFileSystem readtime= "</span> + (end - start));
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>       Assert.assertFalse(<span class="jxr_string">"We took too much time to read"</span>, (end - start) &gt; 60000);
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>     }
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>     ss.close();
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>     ssI.close();
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>   }
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> <em class="jxr_javadoccomment">   * Allow to get the hostname, using getHostName (hadoop 1) or getDisplayName (hadoop 2)</em>
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>   <strong class="jxr_keyword">private</strong> String getHostName(DataNode dn) <strong class="jxr_keyword">throws</strong> InvocationTargetException, IllegalAccessException {
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>     Method m;
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>       m = DataNode.<strong class="jxr_keyword">class</strong>.getMethod(<span class="jxr_string">"getDisplayName"</span>);
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>     } <strong class="jxr_keyword">catch</strong> (NoSuchMethodException e) {
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>         m = DataNode.<strong class="jxr_keyword">class</strong>.getMethod(<span class="jxr_string">"getHostName"</span>);
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>       } <strong class="jxr_keyword">catch</strong> (NoSuchMethodException e1) {
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>         <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(e1);
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>       }
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>     }
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> 
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>     String res = (String) m.invoke(dn);
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>     <strong class="jxr_keyword">if</strong> (res.contains(<span class="jxr_string">":"</span>)) {
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>       <strong class="jxr_keyword">return</strong> res.split(<span class="jxr_string">":"</span>)[0];
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>       <strong class="jxr_keyword">return</strong> res;
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>     }
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>   }
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> 
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_javadoccomment">   * Test that the hook works within HBase, including when there are multiple blocks.</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>   @Test()
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testHBaseCluster() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>     byte[] sb = <span class="jxr_string">"sb"</span>.getBytes();
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>     htu.startMiniZKCluster();
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> 
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>     MiniHBaseCluster hbm = htu.startMiniHBaseCluster(1, 1);
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>     hbm.waitForActiveAndReadyMaster();
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>     hbm.getRegionServer(0).waitForServerOnline();
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>     HRegionServer targetRs = hbm.getRegionServer(0);
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> 
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>     <em class="jxr_comment">// We want to have a datanode with the same name as the region server, so</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>     <em class="jxr_comment">//  we're going to get the regionservername, and start a new datanode with this name.</em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>     String host4 = targetRs.getServerName().getHostname();
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>     LOG.info(<span class="jxr_string">"Starting a new datanode with the name="</span> + host4);
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>     cluster.startDataNodes(conf, 1, <strong class="jxr_keyword">true</strong>, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">new</strong> String[]{<span class="jxr_string">"/r4"</span>}, <strong class="jxr_keyword">new</strong> String[]{host4}, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>     cluster.waitClusterUp();
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> 
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> repCount = 3;
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> 
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>     <em class="jxr_comment">// We use the regionserver file system &amp; conf as we expect it to have the hook.</em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>     conf = targetRs.getConfiguration();
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>     HFileSystem rfs = (HFileSystem) targetRs.getFileSystem();
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>     Table h = htu.createTable(TableName.valueOf(<span class="jxr_string">"table"</span>), sb);
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>     <em class="jxr_comment">// Now, we have 4 datanodes and a replication count of 3. So we don't know if the datanode</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>     <em class="jxr_comment">// with the same node will be used. We can't really stop an existing datanode, this would</em>
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>     <em class="jxr_comment">// make us fall in nasty hdfs bugs/issues. So we're going to try multiple times.</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>     <em class="jxr_comment">// Now we need to find the log file, its locations, and look at it</em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> 
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>     String rootDir = <strong class="jxr_keyword">new</strong> Path(FSUtils.getRootDir(conf) + <span class="jxr_string">"/"</span> + HConstants.HREGION_LOGDIR_NAME +
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>             <span class="jxr_string">"/"</span> + targetRs.getServerName().toString()).toUri().getPath();
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> 
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>     DistributedFileSystem mdfs = (DistributedFileSystem)
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>         hbm.getMaster().getMasterFileSystem().getFileSystem();
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>     <strong class="jxr_keyword">int</strong> nbTest = 0;
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>     <strong class="jxr_keyword">while</strong> (nbTest &lt; 10) {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>       <strong class="jxr_keyword">final</strong> List&lt;Region&gt; regions = targetRs.getOnlineRegions(h.getName());
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>       <strong class="jxr_keyword">final</strong> CountDownLatch latch = <strong class="jxr_keyword">new</strong> CountDownLatch(regions.size());
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>       <em class="jxr_comment">// listen for successful log rolls</em>
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>       <strong class="jxr_keyword">final</strong> WALActionsListener listener = <strong class="jxr_keyword">new</strong> WALActionsListener.Base() {
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>             @Override
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>             <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> postLogRoll(<strong class="jxr_keyword">final</strong> Path oldPath, <strong class="jxr_keyword">final</strong> Path newPath) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>               latch.countDown();
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>             }
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>           };
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>       <strong class="jxr_keyword">for</strong> (Region region : regions) {
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>         ((HRegion)region).getWAL().registerWALActionsListener(listener);
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>       }
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>       htu.getHBaseAdmin().rollWALWriter(targetRs.getServerName());
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> 
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>       <em class="jxr_comment">// wait</em>
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>         latch.await();
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>       } <strong class="jxr_keyword">catch</strong> (InterruptedException exception) {
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>         LOG.warn(<span class="jxr_string">"Interrupted while waiting for the wal of '"</span> + targetRs + <span class="jxr_string">"' to roll. If later "</span> +
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>             <span class="jxr_string">"tests fail, it's probably because we should still be waiting."</span>);
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>         Thread.currentThread().interrupt();
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>       }
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>       <strong class="jxr_keyword">for</strong> (Region region : regions) {
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>         ((HRegion)region).getWAL().unregisterWALActionsListener(listener);
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>       }
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> 
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>       <em class="jxr_comment">// We need a sleep as the namenode is informed asynchronously</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>       Thread.sleep(100);
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>       <em class="jxr_comment">// insert one put to ensure a minimal size</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>       Put p = <strong class="jxr_keyword">new</strong> Put(sb);
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>       p.add(sb, sb, sb);
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>       h.put(p);
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>       DirectoryListing dl = dfs.getClient().listPaths(rootDir, HdfsFileStatus.EMPTY_NAME);
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>       HdfsFileStatus[] hfs = dl.getPartialListing();
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>       <em class="jxr_comment">// As we wrote a put, we should have at least one log file.</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>       Assert.assertTrue(hfs.length &gt;= 1);
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>       <strong class="jxr_keyword">for</strong> (HdfsFileStatus hf : hfs) {
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>         <em class="jxr_comment">// Because this is a live cluster, log files might get archived while we're processing</em>
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>           LOG.info(<span class="jxr_string">"Log file found: "</span> + hf.getLocalName() + <span class="jxr_string">" in "</span> + rootDir);
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>           String logFile = rootDir + <span class="jxr_string">"/"</span> + hf.getLocalName();
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>           FileStatus fsLog = rfs.getFileStatus(<strong class="jxr_keyword">new</strong> Path(logFile));
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> 
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>           LOG.info(<span class="jxr_string">"Checking log file: "</span> + logFile);
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>           <em class="jxr_comment">// Now checking that the hook is up and running</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>           <em class="jxr_comment">// We can't call directly getBlockLocations, it's not available in HFileSystem</em>
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>           <em class="jxr_comment">// We're trying multiple times to be sure, as the order is random</em>
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>           BlockLocation[] bls = rfs.getFileBlockLocations(fsLog, 0, 1);
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>           <strong class="jxr_keyword">if</strong> (bls.length &gt; 0) {
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>             BlockLocation bl = bls[0];
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>             LOG.info(bl.getHosts().length + <span class="jxr_string">" replicas for block 0 in "</span> + logFile + <span class="jxr_string">" "</span>);
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; bl.getHosts().length - 1; i++) {
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>               LOG.info(bl.getHosts()[i] + <span class="jxr_string">"    "</span> + logFile);
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>               Assert.assertNotSame(bl.getHosts()[i], host4);
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>             }
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>             String last = bl.getHosts()[bl.getHosts().length - 1];
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>             LOG.info(last + <span class="jxr_string">"    "</span> + logFile);
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>             <strong class="jxr_keyword">if</strong> (host4.equals(last)) {
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>               nbTest++;
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>               LOG.info(logFile + <span class="jxr_string">" is on the new datanode and is ok"</span>);
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>               <strong class="jxr_keyword">if</strong> (bl.getHosts().length == 3) {
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>                 <em class="jxr_comment">// We can test this case from the file system as well</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>                 <em class="jxr_comment">// Checking the underlying file system. Multiple times as the order is random</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>                 testFromDFS(dfs, logFile, repCount, host4);
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> 
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>                 <em class="jxr_comment">// now from the master</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>                 testFromDFS(mdfs, logFile, repCount, host4);
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>               }
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>             }
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>           }
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>         } <strong class="jxr_keyword">catch</strong> (FileNotFoundException exception) {
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>           LOG.debug(<span class="jxr_string">"Failed to find log file '"</span> + hf.getLocalName() + <span class="jxr_string">"'; it probably was "</span> +
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>               <span class="jxr_string">"archived out from under us so we'll ignore and retry. If this test hangs "</span> +
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>               <span class="jxr_string">"indefinitely you should treat this failure as a symptom."</span>, exception);
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>         } <strong class="jxr_keyword">catch</strong> (RemoteException exception) {
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>           <strong class="jxr_keyword">if</strong> (exception.unwrapRemoteException() instanceof FileNotFoundException) {
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>             LOG.debug(<span class="jxr_string">"Failed to find log file '"</span> + hf.getLocalName() + <span class="jxr_string">"'; it probably was "</span> +
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>                 <span class="jxr_string">"archived out from under us so we'll ignore and retry. If this test hangs "</span> +
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>                 <span class="jxr_string">"indefinitely you should treat this failure as a symptom."</span>, exception);
+<a class="jxr_linenumber" name="L374" href="#L374">374</a>           } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>             <strong class="jxr_keyword">throw</strong> exception;
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>           }
+<a class="jxr_linenumber" name="L377" href="#L377">377</a>         }
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>       }
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>     }
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>   }
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> 
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> testFromDFS(DistributedFileSystem dfs, String src, <strong class="jxr_keyword">int</strong> repCount, String localhost)
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>       <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>     <em class="jxr_comment">// Multiple times as the order is random</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; 10; i++) {
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>       LocatedBlocks l;
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>       <em class="jxr_comment">// The NN gets the block list asynchronously, so we may need multiple tries to get the list</em>
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>       <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> max = System.currentTimeMillis() + 10000;
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>       <strong class="jxr_keyword">boolean</strong> done;
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>       <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>         Assert.assertTrue(<span class="jxr_string">"Can't get enouth replica."</span>, System.currentTimeMillis() &lt; max);
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>         l = getNamenode(dfs.getClient()).getBlockLocations(src, 0, 1);
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>         Assert.assertNotNull(<span class="jxr_string">"Can't get block locations for "</span> + src, l);
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>         Assert.assertNotNull(l.getLocatedBlocks());
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>         Assert.assertTrue(l.getLocatedBlocks().size() &gt; 0);
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> 
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>         done = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> y = 0; y &lt; l.getLocatedBlocks().size() &amp;&amp; done; y++) {
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>           done = (l.get(y).getLocations().length == repCount);
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>         }
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>       } <strong class="jxr_keyword">while</strong> (!done);
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>       <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> y = 0; y &lt; l.getLocatedBlocks().size() &amp;&amp; done; y++) {
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>         Assert.assertEquals(localhost, l.get(y).getLocations()[repCount - 1].getHostName());
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>       }
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>     }
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>   }
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> ClientProtocol getNamenode(DFSClient dfsc) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>     Field nf = DFSClient.<strong class="jxr_keyword">class</strong>.getDeclaredField(<span class="jxr_string">"namenode"</span>);
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>     nf.setAccessible(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>     <strong class="jxr_keyword">return</strong> (ClientProtocol) nf.get(dfsc);
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>   }
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> 
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> <em class="jxr_javadoccomment">   * Test that the reorder algo works as we expect.</em>
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>   @Test
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testBlockLocation() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>     <em class="jxr_comment">// We need to start HBase to get  HConstants.HBASE_DIR set in conf</em>
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>     htu.startMiniZKCluster();
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>     MiniHBaseCluster hbm = htu.startMiniHBaseCluster(1, 1);
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>     conf = hbm.getConfiguration();
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>     <em class="jxr_comment">// The "/" is mandatory, without it we've got a null pointer exception on the namenode</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>     <strong class="jxr_keyword">final</strong> String fileName = <span class="jxr_string">"/helloWorld"</span>;
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>     Path p = <strong class="jxr_keyword">new</strong> Path(fileName);
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> 
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> repCount = 3;
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>     Assert.assertTrue((<strong class="jxr_keyword">short</strong>) cluster.getDataNodes().size() &gt;= repCount);
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> 
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>     <em class="jxr_comment">// Let's write the file</em>
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>     FSDataOutputStream fop = dfs.create(p, (<strong class="jxr_keyword">short</strong>) repCount);
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> toWrite = 875.5613;
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>     fop.writeDouble(toWrite);
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>     fop.close();
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> 
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i=0; i&lt;10; i++){
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>       <em class="jxr_comment">// The interceptor is not set in this test, so we get the raw list at this point</em>
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>       LocatedBlocks l;
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>       <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> max = System.currentTimeMillis() + 10000;
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>       <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>         l = getNamenode(dfs.getClient()).getBlockLocations(fileName, 0, 1);
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>         Assert.assertNotNull(l.getLocatedBlocks());
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>         Assert.assertEquals(l.getLocatedBlocks().size(), 1);
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>         Assert.assertTrue(<span class="jxr_string">"Expecting "</span> + repCount + <span class="jxr_string">" , got "</span> + l.get(0).getLocations().length,
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>             System.currentTimeMillis() &lt; max);
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>       } <strong class="jxr_keyword">while</strong> (l.get(0).getLocations().length != repCount);
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> 
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>       <em class="jxr_comment">// Should be filtered, the name is different =&gt; The order won't change</em>
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>       Object originalList[] = l.getLocatedBlocks().toArray();
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>       HFileSystem.ReorderWALBlocks lrb = <strong class="jxr_keyword">new</strong> HFileSystem.ReorderWALBlocks();
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>       lrb.reorderBlocks(conf, l, fileName);
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>       Assert.assertArrayEquals(originalList, l.getLocatedBlocks().toArray());
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> 
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>       <em class="jxr_comment">// Should be reordered, as we pretend to be a file name with a compliant stuff</em>
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>       Assert.assertNotNull(conf.get(HConstants.HBASE_DIR));
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>       Assert.assertFalse(conf.get(HConstants.HBASE_DIR).isEmpty());
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>       String pseudoLogFile = conf.get(HConstants.HBASE_DIR) + <span class="jxr_string">"/"</span> +
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>           HConstants.HREGION_LOGDIR_NAME + <span class="jxr_string">"/"</span> + host1 + <span class="jxr_string">",6977,6576"</span> + <span class="jxr_string">"/mylogfile"</span>;
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> 
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>       <em class="jxr_comment">// Check that it will be possible to extract a ServerName from our construction</em>
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>       Assert.assertNotNull(<span class="jxr_string">"log= "</span> + pseudoLogFile,
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>           DefaultWALProvider.getServerNameFromWALDirectoryName(dfs.getConf(), pseudoLogFile));
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> 
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>       <em class="jxr_comment">// And check we're doing the right reorder.</em>
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>       lrb.reorderBlocks(conf, l, pseudoLogFile);
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>       Assert.assertEquals(host1, l.get(0).getLocations()[2].getHostName());
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> 
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>       <em class="jxr_comment">// Check again, it should remain the same.</em>
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>       lrb.reorderBlocks(conf, l, pseudoLogFile);
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>       Assert.assertEquals(host1, l.get(0).getLocations()[2].getHostName());
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>     }
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>   }
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> 
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

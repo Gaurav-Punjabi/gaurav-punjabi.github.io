@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>HttpsProtocols xref</title>
+<link type="text/css" rel="stylesheet" href="../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 2002, 2003, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_comment"> * @test</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_comment"> * @bug 4671289</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_comment"> * @summary passing https.protocols from command line doesn't work.</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_comment"> * @run main/othervm -Dhttps.protocols=SSLv3 HttpsProtocols</em>
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_comment"> * @author Brad Wetmore</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> java.io.*;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> java.net.*;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> javax.net.ssl.*;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> HttpsProtocols <strong class="jxr_keyword">implements</strong> HostnameVerifier {
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>      <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_comment">     * =============================================================</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_comment">     * Set the various variables needed for the tests, then</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_comment">     * specify what tests to run on each side.</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>      <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_comment">     * Should we run the client or server in a separate thread?</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_comment">     * Both sides can throw exceptions, but do you have a preference</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_comment">     * as to which side should be the main thread.</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> separateServerThread = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>      <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_comment">     * Where do we find the keystores?</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>      <strong class="jxr_keyword">static</strong> String pathToStores = <span class="jxr_string">"../../../../../../../etc"</span>;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>      <strong class="jxr_keyword">static</strong> String keyStoreFile = <span class="jxr_string">"keystore"</span>;
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>      <strong class="jxr_keyword">static</strong> String trustStoreFile = <span class="jxr_string">"truststore"</span>;
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>      <strong class="jxr_keyword">static</strong> String passwd = <span class="jxr_string">"passphrase"</span>;
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>      <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_comment">     * Is the server ready to serve?</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>      <strong class="jxr_keyword">volatile</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> serverReady = false;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>      <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_comment">     * Turn on SSL debugging?</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> debug = false;
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>      <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_comment">     * If the client or server is doing some kind of object creation</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_comment">     * that the other side depends on, and that thread prematurely</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_comment">     * exits, you may experience a hang.  The test harness will</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_comment">     * terminate all hung threads after its timeout has expired,</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_comment">     * currently 3 minutes by default, but you might try to be</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_comment">     * smart about it....</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>      <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_comment">     * Define the server side of the test.</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_comment">     *</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_comment">     * If the server prematurely exits, serverReady will be set to true</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_comment">     * to avoid infinite hangs.</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>      <strong class="jxr_keyword">void</strong> doServerSide() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>          SSLServerSocketFactory sslssf =
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>              (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>          SSLServerSocket sslServerSocket =
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>              (SSLServerSocket) sslssf.createServerSocket(serverPort);
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>          serverPort = sslServerSocket.getLocalPort();
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>          <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_comment">         * Signal Client, we're ready for his connect.</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_comment">         */</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>          serverReady = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>          SSLSocket sslSocket = (SSLSocket) sslServerSocket.accept();
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>          DataOutputStream out =
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>                         <strong class="jxr_keyword">new</strong> DataOutputStream(sslSocket.getOutputStream());
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>         BufferedReader in =
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>             <strong class="jxr_keyword">new</strong> BufferedReader(<strong class="jxr_keyword">new</strong> InputStreamReader(
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>             sslSocket.getInputStream()));
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>         <em class="jxr_comment">// read the request</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>         readRequest(in);
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>         byte [] bytecodes = <span class="jxr_string">"Hello world"</span>.getBytes();
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>         out.writeBytes(<span class="jxr_string">"HTTP/1.0 200 OK\r\n"</span>);
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>         out.writeBytes(<span class="jxr_string">"Content-Length: "</span> + bytecodes.length +
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>                                            <span class="jxr_string">"\r\n"</span>);
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>         out.writeBytes(<span class="jxr_string">"Content-Type: text/html\r\n\r\n"</span>);
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>         out.write(bytecodes);
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>         out.flush();
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>         sslSocket.close();
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>     }
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">     * read the response, don't care for the syntax of the request-line</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> readRequest(BufferedReader in)
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>         <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>         String line = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>         <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>             line = in.readLine();
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>             System.out.println(<span class="jxr_string">"Server received: "</span> + line);
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>         } <strong class="jxr_keyword">while</strong> ((line.length() != 0) &amp;&amp;
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>                 (line.charAt(0) != '\r') &amp;&amp; (line.charAt(0) != '\n'));
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>     }
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> <em class="jxr_comment">     * Define the client side of the test.</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_comment">     *</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_comment">     * If the server prematurely exits, serverReady will be set to true</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_comment">     * to avoid infinite hangs.</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>     <strong class="jxr_keyword">void</strong> doClientSide() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>         <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> <em class="jxr_comment">         * Wait for server to get started.</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_comment">         */</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>         <strong class="jxr_keyword">while</strong> (!serverReady) {
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>             Thread.sleep(50);
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>         }
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>         HttpsURLConnection.setDefaultHostnameVerifier(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>         URL url = <strong class="jxr_keyword">new</strong> URL(<span class="jxr_string">"https://localhost:"</span> + serverPort + <span class="jxr_string">"/"</span>);
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>         HttpURLConnection urlc = (HttpURLConnection) url.openConnection();
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>         System.out.println(<span class="jxr_string">"response is "</span> + urlc.getResponseCode());
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>     }
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> verify(String hostname, SSLSession session) {
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>     }
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_comment">     * =============================================================</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> <em class="jxr_comment">     * The remainder is just support stuff</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>     <em class="jxr_comment">// use any free port by default</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>     <strong class="jxr_keyword">volatile</strong> <strong class="jxr_keyword">int</strong> serverPort = 0;
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>     <strong class="jxr_keyword">volatile</strong> Exception serverException = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>     <strong class="jxr_keyword">volatile</strong> Exception clientException = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> main(String[] args) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>         String keyFilename =
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>             System.getProperty(<span class="jxr_string">"test.src"</span>, <span class="jxr_string">"./"</span>) + <span class="jxr_string">"/"</span> + pathToStores +
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>                 <span class="jxr_string">"/"</span> + keyStoreFile;
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>         String trustFilename =
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>             System.getProperty(<span class="jxr_string">"test.src"</span>, <span class="jxr_string">"./"</span>) + <span class="jxr_string">"/"</span> + pathToStores +
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>                 <span class="jxr_string">"/"</span> + trustStoreFile;
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>         System.setProperty(<span class="jxr_string">"javax.net.ssl.keyStore"</span>, keyFilename);
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>         System.setProperty(<span class="jxr_string">"javax.net.ssl.keyStorePassword"</span>, passwd);
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>         System.setProperty(<span class="jxr_string">"javax.net.ssl.trustStore"</span>, trustFilename);
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>         System.setProperty(<span class="jxr_string">"javax.net.ssl.trustStorePassword"</span>, passwd);
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>         String prop = System.getProperty(<span class="jxr_string">"https.protocols"</span>);
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>         System.out.println(<span class="jxr_string">"protocols = "</span> + prop);
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>         <strong class="jxr_keyword">if</strong> ((prop == <strong class="jxr_keyword">null</strong>) || (!prop.equals(<span class="jxr_string">"SSLv3"</span>))) {
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> Exception(<span class="jxr_string">"https.protocols not set properly"</span>);
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>         }
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>         <strong class="jxr_keyword">if</strong> (debug)
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>             System.setProperty(<span class="jxr_string">"javax.net.debug"</span>, <span class="jxr_string">"all"</span>);
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>         <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_comment">         * Start the tests.</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_comment">         */</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>         <strong class="jxr_keyword">new</strong> HttpsProtocols();
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>     }
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> 
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>     Thread clientThread = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>     Thread serverThread = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> 
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_comment">     * Primary constructor, used to drive remainder of the test.</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_comment">     *</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_comment">     * Fork off the other side, then do your work.</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>     HttpsProtocols() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>         <strong class="jxr_keyword">if</strong> (separateServerThread) {
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>             startServer(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>             startClient(false);
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>             startClient(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>             startServer(false);
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>         }
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> 
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>         <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> <em class="jxr_comment">         * Wait for other side to close down.</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> <em class="jxr_comment">         */</em>
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>         <strong class="jxr_keyword">if</strong> (separateServerThread) {
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>             serverThread.join();
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>             clientThread.join();
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>         }
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>         <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> <em class="jxr_comment">         * When we get here, the test is pretty much over.</em>
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> <em class="jxr_comment">         *</em>
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> <em class="jxr_comment">         * If the main thread excepted, that propagates back</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> <em class="jxr_comment">         * immediately.  If the other thread threw an exception, we</em>
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> <em class="jxr_comment">         * should report back.</em>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> <em class="jxr_comment">         */</em>
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>         <strong class="jxr_keyword">if</strong> (serverException != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>             System.out.print(<span class="jxr_string">"Server Exception:"</span>);
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>             <strong class="jxr_keyword">throw</strong> serverException;
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>         }
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>         <strong class="jxr_keyword">if</strong> (clientException != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>             System.out.print(<span class="jxr_string">"Client Exception:"</span>);
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>             <strong class="jxr_keyword">throw</strong> clientException;
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>         }
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>     }
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> 
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>     <strong class="jxr_keyword">void</strong> startServer(<strong class="jxr_keyword">boolean</strong> newThread) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>         <strong class="jxr_keyword">if</strong> (newThread) {
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>             serverThread = <strong class="jxr_keyword">new</strong> Thread() {
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>                 <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> run() {
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>                     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>                         doServerSide();
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>                     } <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>                         <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_comment">                         * Our server thread just died.</em>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> <em class="jxr_comment">                         *</em>
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> <em class="jxr_comment">                         * Release the client, if not active already...</em>
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> <em class="jxr_comment">                         */</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>                         System.err.println(<span class="jxr_string">"Server died..."</span>);
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>                         serverReady = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>                         serverException = e;
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>                     }
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>                 }
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>             };
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>             serverThread.start();
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>             doServerSide();
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>         }
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>     }
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> 
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>     <strong class="jxr_keyword">void</strong> startClient(<strong class="jxr_keyword">boolean</strong> newThread) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>         <strong class="jxr_keyword">if</strong> (newThread) {
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>             clientThread = <strong class="jxr_keyword">new</strong> Thread() {
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>                 <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> run() {
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>                     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>                         doClientSide();
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>                     } <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>                         <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> <em class="jxr_comment">                         * Our client thread just died.</em>
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> <em class="jxr_comment">                         */</em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>                         System.err.println(<span class="jxr_string">"Client died..."</span>);
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>                         clientException = e;
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>                     }
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>                 }
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>             };
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>             clientThread.start();
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>             doClientSide();
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>         }
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>     }
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

@@ -1,0 +1,529 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>FromElementFactory xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Hibernate, Relational Persistence for Idiomatic Java</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Copyright (c) 2008, Red Hat Middleware LLC or third-party contributors as</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * indicated by the @author tags or express copyright attribution</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * statements applied by the authors.  All third-party contributions are</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * distributed under license by Red Hat Middleware LLC.</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * This copyrighted material is made available to anyone wishing to use, modify,</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * copy, or redistribute it subject to the terms and conditions of the GNU</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * Lesser General Public License, as published by the Free Software Foundation.</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * This program is distributed in the hope that it will be useful,</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * for more details.</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * You should have received a copy of the GNU Lesser General Public License</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * along with this distribution; if not, write to:</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * Free Software Foundation, Inc.</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * 51 Franklin Street, Fifth Floor</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * Boston, MA  02110-1301  USA</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">package</strong> org.hibernate.hql.internal.ast.tree;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> antlr.ASTFactory;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> antlr.SemanticException;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> antlr.collections.AST;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.jboss.logging.Logger;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.hibernate.engine.internal.JoinSequence;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.hibernate.hql.internal.antlr.SqlTokenTypes;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.hibernate.hql.internal.ast.util.ASTUtil;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.hibernate.hql.internal.ast.util.AliasGenerator;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.hibernate.hql.internal.ast.util.PathHelper;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.hibernate.hql.internal.ast.util.SessionFactoryHelper;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.hibernate.internal.CoreMessageLogger;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.hibernate.internal.util.StringHelper;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.hibernate.persister.collection.QueryableCollection;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.hibernate.persister.entity.EntityPersister;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.hibernate.persister.entity.Joinable;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.hibernate.persister.entity.Queryable;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.hibernate.sql.JoinType;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> org.hibernate.type.AssociationType;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> org.hibernate.type.CollectionType;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> org.hibernate.type.ComponentType;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> org.hibernate.type.EntityType;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> org.hibernate.type.Type;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> * Encapsulates the creation of FromElements and JoinSequences.</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> * @author josh</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> FromElementFactory <strong class="jxr_keyword">implements</strong> SqlTokenTypes {
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> CoreMessageLogger LOG = Logger.getMessageLogger(CoreMessageLogger.<strong class="jxr_keyword">class</strong>, FromElementFactory.<strong class="jxr_keyword">class</strong>.getName());
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  	<strong class="jxr_keyword">private</strong> FromClause fromClause;
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  	<strong class="jxr_keyword">private</strong> FromElement origin;
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  	<strong class="jxr_keyword">private</strong> String path;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  	<strong class="jxr_keyword">private</strong> String classAlias;
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  	<strong class="jxr_keyword">private</strong> String[] columns;
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> implied;
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> inElementsFunction;
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> collection;
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	<strong class="jxr_keyword">private</strong> QueryableCollection queryableCollection;
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  	<strong class="jxr_keyword">private</strong> CollectionType collectionType;
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment">	 * Creates entity from elements.</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	<strong class="jxr_keyword">public</strong> FromElementFactory(FromClause fromClause, FromElement origin, String path) {
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		<strong class="jxr_keyword">this</strong>.fromClause = fromClause;
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">this</strong>.origin = origin;
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		<strong class="jxr_keyword">this</strong>.path = path;
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		collection = false;
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	}
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment">	 * Creates collection from elements.</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  	<strong class="jxr_keyword">public</strong> FromElementFactory(
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	        FromClause fromClause,
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  	        FromElement origin,
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	        String path,
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  	        String classAlias,
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  	        String[] columns,
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  	        <strong class="jxr_keyword">boolean</strong> implied) {
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  		<strong class="jxr_keyword">this</strong>( fromClause, origin, path );
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		<strong class="jxr_keyword">this</strong>.classAlias = classAlias;
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		<strong class="jxr_keyword">this</strong>.columns = columns;
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  		<strong class="jxr_keyword">this</strong>.implied = implied;
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  		collection = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  	}
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	FromElement addFromElement() <strong class="jxr_keyword">throws</strong> SemanticException {
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		FromClause parentFromClause = fromClause.getParentFromClause();
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		<strong class="jxr_keyword">if</strong> ( parentFromClause != <strong class="jxr_keyword">null</strong> ) {
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			<em class="jxr_comment">// Look up class name using the first identifier in the path.</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			String pathAlias = PathHelper.getAlias( path );
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 			FromElement parentFromElement = parentFromClause.getFromElement( pathAlias );
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 			<strong class="jxr_keyword">if</strong> ( parentFromElement != <strong class="jxr_keyword">null</strong> ) {
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 				<strong class="jxr_keyword">return</strong> createFromElementInSubselect( path, pathAlias, parentFromElement, classAlias );
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 			}
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		}
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		EntityPersister entityPersister = fromClause.getSessionFactoryHelper().requireClassPersister( path );
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		FromElement elem = createAndAddFromElement( path,
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 				classAlias,
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 				entityPersister,
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 				( EntityType ) ( ( Queryable ) entityPersister ).getType(),
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 				<strong class="jxr_keyword">null</strong> );
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		<em class="jxr_comment">// Add to the query spaces.</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 		fromClause.getWalker().addQuerySpaces( entityPersister.getQuerySpaces() );
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		<strong class="jxr_keyword">return</strong> elem;
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 	}
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 	<strong class="jxr_keyword">private</strong> FromElement createFromElementInSubselect(
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	        String path,
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 	        String pathAlias,
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	        FromElement parentFromElement,
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	        String classAlias) <strong class="jxr_keyword">throws</strong> SemanticException {
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 		LOG.debugf( <span class="jxr_string">"createFromElementInSubselect() : path = %s"</span>, path );
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 		<em class="jxr_comment">// Create an DotNode AST for the path and resolve it.</em>
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		FromElement fromElement = evaluateFromElementPath( path, classAlias );
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 		EntityPersister entityPersister = fromElement.getEntityPersister();
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 		<em class="jxr_comment">// If the first identifier in the path refers to the class alias (not the class name), then this</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 		<em class="jxr_comment">// is a correlated subselect.  If it's a correlated sub-select, use the existing table alias.  Otherwise</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 		<em class="jxr_comment">// generate a new one.</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 		String tableAlias = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 		<strong class="jxr_keyword">boolean</strong> correlatedSubselect = pathAlias.equals( parentFromElement.getClassAlias() );
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 		<strong class="jxr_keyword">if</strong> ( correlatedSubselect ) {
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			tableAlias = fromElement.getTableAlias();
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 		}
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 		<strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 			tableAlias = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 		}
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 		<em class="jxr_comment">// If the from element isn't in the same clause, create a new from element.</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 		<strong class="jxr_keyword">if</strong> ( fromElement.getFromClause() != fromClause ) {
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			LOG.debug( <span class="jxr_string">"createFromElementInSubselect() : creating a new FROM element..."</span> );
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			fromElement = createFromElement( entityPersister );
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 			initializeAndAddFromElement( fromElement,
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 					path,
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 					classAlias,
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 					entityPersister,
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 					( EntityType ) ( ( Queryable ) entityPersister ).getType(),
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 					tableAlias
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			);
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 		}
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 		LOG.debugf( <span class="jxr_string">"createFromElementInSubselect() : %s -&gt; %s"</span>, path, fromElement );
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 		<strong class="jxr_keyword">return</strong> fromElement;
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 	}
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 	<strong class="jxr_keyword">private</strong> FromElement evaluateFromElementPath(String path, String classAlias) <strong class="jxr_keyword">throws</strong> SemanticException {
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 		ASTFactory factory = fromClause.getASTFactory();
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 		FromReferenceNode pathNode = ( FromReferenceNode ) PathHelper.parsePath( path, factory );
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 		pathNode.recursiveResolve( FromReferenceNode.ROOT_LEVEL, <em class="jxr_comment">// This is the root level node.</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 				false, <em class="jxr_comment">// Generate an explicit from clause at the root.</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 				classAlias,
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 		        <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 		);
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>         <strong class="jxr_keyword">if</strong> (pathNode.getImpliedJoin() != <strong class="jxr_keyword">null</strong>) <strong class="jxr_keyword">return</strong> pathNode.getImpliedJoin();
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>         <strong class="jxr_keyword">return</strong> pathNode.getFromElement();
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 	}
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 	FromElement createCollectionElementsJoin(
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 	        QueryableCollection queryableCollection,
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 	        String collectionName) <strong class="jxr_keyword">throws</strong> SemanticException {
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 		JoinSequence collectionJoinSequence = fromClause.getSessionFactoryHelper()
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 		        .createCollectionJoinSequence( queryableCollection, collectionName );
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 		<strong class="jxr_keyword">this</strong>.queryableCollection = queryableCollection;
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		<strong class="jxr_keyword">return</strong> createCollectionJoin( collectionJoinSequence, <strong class="jxr_keyword">null</strong> );
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 	}
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 	FromElement createCollection(
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 	        QueryableCollection queryableCollection,
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 	        String role,
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 	        JoinType joinType,
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 	        <strong class="jxr_keyword">boolean</strong> fetchFlag,
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 	        <strong class="jxr_keyword">boolean</strong> indexed)
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 			<strong class="jxr_keyword">throws</strong> SemanticException {
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 		<strong class="jxr_keyword">if</strong> ( !collection ) {
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalStateException( <span class="jxr_string">"FromElementFactory not initialized for collections!"</span> );
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 		}
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 		<strong class="jxr_keyword">this</strong>.inElementsFunction = indexed;
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> 		FromElement elem;
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 		<strong class="jxr_keyword">this</strong>.queryableCollection = queryableCollection;
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 		collectionType = queryableCollection.getCollectionType();
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> 		String roleAlias = fromClause.getAliasGenerator().createName( role );
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> 
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> 		<em class="jxr_comment">// Correlated subqueries create 'special' implied from nodes</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> 		<em class="jxr_comment">// because correlated subselects can't use an ANSI-style join</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> 		<strong class="jxr_keyword">boolean</strong> explicitSubqueryFromElement = fromClause.isSubQuery() &amp;&amp; !implied;
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 		<strong class="jxr_keyword">if</strong> ( explicitSubqueryFromElement ) {
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 			String pathRoot = StringHelper.root( path );
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> 			FromElement origin = fromClause.getFromElement( pathRoot );
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> 			<strong class="jxr_keyword">if</strong> ( origin == <strong class="jxr_keyword">null</strong> || origin.getFromClause() != fromClause ) {
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 				implied = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> 			}
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> 		}
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> 
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> 		<em class="jxr_comment">// super-duper-classic-parser-regression-testing-mojo-magic...</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> 		<strong class="jxr_keyword">if</strong> ( explicitSubqueryFromElement &amp;&amp; DotNode.useThetaStyleImplicitJoins ) {
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 			implied = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> 		}
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> 
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 		Type elementType = queryableCollection.getElementType();
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> 		<strong class="jxr_keyword">if</strong> ( elementType.isEntityType() ) { 			<em class="jxr_comment">// A collection of entities...</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 			elem = createEntityAssociation( role, roleAlias, joinType );
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> 		}
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 		<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> ( elementType.isComponentType() ) {		<em class="jxr_comment">// A collection of components...</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> 			JoinSequence joinSequence = createJoinSequence( roleAlias, joinType );
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> 			elem = createCollectionJoin( joinSequence, roleAlias );
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> 		}
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 		<strong class="jxr_keyword">else</strong> {											<em class="jxr_comment">// A collection of scalar elements...</em>
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> 			JoinSequence joinSequence = createJoinSequence( roleAlias, joinType );
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> 			elem = createCollectionJoin( joinSequence, roleAlias );
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 		}
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> 		elem.setRole( role );
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> 		elem.setQueryableCollection( queryableCollection );
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> 		<em class="jxr_comment">// Don't include sub-classes for implied collection joins or subquery joins.</em>
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> 		<strong class="jxr_keyword">if</strong> ( implied ) {
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> 			elem.setIncludeSubclasses( false );
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> 		}
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> 		<strong class="jxr_keyword">if</strong> ( explicitSubqueryFromElement ) {
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> 			elem.setInProjectionList( <strong class="jxr_keyword">true</strong> );	<em class="jxr_comment">// Treat explict from elements in sub-queries properly.</em>
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> 		}
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> 
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> 		<strong class="jxr_keyword">if</strong> ( fetchFlag ) {
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> 			elem.setFetch( <strong class="jxr_keyword">true</strong> );
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> 		}
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> 		<strong class="jxr_keyword">return</strong> elem;
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> 	}
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> 
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> 	FromElement createEntityJoin(
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> 	        String entityClass,
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> 	        String tableAlias,
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> 	        JoinSequence joinSequence,
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> 	        <strong class="jxr_keyword">boolean</strong> fetchFlag,
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> 	        <strong class="jxr_keyword">boolean</strong> inFrom,
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 	        EntityType type) <strong class="jxr_keyword">throws</strong> SemanticException {
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> 		FromElement elem = createJoin( entityClass, tableAlias, joinSequence, type, false );
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> 		elem.setFetch( fetchFlag );
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> 		EntityPersister entityPersister = elem.getEntityPersister();
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> 		<strong class="jxr_keyword">int</strong> numberOfTables = entityPersister.getQuerySpaces().length;
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> 		<strong class="jxr_keyword">if</strong> ( numberOfTables &gt; 1 &amp;&amp; implied &amp;&amp; !elem.useFromFragment() ) {
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> 			LOG.debug( <span class="jxr_string">"createEntityJoin() : Implied multi-table entity join"</span> );
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> 			elem.setUseFromFragment( <strong class="jxr_keyword">true</strong> );
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> 		}
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> 
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> 		<em class="jxr_comment">// If this is an implied join in a FROM clause, then use ANSI-style joining, and set the</em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> 		<em class="jxr_comment">// flag on the FromElement that indicates that it was implied in the FROM clause itself.</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> 		<strong class="jxr_keyword">if</strong> ( implied &amp;&amp; inFrom ) {
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> 			joinSequence.setUseThetaStyle( false );
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> 			elem.setUseFromFragment( <strong class="jxr_keyword">true</strong> );
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> 			elem.setImpliedInFromClause( <strong class="jxr_keyword">true</strong> );
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> 		}
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> 		<strong class="jxr_keyword">if</strong> ( elem.getWalker().isSubQuery() ) {
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 			<em class="jxr_comment">// two conditions where we need to transform this to a theta-join syntax:</em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> 			<em class="jxr_comment">//      1) 'elem' is the "root from-element" in correlated subqueries</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> 			<em class="jxr_comment">//      2) The DotNode.useThetaStyleImplicitJoins has been set to true</em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> 			<em class="jxr_comment">//          and 'elem' represents an implicit join</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 			<strong class="jxr_keyword">if</strong> ( elem.getFromClause() != elem.getOrigin().getFromClause() ||
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> <em class="jxr_comment">//			        ( implied &amp;&amp; DotNode.useThetaStyleImplicitJoins ) ) {</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> 			        DotNode.useThetaStyleImplicitJoins ) {
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 				<em class="jxr_comment">// the "root from-element" in correlated subqueries do need this piece</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 				elem.setType( FROM_FRAGMENT );
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> 				joinSequence.setUseThetaStyle( <strong class="jxr_keyword">true</strong> );
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> 				elem.setUseFromFragment( false );
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> 			}
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> 		}
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> 
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> 		<strong class="jxr_keyword">return</strong> elem;
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> 	}
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 	<strong class="jxr_keyword">public</strong> FromElement createComponentJoin(ComponentType type) {
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> 		<em class="jxr_comment">// need to create a "place holder" from-element that can store the component/alias for this</em>
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> 		<em class="jxr_comment">// 		component join</em>
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> ComponentJoin( fromClause, origin, classAlias, path, type );
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> 	}
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> 
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> 	FromElement createElementJoin(QueryableCollection queryableCollection) <strong class="jxr_keyword">throws</strong> SemanticException {
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> 		FromElement elem;
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> 
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> 		implied = <strong class="jxr_keyword">true</strong>; <em class="jxr_comment">//TODO: always true for now, but not if we later decide to support elements() in the from clause</em>
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 		inElementsFunction = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> 		Type elementType = queryableCollection.getElementType();
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> 		<strong class="jxr_keyword">if</strong> ( !elementType.isEntityType() ) {
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException( <span class="jxr_string">"Cannot create element join for a collection of non-entities!"</span> );
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> 		}
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 		<strong class="jxr_keyword">this</strong>.queryableCollection = queryableCollection;
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> 		SessionFactoryHelper sfh = fromClause.getSessionFactoryHelper();
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> 		FromElement destination = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> 		String tableAlias = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 		EntityPersister entityPersister = queryableCollection.getElementPersister();
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> 		tableAlias = fromClause.getAliasGenerator().createName( entityPersister.getEntityName() );
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 		String associatedEntityName = entityPersister.getEntityName();
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 		EntityPersister targetEntityPersister = sfh.requireClassPersister( associatedEntityName );
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> 		<em class="jxr_comment">// Create the FROM element for the target (the elements of the collection).</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 		destination = createAndAddFromElement(
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> 				associatedEntityName,
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> 				classAlias,
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 				targetEntityPersister,
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> 				( EntityType ) queryableCollection.getElementType(),
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> 				tableAlias
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> 			);
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 		<em class="jxr_comment">// If the join is implied, then don't include sub-classes on the element.</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 		<strong class="jxr_keyword">if</strong> ( implied ) {
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> 			destination.setIncludeSubclasses( false );
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 		}
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 		fromClause.addCollectionJoinFromElementByPath( path, destination );
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> <em class="jxr_comment">//		origin.addDestination(destination);</em>
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 		<em class="jxr_comment">// Add the query spaces.</em>
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> 		fromClause.getWalker().addQuerySpaces( entityPersister.getQuerySpaces() );
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 		CollectionType type = queryableCollection.getCollectionType();
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> 		String role = type.getRole();
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 		String roleAlias = origin.getTableAlias();
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 		String[] targetColumns = sfh.getCollectionElementColumns( role, roleAlias );
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> 		AssociationType elementAssociationType = sfh.getElementAssociationType( type );
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> 
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 		<em class="jxr_comment">// Create the join element under the from element.</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 		JoinType joinType = JoinType.INNER_JOIN;
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> 		JoinSequence joinSequence = sfh.createJoinSequence( implied, elementAssociationType, tableAlias, joinType, targetColumns );
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> 		elem = initializeJoin( path, destination, joinSequence, targetColumns, origin, false );
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 		elem.setUseFromFragment( <strong class="jxr_keyword">true</strong> );	<em class="jxr_comment">// The associated entity is implied, but it must be included in the FROM.</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> 		elem.setCollectionTableAlias( roleAlias );	<em class="jxr_comment">// The collection alias is the role.</em>
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 		<strong class="jxr_keyword">return</strong> elem;
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 	}
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> 	<strong class="jxr_keyword">private</strong> FromElement createCollectionJoin(JoinSequence collectionJoinSequence, String tableAlias) <strong class="jxr_keyword">throws</strong> SemanticException {
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> 		String text = queryableCollection.getTableName();
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 		AST ast = createFromElement( text );
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> 		FromElement destination = ( FromElement ) ast;
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 		Type elementType = queryableCollection.getElementType();
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 		<strong class="jxr_keyword">if</strong> ( elementType.isCollectionType() ) {
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> SemanticException( <span class="jxr_string">"Collections of collections are not supported!"</span> );
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 		}
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 		destination.initializeCollection( fromClause, classAlias, tableAlias );
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 		destination.setType( JOIN_FRAGMENT );		<em class="jxr_comment">// Tag this node as a JOIN.</em>
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 		destination.setIncludeSubclasses( false );	<em class="jxr_comment">// Don't include subclasses in the join.</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 		destination.setCollectionJoin( <strong class="jxr_keyword">true</strong> );		<em class="jxr_comment">// This is a clollection join.</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> 		destination.setJoinSequence( collectionJoinSequence );
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> 		destination.setOrigin( origin, false );
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> 		destination.setCollectionTableAlias(tableAlias);
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> <em class="jxr_comment">//		origin.addDestination( destination );</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> <em class="jxr_comment">// This was the cause of HHH-242</em>
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> <em class="jxr_comment">//		origin.setType( FROM_FRAGMENT );			// Set the parent node type so that the AST is properly formed.</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 		origin.setText( <span class="jxr_string">""</span> );						<em class="jxr_comment">// The destination node will have all the FROM text.</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> 		origin.setCollectionJoin( <strong class="jxr_keyword">true</strong> );			<em class="jxr_comment">// The parent node is a collection join too (voodoo - see JoinProcessor)</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> 		fromClause.addCollectionJoinFromElementByPath( path, destination );
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 		fromClause.getWalker().addQuerySpaces( queryableCollection.getCollectionSpaces() );
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> 		<strong class="jxr_keyword">return</strong> destination;
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> 	}
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> 
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> 	<strong class="jxr_keyword">private</strong> FromElement createEntityAssociation(
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> 	        String role,
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 	        String roleAlias,
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> 	        JoinType joinType) <strong class="jxr_keyword">throws</strong> SemanticException {
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 		FromElement elem;
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> 		Queryable entityPersister = ( Queryable ) queryableCollection.getElementPersister();
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> 		String associatedEntityName = entityPersister.getEntityName();
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 		<em class="jxr_comment">// Get the class name of the associated entity.</em>
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> 		<strong class="jxr_keyword">if</strong> ( queryableCollection.isOneToMany() ) {
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> 			LOG.debugf( <span class="jxr_string">"createEntityAssociation() : One to many - path = %s role = %s associatedEntityName = %s"</span>,
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> 					path,
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> 					role,
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> 					associatedEntityName );
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> 			JoinSequence joinSequence = createJoinSequence( roleAlias, joinType );
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> 
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 			elem = createJoin( associatedEntityName, roleAlias, joinSequence, ( EntityType ) queryableCollection.getElementType(), false );
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> 		}
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> 		<strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> 			LOG.debugf( <span class="jxr_string">"createManyToMany() : path = %s role = %s associatedEntityName = %s"</span>, path, role, associatedEntityName );
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> 			elem = createManyToMany( role, associatedEntityName,
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> 					roleAlias, entityPersister, ( EntityType ) queryableCollection.getElementType(), joinType );
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 			fromClause.getWalker().addQuerySpaces( queryableCollection.getCollectionSpaces() );
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 		}
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> 		elem.setCollectionTableAlias( roleAlias );
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> 		<strong class="jxr_keyword">return</strong> elem;
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 	}
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> 
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> 	<strong class="jxr_keyword">private</strong> FromElement createJoin(
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> 	        String entityClass,
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> 	        String tableAlias,
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> 	        JoinSequence joinSequence,
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 	        EntityType type,
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> 	        <strong class="jxr_keyword">boolean</strong> manyToMany) <strong class="jxr_keyword">throws</strong> SemanticException {
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> 		<em class="jxr_comment">//  origin, path, implied, columns, classAlias,</em>
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 		EntityPersister entityPersister = fromClause.getSessionFactoryHelper().requireClassPersister( entityClass );
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 		FromElement destination = createAndAddFromElement( entityClass,
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> 				classAlias,
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> 				entityPersister,
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> 				type,
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> 				tableAlias );
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> 		<strong class="jxr_keyword">return</strong> initializeJoin( path, destination, joinSequence, getColumns(), origin, manyToMany );
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 	}
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> 
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> 	<strong class="jxr_keyword">private</strong> FromElement createManyToMany(
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> 	        String role,
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> 	        String associatedEntityName,
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> 	        String roleAlias,
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> 	        Queryable entityPersister,
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> 	        EntityType type,
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> 	        JoinType joinType) <strong class="jxr_keyword">throws</strong> SemanticException {
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> 		FromElement elem;
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> 		SessionFactoryHelper sfh = fromClause.getSessionFactoryHelper();
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> 		<strong class="jxr_keyword">if</strong> ( inElementsFunction <em class="jxr_comment">/*implied*/</em> ) {
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 			<em class="jxr_comment">// For implied many-to-many, just add the end join.</em>
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> 			JoinSequence joinSequence = createJoinSequence( roleAlias, joinType );
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> 			elem = createJoin( associatedEntityName, roleAlias, joinSequence, type, <strong class="jxr_keyword">true</strong> );
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> 		}
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 		<strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 			<em class="jxr_comment">// For an explicit many-to-many relationship, add a second join from the intermediate</em>
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> 			<em class="jxr_comment">// (many-to-many) table to the destination table.  Also, make sure that the from element's</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> 			<em class="jxr_comment">// idea of the destination is the destination table.</em>
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> 			String tableAlias = fromClause.getAliasGenerator().createName( entityPersister.getEntityName() );
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> 			String[] secondJoinColumns = sfh.getCollectionElementColumns( role, roleAlias );
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> 			<em class="jxr_comment">// Add the second join, the one that ends in the destination table.</em>
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> 			JoinSequence joinSequence = createJoinSequence( roleAlias, joinType );
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> 			joinSequence.addJoin( sfh.getElementAssociationType( collectionType ), tableAlias, joinType, secondJoinColumns );
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> 			elem = createJoin( associatedEntityName, tableAlias, joinSequence, type, false );
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> 			elem.setUseFromFragment( <strong class="jxr_keyword">true</strong> );
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> 		}
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> 		<strong class="jxr_keyword">return</strong> elem;
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> 	}
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> 
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> 	<strong class="jxr_keyword">private</strong> JoinSequence createJoinSequence(String roleAlias, JoinType joinType) {
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> 		SessionFactoryHelper sessionFactoryHelper = fromClause.getSessionFactoryHelper();
+<a class="jxr_linenumber" name="L441" href="#L441">441</a> 		String[] joinColumns = getColumns();
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 		<strong class="jxr_keyword">if</strong> ( collectionType == <strong class="jxr_keyword">null</strong> ) {
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalStateException( <span class="jxr_string">"collectionType is null!"</span> );
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 		}
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> 		<strong class="jxr_keyword">return</strong> sessionFactoryHelper.createJoinSequence( implied, collectionType, roleAlias, joinType, joinColumns );
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> 	}
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> 	<strong class="jxr_keyword">private</strong> FromElement createAndAddFromElement(
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> 	        String className,
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> 	        String classAlias,
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> 	        EntityPersister entityPersister,
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> 	        EntityType type,
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> 	        String tableAlias) {
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> 		<strong class="jxr_keyword">if</strong> ( !( entityPersister instanceof Joinable ) ) {
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException( <span class="jxr_string">"EntityPersister "</span> + entityPersister + <span class="jxr_string">" does not implement Joinable!"</span> );
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> 		}
+<a class="jxr_linenumber" name="L457" href="#L457">457</a> 		FromElement element = createFromElement( entityPersister );
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> 		initializeAndAddFromElement( element, className, classAlias, entityPersister, type, tableAlias );
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> 		<strong class="jxr_keyword">return</strong> element;
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> 	}
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> 
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> initializeAndAddFromElement(
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> 	        FromElement element,
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> 	        String className,
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> 	        String classAlias,
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> 	        EntityPersister entityPersister,
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> 	        EntityType type,
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> 	        String tableAlias) {
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> 		<strong class="jxr_keyword">if</strong> ( tableAlias == <strong class="jxr_keyword">null</strong> ) {
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> 			AliasGenerator aliasGenerator = fromClause.getAliasGenerator();
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> 			tableAlias = aliasGenerator.createName( entityPersister.getEntityName() );
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> 		}
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> 		element.initializeEntity( fromClause, className, entityPersister, type, classAlias, tableAlias );
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> 	}
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> 
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> 	<strong class="jxr_keyword">private</strong> FromElement createFromElement(EntityPersister entityPersister) {
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> 		Joinable joinable = ( Joinable ) entityPersister;
+<a class="jxr_linenumber" name="L478" href="#L478">478</a> 		String text = joinable.getTableName();
+<a class="jxr_linenumber" name="L479" href="#L479">479</a> 		AST ast = createFromElement( text );
+<a class="jxr_linenumber" name="L480" href="#L480">480</a> 		FromElement element = ( FromElement ) ast;
+<a class="jxr_linenumber" name="L481" href="#L481">481</a> 		<strong class="jxr_keyword">return</strong> element;
+<a class="jxr_linenumber" name="L482" href="#L482">482</a> 	}
+<a class="jxr_linenumber" name="L483" href="#L483">483</a> 
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> 	<strong class="jxr_keyword">private</strong> AST createFromElement(String text) {
+<a class="jxr_linenumber" name="L485" href="#L485">485</a> 		AST ast = ASTUtil.create( fromClause.getASTFactory(),
+<a class="jxr_linenumber" name="L486" href="#L486">486</a> 				implied ? IMPLIED_FROM : FROM_FRAGMENT, <em class="jxr_comment">// This causes the factory to instantiate the desired class.</em>
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> 				text );
+<a class="jxr_linenumber" name="L488" href="#L488">488</a> 		<em class="jxr_comment">// Reset the node type, because the rest of the system is expecting FROM_FRAGMENT, all we wanted was</em>
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> 		<em class="jxr_comment">// for the factory to create the right sub-class.  This might get reset again later on anyway to make the</em>
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> 		<em class="jxr_comment">// SQL generation simpler.</em>
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> 		ast.setType( FROM_FRAGMENT );
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> 		<strong class="jxr_keyword">return</strong> ast;
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> 	}
+<a class="jxr_linenumber" name="L494" href="#L494">494</a> 
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> 	<strong class="jxr_keyword">private</strong> FromElement initializeJoin(
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> 	        String path,
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> 	        FromElement destination,
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> 	        JoinSequence joinSequence,
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> 	        String[] columns,
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> 	        FromElement origin,
+<a class="jxr_linenumber" name="L501" href="#L501">501</a> 	        <strong class="jxr_keyword">boolean</strong> manyToMany) {
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> 		destination.setType( JOIN_FRAGMENT );
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 		destination.setJoinSequence( joinSequence );
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> 		destination.setColumns( columns );
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> 		destination.setOrigin( origin, manyToMany );
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> 		fromClause.addJoinByPathMap( path, destination );
+<a class="jxr_linenumber" name="L507" href="#L507">507</a> 		<strong class="jxr_keyword">return</strong> destination;
+<a class="jxr_linenumber" name="L508" href="#L508">508</a> 	}
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> 
+<a class="jxr_linenumber" name="L510" href="#L510">510</a> 	<strong class="jxr_keyword">private</strong> String[] getColumns() {
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> 		<strong class="jxr_keyword">if</strong> ( columns == <strong class="jxr_keyword">null</strong> ) {
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalStateException( <span class="jxr_string">"No foriegn key columns were supplied!"</span> );
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> 		}
+<a class="jxr_linenumber" name="L514" href="#L514">514</a> 		<strong class="jxr_keyword">return</strong> columns;
+<a class="jxr_linenumber" name="L515" href="#L515">515</a> 	}
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

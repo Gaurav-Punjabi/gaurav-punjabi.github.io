@@ -1,0 +1,1006 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>StripeStoreFileManager xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_javadoccomment"> * Licensed to the Apache Software Foundation (ASF) under one</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_javadoccomment"> * or more contributor license agreements.  See the NOTICE file</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_javadoccomment"> * distributed with this work for additional information</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_javadoccomment"> * regarding copyright ownership.  The ASF licenses this file</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_javadoccomment"> * to you under the Apache License, Version 2.0 (the</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_javadoccomment"> * "License"); you may not use this file except in compliance</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_javadoccomment"> * with the License.  You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_javadoccomment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_javadoccomment"> * Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_javadoccomment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_javadoccomment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_javadoccomment"> * See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_javadoccomment"> * limitations under the License.</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">package</strong> org.apache.hadoop.hbase.regionserver;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.util.Arrays;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.util.Collection;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> java.util.HashMap;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.Iterator;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> java.util.TreeMap;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.logging.Log;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.logging.LogFactory;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.conf.Configuration;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.Cell;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.HConstants;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.KeyValue;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.KeyValue.KVComparator;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.classification.InterfaceAudience;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.compactions.StripeCompactionPolicy;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.Bytes;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.ConcatenatedLists;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.util.StringUtils.TraditionalBinaryPrefix;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableCollection;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableList;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment"> * Stripe implementation of StoreFileManager.</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment"> * Not thread safe - relies on external locking (in HStore). Collections that this class</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment"> * returns are immutable or unique to the call, so they should be safe.</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> * Stripe store splits the key space of the region into non-overlapping stripes, as well as</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> * some recent files that have all the keys (level 0). Each stripe contains a set of files.</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> * When L0 is compacted, it's split into the files corresponding to existing stripe boundaries,</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> * that can thus be added to stripes.</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment"> * When scan or get happens, it only has to read the files from the corresponding stripes.</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment"> * See StripeCompationPolicy on how the stripes are determined; this class doesn't care.</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment"> * This class should work together with StripeCompactionPolicy and StripeCompactor.</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> * With regard to how they work, we make at least the following (reasonable) assumptions:</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> *  - Compaction produces one file per new stripe (if any); that is easy to change.</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> *  - Compaction has one contiguous set of stripes both in and out, except if L0 is involved.</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  @InterfaceAudience.Private
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> StripeStoreFileManager
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>    <strong class="jxr_keyword">implements</strong> StoreFileManager, StripeCompactionPolicy.StripeInformationProvider {
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>    <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Log LOG = LogFactory.getLog(StripeStoreFileManager.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment">   * The file metadata fields that contain the stripe information.</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> byte[] STRIPE_START_KEY = Bytes.toBytes(<span class="jxr_string">"STRIPE_START_KEY"</span>);
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> byte[] STRIPE_END_KEY = Bytes.toBytes(<span class="jxr_string">"STRIPE_END_KEY"</span>);
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> Bytes.RowEndKeyComparator MAP_COMPARATOR = <strong class="jxr_keyword">new</strong> Bytes.RowEndKeyComparator();
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment">   * The key value used for range boundary, indicating that the boundary is open (i.e. +-inf).</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> byte[] OPEN_KEY = HConstants.EMPTY_BYTE_ARRAY;
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>    <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> byte[] INVALID_KEY = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment">   * The state class. Used solely to replace results atomically during</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment">   * compactions and avoid complicated error handling.</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> State {
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  <em class="jxr_javadoccomment">     * The end rows of each stripe. The last stripe end is always open-ended, so it's not stored</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment">     * here. It is invariant that the start row of the stripe is the end row of the previous one</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment">     * (and is an open boundary for the first one).</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>      <strong class="jxr_keyword">public</strong> byte[][] stripeEndRows = <strong class="jxr_keyword">new</strong> byte[0][];
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment">     * Files by stripe. Each element of the list corresponds to stripeEndRow element with the</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment">     * same index, except the last one. Inside each list, the files are in reverse order by</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">     * seqNum. Note that the length of this is one higher than that of stripeEndKeys.</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>     <strong class="jxr_keyword">public</strong> ArrayList&lt;ImmutableList&lt;StoreFile&gt;&gt; stripeFiles
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>       = <strong class="jxr_keyword">new</strong> ArrayList&lt;ImmutableList&lt;StoreFile&gt;&gt;();
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>     <em class="jxr_javadoccomment">/** Level 0. The files are in reverse order by seqNum. */</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>     <strong class="jxr_keyword">public</strong> ImmutableList&lt;StoreFile&gt; level0Files = ImmutableList.&lt;StoreFile&gt;of();
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>     <em class="jxr_javadoccomment">/** Cached list of all files in the structure, to return from some calls */</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>     <strong class="jxr_keyword">public</strong> ImmutableList&lt;StoreFile&gt; allFilesCached = ImmutableList.&lt;StoreFile&gt;of();
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>   }
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>   <strong class="jxr_keyword">private</strong> State state = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>   <em class="jxr_javadoccomment">/** Cached file metadata (or overrides as the case may be) */</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>   <strong class="jxr_keyword">private</strong> HashMap&lt;StoreFile, byte[]&gt; fileStarts = <strong class="jxr_keyword">new</strong> HashMap&lt;StoreFile, byte[]&gt;();
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>   <strong class="jxr_keyword">private</strong> HashMap&lt;StoreFile, byte[]&gt; fileEnds = <strong class="jxr_keyword">new</strong> HashMap&lt;StoreFile, byte[]&gt;();
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>   <em class="jxr_javadoccomment">/** Normally invalid key is null, but in the map null is the result for "no key"; so use</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">   * the following constant value in these maps instead. Note that this is a constant and</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment">   * we use it to compare by reference when we read from the map. */</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> byte[] INVALID_KEY_IN_MAP = <strong class="jxr_keyword">new</strong> byte[0];
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> KVComparator kvComparator;
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>   <strong class="jxr_keyword">private</strong> StripeStoreConfig config;
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> blockingFileCount;
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>   <strong class="jxr_keyword">public</strong> StripeStoreFileManager(
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>       KVComparator kvComparator, Configuration conf, StripeStoreConfig config) {
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>     <strong class="jxr_keyword">this</strong>.kvComparator = kvComparator;
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>     <strong class="jxr_keyword">this</strong>.config = config;
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>     <strong class="jxr_keyword">this</strong>.blockingFileCount = conf.getInt(
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>         HStore.BLOCKING_STOREFILES_KEY, HStore.DEFAULT_BLOCKING_STOREFILE_COUNT);
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>   }
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>   @Override
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> loadFiles(List&lt;StoreFile&gt; storeFiles) {
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>     loadUnclassifiedStoreFiles(storeFiles);
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>   }
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>   @Override
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>   <strong class="jxr_keyword">public</strong> Collection&lt;StoreFile&gt; getStorefiles() {
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>     <strong class="jxr_keyword">return</strong> state.allFilesCached;
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>   }
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>   @Override
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> insertNewFiles(Collection&lt;StoreFile&gt; sfs) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>     CompactionOrFlushMergeCopy cmc = <strong class="jxr_keyword">new</strong> CompactionOrFlushMergeCopy(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>     cmc.mergeResults(<strong class="jxr_keyword">null</strong>, sfs);
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>     debugDumpState(<span class="jxr_string">"Added new files"</span>);
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>   }
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>   @Override
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>   <strong class="jxr_keyword">public</strong> ImmutableCollection&lt;StoreFile&gt; clearFiles() {
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>     ImmutableCollection&lt;StoreFile&gt; result = state.allFilesCached;
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>     <strong class="jxr_keyword">this</strong>.state = <strong class="jxr_keyword">new</strong> State();
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>     <strong class="jxr_keyword">this</strong>.fileStarts.clear();
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>     <strong class="jxr_keyword">this</strong>.fileEnds.clear();
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>     <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>   }
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>   @Override
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> getStorefileCount() {
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>     <strong class="jxr_keyword">return</strong> state.allFilesCached.size();
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>   }
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>   <em class="jxr_javadoccomment">/** See {@link StoreFileManager#getCandidateFilesForRowKeyBefore(KeyValue)}</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment">   * for details on this methods. */</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>   @Override
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>   <strong class="jxr_keyword">public</strong> Iterator&lt;StoreFile&gt; getCandidateFilesForRowKeyBefore(<strong class="jxr_keyword">final</strong> KeyValue targetKey) {
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>     KeyBeforeConcatenatedLists result = <strong class="jxr_keyword">new</strong> KeyBeforeConcatenatedLists();
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>     <em class="jxr_comment">// Order matters for this call.</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>     result.addSublist(state.level0Files);
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>     <strong class="jxr_keyword">if</strong> (!state.stripeFiles.isEmpty()) {
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>       <strong class="jxr_keyword">int</strong> lastStripeIndex = findStripeForRow(targetKey.getRow(), false);
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>       <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> stripeIndex = lastStripeIndex; stripeIndex &gt;= 0; --stripeIndex) {
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>         result.addSublist(state.stripeFiles.get(stripeIndex));
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>       }
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>     }
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>     <strong class="jxr_keyword">return</strong> result.iterator();
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>   }
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>   <em class="jxr_javadoccomment">/** See {@link StoreFileManager#getCandidateFilesForRowKeyBefore(KeyValue)} and</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> <em class="jxr_javadoccomment">   * {@link StoreFileManager#updateCandidateFilesForRowKeyBefore(Iterator, KeyValue, Cell)}</em>
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> <em class="jxr_javadoccomment">   * for details on this methods. */</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>   @Override
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>   <strong class="jxr_keyword">public</strong> Iterator&lt;StoreFile&gt; updateCandidateFilesForRowKeyBefore(
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>       Iterator&lt;StoreFile&gt; candidateFiles, <strong class="jxr_keyword">final</strong> KeyValue targetKey, <strong class="jxr_keyword">final</strong> Cell candidate) {
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>     KeyBeforeConcatenatedLists.Iterator original =
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>         (KeyBeforeConcatenatedLists.Iterator)candidateFiles;
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>     assert original != <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>     ArrayList&lt;List&lt;StoreFile&gt;&gt; components = original.getComponents();
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> firstIrrelevant = 0; firstIrrelevant &lt; components.size(); ++firstIrrelevant) {
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>       StoreFile sf = components.get(firstIrrelevant).get(0);
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>       byte[] endKey = endOf(sf);
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>       <em class="jxr_comment">// Entries are ordered as such: L0, then stripes in reverse order. We never remove</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>       <em class="jxr_comment">// level 0; we remove the stripe, and all subsequent ones, as soon as we find the</em>
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>       <em class="jxr_comment">// first one that cannot possibly have better candidates.</em>
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>       <strong class="jxr_keyword">if</strong> (!isInvalid(endKey) &amp;&amp; !isOpen(endKey)
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>           &amp;&amp; (nonOpenRowCompare(endKey, targetKey.getRow()) &lt;= 0)) {
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>         original.removeComponents(firstIrrelevant);
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>       }
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>     }
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>     <strong class="jxr_keyword">return</strong> original;
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>   }
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>   @Override
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_javadoccomment">   * Override of getSplitPoint that determines the split point as the boundary between two</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">   * stripes, unless it causes significant imbalance between split sides' sizes. In that</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment">   * case, the split boundary will be chosen from the middle of one of the stripes to</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">   * minimize imbalance.</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_javadoccomment">   * @return The split point, or null if no split is possible.</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>   <strong class="jxr_keyword">public</strong> byte[] getSplitPoint() <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>     <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.getStorefileCount() == 0) <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>     <strong class="jxr_keyword">if</strong> (state.stripeFiles.size() &lt;= 1) {
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>       <strong class="jxr_keyword">return</strong> getSplitPointFromAllFiles();
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>     }
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>     <strong class="jxr_keyword">int</strong> leftIndex = -1, rightIndex = state.stripeFiles.size();
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>     <strong class="jxr_keyword">long</strong> leftSize = 0, rightSize = 0;
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>     <strong class="jxr_keyword">long</strong> lastLeftSize = 0, lastRightSize = 0;
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>     <strong class="jxr_keyword">while</strong> (rightIndex - 1 != leftIndex) {
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>       <strong class="jxr_keyword">if</strong> (leftSize &gt;= rightSize) {
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>         --rightIndex;
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>         lastRightSize = getStripeFilesSize(rightIndex);
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>         rightSize += lastRightSize;
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>       } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>         ++leftIndex;
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>         lastLeftSize = getStripeFilesSize(leftIndex);
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>         leftSize += lastLeftSize;
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>       }
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>     }
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>     <strong class="jxr_keyword">if</strong> (leftSize == 0 || rightSize == 0) {
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>       String errMsg = String.format(<span class="jxr_string">"Cannot split on a boundary - left index %d size %d, "</span>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>           + <span class="jxr_string">"right index %d size %d"</span>, leftIndex, leftSize, rightIndex, rightSize);
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>       debugDumpState(errMsg);
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>       LOG.warn(errMsg);
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>       <strong class="jxr_keyword">return</strong> getSplitPointFromAllFiles();
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>     }
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>     <strong class="jxr_keyword">double</strong> ratio = (<strong class="jxr_keyword">double</strong>)rightSize / leftSize;
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>     <strong class="jxr_keyword">if</strong> (ratio &lt; 1) {
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>       ratio = 1 / ratio;
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>     }
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>     <strong class="jxr_keyword">if</strong> (config.getMaxSplitImbalance() &gt; ratio) <strong class="jxr_keyword">return</strong> state.stripeEndRows[leftIndex];
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> 
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>     <em class="jxr_comment">// If the difference between the sides is too large, we could get the proportional key on</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>     <em class="jxr_comment">// the a stripe to equalize the difference, but there's no proportional key method at the</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>     <em class="jxr_comment">// moment, and it's not extremely important.</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>     <em class="jxr_comment">// See if we can achieve better ratio if we split the bigger side in half.</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>     <strong class="jxr_keyword">boolean</strong> isRightLarger = rightSize &gt;= leftSize;
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>     <strong class="jxr_keyword">double</strong> newRatio = isRightLarger
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>         ? getMidStripeSplitRatio(leftSize, rightSize, lastRightSize)
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>         : getMidStripeSplitRatio(rightSize, leftSize, lastLeftSize);
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>     <strong class="jxr_keyword">if</strong> (newRatio &lt; 1) {
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>       newRatio = 1 / newRatio;
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>     }
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>     <strong class="jxr_keyword">if</strong> (newRatio &gt;= ratio)  <strong class="jxr_keyword">return</strong> state.stripeEndRows[leftIndex];
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>     LOG.debug(<span class="jxr_string">"Splitting the stripe - ratio w/o split "</span> + ratio + <span class="jxr_string">", ratio with split "</span>
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>         + newRatio + <span class="jxr_string">" configured ratio "</span> + config.getMaxSplitImbalance());
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>     <em class="jxr_comment">// Ok, we may get better ratio, get it.</em>
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>     <strong class="jxr_keyword">return</strong> StoreUtils.getLargestFile(state.stripeFiles.get(
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>         isRightLarger ? rightIndex : leftIndex)).getFileSplitPoint(<strong class="jxr_keyword">this</strong>.kvComparator);
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>   }
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> 
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>   <strong class="jxr_keyword">private</strong> byte[] getSplitPointFromAllFiles() <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>     ConcatenatedLists&lt;StoreFile&gt; sfs = <strong class="jxr_keyword">new</strong> ConcatenatedLists&lt;StoreFile&gt;();
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>     sfs.addSublist(state.level0Files);
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>     sfs.addAllSublists(state.stripeFiles);
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>     <strong class="jxr_keyword">if</strong> (sfs.isEmpty()) <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>     <strong class="jxr_keyword">return</strong> StoreUtils.getLargestFile(sfs).getFileSplitPoint(<strong class="jxr_keyword">this</strong>.kvComparator);
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>   }
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">double</strong> getMidStripeSplitRatio(<strong class="jxr_keyword">long</strong> smallerSize, <strong class="jxr_keyword">long</strong> largerSize, <strong class="jxr_keyword">long</strong> lastLargerSize) {
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>     <strong class="jxr_keyword">return</strong> (<strong class="jxr_keyword">double</strong>)(largerSize - lastLargerSize / 2f) / (smallerSize + lastLargerSize / 2f);
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>   }
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>   @Override
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>   <strong class="jxr_keyword">public</strong> Collection&lt;StoreFile&gt; getFilesForScanOrGet(
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>       <strong class="jxr_keyword">boolean</strong> isGet, byte[] startRow, byte[] stopRow) {
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>     <strong class="jxr_keyword">if</strong> (state.stripeFiles.isEmpty()) {
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>       <strong class="jxr_keyword">return</strong> state.level0Files; <em class="jxr_comment">// There's just L0.</em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>     }
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> 
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>     <strong class="jxr_keyword">int</strong> firstStripe = findStripeForRow(startRow, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>     <strong class="jxr_keyword">int</strong> lastStripe = findStripeForRow(stopRow, false);
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>     assert firstStripe &lt;= lastStripe;
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>     <strong class="jxr_keyword">if</strong> (firstStripe == lastStripe &amp;&amp; state.level0Files.isEmpty()) {
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>       <strong class="jxr_keyword">return</strong> state.stripeFiles.get(firstStripe); <em class="jxr_comment">// There's just one stripe we need.</em>
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>     }
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>     <strong class="jxr_keyword">if</strong> (firstStripe == 0 &amp;&amp; lastStripe == (state.stripeFiles.size() - 1)) {
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>       <strong class="jxr_keyword">return</strong> state.allFilesCached; <em class="jxr_comment">// We need to read all files.</em>
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>     }
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> 
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>     ConcatenatedLists&lt;StoreFile&gt; result = <strong class="jxr_keyword">new</strong> ConcatenatedLists&lt;StoreFile&gt;();
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>     result.addAllSublists(state.stripeFiles.subList(firstStripe, lastStripe + 1));
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>     result.addSublist(state.level0Files);
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>     <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>   }
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>   @Override
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addCompactionResults(
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>     Collection&lt;StoreFile&gt; compactedFiles, Collection&lt;StoreFile&gt; results) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>     <em class="jxr_comment">// See class comment for the assumptions we make here.</em>
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>     LOG.debug(<span class="jxr_string">"Attempting to merge compaction results: "</span> + compactedFiles.size()
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>         + <span class="jxr_string">" files replaced by "</span> + results.size());
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>     <em class="jxr_comment">// In order to be able to fail in the middle of the operation, we'll operate on lazy</em>
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>     <em class="jxr_comment">// copies and apply the result at the end.</em>
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>     CompactionOrFlushMergeCopy cmc = <strong class="jxr_keyword">new</strong> CompactionOrFlushMergeCopy(false);
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>     cmc.mergeResults(compactedFiles, results);
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>     debugDumpState(<span class="jxr_string">"Merged compaction results"</span>);
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>   }
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> 
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>   @Override
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> getStoreCompactionPriority() {
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>     <em class="jxr_comment">// If there's only L0, do what the default store does.</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>     <em class="jxr_comment">// If we are in critical priority, do the same - we don't want to trump all stores all</em>
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>     <em class="jxr_comment">// the time due to how many files we have.</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>     <strong class="jxr_keyword">int</strong> fc = getStorefileCount();
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>     <strong class="jxr_keyword">if</strong> (state.stripeFiles.isEmpty() || (<strong class="jxr_keyword">this</strong>.blockingFileCount &lt;= fc)) {
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>.blockingFileCount - fc;
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>     }
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>     <em class="jxr_comment">// If we are in good shape, we don't want to be trumped by all other stores due to how</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>     <em class="jxr_comment">// many files we have, so do an approximate mapping to normal priority range; L0 counts</em>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>     <em class="jxr_comment">// for all stripes.</em>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>     <strong class="jxr_keyword">int</strong> l0 = state.level0Files.size(), sc = state.stripeFiles.size();
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>     <strong class="jxr_keyword">int</strong> priority = (<strong class="jxr_keyword">int</strong>)Math.ceil(((<strong class="jxr_keyword">double</strong>)(<strong class="jxr_keyword">this</strong>.blockingFileCount - fc + l0) / sc) - l0);
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>     <strong class="jxr_keyword">return</strong> (priority &lt;= HStore.PRIORITY_USER) ? (HStore.PRIORITY_USER + 1) : priority;
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>   }
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> <em class="jxr_javadoccomment">   * Gets the total size of all files in the stripe.</em>
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> <em class="jxr_javadoccomment">   * @param stripeIndex Stripe index.</em>
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> <em class="jxr_javadoccomment">   * @return Size.</em>
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">long</strong> getStripeFilesSize(<strong class="jxr_keyword">int</strong> stripeIndex) {
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>     <strong class="jxr_keyword">long</strong> result = 0;
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>     <strong class="jxr_keyword">for</strong> (StoreFile sf : state.stripeFiles.get(stripeIndex)) {
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>       result += sf.getReader().length();
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>     }
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>     <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>   }
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> <em class="jxr_javadoccomment">   * Loads initial store files that were picked up from some physical location pertaining to</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> <em class="jxr_javadoccomment">   * this store (presumably). Unlike adding files after compaction, assumes empty initial</em>
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> <em class="jxr_javadoccomment">   * sets, and is forgiving with regard to stripe constraints - at worst, many/all files will</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> <em class="jxr_javadoccomment">   * go to level 0.</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> <em class="jxr_javadoccomment">   * @param storeFiles Store files to add.</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> loadUnclassifiedStoreFiles(List&lt;StoreFile&gt; storeFiles) {
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>     LOG.debug(<span class="jxr_string">"Attempting to load "</span> + storeFiles.size() + <span class="jxr_string">" store files."</span>);
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>     TreeMap&lt;byte[], ArrayList&lt;StoreFile&gt;&gt; candidateStripes =
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>         <strong class="jxr_keyword">new</strong> TreeMap&lt;byte[], ArrayList&lt;StoreFile&gt;&gt;(MAP_COMPARATOR);
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>     ArrayList&lt;StoreFile&gt; level0Files = <strong class="jxr_keyword">new</strong> ArrayList&lt;StoreFile&gt;();
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>     <em class="jxr_comment">// Separate the files into tentative stripes; then validate. Currently, we rely on metadata.</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>     <em class="jxr_comment">// If needed, we could dynamically determine the stripes in future.</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>     <strong class="jxr_keyword">for</strong> (StoreFile sf : storeFiles) {
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>       byte[] startRow = startOf(sf), endRow = endOf(sf);
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>       <em class="jxr_comment">// Validate the range and put the files into place.</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>       <strong class="jxr_keyword">if</strong> (isInvalid(startRow) || isInvalid(endRow)) {
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>         insertFileIntoStripe(level0Files, sf); <em class="jxr_comment">// No metadata - goes to L0.</em>
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>         ensureLevel0Metadata(sf);
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>       } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (!isOpen(startRow) &amp;&amp; !isOpen(endRow) &amp;&amp;
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>           nonOpenRowCompare(startRow, endRow) &gt;= 0) {
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>         LOG.error(<span class="jxr_string">"Unexpected metadata - start row ["</span> + Bytes.toString(startRow) + <span class="jxr_string">"], end row ["</span>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>           + Bytes.toString(endRow) + <span class="jxr_string">"] in file ["</span> + sf.getPath() + <span class="jxr_string">"], pushing to L0"</span>);
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>         insertFileIntoStripe(level0Files, sf); <em class="jxr_comment">// Bad metadata - goes to L0 also.</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>         ensureLevel0Metadata(sf);
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>       } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>         ArrayList&lt;StoreFile&gt; stripe = candidateStripes.get(endRow);
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>         <strong class="jxr_keyword">if</strong> (stripe == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>           stripe = <strong class="jxr_keyword">new</strong> ArrayList&lt;StoreFile&gt;();
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>           candidateStripes.put(endRow, stripe);
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>         }
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>         insertFileIntoStripe(stripe, sf);
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>       }
+<a class="jxr_linenumber" name="L374" href="#L374">374</a>     }
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>     <em class="jxr_comment">// Possible improvement - for variable-count stripes, if all the files are in L0, we can</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>     <em class="jxr_comment">// instead create single, open-ended stripe with all files.</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> 
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>     <strong class="jxr_keyword">boolean</strong> hasOverlaps = false;
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>     byte[] expectedStartRow = <strong class="jxr_keyword">null</strong>; <em class="jxr_comment">// first stripe can start wherever</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>     Iterator&lt;Map.Entry&lt;byte[], ArrayList&lt;StoreFile&gt;&gt;&gt; entryIter =
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>         candidateStripes.entrySet().iterator();
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>     <strong class="jxr_keyword">while</strong> (entryIter.hasNext()) {
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>       Map.Entry&lt;byte[], ArrayList&lt;StoreFile&gt;&gt; entry = entryIter.next();
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>       ArrayList&lt;StoreFile&gt; files = entry.getValue();
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>       <em class="jxr_comment">// Validate the file start rows, and remove the bad ones to level 0.</em>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>       <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; files.size(); ++i) {
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>         StoreFile sf = files.get(i);
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>         byte[] startRow = startOf(sf);
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>         <strong class="jxr_keyword">if</strong> (expectedStartRow == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>           expectedStartRow = startRow; <em class="jxr_comment">// ensure that first stripe is still consistent</em>
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (!rowEquals(expectedStartRow, startRow)) {
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>           hasOverlaps = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>           LOG.warn(<span class="jxr_string">"Store file doesn't fit into the tentative stripes - expected to start at ["</span>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>               + Bytes.toString(expectedStartRow) + <span class="jxr_string">"], but starts at ["</span> + Bytes.toString(startRow)
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>               + <span class="jxr_string">"], to L0 it goes"</span>);
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>           StoreFile badSf = files.remove(i);
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>           insertFileIntoStripe(level0Files, badSf);
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>           ensureLevel0Metadata(badSf);
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>           --i;
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>         }
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>       }
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>       <em class="jxr_comment">// Check if any files from the candidate stripe are valid. If so, add a stripe.</em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>       byte[] endRow = entry.getKey();
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>       <strong class="jxr_keyword">if</strong> (!files.isEmpty()) {
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>         expectedStartRow = endRow; <em class="jxr_comment">// Next stripe must start exactly at that key.</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>       } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>         entryIter.remove();
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>       }
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>     }
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> 
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>     <em class="jxr_comment">// In the end, there must be open ends on two sides. If not, and there were no errors i.e.</em>
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>     <em class="jxr_comment">// files are consistent, they might be coming from a split. We will treat the boundaries</em>
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>     <em class="jxr_comment">// as open keys anyway, and log the message.</em>
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>     <em class="jxr_comment">// If there were errors, we'll play it safe and dump everything into L0.</em>
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>     <strong class="jxr_keyword">if</strong> (!candidateStripes.isEmpty()) {
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>       StoreFile firstFile = candidateStripes.firstEntry().getValue().get(0);
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>       <strong class="jxr_keyword">boolean</strong> isOpen = isOpen(startOf(firstFile)) &amp;&amp; isOpen(candidateStripes.lastKey());
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>       <strong class="jxr_keyword">if</strong> (!isOpen) {
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>         LOG.warn(<span class="jxr_string">"The range of the loaded files does not cover full key space: from ["</span>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>             + Bytes.toString(startOf(firstFile)) + <span class="jxr_string">"], to ["</span>
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>             + Bytes.toString(candidateStripes.lastKey()) + <span class="jxr_string">"]"</span>);
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>         <strong class="jxr_keyword">if</strong> (!hasOverlaps) {
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>           ensureEdgeStripeMetadata(candidateStripes.firstEntry().getValue(), <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>           ensureEdgeStripeMetadata(candidateStripes.lastEntry().getValue(), false);
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>           LOG.warn(<span class="jxr_string">"Inconsistent files, everything goes to L0."</span>);
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>           <strong class="jxr_keyword">for</strong> (ArrayList&lt;StoreFile&gt; files : candidateStripes.values()) {
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>             <strong class="jxr_keyword">for</strong> (StoreFile sf : files) {
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>               insertFileIntoStripe(level0Files, sf);
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>               ensureLevel0Metadata(sf);
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>             }
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>           }
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>           candidateStripes.clear();
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>         }
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>       }
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>     }
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> 
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>     <em class="jxr_comment">// Copy the results into the fields.</em>
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>     State state = <strong class="jxr_keyword">new</strong> State();
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>     state.level0Files = ImmutableList.copyOf(level0Files);
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>     state.stripeFiles = <strong class="jxr_keyword">new</strong> ArrayList&lt;ImmutableList&lt;StoreFile&gt;&gt;(candidateStripes.size());
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>     state.stripeEndRows = <strong class="jxr_keyword">new</strong> byte[Math.max(0, candidateStripes.size() - 1)][];
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>     ArrayList&lt;StoreFile&gt; newAllFiles = <strong class="jxr_keyword">new</strong> ArrayList&lt;StoreFile&gt;(level0Files);
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>     <strong class="jxr_keyword">int</strong> i = candidateStripes.size() - 1;
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>     <strong class="jxr_keyword">for</strong> (Map.Entry&lt;byte[], ArrayList&lt;StoreFile&gt;&gt; entry : candidateStripes.entrySet()) {
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>       state.stripeFiles.add(ImmutableList.copyOf(entry.getValue()));
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>       newAllFiles.addAll(entry.getValue());
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>       <strong class="jxr_keyword">if</strong> (i &gt; 0) {
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>         state.stripeEndRows[state.stripeFiles.size() - 1] = entry.getKey();
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>       }
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>       --i;
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>     }
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>     state.allFilesCached = ImmutableList.copyOf(newAllFiles);
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>     <strong class="jxr_keyword">this</strong>.state = state;
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>     debugDumpState(<span class="jxr_string">"Files loaded"</span>);
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>   }
+<a class="jxr_linenumber" name="L457" href="#L457">457</a> 
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> ensureEdgeStripeMetadata(ArrayList&lt;StoreFile&gt; stripe, <strong class="jxr_keyword">boolean</strong> isFirst) {
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>     HashMap&lt;StoreFile, byte[]&gt; targetMap = isFirst ? fileStarts : fileEnds;
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>     <strong class="jxr_keyword">for</strong> (StoreFile sf : stripe) {
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>       targetMap.put(sf, OPEN_KEY);
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>     }
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>   }
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> 
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> ensureLevel0Metadata(StoreFile sf) {
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>     <strong class="jxr_keyword">if</strong> (!isInvalid(startOf(sf))) <strong class="jxr_keyword">this</strong>.fileStarts.put(sf, INVALID_KEY_IN_MAP);
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>     <strong class="jxr_keyword">if</strong> (!isInvalid(endOf(sf))) <strong class="jxr_keyword">this</strong>.fileEnds.put(sf, INVALID_KEY_IN_MAP);
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>   }
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> 
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> debugDumpState(String string) {
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>     <strong class="jxr_keyword">if</strong> (!LOG.isDebugEnabled()) <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>     StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>     sb.append(<span class="jxr_string">"\n"</span> + string + <span class="jxr_string">"; current stripe state is as such:"</span>);
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>     sb.append(<span class="jxr_string">"\n level 0 with "</span>)
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>         .append(state.level0Files.size())
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>         .append(
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>           <span class="jxr_string">" files: "</span>
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>               + TraditionalBinaryPrefix.<strong class="jxr_keyword">long</strong>2String(
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>                 StripeCompactionPolicy.getTotalFileSize(state.level0Files), <span class="jxr_string">""</span>, 1) + <span class="jxr_string">";"</span>);
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; state.stripeFiles.size(); ++i) {
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>       String endRow = (i == state.stripeEndRows.length)
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>           ? <span class="jxr_string">"(end)"</span> : <span class="jxr_string">"["</span> + Bytes.toString(state.stripeEndRows[i]) + <span class="jxr_string">"]"</span>;
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>       sb.append(<span class="jxr_string">"\n stripe ending in "</span>)
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>           .append(endRow)
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>           .append(<span class="jxr_string">" with "</span>)
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>           .append(state.stripeFiles.get(i).size())
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>           .append(
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>             <span class="jxr_string">" files: "</span>
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>                 + TraditionalBinaryPrefix.<strong class="jxr_keyword">long</strong>2String(
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>                   StripeCompactionPolicy.getTotalFileSize(state.stripeFiles.get(i)), <span class="jxr_string">""</span>, 1) + <span class="jxr_string">";"</span>);
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>     }
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>     sb.append(<span class="jxr_string">"\n"</span>).append(state.stripeFiles.size()).append(<span class="jxr_string">" stripes total."</span>);
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>     sb.append(<span class="jxr_string">"\n"</span>).append(getStorefileCount()).append(<span class="jxr_string">" files total."</span>);
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>     LOG.debug(sb.toString());
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>   }
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> 
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> <em class="jxr_javadoccomment">   * Checks whether the key indicates an open interval boundary (i.e. infinity).</em>
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> isOpen(byte[] key) {
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>     <strong class="jxr_keyword">return</strong> key != <strong class="jxr_keyword">null</strong> &amp;&amp; key.length == 0;
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>   }
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> <em class="jxr_javadoccomment">   * Checks whether the key is invalid (e.g. from an L0 file, or non-stripe-compacted files).</em>
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> isInvalid(byte[] key) {
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>     <strong class="jxr_keyword">return</strong> key == INVALID_KEY;
+<a class="jxr_linenumber" name="L509" href="#L509">509</a>   }
+<a class="jxr_linenumber" name="L510" href="#L510">510</a> 
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> <em class="jxr_javadoccomment">   * Compare two keys for equality.</em>
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> rowEquals(byte[] k1, byte[] k2) {
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>     <strong class="jxr_keyword">return</strong> kvComparator.matchingRows(k1, 0, k1.length, k2, 0, k2.length);
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>   }
+<a class="jxr_linenumber" name="L517" href="#L517">517</a> 
+<a class="jxr_linenumber" name="L518" href="#L518">518</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> <em class="jxr_javadoccomment">   * Compare two keys. Keys must not be open (isOpen(row) == false).</em>
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> nonOpenRowCompare(byte[] k1, byte[] k2) {
+<a class="jxr_linenumber" name="L522" href="#L522">522</a>     assert !isOpen(k1) &amp;&amp; !isOpen(k2);
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>     <strong class="jxr_keyword">return</strong> kvComparator.compareRows(k1, 0, k1.length, k2, 0, k2.length);
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>   }
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> 
+<a class="jxr_linenumber" name="L526" href="#L526">526</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> <em class="jxr_javadoccomment">   * Finds the stripe index by end row.</em>
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L529" href="#L529">529</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> findStripeIndexByEndRow(byte[] endRow) {
+<a class="jxr_linenumber" name="L530" href="#L530">530</a>     assert !isInvalid(endRow);
+<a class="jxr_linenumber" name="L531" href="#L531">531</a>     <strong class="jxr_keyword">if</strong> (isOpen(endRow)) <strong class="jxr_keyword">return</strong> state.stripeEndRows.length;
+<a class="jxr_linenumber" name="L532" href="#L532">532</a>     <strong class="jxr_keyword">return</strong> Arrays.binarySearch(state.stripeEndRows, endRow, Bytes.BYTES_COMPARATOR);
+<a class="jxr_linenumber" name="L533" href="#L533">533</a>   }
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> 
+<a class="jxr_linenumber" name="L535" href="#L535">535</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> <em class="jxr_javadoccomment">   * Finds the stripe index for the stripe containing a row provided externally for get/scan.</em>
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L538" href="#L538">538</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> findStripeForRow(byte[] row, <strong class="jxr_keyword">boolean</strong> isStart) {
+<a class="jxr_linenumber" name="L539" href="#L539">539</a>     <strong class="jxr_keyword">if</strong> (isStart &amp;&amp; row == HConstants.EMPTY_START_ROW) <strong class="jxr_keyword">return</strong> 0;
+<a class="jxr_linenumber" name="L540" href="#L540">540</a>     <strong class="jxr_keyword">if</strong> (!isStart &amp;&amp; row == HConstants.EMPTY_END_ROW) <strong class="jxr_keyword">return</strong> state.stripeFiles.size() - 1;
+<a class="jxr_linenumber" name="L541" href="#L541">541</a>     <em class="jxr_comment">// If there's an exact match below, a stripe ends at "row". Stripe right boundary is</em>
+<a class="jxr_linenumber" name="L542" href="#L542">542</a>     <em class="jxr_comment">// exclusive, so that means the row is in the next stripe; thus, we need to add one to index.</em>
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>     <em class="jxr_comment">// If there's no match, the return value of binarySearch is (-(insertion point) - 1), where</em>
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>     <em class="jxr_comment">// insertion point is the index of the next greater element, or list size if none. The</em>
+<a class="jxr_linenumber" name="L545" href="#L545">545</a>     <em class="jxr_comment">// insertion point happens to be exactly what we need, so we need to add one to the result.</em>
+<a class="jxr_linenumber" name="L546" href="#L546">546</a>     <strong class="jxr_keyword">return</strong> Math.abs(Arrays.binarySearch(state.stripeEndRows, row, Bytes.BYTES_COMPARATOR) + 1);
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>   }
+<a class="jxr_linenumber" name="L548" href="#L548">548</a> 
+<a class="jxr_linenumber" name="L549" href="#L549">549</a>   @Override
+<a class="jxr_linenumber" name="L550" href="#L550">550</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> byte[] getStartRow(<strong class="jxr_keyword">int</strong> stripeIndex) {
+<a class="jxr_linenumber" name="L551" href="#L551">551</a>     <strong class="jxr_keyword">return</strong> (stripeIndex == 0  ? OPEN_KEY : state.stripeEndRows[stripeIndex - 1]);
+<a class="jxr_linenumber" name="L552" href="#L552">552</a>   }
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> 
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>   @Override
+<a class="jxr_linenumber" name="L555" href="#L555">555</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> byte[] getEndRow(<strong class="jxr_keyword">int</strong> stripeIndex) {
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>     <strong class="jxr_keyword">return</strong> (stripeIndex == state.stripeEndRows.length
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>         ? OPEN_KEY : state.stripeEndRows[stripeIndex]);
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>   }
+<a class="jxr_linenumber" name="L559" href="#L559">559</a> 
+<a class="jxr_linenumber" name="L560" href="#L560">560</a> 
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>   <strong class="jxr_keyword">private</strong> byte[] startOf(StoreFile sf) {
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>     byte[] result = <strong class="jxr_keyword">this</strong>.fileStarts.get(sf);
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>     <strong class="jxr_keyword">return</strong> result == <strong class="jxr_keyword">null</strong> ? sf.getMetadataValue(STRIPE_START_KEY)
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>         : (result == INVALID_KEY_IN_MAP ? INVALID_KEY : result);
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>   }
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> 
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>   <strong class="jxr_keyword">private</strong> byte[] endOf(StoreFile sf) {
+<a class="jxr_linenumber" name="L568" href="#L568">568</a>     byte[] result = <strong class="jxr_keyword">this</strong>.fileEnds.get(sf);
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>     <strong class="jxr_keyword">return</strong> result == <strong class="jxr_keyword">null</strong> ? sf.getMetadataValue(STRIPE_END_KEY)
+<a class="jxr_linenumber" name="L570" href="#L570">570</a>         : (result == INVALID_KEY_IN_MAP ? INVALID_KEY : result);
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>   }
+<a class="jxr_linenumber" name="L572" href="#L572">572</a> 
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> <em class="jxr_javadoccomment">   * Inserts a file in the correct place (by seqnum) in a stripe copy.</em>
+<a class="jxr_linenumber" name="L575" href="#L575">575</a> <em class="jxr_javadoccomment">   * @param stripe Stripe copy to insert into.</em>
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> <em class="jxr_javadoccomment">   * @param sf File to insert.</em>
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L578" href="#L578">578</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> insertFileIntoStripe(ArrayList&lt;StoreFile&gt; stripe, StoreFile sf) {
+<a class="jxr_linenumber" name="L579" href="#L579">579</a>     <em class="jxr_comment">// The only operation for which sorting of the files matters is KeyBefore. Therefore,</em>
+<a class="jxr_linenumber" name="L580" href="#L580">580</a>     <em class="jxr_comment">// we will store the file in reverse order by seqNum from the outset.</em>
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> insertBefore = 0; ; ++insertBefore) {
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>       <strong class="jxr_keyword">if</strong> (insertBefore == stripe.size()
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>           || (StoreFile.Comparators.SEQ_ID.compare(sf, stripe.get(insertBefore)) &gt;= 0)) {
+<a class="jxr_linenumber" name="L584" href="#L584">584</a>         stripe.add(insertBefore, sf);
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L586" href="#L586">586</a>       }
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>     }
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>   }
+<a class="jxr_linenumber" name="L589" href="#L589">589</a> 
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L591" href="#L591">591</a> <em class="jxr_javadoccomment">   * An extension of ConcatenatedLists that has several peculiar properties.</em>
+<a class="jxr_linenumber" name="L592" href="#L592">592</a> <em class="jxr_javadoccomment">   * First, one can cut the tail of the logical list by removing last several sub-lists.</em>
+<a class="jxr_linenumber" name="L593" href="#L593">593</a> <em class="jxr_javadoccomment">   * Second, items can be removed thru iterator.</em>
+<a class="jxr_linenumber" name="L594" href="#L594">594</a> <em class="jxr_javadoccomment">   * Third, if the sub-lists are immutable, they are replaced with mutable copies when needed.</em>
+<a class="jxr_linenumber" name="L595" href="#L595">595</a> <em class="jxr_javadoccomment">   * On average KeyBefore operation will contain half the stripes as potential candidates,</em>
+<a class="jxr_linenumber" name="L596" href="#L596">596</a> <em class="jxr_javadoccomment">   * but will quickly cut down on them as it finds something in the more likely ones; thus,</em>
+<a class="jxr_linenumber" name="L597" href="#L597">597</a> <em class="jxr_javadoccomment">   * the above allow us to avoid unnecessary copying of a bunch of lists.</em>
+<a class="jxr_linenumber" name="L598" href="#L598">598</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> KeyBeforeConcatenatedLists <strong class="jxr_keyword">extends</strong> ConcatenatedLists&lt;StoreFile&gt; {
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>     @Override
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>     <strong class="jxr_keyword">public</strong> java.util.Iterator&lt;StoreFile&gt; iterator() {
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Iterator();
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>     }
+<a class="jxr_linenumber" name="L604" href="#L604">604</a> 
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> Iterator <strong class="jxr_keyword">extends</strong> ConcatenatedLists&lt;StoreFile&gt;.Iterator {
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>       <strong class="jxr_keyword">public</strong> ArrayList&lt;List&lt;StoreFile&gt;&gt; getComponents() {
+<a class="jxr_linenumber" name="L607" href="#L607">607</a>         <strong class="jxr_keyword">return</strong> components;
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>       }
+<a class="jxr_linenumber" name="L609" href="#L609">609</a> 
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> removeComponents(<strong class="jxr_keyword">int</strong> startIndex) {
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>         List&lt;List&lt;StoreFile&gt;&gt; subList = components.subList(startIndex, components.size());
+<a class="jxr_linenumber" name="L612" href="#L612">612</a>         <strong class="jxr_keyword">for</strong> (List&lt;StoreFile&gt; entry : subList) {
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>           size -= entry.size();
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>         }
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>         assert size &gt;= 0;
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>         subList.clear();
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>       }
+<a class="jxr_linenumber" name="L618" href="#L618">618</a> 
+<a class="jxr_linenumber" name="L619" href="#L619">619</a>       @Override
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> remove() {
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>         <strong class="jxr_keyword">if</strong> (!<strong class="jxr_keyword">this</strong>.nextWasCalled) {
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>           <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalStateException(<span class="jxr_string">"No element to remove"</span>);
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>         }
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>         <strong class="jxr_keyword">this</strong>.nextWasCalled = false;
+<a class="jxr_linenumber" name="L625" href="#L625">625</a>         List&lt;StoreFile&gt; src = components.get(currentComponent);
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>         <strong class="jxr_keyword">if</strong> (src instanceof ImmutableList&lt;?&gt;) {
+<a class="jxr_linenumber" name="L627" href="#L627">627</a>           src = <strong class="jxr_keyword">new</strong> ArrayList&lt;StoreFile&gt;(src);
+<a class="jxr_linenumber" name="L628" href="#L628">628</a>           components.set(currentComponent, src);
+<a class="jxr_linenumber" name="L629" href="#L629">629</a>         }
+<a class="jxr_linenumber" name="L630" href="#L630">630</a>         src.remove(indexWithinComponent);
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>         --size;
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>         --indexWithinComponent;
+<a class="jxr_linenumber" name="L633" href="#L633">633</a>         <strong class="jxr_keyword">if</strong> (src.isEmpty()) {
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>           components.remove(currentComponent); <em class="jxr_comment">// indexWithinComponent is already -1 here.</em>
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>         }
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>       }
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>     }
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>   }
+<a class="jxr_linenumber" name="L639" href="#L639">639</a> 
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L641" href="#L641">641</a> <em class="jxr_javadoccomment">   * Non-static helper class for merging compaction or flush results.</em>
+<a class="jxr_linenumber" name="L642" href="#L642">642</a> <em class="jxr_javadoccomment">   * Since we want to merge them atomically (more or less), it operates on lazy copies,</em>
+<a class="jxr_linenumber" name="L643" href="#L643">643</a> <em class="jxr_javadoccomment">   * then creates a new state object and puts it in place.</em>
+<a class="jxr_linenumber" name="L644" href="#L644">644</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L645" href="#L645">645</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">class</strong> CompactionOrFlushMergeCopy {
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>     <strong class="jxr_keyword">private</strong> ArrayList&lt;List&lt;StoreFile&gt;&gt; stripeFiles = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L647" href="#L647">647</a>     <strong class="jxr_keyword">private</strong> ArrayList&lt;StoreFile&gt; level0Files = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L648" href="#L648">648</a>     <strong class="jxr_keyword">private</strong> ArrayList&lt;byte[]&gt; stripeEndRows = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L649" href="#L649">649</a> 
+<a class="jxr_linenumber" name="L650" href="#L650">650</a>     <strong class="jxr_keyword">private</strong> Collection&lt;StoreFile&gt; compactedFiles = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L651" href="#L651">651</a>     <strong class="jxr_keyword">private</strong> Collection&lt;StoreFile&gt; results = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L652" href="#L652">652</a> 
+<a class="jxr_linenumber" name="L653" href="#L653">653</a>     <strong class="jxr_keyword">private</strong> List&lt;StoreFile&gt; l0Results = <strong class="jxr_keyword">new</strong> ArrayList&lt;StoreFile&gt;();
+<a class="jxr_linenumber" name="L654" href="#L654">654</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> isFlush;
+<a class="jxr_linenumber" name="L655" href="#L655">655</a> 
+<a class="jxr_linenumber" name="L656" href="#L656">656</a>     <strong class="jxr_keyword">public</strong> CompactionOrFlushMergeCopy(<strong class="jxr_keyword">boolean</strong> isFlush) {
+<a class="jxr_linenumber" name="L657" href="#L657">657</a>       <em class="jxr_comment">// Create a lazy mutable copy (other fields are so lazy they start out as nulls).</em>
+<a class="jxr_linenumber" name="L658" href="#L658">658</a>       <strong class="jxr_keyword">this</strong>.stripeFiles = <strong class="jxr_keyword">new</strong> ArrayList&lt;List&lt;StoreFile&gt;&gt;(
+<a class="jxr_linenumber" name="L659" href="#L659">659</a>           StripeStoreFileManager.<strong class="jxr_keyword">this</strong>.state.stripeFiles);
+<a class="jxr_linenumber" name="L660" href="#L660">660</a>       <strong class="jxr_keyword">this</strong>.isFlush = isFlush;
+<a class="jxr_linenumber" name="L661" href="#L661">661</a>     }
+<a class="jxr_linenumber" name="L662" href="#L662">662</a> 
+<a class="jxr_linenumber" name="L663" href="#L663">663</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> mergeResults(Collection&lt;StoreFile&gt; compactedFiles, Collection&lt;StoreFile&gt; results)
+<a class="jxr_linenumber" name="L664" href="#L664">664</a>         <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L665" href="#L665">665</a>       assert <strong class="jxr_keyword">this</strong>.compactedFiles == <strong class="jxr_keyword">null</strong> &amp;&amp; <strong class="jxr_keyword">this</strong>.results == <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L666" href="#L666">666</a>       <strong class="jxr_keyword">this</strong>.compactedFiles = compactedFiles;
+<a class="jxr_linenumber" name="L667" href="#L667">667</a>       <strong class="jxr_keyword">this</strong>.results = results;
+<a class="jxr_linenumber" name="L668" href="#L668">668</a>       <em class="jxr_comment">// Do logical processing.</em>
+<a class="jxr_linenumber" name="L669" href="#L669">669</a>       <strong class="jxr_keyword">if</strong> (!isFlush) removeCompactedFiles();
+<a class="jxr_linenumber" name="L670" href="#L670">670</a>       TreeMap&lt;byte[], StoreFile&gt; newStripes = processResults();
+<a class="jxr_linenumber" name="L671" href="#L671">671</a>       <strong class="jxr_keyword">if</strong> (newStripes != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L672" href="#L672">672</a>         processNewCandidateStripes(newStripes);
+<a class="jxr_linenumber" name="L673" href="#L673">673</a>       }
+<a class="jxr_linenumber" name="L674" href="#L674">674</a>       <em class="jxr_comment">// Create new state and update parent.</em>
+<a class="jxr_linenumber" name="L675" href="#L675">675</a>       State state = createNewState();
+<a class="jxr_linenumber" name="L676" href="#L676">676</a>       StripeStoreFileManager.<strong class="jxr_keyword">this</strong>.state = state;
+<a class="jxr_linenumber" name="L677" href="#L677">677</a>       updateMetadataMaps();
+<a class="jxr_linenumber" name="L678" href="#L678">678</a>     }
+<a class="jxr_linenumber" name="L679" href="#L679">679</a> 
+<a class="jxr_linenumber" name="L680" href="#L680">680</a>     <strong class="jxr_keyword">private</strong> State createNewState() {
+<a class="jxr_linenumber" name="L681" href="#L681">681</a>       State oldState = StripeStoreFileManager.<strong class="jxr_keyword">this</strong>.state;
+<a class="jxr_linenumber" name="L682" href="#L682">682</a>       <em class="jxr_comment">// Stripe count should be the same unless the end rows changed.</em>
+<a class="jxr_linenumber" name="L683" href="#L683">683</a>       assert oldState.stripeFiles.size() == <strong class="jxr_keyword">this</strong>.stripeFiles.size() || <strong class="jxr_keyword">this</strong>.stripeEndRows != <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L684" href="#L684">684</a>       State newState = <strong class="jxr_keyword">new</strong> State();
+<a class="jxr_linenumber" name="L685" href="#L685">685</a>       newState.level0Files = (<strong class="jxr_keyword">this</strong>.level0Files == <strong class="jxr_keyword">null</strong>) ? oldState.level0Files
+<a class="jxr_linenumber" name="L686" href="#L686">686</a>           : ImmutableList.copyOf(<strong class="jxr_keyword">this</strong>.level0Files);
+<a class="jxr_linenumber" name="L687" href="#L687">687</a>       newState.stripeEndRows = (<strong class="jxr_keyword">this</strong>.stripeEndRows == <strong class="jxr_keyword">null</strong>) ? oldState.stripeEndRows
+<a class="jxr_linenumber" name="L688" href="#L688">688</a>           : <strong class="jxr_keyword">this</strong>.stripeEndRows.toArray(<strong class="jxr_keyword">new</strong> byte[<strong class="jxr_keyword">this</strong>.stripeEndRows.size()][]);
+<a class="jxr_linenumber" name="L689" href="#L689">689</a>       newState.stripeFiles = <strong class="jxr_keyword">new</strong> ArrayList&lt;ImmutableList&lt;StoreFile&gt;&gt;(<strong class="jxr_keyword">this</strong>.stripeFiles.size());
+<a class="jxr_linenumber" name="L690" href="#L690">690</a>       <strong class="jxr_keyword">for</strong> (List&lt;StoreFile&gt; newStripe : <strong class="jxr_keyword">this</strong>.stripeFiles) {
+<a class="jxr_linenumber" name="L691" href="#L691">691</a>         newState.stripeFiles.add(newStripe instanceof ImmutableList&lt;?&gt;
+<a class="jxr_linenumber" name="L692" href="#L692">692</a>             ? (ImmutableList&lt;StoreFile&gt;)newStripe : ImmutableList.copyOf(newStripe));
+<a class="jxr_linenumber" name="L693" href="#L693">693</a>       }
+<a class="jxr_linenumber" name="L694" href="#L694">694</a> 
+<a class="jxr_linenumber" name="L695" href="#L695">695</a>       List&lt;StoreFile&gt; newAllFiles = <strong class="jxr_keyword">new</strong> ArrayList&lt;StoreFile&gt;(oldState.allFilesCached);
+<a class="jxr_linenumber" name="L696" href="#L696">696</a>       <strong class="jxr_keyword">if</strong> (!isFlush) newAllFiles.removeAll(compactedFiles);
+<a class="jxr_linenumber" name="L697" href="#L697">697</a>       newAllFiles.addAll(results);
+<a class="jxr_linenumber" name="L698" href="#L698">698</a>       newState.allFilesCached = ImmutableList.copyOf(newAllFiles);
+<a class="jxr_linenumber" name="L699" href="#L699">699</a>       <strong class="jxr_keyword">return</strong> newState;
+<a class="jxr_linenumber" name="L700" href="#L700">700</a>     }
+<a class="jxr_linenumber" name="L701" href="#L701">701</a> 
+<a class="jxr_linenumber" name="L702" href="#L702">702</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> updateMetadataMaps() {
+<a class="jxr_linenumber" name="L703" href="#L703">703</a>       StripeStoreFileManager parent = StripeStoreFileManager.<strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L704" href="#L704">704</a>       <strong class="jxr_keyword">if</strong> (!isFlush) {
+<a class="jxr_linenumber" name="L705" href="#L705">705</a>         <strong class="jxr_keyword">for</strong> (StoreFile sf : <strong class="jxr_keyword">this</strong>.compactedFiles) {
+<a class="jxr_linenumber" name="L706" href="#L706">706</a>           parent.fileStarts.remove(sf);
+<a class="jxr_linenumber" name="L707" href="#L707">707</a>           parent.fileEnds.remove(sf);
+<a class="jxr_linenumber" name="L708" href="#L708">708</a>         }
+<a class="jxr_linenumber" name="L709" href="#L709">709</a>       }
+<a class="jxr_linenumber" name="L710" href="#L710">710</a>       <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.l0Results != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L711" href="#L711">711</a>         <strong class="jxr_keyword">for</strong> (StoreFile sf : <strong class="jxr_keyword">this</strong>.l0Results) {
+<a class="jxr_linenumber" name="L712" href="#L712">712</a>           parent.ensureLevel0Metadata(sf);
+<a class="jxr_linenumber" name="L713" href="#L713">713</a>         }
+<a class="jxr_linenumber" name="L714" href="#L714">714</a>       }
+<a class="jxr_linenumber" name="L715" href="#L715">715</a>     }
+<a class="jxr_linenumber" name="L716" href="#L716">716</a> 
+<a class="jxr_linenumber" name="L717" href="#L717">717</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L718" href="#L718">718</a> <em class="jxr_javadoccomment">     * @param index Index of the stripe we need.</em>
+<a class="jxr_linenumber" name="L719" href="#L719">719</a> <em class="jxr_javadoccomment">     * @return A lazy stripe copy from current stripes.</em>
+<a class="jxr_linenumber" name="L720" href="#L720">720</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L721" href="#L721">721</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ArrayList&lt;StoreFile&gt; getStripeCopy(<strong class="jxr_keyword">int</strong> index) {
+<a class="jxr_linenumber" name="L722" href="#L722">722</a>       List&lt;StoreFile&gt; stripeCopy = <strong class="jxr_keyword">this</strong>.stripeFiles.get(index);
+<a class="jxr_linenumber" name="L723" href="#L723">723</a>       ArrayList&lt;StoreFile&gt; result = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L724" href="#L724">724</a>       <strong class="jxr_keyword">if</strong> (stripeCopy instanceof ImmutableList&lt;?&gt;) {
+<a class="jxr_linenumber" name="L725" href="#L725">725</a>         result = <strong class="jxr_keyword">new</strong> ArrayList&lt;StoreFile&gt;(stripeCopy);
+<a class="jxr_linenumber" name="L726" href="#L726">726</a>         <strong class="jxr_keyword">this</strong>.stripeFiles.set(index, result);
+<a class="jxr_linenumber" name="L727" href="#L727">727</a>       } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L728" href="#L728">728</a>         result = (ArrayList&lt;StoreFile&gt;)stripeCopy;
+<a class="jxr_linenumber" name="L729" href="#L729">729</a>       }
+<a class="jxr_linenumber" name="L730" href="#L730">730</a>       <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L731" href="#L731">731</a>     }
+<a class="jxr_linenumber" name="L732" href="#L732">732</a> 
+<a class="jxr_linenumber" name="L733" href="#L733">733</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L734" href="#L734">734</a> <em class="jxr_javadoccomment">     * @return A lazy L0 copy from current state.</em>
+<a class="jxr_linenumber" name="L735" href="#L735">735</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L736" href="#L736">736</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ArrayList&lt;StoreFile&gt; getLevel0Copy() {
+<a class="jxr_linenumber" name="L737" href="#L737">737</a>       <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.level0Files == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L738" href="#L738">738</a>         <strong class="jxr_keyword">this</strong>.level0Files = <strong class="jxr_keyword">new</strong> ArrayList&lt;StoreFile&gt;(StripeStoreFileManager.<strong class="jxr_keyword">this</strong>.state.level0Files);
+<a class="jxr_linenumber" name="L739" href="#L739">739</a>       }
+<a class="jxr_linenumber" name="L740" href="#L740">740</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>.level0Files;
+<a class="jxr_linenumber" name="L741" href="#L741">741</a>     }
+<a class="jxr_linenumber" name="L742" href="#L742">742</a> 
+<a class="jxr_linenumber" name="L743" href="#L743">743</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L744" href="#L744">744</a> <em class="jxr_javadoccomment">     * Process new files, and add them either to the structure of existing stripes,</em>
+<a class="jxr_linenumber" name="L745" href="#L745">745</a> <em class="jxr_javadoccomment">     * or to the list of new candidate stripes.</em>
+<a class="jxr_linenumber" name="L746" href="#L746">746</a> <em class="jxr_javadoccomment">     * @return New candidate stripes.</em>
+<a class="jxr_linenumber" name="L747" href="#L747">747</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L748" href="#L748">748</a>     <strong class="jxr_keyword">private</strong> TreeMap&lt;byte[], StoreFile&gt; processResults() <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L749" href="#L749">749</a>       TreeMap&lt;byte[], StoreFile&gt; newStripes = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L750" href="#L750">750</a>       <strong class="jxr_keyword">for</strong> (StoreFile sf : <strong class="jxr_keyword">this</strong>.results) {
+<a class="jxr_linenumber" name="L751" href="#L751">751</a>         byte[] startRow = startOf(sf), endRow = endOf(sf);
+<a class="jxr_linenumber" name="L752" href="#L752">752</a>         <strong class="jxr_keyword">if</strong> (isInvalid(endRow) || isInvalid(startRow)) {
+<a class="jxr_linenumber" name="L753" href="#L753">753</a>           <strong class="jxr_keyword">if</strong> (!isFlush) {
+<a class="jxr_linenumber" name="L754" href="#L754">754</a>             LOG.warn(<span class="jxr_string">"The newly compacted file doesn't have stripes set: "</span> + sf.getPath());
+<a class="jxr_linenumber" name="L755" href="#L755">755</a>           }
+<a class="jxr_linenumber" name="L756" href="#L756">756</a>           insertFileIntoStripe(getLevel0Copy(), sf);
+<a class="jxr_linenumber" name="L757" href="#L757">757</a>           <strong class="jxr_keyword">this</strong>.l0Results.add(sf);
+<a class="jxr_linenumber" name="L758" href="#L758">758</a>           <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L759" href="#L759">759</a>         }
+<a class="jxr_linenumber" name="L760" href="#L760">760</a>         <strong class="jxr_keyword">if</strong> (!<strong class="jxr_keyword">this</strong>.stripeFiles.isEmpty()) {
+<a class="jxr_linenumber" name="L761" href="#L761">761</a>           <strong class="jxr_keyword">int</strong> stripeIndex = findStripeIndexByEndRow(endRow);
+<a class="jxr_linenumber" name="L762" href="#L762">762</a>           <strong class="jxr_keyword">if</strong> ((stripeIndex &gt;= 0) &amp;&amp; rowEquals(getStartRow(stripeIndex), startRow)) {
+<a class="jxr_linenumber" name="L763" href="#L763">763</a>             <em class="jxr_comment">// Simple/common case - add file to an existing stripe.</em>
+<a class="jxr_linenumber" name="L764" href="#L764">764</a>             insertFileIntoStripe(getStripeCopy(stripeIndex), sf);
+<a class="jxr_linenumber" name="L765" href="#L765">765</a>             <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L766" href="#L766">766</a>           }
+<a class="jxr_linenumber" name="L767" href="#L767">767</a>         }
+<a class="jxr_linenumber" name="L768" href="#L768">768</a> 
+<a class="jxr_linenumber" name="L769" href="#L769">769</a>         <em class="jxr_comment">// Make a new candidate stripe.</em>
+<a class="jxr_linenumber" name="L770" href="#L770">770</a>         <strong class="jxr_keyword">if</strong> (newStripes == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L771" href="#L771">771</a>           newStripes = <strong class="jxr_keyword">new</strong> TreeMap&lt;byte[], StoreFile&gt;(MAP_COMPARATOR);
+<a class="jxr_linenumber" name="L772" href="#L772">772</a>         }
+<a class="jxr_linenumber" name="L773" href="#L773">773</a>         StoreFile oldSf = newStripes.put(endRow, sf);
+<a class="jxr_linenumber" name="L774" href="#L774">774</a>         <strong class="jxr_keyword">if</strong> (oldSf != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L775" href="#L775">775</a>           <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IOException(<span class="jxr_string">"Compactor has produced multiple files for the stripe ending in ["</span>
+<a class="jxr_linenumber" name="L776" href="#L776">776</a>               + Bytes.toString(endRow) + <span class="jxr_string">"], found "</span> + sf.getPath() + <span class="jxr_string">" and "</span> + oldSf.getPath());
+<a class="jxr_linenumber" name="L777" href="#L777">777</a>         }
+<a class="jxr_linenumber" name="L778" href="#L778">778</a>       }
+<a class="jxr_linenumber" name="L779" href="#L779">779</a>       <strong class="jxr_keyword">return</strong> newStripes;
+<a class="jxr_linenumber" name="L780" href="#L780">780</a>     }
+<a class="jxr_linenumber" name="L781" href="#L781">781</a> 
+<a class="jxr_linenumber" name="L782" href="#L782">782</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L783" href="#L783">783</a> <em class="jxr_javadoccomment">     * Remove compacted files.</em>
+<a class="jxr_linenumber" name="L784" href="#L784">784</a> <em class="jxr_javadoccomment">     * @param compactedFiles Compacted files.</em>
+<a class="jxr_linenumber" name="L785" href="#L785">785</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L786" href="#L786">786</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> removeCompactedFiles() <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>       <strong class="jxr_keyword">for</strong> (StoreFile oldFile : <strong class="jxr_keyword">this</strong>.compactedFiles) {
+<a class="jxr_linenumber" name="L788" href="#L788">788</a>         byte[] oldEndRow = endOf(oldFile);
+<a class="jxr_linenumber" name="L789" href="#L789">789</a>         List&lt;StoreFile&gt; source = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>         <strong class="jxr_keyword">if</strong> (isInvalid(oldEndRow)) {
+<a class="jxr_linenumber" name="L791" href="#L791">791</a>           source = getLevel0Copy();
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L793" href="#L793">793</a>           <strong class="jxr_keyword">int</strong> stripeIndex = findStripeIndexByEndRow(oldEndRow);
+<a class="jxr_linenumber" name="L794" href="#L794">794</a>           <strong class="jxr_keyword">if</strong> (stripeIndex &lt; 0) {
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IOException(<span class="jxr_string">"An allegedly compacted file ["</span> + oldFile + <span class="jxr_string">"] does not belong"</span>
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>                 + <span class="jxr_string">" to a known stripe (end row - ["</span> + Bytes.toString(oldEndRow) + <span class="jxr_string">"])"</span>);
+<a class="jxr_linenumber" name="L797" href="#L797">797</a>           }
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>           source = getStripeCopy(stripeIndex);
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>         }
+<a class="jxr_linenumber" name="L800" href="#L800">800</a>         <strong class="jxr_keyword">if</strong> (!source.remove(oldFile)) {
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>           <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IOException(<span class="jxr_string">"An allegedly compacted file ["</span> + oldFile + <span class="jxr_string">"] was not found"</span>);
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>         }
+<a class="jxr_linenumber" name="L803" href="#L803">803</a>       }
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>     }
+<a class="jxr_linenumber" name="L805" href="#L805">805</a> 
+<a class="jxr_linenumber" name="L806" href="#L806">806</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L807" href="#L807">807</a> <em class="jxr_javadoccomment">     * See {@link #addCompactionResults(Collection, Collection)} - updates the stripe list with</em>
+<a class="jxr_linenumber" name="L808" href="#L808">808</a> <em class="jxr_javadoccomment">     * new candidate stripes/removes old stripes; produces new set of stripe end rows.</em>
+<a class="jxr_linenumber" name="L809" href="#L809">809</a> <em class="jxr_javadoccomment">     * @param newStripes  New stripes - files by end row.</em>
+<a class="jxr_linenumber" name="L810" href="#L810">810</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L811" href="#L811">811</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> processNewCandidateStripes(
+<a class="jxr_linenumber" name="L812" href="#L812">812</a>         TreeMap&lt;byte[], StoreFile&gt; newStripes) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L813" href="#L813">813</a>       <em class="jxr_comment">// Validate that the removed and added aggregate ranges still make for a full key space.</em>
+<a class="jxr_linenumber" name="L814" href="#L814">814</a>       <strong class="jxr_keyword">boolean</strong> hasStripes = !<strong class="jxr_keyword">this</strong>.stripeFiles.isEmpty();
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>       <strong class="jxr_keyword">this</strong>.stripeEndRows = <strong class="jxr_keyword">new</strong> ArrayList&lt;byte[]&gt;(
+<a class="jxr_linenumber" name="L816" href="#L816">816</a>           Arrays.asList(StripeStoreFileManager.<strong class="jxr_keyword">this</strong>.state.stripeEndRows));
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>       <strong class="jxr_keyword">int</strong> removeFrom = 0;
+<a class="jxr_linenumber" name="L818" href="#L818">818</a>       byte[] firstStartRow = startOf(newStripes.firstEntry().getValue());
+<a class="jxr_linenumber" name="L819" href="#L819">819</a>       byte[] lastEndRow = newStripes.lastKey();
+<a class="jxr_linenumber" name="L820" href="#L820">820</a>       <strong class="jxr_keyword">if</strong> (!hasStripes &amp;&amp; (!isOpen(firstStartRow) || !isOpen(lastEndRow))) {
+<a class="jxr_linenumber" name="L821" href="#L821">821</a>         <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IOException(<span class="jxr_string">"Newly created stripes do not cover the entire key space."</span>);
+<a class="jxr_linenumber" name="L822" href="#L822">822</a>       }
+<a class="jxr_linenumber" name="L823" href="#L823">823</a> 
+<a class="jxr_linenumber" name="L824" href="#L824">824</a>       <strong class="jxr_keyword">boolean</strong> canAddNewStripes = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L825" href="#L825">825</a>       Collection&lt;StoreFile&gt; filesForL0 = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L826" href="#L826">826</a>       <strong class="jxr_keyword">if</strong> (hasStripes) {
+<a class="jxr_linenumber" name="L827" href="#L827">827</a>         <em class="jxr_comment">// Determine which stripes will need to be removed because they conflict with new stripes.</em>
+<a class="jxr_linenumber" name="L828" href="#L828">828</a>         <em class="jxr_comment">// The new boundaries should match old stripe boundaries, so we should get exact matches.</em>
+<a class="jxr_linenumber" name="L829" href="#L829">829</a>         <strong class="jxr_keyword">if</strong> (isOpen(firstStartRow)) {
+<a class="jxr_linenumber" name="L830" href="#L830">830</a>           removeFrom = 0;
+<a class="jxr_linenumber" name="L831" href="#L831">831</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L832" href="#L832">832</a>           removeFrom = findStripeIndexByEndRow(firstStartRow);
+<a class="jxr_linenumber" name="L833" href="#L833">833</a>           <strong class="jxr_keyword">if</strong> (removeFrom &lt; 0) <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IOException(<span class="jxr_string">"Compaction is trying to add a bad range."</span>);
+<a class="jxr_linenumber" name="L834" href="#L834">834</a>           ++removeFrom;
+<a class="jxr_linenumber" name="L835" href="#L835">835</a>         }
+<a class="jxr_linenumber" name="L836" href="#L836">836</a>         <strong class="jxr_keyword">int</strong> removeTo = findStripeIndexByEndRow(lastEndRow);
+<a class="jxr_linenumber" name="L837" href="#L837">837</a>         <strong class="jxr_keyword">if</strong> (removeTo &lt; 0) <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IOException(<span class="jxr_string">"Compaction is trying to add a bad range."</span>);
+<a class="jxr_linenumber" name="L838" href="#L838">838</a>         <em class="jxr_comment">// See if there are files in the stripes we are trying to replace.</em>
+<a class="jxr_linenumber" name="L839" href="#L839">839</a>         ArrayList&lt;StoreFile&gt; conflictingFiles = <strong class="jxr_keyword">new</strong> ArrayList&lt;StoreFile&gt;();
+<a class="jxr_linenumber" name="L840" href="#L840">840</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> removeIndex = removeTo; removeIndex &gt;= removeFrom; --removeIndex) {
+<a class="jxr_linenumber" name="L841" href="#L841">841</a>           conflictingFiles.addAll(<strong class="jxr_keyword">this</strong>.stripeFiles.get(removeIndex));
+<a class="jxr_linenumber" name="L842" href="#L842">842</a>         }
+<a class="jxr_linenumber" name="L843" href="#L843">843</a>         <strong class="jxr_keyword">if</strong> (!conflictingFiles.isEmpty()) {
+<a class="jxr_linenumber" name="L844" href="#L844">844</a>           <em class="jxr_comment">// This can be caused by two things - concurrent flush into stripes, or a bug.</em>
+<a class="jxr_linenumber" name="L845" href="#L845">845</a>           <em class="jxr_comment">// Unfortunately, we cannot tell them apart without looking at timing or something</em>
+<a class="jxr_linenumber" name="L846" href="#L846">846</a>           <em class="jxr_comment">// like that. We will assume we are dealing with a flush and dump it into L0.</em>
+<a class="jxr_linenumber" name="L847" href="#L847">847</a>           <strong class="jxr_keyword">if</strong> (isFlush) {
+<a class="jxr_linenumber" name="L848" href="#L848">848</a>             <strong class="jxr_keyword">long</strong> newSize = StripeCompactionPolicy.getTotalFileSize(newStripes.values());
+<a class="jxr_linenumber" name="L849" href="#L849">849</a>             LOG.warn(<span class="jxr_string">"Stripes were created by a flush, but results of size "</span> + newSize
+<a class="jxr_linenumber" name="L850" href="#L850">850</a>                 + <span class="jxr_string">" cannot be added because the stripes have changed"</span>);
+<a class="jxr_linenumber" name="L851" href="#L851">851</a>             canAddNewStripes = false;
+<a class="jxr_linenumber" name="L852" href="#L852">852</a>             filesForL0 = newStripes.values();
+<a class="jxr_linenumber" name="L853" href="#L853">853</a>           } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L854" href="#L854">854</a>             <strong class="jxr_keyword">long</strong> oldSize = StripeCompactionPolicy.getTotalFileSize(conflictingFiles);
+<a class="jxr_linenumber" name="L855" href="#L855">855</a>             LOG.info(conflictingFiles.size() + <span class="jxr_string">" conflicting files (likely created by a flush) "</span>
+<a class="jxr_linenumber" name="L856" href="#L856">856</a>                 + <span class="jxr_string">" of size "</span> + oldSize + <span class="jxr_string">" are moved to L0 due to concurrent stripe change"</span>);
+<a class="jxr_linenumber" name="L857" href="#L857">857</a>             filesForL0 = conflictingFiles;
+<a class="jxr_linenumber" name="L858" href="#L858">858</a>           }
+<a class="jxr_linenumber" name="L859" href="#L859">859</a>           <strong class="jxr_keyword">if</strong> (filesForL0 != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L860" href="#L860">860</a>             <strong class="jxr_keyword">for</strong> (StoreFile sf : filesForL0) {
+<a class="jxr_linenumber" name="L861" href="#L861">861</a>               insertFileIntoStripe(getLevel0Copy(), sf);
+<a class="jxr_linenumber" name="L862" href="#L862">862</a>             }
+<a class="jxr_linenumber" name="L863" href="#L863">863</a>             l0Results.addAll(filesForL0);
+<a class="jxr_linenumber" name="L864" href="#L864">864</a>           }
+<a class="jxr_linenumber" name="L865" href="#L865">865</a>         }
+<a class="jxr_linenumber" name="L866" href="#L866">866</a> 
+<a class="jxr_linenumber" name="L867" href="#L867">867</a>         <strong class="jxr_keyword">if</strong> (canAddNewStripes) {
+<a class="jxr_linenumber" name="L868" href="#L868">868</a>           <em class="jxr_comment">// Remove old empty stripes.</em>
+<a class="jxr_linenumber" name="L869" href="#L869">869</a>           <strong class="jxr_keyword">int</strong> originalCount = <strong class="jxr_keyword">this</strong>.stripeFiles.size();
+<a class="jxr_linenumber" name="L870" href="#L870">870</a>           <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> removeIndex = removeTo; removeIndex &gt;= removeFrom; --removeIndex) {
+<a class="jxr_linenumber" name="L871" href="#L871">871</a>             <strong class="jxr_keyword">if</strong> (removeIndex != originalCount - 1) {
+<a class="jxr_linenumber" name="L872" href="#L872">872</a>               <strong class="jxr_keyword">this</strong>.stripeEndRows.remove(removeIndex);
+<a class="jxr_linenumber" name="L873" href="#L873">873</a>             }
+<a class="jxr_linenumber" name="L874" href="#L874">874</a>             <strong class="jxr_keyword">this</strong>.stripeFiles.remove(removeIndex);
+<a class="jxr_linenumber" name="L875" href="#L875">875</a>           }
+<a class="jxr_linenumber" name="L876" href="#L876">876</a>         }
+<a class="jxr_linenumber" name="L877" href="#L877">877</a>       }
+<a class="jxr_linenumber" name="L878" href="#L878">878</a> 
+<a class="jxr_linenumber" name="L879" href="#L879">879</a>       <strong class="jxr_keyword">if</strong> (!canAddNewStripes) <strong class="jxr_keyword">return</strong>; <em class="jxr_comment">// Files were already put into L0.</em>
+<a class="jxr_linenumber" name="L880" href="#L880">880</a> 
+<a class="jxr_linenumber" name="L881" href="#L881">881</a>       <em class="jxr_comment">// Now, insert new stripes. The total ranges match, so we can insert where we removed.</em>
+<a class="jxr_linenumber" name="L882" href="#L882">882</a>       byte[] previousEndRow = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L883" href="#L883">883</a>       <strong class="jxr_keyword">int</strong> insertAt = removeFrom;
+<a class="jxr_linenumber" name="L884" href="#L884">884</a>       <strong class="jxr_keyword">for</strong> (Map.Entry&lt;byte[], StoreFile&gt; newStripe : newStripes.entrySet()) {
+<a class="jxr_linenumber" name="L885" href="#L885">885</a>         <strong class="jxr_keyword">if</strong> (previousEndRow != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L886" href="#L886">886</a>           <em class="jxr_comment">// Validate that the ranges are contiguous.</em>
+<a class="jxr_linenumber" name="L887" href="#L887">887</a>           assert !isOpen(previousEndRow);
+<a class="jxr_linenumber" name="L888" href="#L888">888</a>           byte[] startRow = startOf(newStripe.getValue());
+<a class="jxr_linenumber" name="L889" href="#L889">889</a>           <strong class="jxr_keyword">if</strong> (!rowEquals(previousEndRow, startRow)) {
+<a class="jxr_linenumber" name="L890" href="#L890">890</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IOException(<span class="jxr_string">"The new stripes produced by "</span>
+<a class="jxr_linenumber" name="L891" href="#L891">891</a>                 + (isFlush ? <span class="jxr_string">"flush"</span> : <span class="jxr_string">"compaction"</span>) + <span class="jxr_string">" are not contiguous"</span>);
+<a class="jxr_linenumber" name="L892" href="#L892">892</a>           }
+<a class="jxr_linenumber" name="L893" href="#L893">893</a>         }
+<a class="jxr_linenumber" name="L894" href="#L894">894</a>         <em class="jxr_comment">// Add the new stripe.</em>
+<a class="jxr_linenumber" name="L895" href="#L895">895</a>         ArrayList&lt;StoreFile&gt; tmp = <strong class="jxr_keyword">new</strong> ArrayList&lt;StoreFile&gt;();
+<a class="jxr_linenumber" name="L896" href="#L896">896</a>         tmp.add(newStripe.getValue());
+<a class="jxr_linenumber" name="L897" href="#L897">897</a>         stripeFiles.add(insertAt, tmp);
+<a class="jxr_linenumber" name="L898" href="#L898">898</a>         previousEndRow = newStripe.getKey();
+<a class="jxr_linenumber" name="L899" href="#L899">899</a>         <strong class="jxr_keyword">if</strong> (!isOpen(previousEndRow)) {
+<a class="jxr_linenumber" name="L900" href="#L900">900</a>           stripeEndRows.add(insertAt, previousEndRow);
+<a class="jxr_linenumber" name="L901" href="#L901">901</a>         }
+<a class="jxr_linenumber" name="L902" href="#L902">902</a>         ++insertAt;
+<a class="jxr_linenumber" name="L903" href="#L903">903</a>       }
+<a class="jxr_linenumber" name="L904" href="#L904">904</a>     }
+<a class="jxr_linenumber" name="L905" href="#L905">905</a>   }
+<a class="jxr_linenumber" name="L906" href="#L906">906</a> 
+<a class="jxr_linenumber" name="L907" href="#L907">907</a>   @Override
+<a class="jxr_linenumber" name="L908" href="#L908">908</a>   <strong class="jxr_keyword">public</strong> List&lt;StoreFile&gt; getLevel0Files() {
+<a class="jxr_linenumber" name="L909" href="#L909">909</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>.state.level0Files;
+<a class="jxr_linenumber" name="L910" href="#L910">910</a>   }
+<a class="jxr_linenumber" name="L911" href="#L911">911</a> 
+<a class="jxr_linenumber" name="L912" href="#L912">912</a>   @Override
+<a class="jxr_linenumber" name="L913" href="#L913">913</a>   <strong class="jxr_keyword">public</strong> List&lt;byte[]&gt; getStripeBoundaries() {
+<a class="jxr_linenumber" name="L914" href="#L914">914</a>     <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.state.stripeFiles.isEmpty()) <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> ArrayList&lt;byte[]&gt;();
+<a class="jxr_linenumber" name="L915" href="#L915">915</a>     ArrayList&lt;byte[]&gt; result = <strong class="jxr_keyword">new</strong> ArrayList&lt;byte[]&gt;(<strong class="jxr_keyword">this</strong>.state.stripeEndRows.length + 2);
+<a class="jxr_linenumber" name="L916" href="#L916">916</a>     result.add(OPEN_KEY);
+<a class="jxr_linenumber" name="L917" href="#L917">917</a>     Collections.addAll(result, <strong class="jxr_keyword">this</strong>.state.stripeEndRows);
+<a class="jxr_linenumber" name="L918" href="#L918">918</a>     result.add(OPEN_KEY);
+<a class="jxr_linenumber" name="L919" href="#L919">919</a>     <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L920" href="#L920">920</a>   }
+<a class="jxr_linenumber" name="L921" href="#L921">921</a> 
+<a class="jxr_linenumber" name="L922" href="#L922">922</a>   @Override
+<a class="jxr_linenumber" name="L923" href="#L923">923</a>   <strong class="jxr_keyword">public</strong> ArrayList&lt;ImmutableList&lt;StoreFile&gt;&gt; getStripes() {
+<a class="jxr_linenumber" name="L924" href="#L924">924</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>.state.stripeFiles;
+<a class="jxr_linenumber" name="L925" href="#L925">925</a>   }
+<a class="jxr_linenumber" name="L926" href="#L926">926</a> 
+<a class="jxr_linenumber" name="L927" href="#L927">927</a>   @Override
+<a class="jxr_linenumber" name="L928" href="#L928">928</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> getStripeCount() {
+<a class="jxr_linenumber" name="L929" href="#L929">929</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>.state.stripeFiles.size();
+<a class="jxr_linenumber" name="L930" href="#L930">930</a>   }
+<a class="jxr_linenumber" name="L931" href="#L931">931</a> 
+<a class="jxr_linenumber" name="L932" href="#L932">932</a>   @Override
+<a class="jxr_linenumber" name="L933" href="#L933">933</a>   <strong class="jxr_keyword">public</strong> Collection&lt;StoreFile&gt; getUnneededFiles(<strong class="jxr_keyword">long</strong> maxTs, List&lt;StoreFile&gt; filesCompacting) {
+<a class="jxr_linenumber" name="L934" href="#L934">934</a>     <em class="jxr_comment">// 1) We can never get rid of the last file which has the maximum seqid in a stripe.</em>
+<a class="jxr_linenumber" name="L935" href="#L935">935</a>     <em class="jxr_comment">// 2) Files that are not the latest can't become one due to (1), so the rest are fair game.</em>
+<a class="jxr_linenumber" name="L936" href="#L936">936</a>     State state = <strong class="jxr_keyword">this</strong>.state;
+<a class="jxr_linenumber" name="L937" href="#L937">937</a>     Collection&lt;StoreFile&gt; expiredStoreFiles = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L938" href="#L938">938</a>     <strong class="jxr_keyword">for</strong> (ImmutableList&lt;StoreFile&gt; stripe : state.stripeFiles) {
+<a class="jxr_linenumber" name="L939" href="#L939">939</a>       expiredStoreFiles = findExpiredFiles(stripe, maxTs, filesCompacting, expiredStoreFiles);
+<a class="jxr_linenumber" name="L940" href="#L940">940</a>     }
+<a class="jxr_linenumber" name="L941" href="#L941">941</a>     <strong class="jxr_keyword">return</strong> findExpiredFiles(state.level0Files, maxTs, filesCompacting, expiredStoreFiles);
+<a class="jxr_linenumber" name="L942" href="#L942">942</a>   }
+<a class="jxr_linenumber" name="L943" href="#L943">943</a> 
+<a class="jxr_linenumber" name="L944" href="#L944">944</a>   <strong class="jxr_keyword">private</strong> Collection&lt;StoreFile&gt; findExpiredFiles(ImmutableList&lt;StoreFile&gt; stripe, <strong class="jxr_keyword">long</strong> maxTs,
+<a class="jxr_linenumber" name="L945" href="#L945">945</a>       List&lt;StoreFile&gt; filesCompacting, Collection&lt;StoreFile&gt; expiredStoreFiles) {
+<a class="jxr_linenumber" name="L946" href="#L946">946</a>     <em class="jxr_comment">// Order by seqnum is reversed.</em>
+<a class="jxr_linenumber" name="L947" href="#L947">947</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 1; i &lt; stripe.size(); ++i) {
+<a class="jxr_linenumber" name="L948" href="#L948">948</a>       StoreFile sf = stripe.get(i);
+<a class="jxr_linenumber" name="L949" href="#L949">949</a>       <strong class="jxr_keyword">long</strong> fileTs = sf.getReader().getMaxTimestamp();
+<a class="jxr_linenumber" name="L950" href="#L950">950</a>       <strong class="jxr_keyword">if</strong> (fileTs &lt; maxTs &amp;&amp; !filesCompacting.contains(sf)) {
+<a class="jxr_linenumber" name="L951" href="#L951">951</a>         LOG.info(<span class="jxr_string">"Found an expired store file: "</span> + sf.getPath()
+<a class="jxr_linenumber" name="L952" href="#L952">952</a>             + <span class="jxr_string">" whose maxTimeStamp is "</span> + fileTs + <span class="jxr_string">", which is below "</span> + maxTs);
+<a class="jxr_linenumber" name="L953" href="#L953">953</a>         <strong class="jxr_keyword">if</strong> (expiredStoreFiles == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L954" href="#L954">954</a>           expiredStoreFiles = <strong class="jxr_keyword">new</strong> ArrayList&lt;StoreFile&gt;();
+<a class="jxr_linenumber" name="L955" href="#L955">955</a>         }
+<a class="jxr_linenumber" name="L956" href="#L956">956</a>         expiredStoreFiles.add(sf);
+<a class="jxr_linenumber" name="L957" href="#L957">957</a>       }
+<a class="jxr_linenumber" name="L958" href="#L958">958</a>     }
+<a class="jxr_linenumber" name="L959" href="#L959">959</a>     <strong class="jxr_keyword">return</strong> expiredStoreFiles;
+<a class="jxr_linenumber" name="L960" href="#L960">960</a>   }
+<a class="jxr_linenumber" name="L961" href="#L961">961</a> 
+<a class="jxr_linenumber" name="L962" href="#L962">962</a>   @Override
+<a class="jxr_linenumber" name="L963" href="#L963">963</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">double</strong> getCompactionPressure() {
+<a class="jxr_linenumber" name="L964" href="#L964">964</a>     State stateLocal = <strong class="jxr_keyword">this</strong>.state;
+<a class="jxr_linenumber" name="L965" href="#L965">965</a>     <strong class="jxr_keyword">if</strong> (stateLocal.allFilesCached.size() &gt; blockingFileCount) {
+<a class="jxr_linenumber" name="L966" href="#L966">966</a>       <em class="jxr_comment">// just a hit to tell others that we have reached the blocking file count.</em>
+<a class="jxr_linenumber" name="L967" href="#L967">967</a>       <strong class="jxr_keyword">return</strong> 2.0;
+<a class="jxr_linenumber" name="L968" href="#L968">968</a>     }
+<a class="jxr_linenumber" name="L969" href="#L969">969</a>     <strong class="jxr_keyword">if</strong> (stateLocal.stripeFiles.isEmpty()) {
+<a class="jxr_linenumber" name="L970" href="#L970">970</a>       <strong class="jxr_keyword">return</strong> 0.0;
+<a class="jxr_linenumber" name="L971" href="#L971">971</a>     }
+<a class="jxr_linenumber" name="L972" href="#L972">972</a>     <strong class="jxr_keyword">int</strong> blockingFilePerStripe = blockingFileCount / stateLocal.stripeFiles.size();
+<a class="jxr_linenumber" name="L973" href="#L973">973</a>     <em class="jxr_comment">// do not calculate L0 separately because data will be moved to stripe quickly and in most cases</em>
+<a class="jxr_linenumber" name="L974" href="#L974">974</a>     <em class="jxr_comment">// we flush data to stripe directly.</em>
+<a class="jxr_linenumber" name="L975" href="#L975">975</a>     <strong class="jxr_keyword">int</strong> delta = stateLocal.level0Files.isEmpty() ? 0 : 1;
+<a class="jxr_linenumber" name="L976" href="#L976">976</a>     <strong class="jxr_keyword">double</strong> max = 0.0;
+<a class="jxr_linenumber" name="L977" href="#L977">977</a>     <strong class="jxr_keyword">for</strong> (ImmutableList&lt;StoreFile&gt; stripeFile : stateLocal.stripeFiles) {
+<a class="jxr_linenumber" name="L978" href="#L978">978</a>       <strong class="jxr_keyword">int</strong> stripeFileCount = stripeFile.size();
+<a class="jxr_linenumber" name="L979" href="#L979">979</a>       <strong class="jxr_keyword">double</strong> normCount =
+<a class="jxr_linenumber" name="L980" href="#L980">980</a>           (<strong class="jxr_keyword">double</strong>) (stripeFileCount + delta - config.getStripeCompactMinFiles())
+<a class="jxr_linenumber" name="L981" href="#L981">981</a>               / (blockingFilePerStripe - config.getStripeCompactMinFiles());
+<a class="jxr_linenumber" name="L982" href="#L982">982</a>       <strong class="jxr_keyword">if</strong> (normCount &gt;= 1.0) {
+<a class="jxr_linenumber" name="L983" href="#L983">983</a>         <em class="jxr_comment">// This could happen if stripe is not split evenly. Do not return values that larger than</em>
+<a class="jxr_linenumber" name="L984" href="#L984">984</a>         <em class="jxr_comment">// 1.0 because we have not reached the blocking file count actually.</em>
+<a class="jxr_linenumber" name="L985" href="#L985">985</a>         <strong class="jxr_keyword">return</strong> 1.0;
+<a class="jxr_linenumber" name="L986" href="#L986">986</a>       }
+<a class="jxr_linenumber" name="L987" href="#L987">987</a>       <strong class="jxr_keyword">if</strong> (normCount &gt; max) {
+<a class="jxr_linenumber" name="L988" href="#L988">988</a>         max = normCount;
+<a class="jxr_linenumber" name="L989" href="#L989">989</a>       }
+<a class="jxr_linenumber" name="L990" href="#L990">990</a>     }
+<a class="jxr_linenumber" name="L991" href="#L991">991</a>     <strong class="jxr_keyword">return</strong> max;
+<a class="jxr_linenumber" name="L992" href="#L992">992</a>   }
+<a class="jxr_linenumber" name="L993" href="#L993">993</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

@@ -1,0 +1,920 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>Coding xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 2001, 2010, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.  Oracle designates this</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * particular file as subject to the "Classpath" exception as provided</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * by Oracle in the LICENSE file that accompanied this code.</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">package</strong> com.sun.java.util.jar.pack;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.io.InputStream;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> java.io.OutputStream;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> java.util.HashMap;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.sun.java.util.jar.pack.Constants.*;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment"> * Define the conversions between sequences of small integers and raw bytes.</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment"> * This is a schema of encodings which incorporates varying lengths,</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment"> * varying degrees of length variability, and varying amounts of signed-ness.</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> * @author John Rose</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">class</strong> Coding <strong class="jxr_keyword">implements</strong> Comparable, CodingMethod, Histogram.BitMetric {
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>      <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_comment">      Coding schema for single integers, parameterized by (B,H,S):</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_comment">      Let B in [1,5], H in [1,256], S in [0,3].</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_comment">      (S limit is arbitrary.  B follows the 32-bit limit.  H is byte size.)</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_comment">      A given (B,H,S) code varies in length from 1 to B bytes.</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_comment">      The 256 values a byte may take on are divided into L=(256-H) and H</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_comment">      values, with all the H values larger than the L values.</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_comment">      (That is, the L values are [0,L) and the H are [L,256).)</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_comment">      The last byte is always either the B-th byte, a byte with "L value"</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_comment">      (&lt;L), or both.  There is no other byte that satisfies these conditions.</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_comment">      All bytes before the last always have "H values" (&gt;=L).</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_comment">      Therefore, if L==0, the code always has the full length of B bytes.</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_comment">      The coding then becomes a classic B-byte little-endian unsigned integer.</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_comment">      (Also, if L==128, the high bit of each byte acts signals the presence</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_comment">      of a following byte, up to the maximum length.)</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_comment">      In the unsigned case (S==0), the coding is compact and monotonic</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_comment">      in the ordering of byte sequences defined by appending zero bytes</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_comment">      to pad them to a common length B, reversing them, and ordering them</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_comment">      lexicographically.  (This agrees with "little-endian" byte order.)</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_comment">      Therefore, the unsigned value of a byte sequence may be defined as:</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_comment">      &lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_comment">        U(b0)           == b0</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_comment">                           in [0..L)</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_comment">                           or [0..256) if B==1 (**)</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_comment">        U(b0,b1)        == b0 + b1*H</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_comment">                           in [L..L*(1+H))</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_comment">                           or [L..L*(1+H) + H^2) if B==2</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_comment">        U(b0,b1,b2)     == b0 + b1*H + b2*H^2</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_comment">                           in [L*(1+H)..L*(1+H+H^2))</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_comment">                           or [L*(1+H)..L*(1+H+H^2) + H^3) if B==3</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_comment">        U(b[i]: i&lt;n)    == Sum[i&lt;n]( b[i] * H^i )</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_comment">                           up to  L*Sum[i&lt;n]( H^i )</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_comment">                           or to  L*Sum[i&lt;n]( H^i ) + H^n if n==B</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_comment">      &lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_comment">      (**) If B==1, the values H,L play no role in the coding.</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_comment">      As a convention, we require that any (1,H,S) code must always</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  <em class="jxr_comment">      encode values less than H.  Thus, a simple unsigned byte is coded</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  <em class="jxr_comment">      specifically by the code (1,256,0).</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_comment">      (Properly speaking, the unsigned case should be parameterized as</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_comment">      S==Infinity.  If the schema were regular, the case S==0 would really</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_comment">      denote a numbering in which all coded values are negative.)</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_comment">      If S&gt;0, the unsigned value of a byte sequence is regarded as a binary</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_comment">      integer.  If any of the S low-order bits are zero, the corresponding</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_comment">      signed value will be non-negative.  If all of the S low-order bits</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_comment">      (S&gt;0) are one, the the corresponding signed value will be negative.</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_comment">      The non-negative signed values are compact and monotonically increasing</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_comment">      (from 0) in the ordering of the corresponding unsigned values.</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_comment">      The negative signed values are compact and monotonically decreasing</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_comment">      (from -1) in the ordering of the corresponding unsigned values.</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_comment">      In essence, the low-order S bits function as a collective sign bit</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_comment">      for negative signed numbers, and as a low-order base-(2^S-1) digit</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_comment">      for non-negative signed numbers.</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_comment">      Therefore, the signed value corresponding to an unsigned value is:</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_comment">      &lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_comment">        Sgn(x)  == x                               if S==0</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_comment">        Sgn(x)  == (x / 2^S)*(2^S-1) + (x % 2^S),  if S&gt;0, (x % 2^S) &lt; 2^S-1</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_comment">        Sgn(x)  == -(x / 2^S)-1,                   if S&gt;0, (x % 2^S) == 2^S-1</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_comment">      &lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> <em class="jxr_comment">      Finally, the value of a byte sequence, given the coding parameters</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> <em class="jxr_comment">      (B,H,S), is defined as:</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_comment">      &lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_comment">        V(b[i]: i&lt;n)  == Sgn(U(b[i]: i&lt;n))</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_comment">      &lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_comment">      The extremal positive and negative signed value for a given range</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_comment">      of unsigned values may be found by sign-encoding the largest unsigned</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_comment">      value which is not 2^S-1 mod 2^S, and that which is, respectively.</em>
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> <em class="jxr_comment">      Because B,H,S are variable, this is not a single coding but a schema</em>
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> <em class="jxr_comment">      of codings.  For optimal compression, it is necessary to adaptively</em>
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> <em class="jxr_comment">      select specific codings to the data being compressed.</em>
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> <em class="jxr_comment">      For example, if a sequence of values happens never to be negative,</em>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> <em class="jxr_comment">      S==0 is the best choice.  If the values are equally balanced between</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> <em class="jxr_comment">      negative and positive, S==1.  If negative values are rare, then S&gt;1</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_comment">      is more appropriate.</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> <em class="jxr_comment">      A (B,H,S) encoding is called a "subrange" if it does not encode</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_comment">      the largest 32-bit value, and if the number R of values it does</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_comment">      encode can be expressed as a positive 32-bit value.  (Note that</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_comment">      B=1 implies R&lt;=256, B=2 implies R&lt;=65536, etc.)</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> <em class="jxr_comment">      A delta version of a given (B,H,S) coding encodes an array of integers</em>
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> <em class="jxr_comment">      by writing their successive differences in the (B,H,S) coding.</em>
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> <em class="jxr_comment">      The original integers themselves may be recovered by making a</em>
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> <em class="jxr_comment">      running accumulation of sum of the differences as they are read.</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_comment">      As a special case, if a (B,H,S) encoding is a subrange, its delta</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_comment">      version will only encode arrays of numbers in the coding's unsigned</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_comment">      range, [0..R-1].  The coding of deltas is still in the normal signed</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_comment">      range, if S!=0.  During delta encoding, all subtraction results are</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> <em class="jxr_comment">      reduced to the signed range, by adding multiples of R.  Likewise,</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> <em class="jxr_comment">.     during encoding, all addition results are reduced to the unsigned range.</em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> <em class="jxr_comment">      This special case for subranges allows the benefits of wraparound</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> <em class="jxr_comment">      when encoding correlated sequences of very small positive numbers.</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>     <em class="jxr_comment">// Code-specific limits:</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> saturate32(<strong class="jxr_keyword">long</strong> x) {
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>         <strong class="jxr_keyword">if</strong> (x &gt; Integer.MAX_VALUE)   <strong class="jxr_keyword">return</strong> Integer.MAX_VALUE;
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>         <strong class="jxr_keyword">if</strong> (x &lt; Integer.MIN_VALUE)   <strong class="jxr_keyword">return</strong> Integer.MIN_VALUE;
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>         <strong class="jxr_keyword">return</strong> (<strong class="jxr_keyword">int</strong>)x;
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>     }
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> codeRangeLong(<strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H) {
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>         <strong class="jxr_keyword">return</strong> codeRangeLong(B, H, B);
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>     }
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> codeRangeLong(<strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H, <strong class="jxr_keyword">int</strong> nMax) {
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>         <em class="jxr_comment">// Code range for a all (B,H) codes of length &lt;=nMax (&lt;=B).</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>         <em class="jxr_comment">// n &lt; B:   L*Sum[i&lt;n]( H^i )</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>         <em class="jxr_comment">// n == B:  L*Sum[i&lt;B]( H^i ) + H^B</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>         assert(nMax &gt;= 0 &amp;&amp; nMax &lt;= B);
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>         assert(B &gt;= 1 &amp;&amp; B &lt;= 5);
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>         assert(H &gt;= 1 &amp;&amp; H &lt;= 256);
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>         <strong class="jxr_keyword">if</strong> (nMax == 0)  <strong class="jxr_keyword">return</strong> 0;  <em class="jxr_comment">// no codes of zero length</em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>         <strong class="jxr_keyword">if</strong> (B == 1)     <strong class="jxr_keyword">return</strong> H;  <em class="jxr_comment">// special case; see (**) above</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>         <strong class="jxr_keyword">int</strong> L = 256-H;
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>         <strong class="jxr_keyword">long</strong> sum = 0;
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>         <strong class="jxr_keyword">long</strong> H_i = 1;
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> n = 1; n &lt;= nMax; n++) {
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>             sum += H_i;
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>             H_i *= H;
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>         }
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>         sum *= L;
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>         <strong class="jxr_keyword">if</strong> (nMax == B)
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>             sum += H_i;
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>         <strong class="jxr_keyword">return</strong> sum;
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>     }
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>     <em class="jxr_javadoccomment">/** Largest int representable by (B,H,S) in up to nMax bytes. */</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> codeMax(<strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H, <strong class="jxr_keyword">int</strong> S, <strong class="jxr_keyword">int</strong> nMax) {
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>         <em class="jxr_comment">//assert(S &gt;= 0 &amp;&amp; S &lt;= S_MAX);</em>
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>         <strong class="jxr_keyword">long</strong> range = codeRangeLong(B, H, nMax);
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>         <strong class="jxr_keyword">if</strong> (range == 0)
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>             <strong class="jxr_keyword">return</strong> -1;  <em class="jxr_comment">// degenerate max value for empty set of codes</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>         <strong class="jxr_keyword">if</strong> (S == 0 || range &gt;= (<strong class="jxr_keyword">long</strong>)1&lt;&lt;32)
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>             <strong class="jxr_keyword">return</strong> saturate32(range-1);
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>         <strong class="jxr_keyword">long</strong> maxPos = range-1;
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>         <strong class="jxr_keyword">while</strong> (isNegativeCode(maxPos, S)) {
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>             --maxPos;
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>         }
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>         <strong class="jxr_keyword">if</strong> (maxPos &lt; 0)  <strong class="jxr_keyword">return</strong> -1;  <em class="jxr_comment">// No positive codings at all.</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>         <strong class="jxr_keyword">int</strong> smax = decodeSign32(maxPos, S);
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>         <em class="jxr_comment">// check for 32-bit wraparound:</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>         <strong class="jxr_keyword">if</strong> (smax &lt; 0)
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>             <strong class="jxr_keyword">return</strong> Integer.MAX_VALUE;
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>         <strong class="jxr_keyword">return</strong> smax;
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>     }
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>     <em class="jxr_javadoccomment">/** Smallest int representable by (B,H,S) in up to nMax bytes.</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">        Returns Integer.MIN_VALUE if 32-bit wraparound covers</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment">        the entire negative range.</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> codeMin(<strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H, <strong class="jxr_keyword">int</strong> S, <strong class="jxr_keyword">int</strong> nMax) {
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>         <em class="jxr_comment">//assert(S &gt;= 0 &amp;&amp; S &lt;= S_MAX);</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>         <strong class="jxr_keyword">long</strong> range = codeRangeLong(B, H, nMax);
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>         <strong class="jxr_keyword">if</strong> (range &gt;= (<strong class="jxr_keyword">long</strong>)1&lt;&lt;32 &amp;&amp; nMax == B) {
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>             <em class="jxr_comment">// Can code negative values via 32-bit wraparound.</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>             <strong class="jxr_keyword">return</strong> Integer.MIN_VALUE;
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>         }
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>         <strong class="jxr_keyword">if</strong> (S == 0) {
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>             <strong class="jxr_keyword">return</strong> 0;
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>         }
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>         <strong class="jxr_keyword">long</strong> maxNeg = range-1;
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>         <strong class="jxr_keyword">while</strong> (!isNegativeCode(maxNeg, S))
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>             --maxNeg;
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> 
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>         <strong class="jxr_keyword">if</strong> (maxNeg &lt; 0)  <strong class="jxr_keyword">return</strong> 0;  <em class="jxr_comment">// No negative codings at all.</em>
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>         <strong class="jxr_keyword">return</strong> decodeSign32(maxNeg, S);
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>     }
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>     <em class="jxr_comment">// Some of the arithmetic below is on unsigned 32-bit integers.</em>
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>     <em class="jxr_comment">// These must be represented in Java as longs in the range [0..2^32-1].</em>
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>     <em class="jxr_comment">// The conversion to a signed int is just the Java cast (int), but</em>
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>     <em class="jxr_comment">// the conversion to an unsigned int is the following little method:</em>
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> toUnsigned32(<strong class="jxr_keyword">int</strong> sx) {
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>         <strong class="jxr_keyword">return</strong> ((<strong class="jxr_keyword">long</strong>)sx &lt;&lt; 32) &gt;&gt;&gt; 32;
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>     }
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>     <em class="jxr_comment">// Sign encoding:</em>
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isNegativeCode(<strong class="jxr_keyword">long</strong> ux, <strong class="jxr_keyword">int</strong> S) {
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>         assert(S &gt; 0);
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>         assert(ux &gt;= -1);  <em class="jxr_comment">// can be out of 32-bit range; who cares</em>
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>         <strong class="jxr_keyword">int</strong> Smask = (1&lt;&lt;S)-1;
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>         <strong class="jxr_keyword">return</strong> (((<strong class="jxr_keyword">int</strong>)ux+1) &amp; Smask) == 0;
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>     }
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> hasNegativeCode(<strong class="jxr_keyword">int</strong> sx, <strong class="jxr_keyword">int</strong> S) {
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>         assert(S &gt; 0);
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>         <em class="jxr_comment">// If S&gt;=2 very low negatives are coded by 32-bit-wrapped positives.</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>         <em class="jxr_comment">// The lowest negative representable by a negative coding is</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>         <em class="jxr_comment">// ~(umax32 &gt;&gt; S), and the next lower number is coded by wrapping</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>         <em class="jxr_comment">// the highest positive:</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>         <em class="jxr_comment">//    CodePos(umax32-1)  -&gt;  (umax32-1)-((umax32-1)&gt;&gt;S)</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>         <em class="jxr_comment">// which simplifies to ~(umax32 &gt;&gt; S)-1.</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>         <strong class="jxr_keyword">return</strong> (0 &gt; sx) &amp;&amp; (sx &gt;= ~(-1&gt;&gt;&gt;S));
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>     }
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> decodeSign32(<strong class="jxr_keyword">long</strong> ux, <strong class="jxr_keyword">int</strong> S) {
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>         assert(ux == toUnsigned32((<strong class="jxr_keyword">int</strong>)ux))  <em class="jxr_comment">// must be unsigned 32-bit number</em>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>             : (Long.toHexString(ux));
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>         <strong class="jxr_keyword">if</strong> (S == 0) {
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>             <strong class="jxr_keyword">return</strong> (<strong class="jxr_keyword">int</strong>) ux;  <em class="jxr_comment">// cast to signed int</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>         }
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>         <strong class="jxr_keyword">int</strong> sx;
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>         <strong class="jxr_keyword">if</strong> (isNegativeCode(ux, S)) {
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>             <em class="jxr_comment">// Sgn(x)  == -(x / 2^S)-1</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>             sx = ~((<strong class="jxr_keyword">int</strong>)ux &gt;&gt;&gt; S);
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>             <em class="jxr_comment">// Sgn(x)  == (x / 2^S)*(2^S-1) + (x % 2^S)</em>
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>             sx = (<strong class="jxr_keyword">int</strong>)ux - ((<strong class="jxr_keyword">int</strong>)ux &gt;&gt;&gt; S);
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>         }
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>         <em class="jxr_comment">// Assert special case of S==1:</em>
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>         assert(!(S == 1) || sx == (((<strong class="jxr_keyword">int</strong>)ux &gt;&gt;&gt; 1) ^ -((<strong class="jxr_keyword">int</strong>)ux &amp; 1)));
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>         <strong class="jxr_keyword">return</strong> sx;
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>     }
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> encodeSign32(<strong class="jxr_keyword">int</strong> sx, <strong class="jxr_keyword">int</strong> S) {
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>         <strong class="jxr_keyword">if</strong> (S == 0) {
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>             <strong class="jxr_keyword">return</strong> toUnsigned32(sx);  <em class="jxr_comment">// unsigned 32-bit int</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>         }
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>         <strong class="jxr_keyword">int</strong> Smask = (1&lt;&lt;S)-1;
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>         <strong class="jxr_keyword">long</strong> ux;
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>         <strong class="jxr_keyword">if</strong> (!hasNegativeCode(sx, S)) {
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>             <em class="jxr_comment">// InvSgn(sx) = (sx / (2^S-1))*2^S + (sx % (2^S-1))</em>
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>             ux = sx + (toUnsigned32(sx) / Smask);
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>             <em class="jxr_comment">// InvSgn(sx) = (-sx-1)*2^S + (2^S-1)</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>             ux = (-sx &lt;&lt; S) - 1;
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>         }
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>         ux = toUnsigned32((<strong class="jxr_keyword">int</strong>)ux);
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>         assert(sx == decodeSign32(ux, S))
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>             : (Long.toHexString(ux)+<span class="jxr_string">" -&gt; "</span>+
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>                Integer.toHexString(sx)+<span class="jxr_string">" != "</span>+
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>                Integer.toHexString(decodeSign32(ux, S)));
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>         <strong class="jxr_keyword">return</strong> ux;
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>     }
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> 
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>     <em class="jxr_comment">// Top-level coding of single integers:</em>
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> writeInt(byte[] out, <strong class="jxr_keyword">int</strong>[] outpos, <strong class="jxr_keyword">int</strong> sx, <strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H, <strong class="jxr_keyword">int</strong> S) {
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>         <strong class="jxr_keyword">long</strong> ux = encodeSign32(sx, S);
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>         assert(ux == toUnsigned32((<strong class="jxr_keyword">int</strong>)ux));
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>         assert(ux &lt; codeRangeLong(B, H))
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>             : Long.toHexString(ux);
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>         <strong class="jxr_keyword">int</strong> L = 256-H;
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>         <strong class="jxr_keyword">long</strong> sum = ux;
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>         <strong class="jxr_keyword">int</strong> pos = outpos[0];
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; B-1; i++) {
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>             <strong class="jxr_keyword">if</strong> (sum &lt; L)
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>             sum -= L;
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>             <strong class="jxr_keyword">int</strong> b_i = (<strong class="jxr_keyword">int</strong>)( L + (sum % H) );
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>             sum /= H;
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>             out[pos++] = (byte)b_i;
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>         }
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>         out[pos++] = (byte)sum;
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>         <em class="jxr_comment">// Report number of bytes written by updating outpos[0]:</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>         outpos[0] = pos;
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>         <em class="jxr_comment">// Check right away for mis-coding.</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>         <em class="jxr_comment">//assert(sx == readInt(out, new int[1], B, H, S));</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>     }
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> readInt(byte[] in, <strong class="jxr_keyword">int</strong>[] inpos, <strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H, <strong class="jxr_keyword">int</strong> S) {
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>         <em class="jxr_comment">// U(b[i]: i&lt;n) == Sum[i&lt;n]( b[i] * H^i )</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>         <strong class="jxr_keyword">int</strong> L = 256-H;
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>         <strong class="jxr_keyword">long</strong> sum = 0;
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>         <strong class="jxr_keyword">long</strong> H_i = 1;
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>         <strong class="jxr_keyword">int</strong> pos = inpos[0];
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; B; i++) {
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>             <strong class="jxr_keyword">int</strong> b_i = in[pos++] &amp; 0xFF;
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>             sum += b_i*H_i;
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>             H_i *= H;
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>             <strong class="jxr_keyword">if</strong> (b_i &lt; L)  <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>         }
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>         <em class="jxr_comment">//assert(sum &gt;= 0 &amp;&amp; sum &lt; codeRangeLong(B, H));</em>
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>         <em class="jxr_comment">// Report number of bytes read by updating inpos[0]:</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>         inpos[0] = pos;
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>         <strong class="jxr_keyword">return</strong> decodeSign32(sum, S);
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>     }
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>     <em class="jxr_comment">// The Stream version doesn't fetch a byte unless it is needed for coding.</em>
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> readIntFrom(InputStream in, <strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H, <strong class="jxr_keyword">int</strong> S) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>         <em class="jxr_comment">// U(b[i]: i&lt;n) == Sum[i&lt;n]( b[i] * H^i )</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>         <strong class="jxr_keyword">int</strong> L = 256-H;
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>         <strong class="jxr_keyword">long</strong> sum = 0;
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>         <strong class="jxr_keyword">long</strong> H_i = 1;
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; B; i++) {
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>             <strong class="jxr_keyword">int</strong> b_i = in.read();
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>             <strong class="jxr_keyword">if</strong> (b_i &lt; 0)  <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(<span class="jxr_string">"unexpected EOF"</span>);
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>             sum += b_i*H_i;
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>             H_i *= H;
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>             <strong class="jxr_keyword">if</strong> (b_i &lt; L)  <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>         }
+<a class="jxr_linenumber" name="L344" href="#L344">344</a>         assert(sum &gt;= 0 &amp;&amp; sum &lt; codeRangeLong(B, H));
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>         <strong class="jxr_keyword">return</strong> decodeSign32(sum, S);
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>     }
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> B_MAX = 5;    <em class="jxr_comment">/* B: [1,5] */</em>
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> H_MAX = 256;  <em class="jxr_comment">/* H: [1,256] */</em>
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> S_MAX = 2;    <em class="jxr_comment">/* S: [0,2] */</em>
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>     <em class="jxr_comment">// END OF STATICS.</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> B; <em class="jxr_comment">/*1..5*/</em>       <em class="jxr_comment">// # bytes (1..5)</em>
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> H; <em class="jxr_comment">/*1..256*/</em>     <em class="jxr_comment">// # codes requiring a higher byte</em>
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> L; <em class="jxr_comment">/*0..255*/</em>     <em class="jxr_comment">// # codes requiring a higher byte</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> S; <em class="jxr_comment">/*0..3*/</em>       <em class="jxr_comment">// # low-order bits representing sign</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> del; <em class="jxr_comment">/*0..2*/</em>     <em class="jxr_comment">// type of delta encoding (0 == none)</em>
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> min;              <em class="jxr_comment">// smallest representable value</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> max;              <em class="jxr_comment">// largest representable value</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> umin;             <em class="jxr_comment">// smallest representable uns. value</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> umax;             <em class="jxr_comment">// largest representable uns. value</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong>[] byteMin;        <em class="jxr_comment">// smallest repr. value, given # bytes</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong>[] byteMax;        <em class="jxr_comment">// largest repr. value, given # bytes</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> 
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>     <strong class="jxr_keyword">private</strong> Coding(<strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H, <strong class="jxr_keyword">int</strong> S) {
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>         <strong class="jxr_keyword">this</strong>(B, H, S, 0);
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>     }
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>     <strong class="jxr_keyword">private</strong> Coding(<strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H, <strong class="jxr_keyword">int</strong> S, <strong class="jxr_keyword">int</strong> del) {
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>         <strong class="jxr_keyword">this</strong>.B = B;
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>         <strong class="jxr_keyword">this</strong>.H = H;
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>         <strong class="jxr_keyword">this</strong>.L = 256-H;
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>         <strong class="jxr_keyword">this</strong>.S = S;
+<a class="jxr_linenumber" name="L374" href="#L374">374</a>         <strong class="jxr_keyword">this</strong>.del = del;
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>         <strong class="jxr_keyword">this</strong>.min = codeMin(B, H, S, B);
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>         <strong class="jxr_keyword">this</strong>.max = codeMax(B, H, S, B);
+<a class="jxr_linenumber" name="L377" href="#L377">377</a>         <strong class="jxr_keyword">this</strong>.umin = codeMin(B, H, 0, B);
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>         <strong class="jxr_keyword">this</strong>.umax = codeMax(B, H, 0, B);
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>         <strong class="jxr_keyword">this</strong>.byteMin = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">int</strong>[B];
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>         <strong class="jxr_keyword">this</strong>.byteMax = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">int</strong>[B];
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> 
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> nMax = 1; nMax &lt;= B; nMax++) {
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>             byteMin[nMax-1] = codeMin(B, H, S, nMax);
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>             byteMax[nMax-1] = codeMax(B, H, S, nMax);
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>         }
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>     }
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> 
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> equals(Object x) {
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>         <strong class="jxr_keyword">if</strong> (!(x instanceof Coding))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>         Coding that = (Coding) x;
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>         <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.B != that.B)  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>         <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.H != that.H)  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>         <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.S != that.S)  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>         <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.del != that.del)  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>     }
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> 
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> hashCode() {
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>         <strong class="jxr_keyword">return</strong> (del&lt;&lt;14)+(S&lt;&lt;11)+(B&lt;&lt;8)+(H&lt;&lt;0);
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>     }
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Map&lt;Coding, Coding&gt; codeMap;
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> 
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">synchronized</strong> Coding of(<strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H, <strong class="jxr_keyword">int</strong> S, <strong class="jxr_keyword">int</strong> del) {
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>         <strong class="jxr_keyword">if</strong> (codeMap == <strong class="jxr_keyword">null</strong>)  codeMap = <strong class="jxr_keyword">new</strong> HashMap&lt;&gt;();
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>         Coding x0 = <strong class="jxr_keyword">new</strong> Coding(B, H, S, del);
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>         Coding x1 = codeMap.get(x0);
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>         <strong class="jxr_keyword">if</strong> (x1 == <strong class="jxr_keyword">null</strong>)  codeMap.put(x0, x1 = x0);
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>         <strong class="jxr_keyword">return</strong> x1;
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>     }
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> 
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Coding of(<strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H) {
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>         <strong class="jxr_keyword">return</strong> of(B, H, 0, 0);
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>     }
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> 
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Coding of(<strong class="jxr_keyword">int</strong> B, <strong class="jxr_keyword">int</strong> H, <strong class="jxr_keyword">int</strong> S) {
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>         <strong class="jxr_keyword">return</strong> of(B, H, S, 0);
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>     }
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> 
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> canRepresentValue(<strong class="jxr_keyword">int</strong> x) {
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>         <strong class="jxr_keyword">if</strong> (isSubrange())
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>             <strong class="jxr_keyword">return</strong> canRepresentUnsigned(x);
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>         <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>             <strong class="jxr_keyword">return</strong> canRepresentSigned(x);
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>     }
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>     <em class="jxr_javadoccomment">/** Can this coding represent a single value, possibly a delta?</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">     *  This ignores the D property.  That is, for delta codings,</em>
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> <em class="jxr_javadoccomment">     *  this tests whether a delta value of 'x' can be coded.</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> <em class="jxr_javadoccomment">     *  For signed delta codings which produce unsigned end values,</em>
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> <em class="jxr_javadoccomment">     *  use canRepresentUnsigned.</em>
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> canRepresentSigned(<strong class="jxr_keyword">int</strong> x) {
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>         <strong class="jxr_keyword">return</strong> (x &gt;= min &amp;&amp; x &lt;= max);
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>     }
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>     <em class="jxr_javadoccomment">/** Can this coding, apart from its S property,</em>
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> <em class="jxr_javadoccomment">     *  represent a single value?  (Negative values</em>
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> <em class="jxr_javadoccomment">     *  can only be represented via 32-bit overflow,</em>
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> <em class="jxr_javadoccomment">     *  so this returns true for negative values</em>
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> <em class="jxr_javadoccomment">     *  if isFullRange is true.)</em>
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> canRepresentUnsigned(<strong class="jxr_keyword">int</strong> x) {
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>         <strong class="jxr_keyword">return</strong> (x &gt;= umin &amp;&amp; x &lt;= umax);
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>     }
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>     <em class="jxr_comment">// object-oriented code/decode</em>
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> readFrom(byte[] in, <strong class="jxr_keyword">int</strong>[] inpos) {
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>         <strong class="jxr_keyword">return</strong> readInt(in, inpos, B, H, S);
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>     }
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> writeTo(byte[] out, <strong class="jxr_keyword">int</strong>[] outpos, <strong class="jxr_keyword">int</strong> x) {
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>         writeInt(out, outpos, x, B, H, S);
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>     }
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> 
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>     <em class="jxr_comment">// Stream versions</em>
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> readFrom(InputStream in) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>         <strong class="jxr_keyword">return</strong> readIntFrom(in, B, H, S);
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>     }
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> writeTo(OutputStream out, <strong class="jxr_keyword">int</strong> x) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>         byte[] buf = <strong class="jxr_keyword">new</strong> byte[B];
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>         <strong class="jxr_keyword">int</strong>[] pos = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">int</strong>[1];
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>         writeInt(buf, pos, x, B, H, S);
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>         out.write(buf, 0, pos[0]);
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>     }
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> 
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>     <em class="jxr_comment">// Stream/array versions</em>
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> readArrayFrom(InputStream in, <strong class="jxr_keyword">int</strong>[] a, <strong class="jxr_keyword">int</strong> start, <strong class="jxr_keyword">int</strong> end) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>         <em class="jxr_comment">// %%% use byte[] buffer</em>
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = start; i &lt; end; i++)
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>             a[i] = readFrom(in);
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> 
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> dstep = 0; dstep &lt; del; dstep++) {
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>             <strong class="jxr_keyword">long</strong> state = 0;
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = start; i &lt; end; i++) {
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>                 state += a[i];
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>                 <em class="jxr_comment">// Reduce array values to the required range.</em>
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>                 <strong class="jxr_keyword">if</strong> (isSubrange()) {
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>                     state = reduceToUnsignedRange(state);
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>                 }
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>                 a[i] = (<strong class="jxr_keyword">int</strong>) state;
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>             }
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>         }
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>     }
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> writeArrayTo(OutputStream out, <strong class="jxr_keyword">int</strong>[] a, <strong class="jxr_keyword">int</strong> start, <strong class="jxr_keyword">int</strong> end) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>         <strong class="jxr_keyword">if</strong> (end &lt;= start)  <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> dstep = 0; dstep &lt; del; dstep++) {
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>             <strong class="jxr_keyword">int</strong>[] deltas;
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>             <strong class="jxr_keyword">if</strong> (!isSubrange())
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>                 deltas = makeDeltas(a, start, end, 0, 0);
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>             <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>                 deltas = makeDeltas(a, start, end, min, max);
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>             a = deltas;
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>             start = 0;
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>             end = deltas.length;
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>         }
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>         <em class="jxr_comment">// The following code is a buffered version of this loop:</em>
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>         <em class="jxr_comment">//    for (int i = start; i &lt; end; i++)</em>
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>         <em class="jxr_comment">//        writeTo(out, a[i]);</em>
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>         byte[] buf = <strong class="jxr_keyword">new</strong> byte[1&lt;&lt;8];
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> bufmax = buf.length-B;
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>         <strong class="jxr_keyword">int</strong>[] pos = { 0 };
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = start; i &lt; end; ) {
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>             <strong class="jxr_keyword">while</strong> (pos[0] &lt;= bufmax) {
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>                 writeTo(buf, pos, a[i++]);
+<a class="jxr_linenumber" name="L503" href="#L503">503</a>                 <strong class="jxr_keyword">if</strong> (i &gt;= end)  <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>             }
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>             out.write(buf, 0, pos[0]);
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>             pos[0] = 0;
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>         }
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>     }
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> 
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>     <em class="jxr_javadoccomment">/** Tell if the range of this coding (number of distinct</em>
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> <em class="jxr_javadoccomment">     *  representable values) can be expressed in 32 bits.</em>
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>     <strong class="jxr_keyword">boolean</strong> isSubrange() {
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>         <strong class="jxr_keyword">return</strong> max &lt; Integer.MAX_VALUE
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>             &amp;&amp; ((<strong class="jxr_keyword">long</strong>)max - (<strong class="jxr_keyword">long</strong>)min + 1) &lt;= Integer.MAX_VALUE;
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>     }
+<a class="jxr_linenumber" name="L517" href="#L517">517</a> 
+<a class="jxr_linenumber" name="L518" href="#L518">518</a>     <em class="jxr_javadoccomment">/** Tell if this coding can represent all 32-bit values.</em>
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> <em class="jxr_javadoccomment">     *  Note:  Some codings, such as unsigned ones, can be neither</em>
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> <em class="jxr_javadoccomment">     *  subranges nor full-range codings.</em>
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L522" href="#L522">522</a>     <strong class="jxr_keyword">boolean</strong> isFullRange() {
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>         <strong class="jxr_keyword">return</strong> max == Integer.MAX_VALUE &amp;&amp; min == Integer.MIN_VALUE;
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>     }
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> 
+<a class="jxr_linenumber" name="L526" href="#L526">526</a>     <em class="jxr_javadoccomment">/** Return the number of values this coding (a subrange) can represent. */</em>
+<a class="jxr_linenumber" name="L527" href="#L527">527</a>     <strong class="jxr_keyword">int</strong> getRange() {
+<a class="jxr_linenumber" name="L528" href="#L528">528</a>         assert(isSubrange());
+<a class="jxr_linenumber" name="L529" href="#L529">529</a>         <strong class="jxr_keyword">return</strong> (max - min) + 1;  <em class="jxr_comment">// range includes both min &amp; max</em>
+<a class="jxr_linenumber" name="L530" href="#L530">530</a>     }
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> 
+<a class="jxr_linenumber" name="L532" href="#L532">532</a>     Coding setB(<strong class="jxr_keyword">int</strong> B) { <strong class="jxr_keyword">return</strong> Coding.of(B, H, S, del); }
+<a class="jxr_linenumber" name="L533" href="#L533">533</a>     Coding setH(<strong class="jxr_keyword">int</strong> H) { <strong class="jxr_keyword">return</strong> Coding.of(B, H, S, del); }
+<a class="jxr_linenumber" name="L534" href="#L534">534</a>     Coding setS(<strong class="jxr_keyword">int</strong> S) { <strong class="jxr_keyword">return</strong> Coding.of(B, H, S, del); }
+<a class="jxr_linenumber" name="L535" href="#L535">535</a>     Coding setL(<strong class="jxr_keyword">int</strong> L) { <strong class="jxr_keyword">return</strong> setH(256-L); }
+<a class="jxr_linenumber" name="L536" href="#L536">536</a>     Coding setD(<strong class="jxr_keyword">int</strong> del) { <strong class="jxr_keyword">return</strong> Coding.of(B, H, S, del); }
+<a class="jxr_linenumber" name="L537" href="#L537">537</a>     Coding getDeltaCoding() { <strong class="jxr_keyword">return</strong> setD(del+1); }
+<a class="jxr_linenumber" name="L538" href="#L538">538</a> 
+<a class="jxr_linenumber" name="L539" href="#L539">539</a>     <em class="jxr_javadoccomment">/** Return a coding suitable for representing summed, modulo-reduced values. */</em>
+<a class="jxr_linenumber" name="L540" href="#L540">540</a>     Coding getValueCoding() {
+<a class="jxr_linenumber" name="L541" href="#L541">541</a>         <strong class="jxr_keyword">if</strong> (isDelta())
+<a class="jxr_linenumber" name="L542" href="#L542">542</a>             <strong class="jxr_keyword">return</strong> Coding.of(B, H, 0, del-1);
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>         <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L545" href="#L545">545</a>     }
+<a class="jxr_linenumber" name="L546" href="#L546">546</a> 
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>     <em class="jxr_javadoccomment">/** Reduce the given value to be within this coding's unsigned range,</em>
+<a class="jxr_linenumber" name="L548" href="#L548">548</a> <em class="jxr_javadoccomment">     *  by adding or subtracting a multiple of (max-min+1).</em>
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L550" href="#L550">550</a>     <strong class="jxr_keyword">int</strong> reduceToUnsignedRange(<strong class="jxr_keyword">long</strong> value) {
+<a class="jxr_linenumber" name="L551" href="#L551">551</a>         <strong class="jxr_keyword">if</strong> (value == (<strong class="jxr_keyword">int</strong>)value &amp;&amp; canRepresentUnsigned((<strong class="jxr_keyword">int</strong>)value))
+<a class="jxr_linenumber" name="L552" href="#L552">552</a>             <em class="jxr_comment">// already in unsigned range</em>
+<a class="jxr_linenumber" name="L553" href="#L553">553</a>             <strong class="jxr_keyword">return</strong> (<strong class="jxr_keyword">int</strong>)value;
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>         <strong class="jxr_keyword">int</strong> range = getRange();
+<a class="jxr_linenumber" name="L555" href="#L555">555</a>         assert(range &gt; 0);
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>         value %= range;
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>         <strong class="jxr_keyword">if</strong> (value &lt; 0)  value += range;
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>         assert(canRepresentUnsigned((<strong class="jxr_keyword">int</strong>)value));
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>         <strong class="jxr_keyword">return</strong> (<strong class="jxr_keyword">int</strong>)value;
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>     }
+<a class="jxr_linenumber" name="L561" href="#L561">561</a> 
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>     <strong class="jxr_keyword">int</strong> reduceToSignedRange(<strong class="jxr_keyword">int</strong> value) {
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>         <strong class="jxr_keyword">if</strong> (canRepresentSigned(value))
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>             <em class="jxr_comment">// already in signed range</em>
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>             <strong class="jxr_keyword">return</strong> value;
+<a class="jxr_linenumber" name="L566" href="#L566">566</a>         <strong class="jxr_keyword">return</strong> reduceToSignedRange(value, min, max);
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>     }
+<a class="jxr_linenumber" name="L568" href="#L568">568</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> reduceToSignedRange(<strong class="jxr_keyword">int</strong> value, <strong class="jxr_keyword">int</strong> min, <strong class="jxr_keyword">int</strong> max) {
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>         <strong class="jxr_keyword">int</strong> range = (max-min+1);
+<a class="jxr_linenumber" name="L570" href="#L570">570</a>         assert(range &gt; 0);
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>         <strong class="jxr_keyword">int</strong> value0 = value;
+<a class="jxr_linenumber" name="L572" href="#L572">572</a>         value -= min;
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>         <strong class="jxr_keyword">if</strong> (value &lt; 0 &amp;&amp; value0 &gt;= 0) {
+<a class="jxr_linenumber" name="L574" href="#L574">574</a>             <em class="jxr_comment">// 32-bit overflow, but the next '%=' op needs to be unsigned</em>
+<a class="jxr_linenumber" name="L575" href="#L575">575</a>             value -= range;
+<a class="jxr_linenumber" name="L576" href="#L576">576</a>             assert(value &gt;= 0);
+<a class="jxr_linenumber" name="L577" href="#L577">577</a>         }
+<a class="jxr_linenumber" name="L578" href="#L578">578</a>         value %= range;
+<a class="jxr_linenumber" name="L579" href="#L579">579</a>         <strong class="jxr_keyword">if</strong> (value &lt; 0)  value += range;
+<a class="jxr_linenumber" name="L580" href="#L580">580</a>         value += min;
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>         assert(min &lt;= value &amp;&amp; value &lt;= max);
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>         <strong class="jxr_keyword">return</strong> value;
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>     }
+<a class="jxr_linenumber" name="L584" href="#L584">584</a> 
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>     <em class="jxr_javadoccomment">/** Does this coding support at least one negative value?</em>
+<a class="jxr_linenumber" name="L586" href="#L586">586</a> <em class="jxr_javadoccomment">        Includes codings that can do so via 32-bit wraparound.</em>
+<a class="jxr_linenumber" name="L587" href="#L587">587</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>     <strong class="jxr_keyword">boolean</strong> isSigned() {
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>         <strong class="jxr_keyword">return</strong> min &lt; 0;
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>     }
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>     <em class="jxr_javadoccomment">/** Does this coding code arrays by making successive differences? */</em>
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>     <strong class="jxr_keyword">boolean</strong> isDelta() {
+<a class="jxr_linenumber" name="L593" href="#L593">593</a>         <strong class="jxr_keyword">return</strong> del != 0;
+<a class="jxr_linenumber" name="L594" href="#L594">594</a>     }
+<a class="jxr_linenumber" name="L595" href="#L595">595</a> 
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> B() { <strong class="jxr_keyword">return</strong> B; }
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> H() { <strong class="jxr_keyword">return</strong> H; }
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> L() { <strong class="jxr_keyword">return</strong> L; }
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> S() { <strong class="jxr_keyword">return</strong> S; }
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> del() { <strong class="jxr_keyword">return</strong> del; }
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> min() { <strong class="jxr_keyword">return</strong> min; }
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> max() { <strong class="jxr_keyword">return</strong> max; }
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> umin() { <strong class="jxr_keyword">return</strong> umin; }
+<a class="jxr_linenumber" name="L604" href="#L604">604</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> umax() { <strong class="jxr_keyword">return</strong> umax; }
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> byteMin(<strong class="jxr_keyword">int</strong> b) { <strong class="jxr_keyword">return</strong> byteMin[b-1]; }
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> byteMax(<strong class="jxr_keyword">int</strong> b) { <strong class="jxr_keyword">return</strong> byteMax[b-1]; }
+<a class="jxr_linenumber" name="L607" href="#L607">607</a> 
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> compareTo(Object x) {
+<a class="jxr_linenumber" name="L609" href="#L609">609</a>         Coding that = (Coding) x;
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>         <strong class="jxr_keyword">int</strong> dkey = <strong class="jxr_keyword">this</strong>.del - that.del;
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>         <strong class="jxr_keyword">if</strong> (dkey == 0)
+<a class="jxr_linenumber" name="L612" href="#L612">612</a>             dkey = <strong class="jxr_keyword">this</strong>.B - that.B;
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>         <strong class="jxr_keyword">if</strong> (dkey == 0)
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>             dkey = <strong class="jxr_keyword">this</strong>.H - that.H;
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>         <strong class="jxr_keyword">if</strong> (dkey == 0)
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>             dkey = <strong class="jxr_keyword">this</strong>.S - that.S;
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>         <strong class="jxr_keyword">return</strong> dkey;
+<a class="jxr_linenumber" name="L618" href="#L618">618</a>     }
+<a class="jxr_linenumber" name="L619" href="#L619">619</a> 
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>     <em class="jxr_javadoccomment">/** Heuristic measure of the difference between two codings. */</em>
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> distanceFrom(Coding that) {
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>         <strong class="jxr_keyword">int</strong> diffdel = <strong class="jxr_keyword">this</strong>.del - that.del;
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>         <strong class="jxr_keyword">if</strong> (diffdel &lt; 0)  diffdel = -diffdel;
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>         <strong class="jxr_keyword">int</strong> diffS = <strong class="jxr_keyword">this</strong>.S - that.S;
+<a class="jxr_linenumber" name="L625" href="#L625">625</a>         <strong class="jxr_keyword">if</strong> (diffS &lt; 0)  diffS = -diffS;
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>         <strong class="jxr_keyword">int</strong> diffB = <strong class="jxr_keyword">this</strong>.B - that.B;
+<a class="jxr_linenumber" name="L627" href="#L627">627</a>         <strong class="jxr_keyword">if</strong> (diffB &lt; 0)  diffB = -diffB;
+<a class="jxr_linenumber" name="L628" href="#L628">628</a>         <strong class="jxr_keyword">int</strong> diffHL;
+<a class="jxr_linenumber" name="L629" href="#L629">629</a>         <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.H == that.H) {
+<a class="jxr_linenumber" name="L630" href="#L630">630</a>             diffHL = 0;
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>             <em class="jxr_comment">// Distance in log space of H (&lt;=128) and L (&lt;128).</em>
+<a class="jxr_linenumber" name="L633" href="#L633">633</a>             <strong class="jxr_keyword">int</strong> thisHL = <strong class="jxr_keyword">this</strong>.getHL();
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>             <strong class="jxr_keyword">int</strong> thatHL = that.getHL();
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>             <em class="jxr_comment">// Double the accuracy of the log:</em>
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>             thisHL *= thisHL;
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>             thatHL *= thatHL;
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>             <strong class="jxr_keyword">if</strong> (thisHL &gt; thatHL)
+<a class="jxr_linenumber" name="L639" href="#L639">639</a>                 diffHL = ceil_lg2(1+(thisHL-1)/thatHL);
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>             <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L641" href="#L641">641</a>                 diffHL = ceil_lg2(1+(thatHL-1)/thisHL);
+<a class="jxr_linenumber" name="L642" href="#L642">642</a>         }
+<a class="jxr_linenumber" name="L643" href="#L643">643</a>         <strong class="jxr_keyword">int</strong> norm = 5*(diffdel + diffS + diffB) + diffHL;
+<a class="jxr_linenumber" name="L644" href="#L644">644</a>         assert(norm != 0 || <strong class="jxr_keyword">this</strong>.compareTo(that) == 0);
+<a class="jxr_linenumber" name="L645" href="#L645">645</a>         <strong class="jxr_keyword">return</strong> norm;
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>     }
+<a class="jxr_linenumber" name="L647" href="#L647">647</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> getHL() {
+<a class="jxr_linenumber" name="L648" href="#L648">648</a>         <em class="jxr_comment">// Follow H in log space by the multiplicative inverse of L.</em>
+<a class="jxr_linenumber" name="L649" href="#L649">649</a>         <strong class="jxr_keyword">if</strong> (H &lt;= 128)  <strong class="jxr_keyword">return</strong> H;
+<a class="jxr_linenumber" name="L650" href="#L650">650</a>         <strong class="jxr_keyword">if</strong> (L &gt;= 1)    <strong class="jxr_keyword">return</strong> 128*128/L;
+<a class="jxr_linenumber" name="L651" href="#L651">651</a>         <strong class="jxr_keyword">return</strong> 128*256;
+<a class="jxr_linenumber" name="L652" href="#L652">652</a>     }
+<a class="jxr_linenumber" name="L653" href="#L653">653</a> 
+<a class="jxr_linenumber" name="L654" href="#L654">654</a>     <em class="jxr_javadoccomment">/** ceiling(log[2](x)): {1-&gt;0, 2-&gt;1, 3-&gt;2, 4-&gt;2, ...} */</em>
+<a class="jxr_linenumber" name="L655" href="#L655">655</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> ceil_lg2(<strong class="jxr_keyword">int</strong> x) {
+<a class="jxr_linenumber" name="L656" href="#L656">656</a>         assert(x-1 &gt;= 0);  <em class="jxr_comment">// x in range (int.MIN_VALUE -&gt; 32)</em>
+<a class="jxr_linenumber" name="L657" href="#L657">657</a>         x -= 1;
+<a class="jxr_linenumber" name="L658" href="#L658">658</a>         <strong class="jxr_keyword">int</strong> lg = 0;
+<a class="jxr_linenumber" name="L659" href="#L659">659</a>         <strong class="jxr_keyword">while</strong> (x != 0) {
+<a class="jxr_linenumber" name="L660" href="#L660">660</a>             lg++;
+<a class="jxr_linenumber" name="L661" href="#L661">661</a>             x &gt;&gt;= 1;
+<a class="jxr_linenumber" name="L662" href="#L662">662</a>         }
+<a class="jxr_linenumber" name="L663" href="#L663">663</a>         <strong class="jxr_keyword">return</strong> lg;
+<a class="jxr_linenumber" name="L664" href="#L664">664</a>     }
+<a class="jxr_linenumber" name="L665" href="#L665">665</a> 
+<a class="jxr_linenumber" name="L666" href="#L666">666</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> byte[] byteBitWidths = <strong class="jxr_keyword">new</strong> byte[0x100];
+<a class="jxr_linenumber" name="L667" href="#L667">667</a>     <strong class="jxr_keyword">static</strong> {
+<a class="jxr_linenumber" name="L668" href="#L668">668</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> b = 0; b &lt; byteBitWidths.length; b++) {
+<a class="jxr_linenumber" name="L669" href="#L669">669</a>             byteBitWidths[b] = (byte) ceil_lg2(b + 1);
+<a class="jxr_linenumber" name="L670" href="#L670">670</a>         }
+<a class="jxr_linenumber" name="L671" href="#L671">671</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 10; i &gt;= 0; i = (i &lt;&lt; 1) - (i &gt;&gt; 3)) {
+<a class="jxr_linenumber" name="L672" href="#L672">672</a>             assert(bitWidth(i) == ceil_lg2(i + 1));
+<a class="jxr_linenumber" name="L673" href="#L673">673</a>         }
+<a class="jxr_linenumber" name="L674" href="#L674">674</a>     }
+<a class="jxr_linenumber" name="L675" href="#L675">675</a> 
+<a class="jxr_linenumber" name="L676" href="#L676">676</a>     <em class="jxr_javadoccomment">/** Number of significant bits in i, not counting sign bits.</em>
+<a class="jxr_linenumber" name="L677" href="#L677">677</a> <em class="jxr_javadoccomment">     *  For positive i, it is ceil_lg2(i + 1).</em>
+<a class="jxr_linenumber" name="L678" href="#L678">678</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L679" href="#L679">679</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> bitWidth(<strong class="jxr_keyword">int</strong> i) {
+<a class="jxr_linenumber" name="L680" href="#L680">680</a>         <strong class="jxr_keyword">if</strong> (i &lt; 0)  i = ~i;  <em class="jxr_comment">// change sign</em>
+<a class="jxr_linenumber" name="L681" href="#L681">681</a>         <strong class="jxr_keyword">int</strong> w = 0;
+<a class="jxr_linenumber" name="L682" href="#L682">682</a>         <strong class="jxr_keyword">int</strong> lo = i;
+<a class="jxr_linenumber" name="L683" href="#L683">683</a>         <strong class="jxr_keyword">if</strong> (lo &lt; byteBitWidths.length)
+<a class="jxr_linenumber" name="L684" href="#L684">684</a>             <strong class="jxr_keyword">return</strong> byteBitWidths[lo];
+<a class="jxr_linenumber" name="L685" href="#L685">685</a>         <strong class="jxr_keyword">int</strong> hi;
+<a class="jxr_linenumber" name="L686" href="#L686">686</a>         hi = (lo &gt;&gt;&gt; 16);
+<a class="jxr_linenumber" name="L687" href="#L687">687</a>         <strong class="jxr_keyword">if</strong> (hi != 0) {
+<a class="jxr_linenumber" name="L688" href="#L688">688</a>             lo = hi;
+<a class="jxr_linenumber" name="L689" href="#L689">689</a>             w += 16;
+<a class="jxr_linenumber" name="L690" href="#L690">690</a>         }
+<a class="jxr_linenumber" name="L691" href="#L691">691</a>         hi = (lo &gt;&gt;&gt; 8);
+<a class="jxr_linenumber" name="L692" href="#L692">692</a>         <strong class="jxr_keyword">if</strong> (hi != 0) {
+<a class="jxr_linenumber" name="L693" href="#L693">693</a>             lo = hi;
+<a class="jxr_linenumber" name="L694" href="#L694">694</a>             w += 8;
+<a class="jxr_linenumber" name="L695" href="#L695">695</a>         }
+<a class="jxr_linenumber" name="L696" href="#L696">696</a>         w += byteBitWidths[lo];
+<a class="jxr_linenumber" name="L697" href="#L697">697</a>         <em class="jxr_comment">//assert(w == ceil_lg2(i + 1));</em>
+<a class="jxr_linenumber" name="L698" href="#L698">698</a>         <strong class="jxr_keyword">return</strong> w;
+<a class="jxr_linenumber" name="L699" href="#L699">699</a>     }
+<a class="jxr_linenumber" name="L700" href="#L700">700</a> 
+<a class="jxr_linenumber" name="L701" href="#L701">701</a>     <em class="jxr_javadoccomment">/** Create an array of successive differences.</em>
+<a class="jxr_linenumber" name="L702" href="#L702">702</a> <em class="jxr_javadoccomment">     *  If min==max, accept any and all 32-bit overflow.</em>
+<a class="jxr_linenumber" name="L703" href="#L703">703</a> <em class="jxr_javadoccomment">     *  Otherwise, avoid 32-bit overflow, and reduce all differences</em>
+<a class="jxr_linenumber" name="L704" href="#L704">704</a> <em class="jxr_javadoccomment">     *  to a value in the given range, by adding or subtracting</em>
+<a class="jxr_linenumber" name="L705" href="#L705">705</a> <em class="jxr_javadoccomment">     *  multiples of the range cardinality (max-min+1).</em>
+<a class="jxr_linenumber" name="L706" href="#L706">706</a> <em class="jxr_javadoccomment">     *  Also, the values are assumed to be in the range [0..(max-min)].</em>
+<a class="jxr_linenumber" name="L707" href="#L707">707</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L708" href="#L708">708</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong>[] makeDeltas(<strong class="jxr_keyword">int</strong>[] values, <strong class="jxr_keyword">int</strong> start, <strong class="jxr_keyword">int</strong> end,
+<a class="jxr_linenumber" name="L709" href="#L709">709</a>                             <strong class="jxr_keyword">int</strong> min, <strong class="jxr_keyword">int</strong> max) {
+<a class="jxr_linenumber" name="L710" href="#L710">710</a>         assert(max &gt;= min);
+<a class="jxr_linenumber" name="L711" href="#L711">711</a>         <strong class="jxr_keyword">int</strong> count = end-start;
+<a class="jxr_linenumber" name="L712" href="#L712">712</a>         <strong class="jxr_keyword">int</strong>[] deltas = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">int</strong>[count];
+<a class="jxr_linenumber" name="L713" href="#L713">713</a>         <strong class="jxr_keyword">int</strong> state = 0;
+<a class="jxr_linenumber" name="L714" href="#L714">714</a>         <strong class="jxr_keyword">if</strong> (min == max) {
+<a class="jxr_linenumber" name="L715" href="#L715">715</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; count; i++) {
+<a class="jxr_linenumber" name="L716" href="#L716">716</a>                 <strong class="jxr_keyword">int</strong> value = values[start+i];
+<a class="jxr_linenumber" name="L717" href="#L717">717</a>                 deltas[i] = value - state;
+<a class="jxr_linenumber" name="L718" href="#L718">718</a>                 state = value;
+<a class="jxr_linenumber" name="L719" href="#L719">719</a>             }
+<a class="jxr_linenumber" name="L720" href="#L720">720</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L721" href="#L721">721</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; count; i++) {
+<a class="jxr_linenumber" name="L722" href="#L722">722</a>                 <strong class="jxr_keyword">int</strong> value = values[start+i];
+<a class="jxr_linenumber" name="L723" href="#L723">723</a>                 assert(value &gt;= 0 &amp;&amp; value+min &lt;= max);
+<a class="jxr_linenumber" name="L724" href="#L724">724</a>                 <strong class="jxr_keyword">int</strong> delta = value - state;
+<a class="jxr_linenumber" name="L725" href="#L725">725</a>                 assert(delta == (<strong class="jxr_keyword">long</strong>)value - (<strong class="jxr_keyword">long</strong>)state); <em class="jxr_comment">// no overflow</em>
+<a class="jxr_linenumber" name="L726" href="#L726">726</a>                 state = value;
+<a class="jxr_linenumber" name="L727" href="#L727">727</a>                 <em class="jxr_comment">// Reduce delta values to the required range.</em>
+<a class="jxr_linenumber" name="L728" href="#L728">728</a>                 delta = reduceToSignedRange(delta, min, max);
+<a class="jxr_linenumber" name="L729" href="#L729">729</a>                 deltas[i] = delta;
+<a class="jxr_linenumber" name="L730" href="#L730">730</a>             }
+<a class="jxr_linenumber" name="L731" href="#L731">731</a>         }
+<a class="jxr_linenumber" name="L732" href="#L732">732</a>         <strong class="jxr_keyword">return</strong> deltas;
+<a class="jxr_linenumber" name="L733" href="#L733">733</a>     }
+<a class="jxr_linenumber" name="L734" href="#L734">734</a> 
+<a class="jxr_linenumber" name="L735" href="#L735">735</a>     <strong class="jxr_keyword">boolean</strong> canRepresent(<strong class="jxr_keyword">int</strong> minValue, <strong class="jxr_keyword">int</strong> maxValue) {
+<a class="jxr_linenumber" name="L736" href="#L736">736</a>         assert(minValue &lt;= maxValue);
+<a class="jxr_linenumber" name="L737" href="#L737">737</a>         <strong class="jxr_keyword">if</strong> (del &gt; 0) {
+<a class="jxr_linenumber" name="L738" href="#L738">738</a>             <strong class="jxr_keyword">if</strong> (isSubrange()) {
+<a class="jxr_linenumber" name="L739" href="#L739">739</a>                 <em class="jxr_comment">// We will force the values to reduce to the right subrange.</em>
+<a class="jxr_linenumber" name="L740" href="#L740">740</a>                 <strong class="jxr_keyword">return</strong> canRepresentUnsigned(maxValue)
+<a class="jxr_linenumber" name="L741" href="#L741">741</a>                     &amp;&amp; canRepresentUnsigned(minValue);
+<a class="jxr_linenumber" name="L742" href="#L742">742</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L743" href="#L743">743</a>                 <em class="jxr_comment">// Huge range; delta values must assume full 32-bit range.</em>
+<a class="jxr_linenumber" name="L744" href="#L744">744</a>                 <strong class="jxr_keyword">return</strong> isFullRange();
+<a class="jxr_linenumber" name="L745" href="#L745">745</a>             }
+<a class="jxr_linenumber" name="L746" href="#L746">746</a>         }
+<a class="jxr_linenumber" name="L747" href="#L747">747</a>         <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L748" href="#L748">748</a>             <em class="jxr_comment">// final values must be representable</em>
+<a class="jxr_linenumber" name="L749" href="#L749">749</a>             <strong class="jxr_keyword">return</strong> canRepresentSigned(maxValue)
+<a class="jxr_linenumber" name="L750" href="#L750">750</a>                 &amp;&amp; canRepresentSigned(minValue);
+<a class="jxr_linenumber" name="L751" href="#L751">751</a>     }
+<a class="jxr_linenumber" name="L752" href="#L752">752</a> 
+<a class="jxr_linenumber" name="L753" href="#L753">753</a>     <strong class="jxr_keyword">boolean</strong> canRepresent(<strong class="jxr_keyword">int</strong>[] values, <strong class="jxr_keyword">int</strong> start, <strong class="jxr_keyword">int</strong> end) {
+<a class="jxr_linenumber" name="L754" href="#L754">754</a>         <strong class="jxr_keyword">int</strong> len = end-start;
+<a class="jxr_linenumber" name="L755" href="#L755">755</a>         <strong class="jxr_keyword">if</strong> (len == 0)       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L756" href="#L756">756</a>         <strong class="jxr_keyword">if</strong> (isFullRange())  <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L757" href="#L757">757</a>         <em class="jxr_comment">// Calculate max, min:</em>
+<a class="jxr_linenumber" name="L758" href="#L758">758</a>         <strong class="jxr_keyword">int</strong> lmax = values[start];
+<a class="jxr_linenumber" name="L759" href="#L759">759</a>         <strong class="jxr_keyword">int</strong> lmin = lmax;
+<a class="jxr_linenumber" name="L760" href="#L760">760</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 1; i &lt; len; i++) {
+<a class="jxr_linenumber" name="L761" href="#L761">761</a>             <strong class="jxr_keyword">int</strong> value = values[start+i];
+<a class="jxr_linenumber" name="L762" href="#L762">762</a>             <strong class="jxr_keyword">if</strong> (lmax &lt; value)  lmax = value;
+<a class="jxr_linenumber" name="L763" href="#L763">763</a>             <strong class="jxr_keyword">if</strong> (lmin &gt; value)  lmin = value;
+<a class="jxr_linenumber" name="L764" href="#L764">764</a>         }
+<a class="jxr_linenumber" name="L765" href="#L765">765</a>         <strong class="jxr_keyword">return</strong> canRepresent(lmin, lmax);
+<a class="jxr_linenumber" name="L766" href="#L766">766</a>     }
+<a class="jxr_linenumber" name="L767" href="#L767">767</a> 
+<a class="jxr_linenumber" name="L768" href="#L768">768</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">double</strong> getBitLength(<strong class="jxr_keyword">int</strong> value) {  <em class="jxr_comment">// implements BitMetric</em>
+<a class="jxr_linenumber" name="L769" href="#L769">769</a>         <strong class="jxr_keyword">return</strong> (<strong class="jxr_keyword">double</strong>) getLength(value) * 8;
+<a class="jxr_linenumber" name="L770" href="#L770">770</a>     }
+<a class="jxr_linenumber" name="L771" href="#L771">771</a> 
+<a class="jxr_linenumber" name="L772" href="#L772">772</a>     <em class="jxr_javadoccomment">/** How many bytes are in the coding of this value?</em>
+<a class="jxr_linenumber" name="L773" href="#L773">773</a> <em class="jxr_javadoccomment">     *  Returns Integer.MAX_VALUE if the value has no coding.</em>
+<a class="jxr_linenumber" name="L774" href="#L774">774</a> <em class="jxr_javadoccomment">     *  The coding must not be a delta coding, since there is no</em>
+<a class="jxr_linenumber" name="L775" href="#L775">775</a> <em class="jxr_javadoccomment">     *  definite size for a single value apart from its context.</em>
+<a class="jxr_linenumber" name="L776" href="#L776">776</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L777" href="#L777">777</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> getLength(<strong class="jxr_keyword">int</strong> value) {
+<a class="jxr_linenumber" name="L778" href="#L778">778</a>         <strong class="jxr_keyword">if</strong> (isDelta() &amp;&amp; isSubrange()) {
+<a class="jxr_linenumber" name="L779" href="#L779">779</a>             <strong class="jxr_keyword">if</strong> (!canRepresentUnsigned(value))
+<a class="jxr_linenumber" name="L780" href="#L780">780</a>                 <strong class="jxr_keyword">return</strong> Integer.MAX_VALUE;
+<a class="jxr_linenumber" name="L781" href="#L781">781</a>             value = reduceToSignedRange(value);
+<a class="jxr_linenumber" name="L782" href="#L782">782</a>         }
+<a class="jxr_linenumber" name="L783" href="#L783">783</a>         <strong class="jxr_keyword">if</strong> (value &gt;= 0) {
+<a class="jxr_linenumber" name="L784" href="#L784">784</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> n = 0; n &lt; B; n++) {
+<a class="jxr_linenumber" name="L785" href="#L785">785</a>                 <strong class="jxr_keyword">if</strong> (value &lt;= byteMax[n])  <strong class="jxr_keyword">return</strong> n+1;
+<a class="jxr_linenumber" name="L786" href="#L786">786</a>             }
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L788" href="#L788">788</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> n = 0; n &lt; B; n++) {
+<a class="jxr_linenumber" name="L789" href="#L789">789</a>                 <strong class="jxr_keyword">if</strong> (value &gt;= byteMin[n])  <strong class="jxr_keyword">return</strong> n+1;
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>             }
+<a class="jxr_linenumber" name="L791" href="#L791">791</a>         }
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>         <strong class="jxr_keyword">return</strong> Integer.MAX_VALUE;
+<a class="jxr_linenumber" name="L793" href="#L793">793</a>     }
+<a class="jxr_linenumber" name="L794" href="#L794">794</a> 
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> getLength(<strong class="jxr_keyword">int</strong>[] values, <strong class="jxr_keyword">int</strong> start, <strong class="jxr_keyword">int</strong> end) {
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>         <strong class="jxr_keyword">int</strong> len = end-start;
+<a class="jxr_linenumber" name="L797" href="#L797">797</a>         <strong class="jxr_keyword">if</strong> (B == 1)  <strong class="jxr_keyword">return</strong> len;
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>         <strong class="jxr_keyword">if</strong> (L == 0)  <strong class="jxr_keyword">return</strong> len * B;
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>         <strong class="jxr_keyword">if</strong> (isDelta()) {
+<a class="jxr_linenumber" name="L800" href="#L800">800</a>             <strong class="jxr_keyword">int</strong>[] deltas;
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>             <strong class="jxr_keyword">if</strong> (!isSubrange())
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>                 deltas = makeDeltas(values, start, end, 0, 0);
+<a class="jxr_linenumber" name="L803" href="#L803">803</a>             <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>                 deltas = makeDeltas(values, start, end, min, max);
+<a class="jxr_linenumber" name="L805" href="#L805">805</a>             <em class="jxr_comment">//return Coding.of(B, H, S).getLength(deltas, 0, len);</em>
+<a class="jxr_linenumber" name="L806" href="#L806">806</a>             values = deltas;
+<a class="jxr_linenumber" name="L807" href="#L807">807</a>             start = 0;
+<a class="jxr_linenumber" name="L808" href="#L808">808</a>         }
+<a class="jxr_linenumber" name="L809" href="#L809">809</a>         <strong class="jxr_keyword">int</strong> sum = len;  <em class="jxr_comment">// at least 1 byte per</em>
+<a class="jxr_linenumber" name="L810" href="#L810">810</a>         <em class="jxr_comment">// add extra bytes for extra-long values</em>
+<a class="jxr_linenumber" name="L811" href="#L811">811</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> n = 1; n &lt;= B; n++) {
+<a class="jxr_linenumber" name="L812" href="#L812">812</a>             <em class="jxr_comment">// what is the coding interval [min..max] for n bytes?</em>
+<a class="jxr_linenumber" name="L813" href="#L813">813</a>             <strong class="jxr_keyword">int</strong> lmax = byteMax[n-1];
+<a class="jxr_linenumber" name="L814" href="#L814">814</a>             <strong class="jxr_keyword">int</strong> lmin = byteMin[n-1];
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>             <strong class="jxr_keyword">int</strong> longer = 0;  <em class="jxr_comment">// count of guys longer than n bytes</em>
+<a class="jxr_linenumber" name="L816" href="#L816">816</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; len; i++) {
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>                 <strong class="jxr_keyword">int</strong> value = values[start+i];
+<a class="jxr_linenumber" name="L818" href="#L818">818</a>                 <strong class="jxr_keyword">if</strong> (value &gt;= 0) {
+<a class="jxr_linenumber" name="L819" href="#L819">819</a>                     <strong class="jxr_keyword">if</strong> (value &gt; lmax)  longer++;
+<a class="jxr_linenumber" name="L820" href="#L820">820</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L821" href="#L821">821</a>                     <strong class="jxr_keyword">if</strong> (value &lt; lmin)  longer++;
+<a class="jxr_linenumber" name="L822" href="#L822">822</a>                 }
+<a class="jxr_linenumber" name="L823" href="#L823">823</a>             }
+<a class="jxr_linenumber" name="L824" href="#L824">824</a>             <strong class="jxr_keyword">if</strong> (longer == 0)  <strong class="jxr_keyword">break</strong>;  <em class="jxr_comment">// no more passes needed</em>
+<a class="jxr_linenumber" name="L825" href="#L825">825</a>             <strong class="jxr_keyword">if</strong> (n == B)  <strong class="jxr_keyword">return</strong> Integer.MAX_VALUE;  <em class="jxr_comment">// cannot represent!</em>
+<a class="jxr_linenumber" name="L826" href="#L826">826</a>             sum += longer;
+<a class="jxr_linenumber" name="L827" href="#L827">827</a>         }
+<a class="jxr_linenumber" name="L828" href="#L828">828</a>         <strong class="jxr_keyword">return</strong> sum;
+<a class="jxr_linenumber" name="L829" href="#L829">829</a>     }
+<a class="jxr_linenumber" name="L830" href="#L830">830</a> 
+<a class="jxr_linenumber" name="L831" href="#L831">831</a>     <strong class="jxr_keyword">public</strong> byte[] getMetaCoding(Coding dflt) {
+<a class="jxr_linenumber" name="L832" href="#L832">832</a>         <strong class="jxr_keyword">if</strong> (dflt == <strong class="jxr_keyword">this</strong>)  <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> byte[]{ (byte) _meta_<strong class="jxr_keyword">default</strong> };
+<a class="jxr_linenumber" name="L833" href="#L833">833</a>         <strong class="jxr_keyword">int</strong> canonicalIndex = BandStructure.indexOf(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L834" href="#L834">834</a>         <strong class="jxr_keyword">if</strong> (canonicalIndex &gt; 0)
+<a class="jxr_linenumber" name="L835" href="#L835">835</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> byte[]{ (byte) canonicalIndex };
+<a class="jxr_linenumber" name="L836" href="#L836">836</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> byte[]{
+<a class="jxr_linenumber" name="L837" href="#L837">837</a>             (byte)_meta_arb,
+<a class="jxr_linenumber" name="L838" href="#L838">838</a>             (byte)(del + 2*S + 8*(B-1)),
+<a class="jxr_linenumber" name="L839" href="#L839">839</a>             (byte)(H-1)
+<a class="jxr_linenumber" name="L840" href="#L840">840</a>         };
+<a class="jxr_linenumber" name="L841" href="#L841">841</a>     }
+<a class="jxr_linenumber" name="L842" href="#L842">842</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> parseMetaCoding(byte[] bytes, <strong class="jxr_keyword">int</strong> pos, Coding dflt, CodingMethod res[]) {
+<a class="jxr_linenumber" name="L843" href="#L843">843</a>         <strong class="jxr_keyword">int</strong> op = bytes[pos++] &amp; 0xFF;
+<a class="jxr_linenumber" name="L844" href="#L844">844</a>         <strong class="jxr_keyword">if</strong> (_meta_canon_min &lt;= op &amp;&amp; op &lt;= _meta_canon_max) {
+<a class="jxr_linenumber" name="L845" href="#L845">845</a>             Coding c = BandStructure.codingForIndex(op);
+<a class="jxr_linenumber" name="L846" href="#L846">846</a>             assert(c != <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L847" href="#L847">847</a>             res[0] = c;
+<a class="jxr_linenumber" name="L848" href="#L848">848</a>             <strong class="jxr_keyword">return</strong> pos;
+<a class="jxr_linenumber" name="L849" href="#L849">849</a>         }
+<a class="jxr_linenumber" name="L850" href="#L850">850</a>         <strong class="jxr_keyword">if</strong> (op == _meta_arb) {
+<a class="jxr_linenumber" name="L851" href="#L851">851</a>             <strong class="jxr_keyword">int</strong> dsb = bytes[pos++] &amp; 0xFF;
+<a class="jxr_linenumber" name="L852" href="#L852">852</a>             <strong class="jxr_keyword">int</strong> H_1 = bytes[pos++] &amp; 0xFF;
+<a class="jxr_linenumber" name="L853" href="#L853">853</a>             <strong class="jxr_keyword">int</strong> del = dsb % 2;
+<a class="jxr_linenumber" name="L854" href="#L854">854</a>             <strong class="jxr_keyword">int</strong> S = (dsb / 2) % 4;
+<a class="jxr_linenumber" name="L855" href="#L855">855</a>             <strong class="jxr_keyword">int</strong> B = (dsb / 8)+1;
+<a class="jxr_linenumber" name="L856" href="#L856">856</a>             <strong class="jxr_keyword">int</strong> H = H_1+1;
+<a class="jxr_linenumber" name="L857" href="#L857">857</a>             <strong class="jxr_keyword">if</strong> (!((1 &lt;= B &amp;&amp; B &lt;= B_MAX) &amp;&amp;
+<a class="jxr_linenumber" name="L858" href="#L858">858</a>                   (0 &lt;= S &amp;&amp; S &lt;= S_MAX) &amp;&amp;
+<a class="jxr_linenumber" name="L859" href="#L859">859</a>                   (1 &lt;= H &amp;&amp; H &lt;= H_MAX) &amp;&amp;
+<a class="jxr_linenumber" name="L860" href="#L860">860</a>                   (0 &lt;= del &amp;&amp; del &lt;= 1))
+<a class="jxr_linenumber" name="L861" href="#L861">861</a>                 || (B == 1 &amp;&amp; H != 256)
+<a class="jxr_linenumber" name="L862" href="#L862">862</a>                 || (B == 5 &amp;&amp; H == 256)) {
+<a class="jxr_linenumber" name="L863" href="#L863">863</a>                 <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(<span class="jxr_string">"Bad arb. coding: ("</span>+B+<span class="jxr_string">","</span>+H+<span class="jxr_string">","</span>+S+<span class="jxr_string">","</span>+del);
+<a class="jxr_linenumber" name="L864" href="#L864">864</a>             }
+<a class="jxr_linenumber" name="L865" href="#L865">865</a>             res[0] = Coding.of(B, H, S, del);
+<a class="jxr_linenumber" name="L866" href="#L866">866</a>             <strong class="jxr_keyword">return</strong> pos;
+<a class="jxr_linenumber" name="L867" href="#L867">867</a>         }
+<a class="jxr_linenumber" name="L868" href="#L868">868</a>         <strong class="jxr_keyword">return</strong> pos-1;  <em class="jxr_comment">// backup</em>
+<a class="jxr_linenumber" name="L869" href="#L869">869</a>     }
+<a class="jxr_linenumber" name="L870" href="#L870">870</a> 
+<a class="jxr_linenumber" name="L871" href="#L871">871</a> 
+<a class="jxr_linenumber" name="L872" href="#L872">872</a>     <strong class="jxr_keyword">public</strong> String keyString() {
+<a class="jxr_linenumber" name="L873" href="#L873">873</a>         <strong class="jxr_keyword">return</strong> <span class="jxr_string">"("</span>+B+<span class="jxr_string">","</span>+H+<span class="jxr_string">","</span>+S+<span class="jxr_string">","</span>+del+<span class="jxr_string">")"</span>;
+<a class="jxr_linenumber" name="L874" href="#L874">874</a>     }
+<a class="jxr_linenumber" name="L875" href="#L875">875</a> 
+<a class="jxr_linenumber" name="L876" href="#L876">876</a>     <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L877" href="#L877">877</a>         String str = <span class="jxr_string">"Coding"</span>+keyString();
+<a class="jxr_linenumber" name="L878" href="#L878">878</a>         <em class="jxr_comment">// If -ea, print out more informative strings!</em>
+<a class="jxr_linenumber" name="L879" href="#L879">879</a>         <em class="jxr_comment">//assert((str = stringForDebug()) != null);</em>
+<a class="jxr_linenumber" name="L880" href="#L880">880</a>         <strong class="jxr_keyword">return</strong> str;
+<a class="jxr_linenumber" name="L881" href="#L881">881</a>     }
+<a class="jxr_linenumber" name="L882" href="#L882">882</a> 
+<a class="jxr_linenumber" name="L883" href="#L883">883</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> verboseStringForDebug = false;
+<a class="jxr_linenumber" name="L884" href="#L884">884</a>     String stringForDebug() {
+<a class="jxr_linenumber" name="L885" href="#L885">885</a>         String minS = (min == Integer.MIN_VALUE ? <span class="jxr_string">"min"</span> : <span class="jxr_string">""</span>+min);
+<a class="jxr_linenumber" name="L886" href="#L886">886</a>         String maxS = (max == Integer.MAX_VALUE ? <span class="jxr_string">"max"</span> : <span class="jxr_string">""</span>+max);
+<a class="jxr_linenumber" name="L887" href="#L887">887</a>         String str = keyString()+<span class="jxr_string">" L="</span>+L+<span class="jxr_string">" r=["</span>+minS+<span class="jxr_string">","</span>+maxS+<span class="jxr_string">"]"</span>;
+<a class="jxr_linenumber" name="L888" href="#L888">888</a>         <strong class="jxr_keyword">if</strong> (isSubrange())
+<a class="jxr_linenumber" name="L889" href="#L889">889</a>             str += <span class="jxr_string">" subrange"</span>;
+<a class="jxr_linenumber" name="L890" href="#L890">890</a>         <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (!isFullRange())
+<a class="jxr_linenumber" name="L891" href="#L891">891</a>             str += <span class="jxr_string">" MIDRANGE"</span>;
+<a class="jxr_linenumber" name="L892" href="#L892">892</a>         <strong class="jxr_keyword">if</strong> (verboseStringForDebug) {
+<a class="jxr_linenumber" name="L893" href="#L893">893</a>             str += <span class="jxr_string">" {"</span>;
+<a class="jxr_linenumber" name="L894" href="#L894">894</a>             <strong class="jxr_keyword">int</strong> prev_range = 0;
+<a class="jxr_linenumber" name="L895" href="#L895">895</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> n = 1; n &lt;= B; n++) {
+<a class="jxr_linenumber" name="L896" href="#L896">896</a>                 <strong class="jxr_keyword">int</strong> range_n = saturate32((<strong class="jxr_keyword">long</strong>)byteMax[n-1] - byteMin[n-1] + 1);
+<a class="jxr_linenumber" name="L897" href="#L897">897</a>                 assert(range_n == saturate32(codeRangeLong(B, H, n)));
+<a class="jxr_linenumber" name="L898" href="#L898">898</a>                 range_n -= prev_range;
+<a class="jxr_linenumber" name="L899" href="#L899">899</a>                 prev_range = range_n;
+<a class="jxr_linenumber" name="L900" href="#L900">900</a>                 String rngS = (range_n == Integer.MAX_VALUE ? <span class="jxr_string">"max"</span> : <span class="jxr_string">""</span>+range_n);
+<a class="jxr_linenumber" name="L901" href="#L901">901</a>                 str += <span class="jxr_string">" #"</span>+n+<span class="jxr_string">"="</span>+rngS;
+<a class="jxr_linenumber" name="L902" href="#L902">902</a>             }
+<a class="jxr_linenumber" name="L903" href="#L903">903</a>             str += <span class="jxr_string">" }"</span>;
+<a class="jxr_linenumber" name="L904" href="#L904">904</a>         }
+<a class="jxr_linenumber" name="L905" href="#L905">905</a>         <strong class="jxr_keyword">return</strong> str;
+<a class="jxr_linenumber" name="L906" href="#L906">906</a>     }
+<a class="jxr_linenumber" name="L907" href="#L907">907</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

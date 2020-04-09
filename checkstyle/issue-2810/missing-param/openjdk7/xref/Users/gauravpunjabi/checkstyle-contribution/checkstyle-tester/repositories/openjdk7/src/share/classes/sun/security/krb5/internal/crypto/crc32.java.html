@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>crc32 xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * published by the Free Software Foundation.  Oracle designates this</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * particular file as subject to the "Classpath" exception as provided</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * by Oracle in the LICENSE file that accompanied this code.</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_comment"> *  (C) Copyright IBM Corp. 1999 All Rights Reserved.</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_comment"> *  Copyright 1997 The Open Group Research Institute.  All rights reserved.</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_comment">// crc32.java</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">package</strong> sun.security.krb5.internal.crypto;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> java.security.MessageDigestSpi;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> java.security.DigestException;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> crc32 <strong class="jxr_keyword">extends</strong> MessageDigestSpi <strong class="jxr_keyword">implements</strong> Cloneable {
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> CRC32_LENGTH = 4; <em class="jxr_comment">//32-bit</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> seed;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> DEBUG = sun.security.krb5.internal.Krb5.DEBUG;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>      <em class="jxr_comment">// buffer;</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>      <em class="jxr_comment">// private int bufferIndex, bufferLeft;</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>      <strong class="jxr_keyword">public</strong> crc32() {
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>          init();
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>      }
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>      <strong class="jxr_keyword">public</strong> Object clone() {
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>          <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>              crc32 crc = (crc32)<strong class="jxr_keyword">super</strong>.clone();
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>              crc.init();
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>              <strong class="jxr_keyword">return</strong> crc;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>          }
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>          <strong class="jxr_keyword">catch</strong> (CloneNotSupportedException e) {
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>          }
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>      }
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">     * Return the digest length in bytes</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">int</strong> engineGetDigestLength() {
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>          <strong class="jxr_keyword">return</strong> (CRC32_LENGTH);
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>      }
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>      <strong class="jxr_keyword">protected</strong> byte[] engineDigest() {
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>          byte[] result = <strong class="jxr_keyword">new</strong> byte[CRC32_LENGTH];
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>          result = <strong class="jxr_keyword">int</strong>2quad(seed);
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>          <em class="jxr_comment">//processBuffer(buffer, 0, bufferIndex, result, 0);</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>          init();
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>          <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>      }
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">int</strong> engineDigest(byte[] buf, <strong class="jxr_keyword">int</strong> offset, <strong class="jxr_keyword">int</strong> len) <strong class="jxr_keyword">throws</strong> DigestException {
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>          byte[] result = <strong class="jxr_keyword">new</strong> byte[CRC32_LENGTH];
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>          result = <strong class="jxr_keyword">int</strong>2quad(seed);
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>          <strong class="jxr_keyword">if</strong> (len &lt; CRC32_LENGTH) {
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> DigestException(<span class="jxr_string">"partial digests not returned"</span>);
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>          }
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>          <strong class="jxr_keyword">if</strong> (buf.length - offset &lt; CRC32_LENGTH) {
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>              <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> DigestException(<span class="jxr_string">"insufficient space in the output "</span> +
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>                                        <span class="jxr_string">"buffer to store the digest"</span>);
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>          }
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>          System.arraycopy(result, 0, buf, offset, CRC32_LENGTH);
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>          <em class="jxr_comment">//processBuffer(buffer, 0, bufferIndex, result, 0);</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>          <em class="jxr_comment">/*if (len &lt; CRC32_LENGTH) {</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_comment">          throw new DigestException("partial digests not returned");</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_comment">          }</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_comment">          if (buf.length - offset &lt; CRC32_LENGTH) {</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_comment">          throw new DigestException("insufficient space in the output " +</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_comment">          "buffer to store the digest");</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_comment">          }</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_comment">          System.arraycopy(result, 0, buf, offset, CRC32_LENGTH);      */</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>          init();
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>          <strong class="jxr_keyword">return</strong> CRC32_LENGTH;
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>      }
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">     * Update adds the passed byte to the digested data.</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> engineUpdate(byte b) {
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>         byte[] input = <strong class="jxr_keyword">new</strong> byte[1];
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>         input[0] = b;
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>         <em class="jxr_comment">//engineUpdate(input, 0, 1);</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>         engineUpdate(input, seed, 1);
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>     }
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_javadoccomment">     * Update adds the selected part of an array of bytes to the digest.</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment">     * This version is more efficient than the byte-at-a-time version;</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">     * it avoids data copies and reduces per-byte call overhead.</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> engineUpdate(byte input[], <strong class="jxr_keyword">int</strong> offset,
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>                                              <strong class="jxr_keyword">int</strong> len) {
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>         processData(input, offset, len);
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>     }
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong>[] crc32Table = {
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>         0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>         0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>         0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>         0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91,
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>         0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de,
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>         0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7,
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>         0x136c9856, 0x646ba8c0, 0xfd62f97a, 0x8a65c9ec,
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>         0x14015c4f, 0x63066cd9, 0xfa0f3d63, 0x8d080df5,
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>         0x3b6e20c8, 0x4c69105e, 0xd56041e4, 0xa2677172,
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>         0x3c03e4d1, 0x4b04d447, 0xd20d85fd, 0xa50ab56b,
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>         0x35b5a8fa, 0x42b2986c, 0xdbbbc9d6, 0xacbcf940,
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>         0x32d86ce3, 0x45df5c75, 0xdcd60dcf, 0xabd13d59,
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>         0x26d930ac, 0x51de003a, 0xc8d75180, 0xbfd06116,
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>         0x21b4f4b5, 0x56b3c423, 0xcfba9599, 0xb8bda50f,
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>         0x2802b89e, 0x5f058808, 0xc60cd9b2, 0xb10be924,
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>         0x2f6f7c87, 0x58684c11, 0xc1611dab, 0xb6662d3d,
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>         0x76dc4190, 0x01db7106, 0x98d220bc, 0xefd5102a,
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>         0x71b18589, 0x06b6b51f, 0x9fbfe4a5, 0xe8b8d433,
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>         0x7807c9a2, 0x0f00f934, 0x9609a88e, 0xe10e9818,
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>         0x7f6a0dbb, 0x086d3d2d, 0x91646c97, 0xe6635c01,
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>         0x6b6b51f4, 0x1c6c6162, 0x856530d8, 0xf262004e,
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>         0x6c0695ed, 0x1b01a57b, 0x8208f4c1, 0xf50fc457,
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>         0x65b0d9c6, 0x12b7e950, 0x8bbeb8ea, 0xfcb9887c,
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>         0x62dd1ddf, 0x15da2d49, 0x8cd37cf3, 0xfbd44c65,
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>         0x4db26158, 0x3ab551ce, 0xa3bc0074, 0xd4bb30e2,
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>         0x4adfa541, 0x3dd895d7, 0xa4d1c46d, 0xd3d6f4fb,
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>         0x4369e96a, 0x346ed9fc, 0xad678846, 0xda60b8d0,
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>         0x44042d73, 0x33031de5, 0xaa0a4c5f, 0xdd0d7cc9,
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>         0x5005713c, 0x270241aa, 0xbe0b1010, 0xc90c2086,
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>         0x5768b525, 0x206f85b3, 0xb966d409, 0xce61e49f,
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>         0x5edef90e, 0x29d9c998, 0xb0d09822, 0xc7d7a8b4,
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>         0x59b33d17, 0x2eb40d81, 0xb7bd5c3b, 0xc0ba6cad,
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>         0xedb88320, 0x9abfb3b6, 0x03b6e20c, 0x74b1d29a,
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>         0xead54739, 0x9dd277af, 0x04db2615, 0x73dc1683,
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>         0xe3630b12, 0x94643b84, 0x0d6d6a3e, 0x7a6a5aa8,
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>         0xe40ecf0b, 0x9309ff9d, 0x0a00ae27, 0x7d079eb1,
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>         0xf00f9344, 0x8708a3d2, 0x1e01f268, 0x6906c2fe,
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>         0xf762575d, 0x806567cb, 0x196c3671, 0x6e6b06e7,
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>         0xfed41b76, 0x89d32be0, 0x10da7a5a, 0x67dd4acc,
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>         0xf9b9df6f, 0x8ebeeff9, 0x17b7be43, 0x60b08ed5,
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>         0xd6d6a3e8, 0xa1d1937e, 0x38d8c2c4, 0x4fdff252,
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>         0xd1bb67f1, 0xa6bc5767, 0x3fb506dd, 0x48b2364b,
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>         0xd80d2bda, 0xaf0a1b4c, 0x36034af6, 0x41047a60,
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>         0xdf60efc3, 0xa867df55, 0x316e8eef, 0x4669be79,
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>         0xcb61b38c, 0xbc66831a, 0x256fd2a0, 0x5268e236,
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>         0xcc0c7795, 0xbb0b4703, 0x220216b9, 0x5505262f,
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>         0xc5ba3bbe, 0xb2bd0b28, 0x2bb45a92, 0x5cb36a04,
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>         0xc2d7ffa7, 0xb5d0cf31, 0x2cd99e8b, 0x5bdeae1d,
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>         0x9b64c2b0, 0xec63f226, 0x756aa39c, 0x026d930a,
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>         0x9c0906a9, 0xeb0e363f, 0x72076785, 0x05005713,
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>         0x95bf4a82, 0xe2b87a14, 0x7bb12bae, 0x0cb61b38,
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>         0x92d28e9b, 0xe5d5be0d, 0x7cdcefb7, 0x0bdbdf21,
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>         0x86d3d2d4, 0xf1d4e242, 0x68ddb3f8, 0x1fda836e,
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>         0x81be16cd, 0xf6b9265b, 0x6fb077e1, 0x18b74777,
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>         0x88085ae6, 0xff0f6a70, 0x66063bca, 0x11010b5c,
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>         0x8f659eff, 0xf862ae69, 0x616bffd3, 0x166ccf45,
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>         0xa00ae278, 0xd70dd2ee, 0x4e048354, 0x3903b3c2,
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>         0xa7672661, 0xd06016f7, 0x4969474d, 0x3e6e77db,
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>         0xaed16a4a, 0xd9d65adc, 0x40df0b66, 0x37d83bf0,
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>         0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>         0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6,
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>         0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf,
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>         0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>         0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>     };
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> engineReset() {
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>         init();
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>     }
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> <em class="jxr_javadoccomment">     * Initialize the CRC32 information</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> init() {
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>         seed = 0;
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>     }
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> processData(byte[] data, <strong class="jxr_keyword">int</strong> off, <strong class="jxr_keyword">int</strong> len) {
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>         <strong class="jxr_keyword">int</strong> result = seed;
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; len; i++)
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>             result = (result &gt;&gt;&gt; 8) ^ crc32Table[(result ^ data[i]) &amp; 0xff];
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>         seed = result;
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>     }
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> <strong class="jxr_keyword">int</strong>2crc32(<strong class="jxr_keyword">int</strong> b) {
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>         <strong class="jxr_keyword">int</strong> crc = b;
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 8; i &gt; 0; i--) {
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>             <strong class="jxr_keyword">if</strong> ((crc &amp; 1) != 0)
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>                 crc = (crc &gt;&gt;&gt; 1) ^ 0xedb88320;
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>             <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>                 crc = crc &gt;&gt;&gt; 1;
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>         }
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>         <strong class="jxr_keyword">return</strong> crc;
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>     }
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> printcrc32Table() {
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>         String temp;
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>         String zerofill = <span class="jxr_string">"00000000"</span>;
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>         System.out.print(<span class="jxr_string">"\tpublic static int[] crc32Table = {"</span>);
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; 256; i++) {
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>             <strong class="jxr_keyword">if</strong> ((i % 4) == 0)
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>                 System.out.print(<span class="jxr_string">"\n\t\t"</span>);
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>             temp = Integer.toHexString(<strong class="jxr_keyword">int</strong>2crc32(i));
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>             System.out.print(<span class="jxr_string">"0x"</span> +
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>                              zerofill.substring(temp.length()) + temp);
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>             <strong class="jxr_keyword">if</strong> (i !=  255)
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>                 System.out.print(<span class="jxr_string">", "</span>);
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>         }
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>         System.out.println(<span class="jxr_string">"\n\t};"</span>);
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>     }
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> 
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> byte2crc32sum(<strong class="jxr_keyword">int</strong> seed, byte[] data, <strong class="jxr_keyword">int</strong> size) {
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>         <strong class="jxr_keyword">int</strong> crc = seed;
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> 
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; size; i++)
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>             crc = (crc &gt;&gt;&gt; 8) ^ crc32Table[(crc ^ data[i]) &amp; 0xff];
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>         <strong class="jxr_keyword">return</strong> crc;
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>     }
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> 
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> byte2crc32sum(<strong class="jxr_keyword">int</strong> seed, byte[] data) {
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>         <strong class="jxr_keyword">return</strong> byte2crc32sum(seed, data, data.length);
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>     }
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> 
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>     <em class="jxr_comment">//sum from zero, i.e., no pre- or post-conditioning</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> byte2crc32sum(byte[] data) {
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>         <strong class="jxr_keyword">return</strong> byte2crc32sum(0, data);
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>     }
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> 
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>     <em class="jxr_comment">//CCITT ITU-T 3309 CRC-32 w/ standard pre- and post-conditioning</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> byte2crc32(byte[] data) {
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>         <strong class="jxr_keyword">return</strong> ~byte2crc32sum(0xffffffff, data);
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>     }
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> 
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> byte[] byte2crc32sum_bytes(byte[] data) {
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>         <strong class="jxr_keyword">int</strong> temp = byte2crc32sum(data);
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">int</strong>2quad(temp);
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>     }
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> 
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> byte[] byte2crc32sum_bytes(byte[] data, <strong class="jxr_keyword">int</strong> size) {
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>         <strong class="jxr_keyword">int</strong> temp = byte2crc32sum(0, data, size);
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>         <strong class="jxr_keyword">if</strong> (DEBUG) {
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>             System.out.println(<span class="jxr_string">"&gt;&gt;&gt;crc32: "</span> + Integer.toHexString(temp));
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>             System.out.println(<span class="jxr_string">"&gt;&gt;&gt;crc32: "</span> + Integer.toBinaryString(temp));
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>         }
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">int</strong>2quad(temp);
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>     }
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> 
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> byte[] <strong class="jxr_keyword">int</strong>2quad(<strong class="jxr_keyword">long</strong> input) {
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>         byte[] output = <strong class="jxr_keyword">new</strong> byte[4];
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; 4; i++) {
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>             output[i] = (byte)((input &gt;&gt;&gt; (i * 8)) &amp; 0xff);
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>         }
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>         <strong class="jxr_keyword">return</strong> output;
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>     }
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

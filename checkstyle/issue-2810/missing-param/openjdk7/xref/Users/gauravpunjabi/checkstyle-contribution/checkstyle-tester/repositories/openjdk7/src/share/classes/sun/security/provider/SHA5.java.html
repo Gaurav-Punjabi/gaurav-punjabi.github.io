@@ -1,0 +1,321 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>SHA5 xref</title>
+<link type="text/css" rel="stylesheet" href="../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 2002, 2006, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.  Oracle designates this</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * particular file as subject to the "Classpath" exception as provided</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * by Oracle in the LICENSE file that accompanied this code.</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">package</strong> sun.security.provider;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.security.*;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.math.BigInteger;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> sun.security.provider.ByteArrayAccess.*;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> * This class implements the Secure Hash Algorithm SHA-384 and SHA-512</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment"> * developed by the National Institute of Standards and Technology along</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment"> * with the National Security Agency.</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> * The two algorithms are almost identical. This file contains a base</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment"> * class SHA5 and two nested static subclasses as the classes to be used</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment"> * by the JCA framework.</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;It implements java.security.MessageDigestSpi, and can be used</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment"> * through Java Cryptography Architecture (JCA), as a pluggable</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment"> * MessageDigest implementation.</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment"> * @since       1.4.2</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment"> * @author      Valerie Peng</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment"> * @author      Andreas Sterbenz</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> SHA5 <strong class="jxr_keyword">extends</strong> DigestBase {
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> ITERATION = 80;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>      <em class="jxr_comment">// Constants for each round/iteration</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong>[] ROUND_CONSTS = {
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>          0x428A2F98D728AE22L, 0x7137449123EF65CDL, 0xB5C0FBCFEC4D3B2FL,
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>          0xE9B5DBA58189DBBCL, 0x3956C25BF348B538L, 0x59F111F1B605D019L,
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>          0x923F82A4AF194F9BL, 0xAB1C5ED5DA6D8118L, 0xD807AA98A3030242L,
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>          0x12835B0145706FBEL, 0x243185BE4EE4B28CL, 0x550C7DC3D5FFB4E2L,
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>          0x72BE5D74F27B896FL, 0x80DEB1FE3B1696B1L, 0x9BDC06A725C71235L,
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>          0xC19BF174CF692694L, 0xE49B69C19EF14AD2L, 0xEFBE4786384F25E3L,
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>          0x0FC19DC68B8CD5B5L, 0x240CA1CC77AC9C65L, 0x2DE92C6F592B0275L,
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>          0x4A7484AA6EA6E483L, 0x5CB0A9DCBD41FBD4L, 0x76F988DA831153B5L,
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>          0x983E5152EE66DFABL, 0xA831C66D2DB43210L, 0xB00327C898FB213FL,
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>          0xBF597FC7BEEF0EE4L, 0xC6E00BF33DA88FC2L, 0xD5A79147930AA725L,
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>          0x06CA6351E003826FL, 0x142929670A0E6E70L, 0x27B70A8546D22FFCL,
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>          0x2E1B21385C26C926L, 0x4D2C6DFC5AC42AEDL, 0x53380D139D95B3DFL,
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>          0x650A73548BAF63DEL, 0x766A0ABB3C77B2A8L, 0x81C2C92E47EDAEE6L,
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>          0x92722C851482353BL, 0xA2BFE8A14CF10364L, 0xA81A664BBC423001L,
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>          0xC24B8B70D0F89791L, 0xC76C51A30654BE30L, 0xD192E819D6EF5218L,
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>          0xD69906245565A910L, 0xF40E35855771202AL, 0x106AA07032BBD1B8L,
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>          0x19A4C116B8D2D0C8L, 0x1E376C085141AB53L, 0x2748774CDF8EEB99L,
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>          0x34B0BCB5E19B48A8L, 0x391C0CB3C5C95A63L, 0x4ED8AA4AE3418ACBL,
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>          0x5B9CCA4F7763E373L, 0x682E6FF3D6B2B8A3L, 0x748F82EE5DEFB2FCL,
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>          0x78A5636F43172F60L, 0x84C87814A1F0AB72L, 0x8CC702081A6439ECL,
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>          0x90BEFFFA23631E28L, 0xA4506CEBDE82BDE9L, 0xBEF9A3F7B2C67915L,
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>          0xC67178F2E372532BL, 0xCA273ECEEA26619CL, 0xD186B8C721C0C207L,
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>          0xEADA7DD6CDE0EB1EL, 0xF57D4F7FEE6ED178L, 0x06F067AA72176FBAL,
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>          0x0A637DC5A2C898A6L, 0x113F9804BEF90DAEL, 0x1B710B35131C471BL,
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>          0x28DB77F523047D84L, 0x32CAAB7B40C72493L, 0x3C9EBE0A15C9BEBCL,
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>          0x431D67C49C100D4CL, 0x4CC5D4BECB3E42B6L, 0x597F299CFC657E2AL,
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>          0x5FCB6FAB3AD6FAECL, 0x6C44198C4A475817L
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>      };
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>      <em class="jxr_comment">// buffer used by implCompress()</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong>[] W;
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>      <em class="jxr_comment">// state of this object</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong>[] state;
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>      <em class="jxr_comment">// initial state value. different between SHA-384 and SHA-512</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong>[] initialHashes;
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_javadoccomment">     * Creates a new SHA object.</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>      SHA5(String name, <strong class="jxr_keyword">int</strong> digestLength, <strong class="jxr_keyword">long</strong>[] initialHashes) {
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>          <strong class="jxr_keyword">super</strong>(name, digestLength, 128);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>          <strong class="jxr_keyword">this</strong>.initialHashes = initialHashes;
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>          state = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">long</strong>[8];
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>         W = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">long</strong>[80];
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>         implReset();
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>     }
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">     * Creates a SHA object with state (for cloning)</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>     SHA5(SHA5 base) {
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>         <strong class="jxr_keyword">super</strong>(base);
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>         <strong class="jxr_keyword">this</strong>.initialHashes = base.initialHashes;
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>         <strong class="jxr_keyword">this</strong>.state = base.state.clone();
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>         <strong class="jxr_keyword">this</strong>.W = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">long</strong>[80];
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>     }
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> implReset() {
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>         System.arraycopy(initialHashes, 0, state, 0, state.length);
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>     }
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> implDigest(byte[] out, <strong class="jxr_keyword">int</strong> ofs) {
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>         <strong class="jxr_keyword">long</strong> bitsProcessed = bytesProcessed &lt;&lt; 3;
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>         <strong class="jxr_keyword">int</strong> index = (<strong class="jxr_keyword">int</strong>)bytesProcessed &amp; 0x7f;
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>         <strong class="jxr_keyword">int</strong> padLen = (index &lt; 112) ? (112 - index) : (240 - index);
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>         engineUpdate(padding, 0, padLen + 8);
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>         i2bBig4((<strong class="jxr_keyword">int</strong>)(bitsProcessed &gt;&gt;&gt; 32), buffer, 120);
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>         i2bBig4((<strong class="jxr_keyword">int</strong>)bitsProcessed, buffer, 124);
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>         implCompress(buffer, 0);
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>         l2bBig(state, 0, out, ofs, engineGetDigestLength());
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>     }
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> <em class="jxr_javadoccomment">     * logical function ch(x,y,z) as defined in spec:</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_javadoccomment">     * @return (x and y) xor ((complement x) and z)</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_javadoccomment">     * @param x long</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> <em class="jxr_javadoccomment">     * @param y long</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_javadoccomment">     * @param z long</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> lf_ch(<strong class="jxr_keyword">long</strong> x, <strong class="jxr_keyword">long</strong> y, <strong class="jxr_keyword">long</strong> z) {
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>         <strong class="jxr_keyword">return</strong> (x &amp; y) ^ ((~x) &amp; z);
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>     }
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> <em class="jxr_javadoccomment">     * logical function maj(x,y,z) as defined in spec:</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment">     * @return (x and y) xor (x and z) xor (y and z)</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment">     * @param x long</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">     * @param y long</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_javadoccomment">     * @param z long</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> lf_maj(<strong class="jxr_keyword">long</strong> x, <strong class="jxr_keyword">long</strong> y, <strong class="jxr_keyword">long</strong> z) {
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>         <strong class="jxr_keyword">return</strong> (x &amp; y) ^ (x &amp; z) ^ (y &amp; z);
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>     }
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> <em class="jxr_javadoccomment">     * logical function R(x,s) - right shift</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> <em class="jxr_javadoccomment">     * @return x right shift for s times</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> <em class="jxr_javadoccomment">     * @param x long</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> <em class="jxr_javadoccomment">     * @param s int</em>
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> lf_R(<strong class="jxr_keyword">long</strong> x, <strong class="jxr_keyword">int</strong> s) {
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>         <strong class="jxr_keyword">return</strong> (x &gt;&gt;&gt; s);
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>     }
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> <em class="jxr_javadoccomment">     * logical function S(x,s) - right rotation</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> <em class="jxr_javadoccomment">     * @return x circular right shift for s times</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> <em class="jxr_javadoccomment">     * @param x long</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> <em class="jxr_javadoccomment">     * @param s int</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> lf_S(<strong class="jxr_keyword">long</strong> x, <strong class="jxr_keyword">int</strong> s) {
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>         <strong class="jxr_keyword">return</strong> (x &gt;&gt;&gt; s) | (x &lt;&lt; (64 - s));
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>     }
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment">     * logical function sigma0(x) - xor of results of right rotations</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment">     * @return S(x,28) xor S(x,34) xor S(x,39)</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">     * @param x long</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> lf_sigma0(<strong class="jxr_keyword">long</strong> x) {
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>         <strong class="jxr_keyword">return</strong> lf_S(x, 28) ^ lf_S(x, 34) ^ lf_S(x, 39);
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>     }
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_javadoccomment">     * logical function sigma1(x) - xor of results of right rotations</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">     * @return S(x,14) xor S(x,18) xor S(x,41)</em>
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> <em class="jxr_javadoccomment">     * @param x long</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> lf_sigma1(<strong class="jxr_keyword">long</strong> x) {
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>         <strong class="jxr_keyword">return</strong> lf_S(x, 14) ^ lf_S(x, 18) ^ lf_S(x, 41);
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>     }
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> <em class="jxr_javadoccomment">     * logical function delta0(x) - xor of results of right shifts/rotations</em>
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> <em class="jxr_javadoccomment">     * @return long</em>
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> <em class="jxr_javadoccomment">     * @param x long</em>
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> lf_delta0(<strong class="jxr_keyword">long</strong> x) {
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>         <strong class="jxr_keyword">return</strong> lf_S(x, 1) ^ lf_S(x, 8) ^ lf_R(x, 7);
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>     }
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> 
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">     * logical function delta1(x) - xor of results of right shifts/rotations</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> <em class="jxr_javadoccomment">     * @return long</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> <em class="jxr_javadoccomment">     * @param x long</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> lf_delta1(<strong class="jxr_keyword">long</strong> x) {
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>         <strong class="jxr_keyword">return</strong> lf_S(x, 19) ^ lf_S(x, 61) ^ lf_R(x, 6);
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>     }
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> 
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> <em class="jxr_javadoccomment">     * Compute the hash for the current block.</em>
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> <em class="jxr_javadoccomment">     * This is in the same vein as Peter Gutmann's algorithm listed in</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> <em class="jxr_javadoccomment">     * the back of Applied Cryptography, Compact implementation of</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> <em class="jxr_javadoccomment">     * "old" NIST Secure Hash Algorithm.</em>
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> implCompress(byte[] buf, <strong class="jxr_keyword">int</strong> ofs) {
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>         b2lBig128(buf, ofs, W);
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>         <em class="jxr_comment">// The first 16 longs are from the byte stream, compute the rest of</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>         <em class="jxr_comment">// the W[]'s</em>
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> t = 16; t &lt; ITERATION; t++) {
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>             W[t] = lf_delta1(W[t-2]) + W[t-7] + lf_delta0(W[t-15])
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>                    + W[t-16];
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>         }
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>         <strong class="jxr_keyword">long</strong> a = state[0];
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>         <strong class="jxr_keyword">long</strong> b = state[1];
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>         <strong class="jxr_keyword">long</strong> c = state[2];
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>         <strong class="jxr_keyword">long</strong> d = state[3];
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>         <strong class="jxr_keyword">long</strong> e = state[4];
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>         <strong class="jxr_keyword">long</strong> f = state[5];
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>         <strong class="jxr_keyword">long</strong> g = state[6];
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>         <strong class="jxr_keyword">long</strong> h = state[7];
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> 
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; ITERATION; i++) {
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>             <strong class="jxr_keyword">long</strong> T1 = h + lf_sigma1(e) + lf_ch(e,f,g) + ROUND_CONSTS[i] + W[i];
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>             <strong class="jxr_keyword">long</strong> T2 = lf_sigma0(a) + lf_maj(a,b,c);
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>             h = g;
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>             g = f;
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>             f = e;
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>             e = d + T1;
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>             d = c;
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>             c = b;
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>             b = a;
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>             a = T1 + T2;
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>         }
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>         state[0] += a;
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>         state[1] += b;
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>         state[2] += c;
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>         state[3] += d;
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>         state[4] += e;
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>         state[5] += f;
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>         state[6] += g;
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>         state[7] += h;
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>     }
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> 
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> <em class="jxr_javadoccomment">     * SHA-512 implementation class.</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> SHA512 <strong class="jxr_keyword">extends</strong> SHA5 {
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> 
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong>[] INITIAL_HASHES = {
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>             0x6a09e667f3bcc908L, 0xbb67ae8584caa73bL,
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>             0x3c6ef372fe94f82bL, 0xa54ff53a5f1d36f1L,
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>             0x510e527fade682d1L, 0x9b05688c2b3e6c1fL,
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>             0x1f83d9abfb41bd6bL, 0x5be0cd19137e2179L
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>         };
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>         <strong class="jxr_keyword">public</strong> SHA512() {
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>             <strong class="jxr_keyword">super</strong>(<span class="jxr_string">"SHA-512"</span>, 64, INITIAL_HASHES);
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>         }
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>         <strong class="jxr_keyword">private</strong> SHA512(SHA512 base) {
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>             <strong class="jxr_keyword">super</strong>(base);
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>         }
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>         <strong class="jxr_keyword">public</strong> Object clone() {
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> SHA512(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>         }
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>     }
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> 
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> <em class="jxr_javadoccomment">     * SHA-384 implementation class.</em>
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> SHA384 <strong class="jxr_keyword">extends</strong> SHA5 {
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> 
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong>[] INITIAL_HASHES = {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>             0xcbbb9d5dc1059ed8L, 0x629a292a367cd507L,
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>             0x9159015a3070dd17L, 0x152fecd8f70e5939L,
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>             0x67332667ffc00b31L, 0x8eb44a8768581511L,
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>             0xdb0c2e0d64f98fa7L, 0x47b5481dbefa4fa4L
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>         };
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> 
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>         <strong class="jxr_keyword">public</strong> SHA384() {
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>             <strong class="jxr_keyword">super</strong>(<span class="jxr_string">"SHA-384"</span>, 48, INITIAL_HASHES);
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>         }
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> 
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>         <strong class="jxr_keyword">private</strong> SHA384(SHA384 base) {
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>             <strong class="jxr_keyword">super</strong>(base);
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>         }
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> 
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>         <strong class="jxr_keyword">public</strong> Object clone() {
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> SHA384(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>         }
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>     }
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

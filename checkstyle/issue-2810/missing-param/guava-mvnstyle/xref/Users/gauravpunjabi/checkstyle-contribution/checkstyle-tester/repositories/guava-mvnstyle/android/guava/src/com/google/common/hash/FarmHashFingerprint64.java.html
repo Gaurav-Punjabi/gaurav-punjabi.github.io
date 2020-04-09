@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>FarmHashFingerprint64 xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (C) 2015 The Guava Authors</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * in compliance with the License. You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software distributed under the License</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * or implied. See the License for the specific language governing permissions and limitations under</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * the License.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">package</strong> com.google.common.hash;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkPositionIndexes;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.hash.LittleEndianByteArray.load32;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.hash.LittleEndianByteArray.load64;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> java.lang.Long.rotateRight;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.VisibleForTesting;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_javadoccomment"> * Implementation of FarmHash Fingerprint64, an open-source fingerprinting algorithm for strings.</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;Its speed is comparable to CityHash64, and its quality of hashing is at least as good.</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;Note to maintainers: This implementation relies on signed arithmetic being bit-wise equivalent</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment"> * to unsigned arithmetic in all cases except:</em>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment"> * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;comparisons (signed values can be negative)</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;division (avoided here)</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;shifting (right shift must be unsigned)</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment"> * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> * @author Kyle Maddison</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment"> * @author Geoff Pike</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> FarmHashFingerprint64 <strong class="jxr_keyword">extends</strong> AbstractNonStreamingHashFunction {
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>    <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> HashFunction FARMHASH_FINGERPRINT_64 = <strong class="jxr_keyword">new</strong> FarmHashFingerprint64();
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>    <em class="jxr_comment">// Some primes between 2^63 and 2^64 for various uses.</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> K0 = 0xc3a5c85c97cb3127L;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> K1 = 0xb492b66fbe98f273L;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> K2 = 0x9ae16a3b2f90404fL;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>    @Override
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>    <strong class="jxr_keyword">public</strong> HashCode hashBytes(byte[] input, <strong class="jxr_keyword">int</strong> off, <strong class="jxr_keyword">int</strong> len) {
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>      checkPositionIndexes(off, off + len, input.length);
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>      <strong class="jxr_keyword">return</strong> HashCode.fromLong(fingerprint(input, off, len));
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>    }
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>    @Override
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> bits() {
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>      <strong class="jxr_keyword">return</strong> 64;
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>    }
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>    @Override
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>    <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>      <strong class="jxr_keyword">return</strong> <span class="jxr_string">"Hashing.farmHashFingerprint64()"</span>;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>    }
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>    <em class="jxr_comment">// End of public functions.</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>    @VisibleForTesting
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>    <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> fingerprint(byte[] bytes, <strong class="jxr_keyword">int</strong> offset, <strong class="jxr_keyword">int</strong> length) {
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>      <strong class="jxr_keyword">if</strong> (length &lt;= 32) {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>        <strong class="jxr_keyword">if</strong> (length &lt;= 16) {
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>          <strong class="jxr_keyword">return</strong> hashLength0to16(bytes, offset, length);
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>        } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>          <strong class="jxr_keyword">return</strong> hashLength17to32(bytes, offset, length);
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>        }
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>      } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (length &lt;= 64) {
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>        <strong class="jxr_keyword">return</strong> hashLength33To64(bytes, offset, length);
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>      } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>        <strong class="jxr_keyword">return</strong> hashLength65Plus(bytes, offset, length);
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>      }
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>    }
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> shiftMix(<strong class="jxr_keyword">long</strong> val) {
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>      <strong class="jxr_keyword">return</strong> val ^ (val &gt;&gt;&gt; 47);
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>    }
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> hashLength16(<strong class="jxr_keyword">long</strong> u, <strong class="jxr_keyword">long</strong> v, <strong class="jxr_keyword">long</strong> mul) {
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>      <strong class="jxr_keyword">long</strong> a = (u ^ v) * mul;
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>      a ^= (a &gt;&gt;&gt; 47);
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>      <strong class="jxr_keyword">long</strong> b = (v ^ a) * mul;
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>      b ^= (b &gt;&gt;&gt; 47);
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>      b *= mul;
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>      <strong class="jxr_keyword">return</strong> b;
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>    }
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment">   * Computes intermediate hash of 32 bytes of byte array from the given offset. Results are</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment">   * returned in the output array because when we last measured, this was 12% faster than allocating</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">   * new arrays every time.</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> weakHashLength32WithSeeds(
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>       byte[] bytes, <strong class="jxr_keyword">int</strong> offset, <strong class="jxr_keyword">long</strong> seedA, <strong class="jxr_keyword">long</strong> seedB, <strong class="jxr_keyword">long</strong>[] output) {
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>     <strong class="jxr_keyword">long</strong> part1 = load64(bytes, offset);
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>     <strong class="jxr_keyword">long</strong> part2 = load64(bytes, offset + 8);
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>     <strong class="jxr_keyword">long</strong> part3 = load64(bytes, offset + 16);
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>     <strong class="jxr_keyword">long</strong> part4 = load64(bytes, offset + 24);
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>     seedA += part1;
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>     seedB = rotateRight(seedB + seedA + part4, 21);
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>     <strong class="jxr_keyword">long</strong> c = seedA;
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>     seedA += part2;
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>     seedA += part3;
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>     seedB += rotateRight(seedA, 44);
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>     output[0] = seedA + part4;
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>     output[1] = seedB + c;
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>   }
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> hashLength0to16(byte[] bytes, <strong class="jxr_keyword">int</strong> offset, <strong class="jxr_keyword">int</strong> length) {
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>     <strong class="jxr_keyword">if</strong> (length &gt;= 8) {
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>       <strong class="jxr_keyword">long</strong> mul = K2 + length * 2;
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>       <strong class="jxr_keyword">long</strong> a = load64(bytes, offset) + K2;
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>       <strong class="jxr_keyword">long</strong> b = load64(bytes, offset + length - 8);
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>       <strong class="jxr_keyword">long</strong> c = rotateRight(b, 37) * mul + a;
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>       <strong class="jxr_keyword">long</strong> d = (rotateRight(a, 25) + b) * mul;
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>       <strong class="jxr_keyword">return</strong> hashLength16(c, d, mul);
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>     }
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>     <strong class="jxr_keyword">if</strong> (length &gt;= 4) {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>       <strong class="jxr_keyword">long</strong> mul = K2 + length * 2;
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>       <strong class="jxr_keyword">long</strong> a = load32(bytes, offset) &amp; 0xFFFFFFFFL;
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>       <strong class="jxr_keyword">return</strong> hashLength16(length + (a &lt;&lt; 3), load32(bytes, offset + length - 4) &amp; 0xFFFFFFFFL, mul);
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>     }
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>     <strong class="jxr_keyword">if</strong> (length &gt; 0) {
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>       byte a = bytes[offset];
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>       byte b = bytes[offset + (length &gt;&gt; 1)];
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>       byte c = bytes[offset + (length - 1)];
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>       <strong class="jxr_keyword">int</strong> y = (a &amp; 0xFF) + ((b &amp; 0xFF) &lt;&lt; 8);
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>       <strong class="jxr_keyword">int</strong> z = length + ((c &amp; 0xFF) &lt;&lt; 2);
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>       <strong class="jxr_keyword">return</strong> shiftMix(y * K2 ^ z * K0) * K2;
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>     }
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>     <strong class="jxr_keyword">return</strong> K2;
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>   }
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> hashLength17to32(byte[] bytes, <strong class="jxr_keyword">int</strong> offset, <strong class="jxr_keyword">int</strong> length) {
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>     <strong class="jxr_keyword">long</strong> mul = K2 + length * 2;
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>     <strong class="jxr_keyword">long</strong> a = load64(bytes, offset) * K1;
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>     <strong class="jxr_keyword">long</strong> b = load64(bytes, offset + 8);
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>     <strong class="jxr_keyword">long</strong> c = load64(bytes, offset + length - 8) * mul;
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>     <strong class="jxr_keyword">long</strong> d = load64(bytes, offset + length - 16) * K2;
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>     <strong class="jxr_keyword">return</strong> hashLength16(
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>         rotateRight(a + b, 43) + rotateRight(c, 30) + d, a + rotateRight(b + K2, 18) + c, mul);
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>   }
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> hashLength33To64(byte[] bytes, <strong class="jxr_keyword">int</strong> offset, <strong class="jxr_keyword">int</strong> length) {
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>     <strong class="jxr_keyword">long</strong> mul = K2 + length * 2;
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>     <strong class="jxr_keyword">long</strong> a = load64(bytes, offset) * K2;
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>     <strong class="jxr_keyword">long</strong> b = load64(bytes, offset + 8);
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>     <strong class="jxr_keyword">long</strong> c = load64(bytes, offset + length - 8) * mul;
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>     <strong class="jxr_keyword">long</strong> d = load64(bytes, offset + length - 16) * K2;
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>     <strong class="jxr_keyword">long</strong> y = rotateRight(a + b, 43) + rotateRight(c, 30) + d;
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>     <strong class="jxr_keyword">long</strong> z = hashLength16(y, a + rotateRight(b + K2, 18) + c, mul);
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>     <strong class="jxr_keyword">long</strong> e = load64(bytes, offset + 16) * mul;
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>     <strong class="jxr_keyword">long</strong> f = load64(bytes, offset + 24);
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>     <strong class="jxr_keyword">long</strong> g = (y + load64(bytes, offset + length - 32)) * mul;
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>     <strong class="jxr_keyword">long</strong> h = (z + load64(bytes, offset + length - 24)) * mul;
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>     <strong class="jxr_keyword">return</strong> hashLength16(
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>         rotateRight(e + f, 43) + rotateRight(g, 30) + h, e + rotateRight(f + a, 18) + g, mul);
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>   }
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> <em class="jxr_comment">   * Compute an 8-byte hash of a byte array of length greater than 64 bytes.</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> <em class="jxr_comment">   */</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> hashLength65Plus(byte[] bytes, <strong class="jxr_keyword">int</strong> offset, <strong class="jxr_keyword">int</strong> length) {
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> seed = 81;
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>     <em class="jxr_comment">// For strings over 64 bytes we loop. Internal state consists of 56 bytes: v, w, x, y, and z.</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>     <strong class="jxr_keyword">long</strong> x = seed;
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>     @SuppressWarnings(<span class="jxr_string">"ConstantOverflow"</span>)
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>     <strong class="jxr_keyword">long</strong> y = seed * K1 + 113;
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>     <strong class="jxr_keyword">long</strong> z = shiftMix(y * K2 + 113) * K2;
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>     <strong class="jxr_keyword">long</strong>[] v = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">long</strong>[2];
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>     <strong class="jxr_keyword">long</strong>[] w = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">long</strong>[2];
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>     x = x * K2 + load64(bytes, offset);
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>     <em class="jxr_comment">// Set end so that after the loop we have 1 to 64 bytes left to process.</em>
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>     <strong class="jxr_keyword">int</strong> end = offset + ((length - 1) / 64) * 64;
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>     <strong class="jxr_keyword">int</strong> last64offset = end + ((length - 1) &amp; 63) - 63;
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>     <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>       x = rotateRight(x + y + v[0] + load64(bytes, offset + 8), 37) * K1;
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>       y = rotateRight(y + v[1] + load64(bytes, offset + 48), 42) * K1;
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>       x ^= w[1];
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>       y += v[0] + load64(bytes, offset + 40);
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>       z = rotateRight(z + w[0], 33) * K1;
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>       weakHashLength32WithSeeds(bytes, offset, v[1] * K1, x + w[0], v);
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>       weakHashLength32WithSeeds(bytes, offset + 32, z + w[1], y + load64(bytes, offset + 16), w);
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>       <strong class="jxr_keyword">long</strong> tmp = x;
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>       x = z;
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>       z = tmp;
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>       offset += 64;
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>     } <strong class="jxr_keyword">while</strong> (offset != end);
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>     <strong class="jxr_keyword">long</strong> mul = K1 + ((z &amp; 0xFF) &lt;&lt; 1);
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>     <em class="jxr_comment">// Operate on the last 64 bytes of input.</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>     offset = last64offset;
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>     w[0] += ((length - 1) &amp; 63);
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>     v[0] += w[0];
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>     w[0] += v[0];
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>     x = rotateRight(x + y + v[0] + load64(bytes, offset + 8), 37) * mul;
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>     y = rotateRight(y + v[1] + load64(bytes, offset + 48), 42) * mul;
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>     x ^= w[1] * 9;
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>     y += v[0] * 9 + load64(bytes, offset + 40);
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>     z = rotateRight(z + w[0], 33) * mul;
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>     weakHashLength32WithSeeds(bytes, offset, v[1] * mul, x + w[0], v);
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>     weakHashLength32WithSeeds(bytes, offset + 32, z + w[1], y + load64(bytes, offset + 16), w);
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>     <strong class="jxr_keyword">return</strong> hashLength16(
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>         hashLength16(v[0], w[0], mul) + shiftMix(y) * K0 + x,
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>         hashLength16(v[1], w[1], mul) + z,
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>         mul);
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>   }
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

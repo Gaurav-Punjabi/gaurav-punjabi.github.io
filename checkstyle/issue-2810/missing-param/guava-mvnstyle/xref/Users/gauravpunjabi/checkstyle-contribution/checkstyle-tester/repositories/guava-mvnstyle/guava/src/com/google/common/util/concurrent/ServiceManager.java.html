@@ -1,0 +1,907 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>ServiceManager xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (C) 2012 The Guava Authors</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * in compliance with the License. You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software distributed under the License</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * or implied. See the License for the specific language governing permissions and limitations under</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * the License.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">package</strong> com.google.common.util.concurrent;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkArgument;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkNotNull;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkState;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Predicates.equalTo;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Predicates.in;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Predicates.instanceOf;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Predicates.not;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.util.concurrent.Internal.toNanosSaturated;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.util.concurrent.MoreExecutors.directExecutor;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.util.concurrent.Service.State.FAILED;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.util.concurrent.Service.State.NEW;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.util.concurrent.Service.State.RUNNING;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.util.concurrent.Service.State.STARTING;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.util.concurrent.Service.State.STOPPING;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.util.concurrent.Service.State.TERMINATED;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> java.util.concurrent.TimeUnit.MILLISECONDS;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.Beta;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.GwtIncompatible;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Function;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.MoreObjects;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Stopwatch;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.Collections2;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableCollection;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableList;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableMap;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableMultimap;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableSet;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableSetMultimap;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.Lists;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.Maps;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.MultimapBuilder;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.Multimaps;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.Multiset;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.Ordering;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.SetMultimap;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> com.google.common.util.concurrent.Service.State;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> com.google.errorprone.annotations.CanIgnoreReturnValue;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <strong class="jxr_keyword">import</strong> com.google.errorprone.annotations.concurrent.GuardedBy;
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">import</strong> com.google.j2objc.annotations.WeakOuter;
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <strong class="jxr_keyword">import</strong> java.lang.ref.WeakReference;
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <strong class="jxr_keyword">import</strong> java.time.Duration;
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <strong class="jxr_keyword">import</strong> java.util.EnumSet;
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <strong class="jxr_keyword">import</strong> java.util.Map.Entry;
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.Executor;
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.TimeUnit;
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.TimeoutException;
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <strong class="jxr_keyword">import</strong> java.util.logging.Level;
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <strong class="jxr_keyword">import</strong> java.util.logging.Logger;
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment"> * A manager for monitoring and controlling a set of {@linkplain Service services}. This class</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment"> * provides methods for {@linkplain #startAsync() starting}, {@linkplain #stopAsync() stopping} and</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment"> * {@linkplain #servicesByState inspecting} a collection of {@linkplain Service services}.</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment"> * Additionally, users can monitor state transitions with the {@linkplain Listener listener}</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment"> * mechanism.</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;While it is recommended that service lifecycles be managed via this class, state transitions</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment"> * initiated via other mechanisms do not impact the correctness of its methods. For example, if the</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment"> * services are started by some mechanism besides {@link #startAsync}, the listeners will be invoked</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment"> * when appropriate and {@link #awaitHealthy} will still work as expected.</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;Here is a simple example of how to use a {@code ServiceManager} to start a server.</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment"> * &lt;pre&gt;{@code</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment"> * class Server {</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment"> *   public static void main(String[] args) {</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_javadoccomment"> *     Set&lt;Service&gt; services = ...;</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  <em class="jxr_javadoccomment"> *     ServiceManager manager = new ServiceManager(services);</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  <em class="jxr_javadoccomment"> *     manager.addListener(new Listener() {</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment"> *         public void stopped() {}</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment"> *         public void healthy() {</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment"> *           // Services have been initialized and are healthy, start accepting requests...</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment"> *         }</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_javadoccomment"> *         public void failure(Service service) {</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_javadoccomment"> *           // Something failed, at this point we could log it, notify a load balancer, or take</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment"> *           // some other action.  For now we will just exit.</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment"> *           System.exit(1);</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment"> *         }</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment"> *       },</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment"> *       MoreExecutors.directExecutor());</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment"> *     Runtime.getRuntime().addShutdownHook(new Thread() {</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment"> *       public void run() {</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment"> *         // Give the services 5 seconds to stop to ensure that we are responsive to shutdown</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment"> *         // requests.</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment"> *         try {</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment"> *           manager.stopAsync().awaitStopped(5, TimeUnit.SECONDS);</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment"> *         } catch (TimeoutException timeout) {</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment"> *           // stopping timed out</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_javadoccomment"> *         }</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_javadoccomment"> *       }</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment"> *     });</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment"> *     manager.startAsync();  // start all the services asynchronously</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment"> *   }</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment"> * }</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> <em class="jxr_javadoccomment"> * }&lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> <em class="jxr_javadoccomment"> * &lt;p&gt;This class uses the ServiceManager's methods to start all of its services, to respond to</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment"> * service failure and to ensure that when the JVM is shutting down all the services are stopped.</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment"> * @author Luke Sandberg</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment"> * @since 14.0</em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> @Beta
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> @GwtIncompatible
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> ServiceManager {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Logger logger = Logger.getLogger(ServiceManager.<strong class="jxr_keyword">class</strong>.getName());
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> ListenerCallQueue.Event&lt;Listener&gt; HEALTHY_EVENT =
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>       <strong class="jxr_keyword">new</strong> ListenerCallQueue.Event&lt;Listener&gt;() {
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>         @Override
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>         <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> call(Listener listener) {
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>           listener.healthy();
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>         }
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>         @Override
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>         <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>           <strong class="jxr_keyword">return</strong> <span class="jxr_string">"healthy()"</span>;
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>         }
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>       };
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> ListenerCallQueue.Event&lt;Listener&gt; STOPPED_EVENT =
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>       <strong class="jxr_keyword">new</strong> ListenerCallQueue.Event&lt;Listener&gt;() {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>         @Override
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>         <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> call(Listener listener) {
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>           listener.stopped();
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>         }
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>         @Override
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>         <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>           <strong class="jxr_keyword">return</strong> <span class="jxr_string">"stopped()"</span>;
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>         }
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>       };
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_javadoccomment">   * A listener for the aggregate state changes of the services that are under management. Users</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> <em class="jxr_javadoccomment">   * that need to listen to more fine-grained events (such as when each particular {@linkplain</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> <em class="jxr_javadoccomment">   * Service service} starts, or terminates), should attach {@linkplain Service.Listener service</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> <em class="jxr_javadoccomment">   * listeners} to each individual service.</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> <em class="jxr_javadoccomment">   * @author Luke Sandberg</em>
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> <em class="jxr_javadoccomment">   * @since 15.0 (present as an interface in 14.0)</em>
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>   @Beta <em class="jxr_comment">// Should come out of Beta when ServiceManager does</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Listener {
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> <em class="jxr_javadoccomment">     * Called when the service initially becomes healthy.</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> <em class="jxr_javadoccomment">     * &lt;p&gt;This will be called at most once after all the services have entered the {@linkplain</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> <em class="jxr_javadoccomment">     * State#RUNNING running} state. If any services fail during start up or {@linkplain</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> <em class="jxr_javadoccomment">     * State#FAILED fail}/{@linkplain State#TERMINATED terminate} before all other services have</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> <em class="jxr_javadoccomment">     * started {@linkplain State#RUNNING running} then this method will not be called.</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> healthy() {}
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment">     * Called when the all of the component services have reached a terminal state, either</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment">     * {@linkplain State#TERMINATED terminated} or {@linkplain State#FAILED failed}.</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> stopped() {}
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> <em class="jxr_javadoccomment">     * Called when a component service has {@linkplain State#FAILED failed}.</em>
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> <em class="jxr_javadoccomment">     * @param service The service that failed.</em>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> failure(Service service) {}
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>   }
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> <em class="jxr_javadoccomment">   * An encapsulation of all of the state that is accessed by the {@linkplain ServiceListener</em>
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> <em class="jxr_javadoccomment">   * service listeners}. This is extracted into its own object so that {@link ServiceListener} could</em>
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> <em class="jxr_javadoccomment">   * be made {@code static} and its instances can be safely constructed and added in the {@link</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> <em class="jxr_javadoccomment">   * ServiceManager} constructor without having to close over the partially constructed {@link</em>
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> <em class="jxr_javadoccomment">   * ServiceManager} instance (i.e. avoid leaking a pointer to {@code this}).</em>
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ServiceManagerState state;
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ImmutableList&lt;Service&gt; services;
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> 
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment">   * Constructs a new instance for managing the given services.</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">   * @param services The services to manage</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if not all services are {@linkplain State#NEW new} or if there</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> <em class="jxr_javadoccomment">   *     are any duplicate services.</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>   <strong class="jxr_keyword">public</strong> ServiceManager(Iterable&lt;? <strong class="jxr_keyword">extends</strong> Service&gt; services) {
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>     ImmutableList&lt;Service&gt; copy = ImmutableList.copyOf(services);
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>     <strong class="jxr_keyword">if</strong> (copy.isEmpty()) {
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>       <em class="jxr_comment">// Having no services causes the manager to behave strangely. Notably, listeners are never</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>       <em class="jxr_comment">// fired. To avoid this we substitute a placeholder service.</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>       logger.log(
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>           Level.WARNING,
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>           <span class="jxr_string">"ServiceManager configured with no services.  Is your application configured properly?"</span>,
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>           <strong class="jxr_keyword">new</strong> EmptyServiceManagerWarning());
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>       copy = ImmutableList.&lt;Service&gt;of(<strong class="jxr_keyword">new</strong> NoOpService());
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>     }
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>     <strong class="jxr_keyword">this</strong>.state = <strong class="jxr_keyword">new</strong> ServiceManagerState(copy);
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>     <strong class="jxr_keyword">this</strong>.services = copy;
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>     WeakReference&lt;ServiceManagerState&gt; stateReference = <strong class="jxr_keyword">new</strong> WeakReference&lt;&gt;(state);
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>     <strong class="jxr_keyword">for</strong> (Service service : copy) {
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>       service.addListener(<strong class="jxr_keyword">new</strong> ServiceListener(service, stateReference), directExecutor());
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>       <em class="jxr_comment">// We check the state after adding the listener as a way to ensure that our listener was added</em>
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>       <em class="jxr_comment">// to a NEW service.</em>
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>       checkArgument(service.state() == NEW, <span class="jxr_string">"Can only manage NEW services, %s"</span>, service);
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>     }
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>     <em class="jxr_comment">// We have installed all of our listeners and after this point any state transition should be</em>
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>     <em class="jxr_comment">// correct.</em>
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>     <strong class="jxr_keyword">this</strong>.state.markReady();
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>   }
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> 
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> <em class="jxr_javadoccomment">   * Registers a {@link Listener} to be {@linkplain Executor#execute executed} on the given</em>
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> <em class="jxr_javadoccomment">   * executor. The listener will not have previous state changes replayed, so it is suggested that</em>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> <em class="jxr_javadoccomment">   * listeners are added before any of the managed services are {@linkplain Service#startAsync</em>
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> <em class="jxr_javadoccomment">   * started}.</em>
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> <em class="jxr_javadoccomment">   * &lt;p&gt;{@code addListener} guarantees execution ordering across calls to a given listener but not</em>
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> <em class="jxr_javadoccomment">   * across calls to multiple listeners. Specifically, a given listener will have its callbacks</em>
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> <em class="jxr_javadoccomment">   * invoked in the same order as the underlying service enters those states. Additionally, at most</em>
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> <em class="jxr_javadoccomment">   * one of the listener's callbacks will execute at once. However, multiple listeners' callbacks</em>
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> <em class="jxr_javadoccomment">   * may execute concurrently, and listeners may execute in an order different from the one in which</em>
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> <em class="jxr_javadoccomment">   * they were registered.</em>
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> <em class="jxr_javadoccomment">   * &lt;p&gt;RuntimeExceptions thrown by a listener will be caught and logged. Any exception thrown</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> <em class="jxr_javadoccomment">   * during {@code Executor.execute} (e.g., a {@code RejectedExecutionException}) will be caught and</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_javadoccomment">   * logged.</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_javadoccomment">   * &lt;p&gt;For fast, lightweight listeners that would be safe to execute in any thread, consider</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> <em class="jxr_javadoccomment">   * calling {@link #addListener(Listener)}.</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> <em class="jxr_javadoccomment">   * @param listener the listener to run when the manager changes state</em>
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> <em class="jxr_javadoccomment">   * @param executor the executor in which the listeners callback methods will be run.</em>
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addListener(Listener listener, Executor executor) {
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>     state.addListener(listener, executor);
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>   }
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> 
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> <em class="jxr_javadoccomment">   * Registers a {@link Listener} to be run when this {@link ServiceManager} changes state. The</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> <em class="jxr_javadoccomment">   * listener will not have previous state changes replayed, so it is suggested that listeners are</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> <em class="jxr_javadoccomment">   * added before any of the managed services are {@linkplain Service#startAsync started}.</em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> <em class="jxr_javadoccomment">   * &lt;p&gt;{@code addListener} guarantees execution ordering across calls to a given listener but not</em>
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">   * across calls to multiple listeners. Specifically, a given listener will have its callbacks</em>
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_javadoccomment">   * invoked in the same order as the underlying service enters those states. Additionally, at most</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_javadoccomment">   * one of the listener's callbacks will execute at once. However, multiple listeners' callbacks</em>
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_javadoccomment">   * may execute concurrently, and listeners may execute in an order different from the one in which</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_javadoccomment">   * they were registered.</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> <em class="jxr_javadoccomment">   * &lt;p&gt;RuntimeExceptions thrown by a listener will be caught and logged.</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">   * @param listener the listener to run when the manager changes state</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addListener(Listener listener) {
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>     state.addListener(listener, directExecutor());
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>   }
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> <em class="jxr_javadoccomment">   * Initiates service {@linkplain Service#startAsync startup} on all the services being managed. It</em>
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment">   * is only valid to call this method if all of the services are {@linkplain State#NEW new}.</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_javadoccomment">   * @return this</em>
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> <em class="jxr_javadoccomment">   * @throws IllegalStateException if any of the Services are not {@link State#NEW new} when the</em>
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> <em class="jxr_javadoccomment">   *     method is called.</em>
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>   @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>   <strong class="jxr_keyword">public</strong> ServiceManager startAsync() {
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>     <strong class="jxr_keyword">for</strong> (Service service : services) {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>       State state = service.state();
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>       checkState(state == NEW, <span class="jxr_string">"Service %s is %s, cannot start it."</span>, service, state);
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>     }
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>     <strong class="jxr_keyword">for</strong> (Service service : services) {
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>         state.tryStartTiming(service);
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>         service.startAsync();
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>       } <strong class="jxr_keyword">catch</strong> (IllegalStateException e) {
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>         <em class="jxr_comment">// This can happen if the service has already been started or stopped (e.g. by another</em>
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>         <em class="jxr_comment">// service or listener). Our contract says it is safe to call this method if</em>
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>         <em class="jxr_comment">// all services were NEW when it was called, and this has already been verified above, so we</em>
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>         <em class="jxr_comment">// don't propagate the exception.</em>
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>         logger.log(Level.WARNING, <span class="jxr_string">"Unable to start Service "</span> + service, e);
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>       }
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>     }
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>   }
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> 
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> <em class="jxr_javadoccomment">   * Waits for the {@link ServiceManager} to become {@linkplain #isHealthy() healthy}. The manager</em>
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> <em class="jxr_javadoccomment">   * will become healthy after all the component services have reached the {@linkplain State#RUNNING</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> <em class="jxr_javadoccomment">   * running} state.</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> <em class="jxr_javadoccomment">   * @throws IllegalStateException if the service manager reaches a state from which it cannot</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> <em class="jxr_javadoccomment">   *     become {@linkplain #isHealthy() healthy}.</em>
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> awaitHealthy() {
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>     state.awaitHealthy();
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>   }
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> <em class="jxr_javadoccomment">   * Waits for the {@link ServiceManager} to become {@linkplain #isHealthy() healthy} for no more</em>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> <em class="jxr_javadoccomment">   * than the given time. The manager will become healthy after all the component services have</em>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> <em class="jxr_javadoccomment">   * reached the {@linkplain State#RUNNING running} state.</em>
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> <em class="jxr_javadoccomment">   * @param timeout the maximum time to wait</em>
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> <em class="jxr_javadoccomment">   * @throws TimeoutException if not all of the services have finished starting within the deadline</em>
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> <em class="jxr_javadoccomment">   * @throws IllegalStateException if the service manager reaches a state from which it cannot</em>
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> <em class="jxr_javadoccomment">   *     become {@linkplain #isHealthy() healthy}.</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> <em class="jxr_javadoccomment">   * @since 28.0</em>
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> awaitHealthy(Duration timeout) <strong class="jxr_keyword">throws</strong> TimeoutException {
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>     awaitHealthy(toNanosSaturated(timeout), TimeUnit.NANOSECONDS);
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>   }
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> <em class="jxr_javadoccomment">   * Waits for the {@link ServiceManager} to become {@linkplain #isHealthy() healthy} for no more</em>
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> <em class="jxr_javadoccomment">   * than the given time. The manager will become healthy after all the component services have</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> <em class="jxr_javadoccomment">   * reached the {@linkplain State#RUNNING running} state.</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> <em class="jxr_javadoccomment">   * @param timeout the maximum time to wait</em>
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> <em class="jxr_javadoccomment">   * @param unit the time unit of the timeout argument</em>
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> <em class="jxr_javadoccomment">   * @throws TimeoutException if not all of the services have finished starting within the deadline</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> <em class="jxr_javadoccomment">   * @throws IllegalStateException if the service manager reaches a state from which it cannot</em>
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> <em class="jxr_javadoccomment">   *     become {@linkplain #isHealthy() healthy}.</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>   @SuppressWarnings(<span class="jxr_string">"GoodTime"</span>) <em class="jxr_comment">// should accept a java.time.Duration</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> awaitHealthy(<strong class="jxr_keyword">long</strong> timeout, TimeUnit unit) <strong class="jxr_keyword">throws</strong> TimeoutException {
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>     state.awaitHealthy(timeout, unit);
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>   }
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> <em class="jxr_javadoccomment">   * Initiates service {@linkplain Service#stopAsync shutdown} if necessary on all the services</em>
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> <em class="jxr_javadoccomment">   * being managed.</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> <em class="jxr_javadoccomment">   * @return this</em>
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>   @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>   <strong class="jxr_keyword">public</strong> ServiceManager stopAsync() {
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>     <strong class="jxr_keyword">for</strong> (Service service : services) {
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>       service.stopAsync();
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>     }
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>   }
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> <em class="jxr_javadoccomment">   * Waits for the all the services to reach a terminal state. After this method returns all</em>
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> <em class="jxr_javadoccomment">   * services will either be {@linkplain Service.State#TERMINATED terminated} or {@linkplain</em>
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_javadoccomment">   * Service.State#FAILED failed}.</em>
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> awaitStopped() {
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>     state.awaitStopped();
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>   }
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> 
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> <em class="jxr_javadoccomment">   * Waits for the all the services to reach a terminal state for no more than the given time. After</em>
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> <em class="jxr_javadoccomment">   * this method returns all services will either be {@linkplain Service.State#TERMINATED</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> <em class="jxr_javadoccomment">   * terminated} or {@linkplain Service.State#FAILED failed}.</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment">   * @param timeout the maximum time to wait</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_javadoccomment">   * @throws TimeoutException if not all of the services have stopped within the deadline</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> <em class="jxr_javadoccomment">   * @since 28.0</em>
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> awaitStopped(Duration timeout) <strong class="jxr_keyword">throws</strong> TimeoutException {
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>     awaitStopped(toNanosSaturated(timeout), TimeUnit.NANOSECONDS);
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>   }
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> 
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> <em class="jxr_javadoccomment">   * Waits for the all the services to reach a terminal state for no more than the given time. After</em>
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> <em class="jxr_javadoccomment">   * this method returns all services will either be {@linkplain Service.State#TERMINATED</em>
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> <em class="jxr_javadoccomment">   * terminated} or {@linkplain Service.State#FAILED failed}.</em>
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> <em class="jxr_javadoccomment">   * @param timeout the maximum time to wait</em>
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> <em class="jxr_javadoccomment">   * @param unit the time unit of the timeout argument</em>
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> <em class="jxr_javadoccomment">   * @throws TimeoutException if not all of the services have stopped within the deadline</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>   @SuppressWarnings(<span class="jxr_string">"GoodTime"</span>) <em class="jxr_comment">// should accept a java.time.Duration</em>
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> awaitStopped(<strong class="jxr_keyword">long</strong> timeout, TimeUnit unit) <strong class="jxr_keyword">throws</strong> TimeoutException {
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>     state.awaitStopped(timeout, unit);
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>   }
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> 
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> <em class="jxr_javadoccomment">   * Returns true if all services are currently in the {@linkplain State#RUNNING running} state.</em>
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Users who want more detailed information should use the {@link #servicesByState} method to</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_javadoccomment">   * get detailed information about which services are not running.</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isHealthy() {
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>     <strong class="jxr_keyword">for</strong> (Service service : services) {
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>       <strong class="jxr_keyword">if</strong> (!service.isRunning()) {
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>       }
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>     }
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>   }
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> 
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> <em class="jxr_javadoccomment">   * Provides a snapshot of the current state of all the services under management.</em>
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> <em class="jxr_javadoccomment">   * &lt;p&gt;N.B. This snapshot is guaranteed to be consistent, i.e. the set of states returned will</em>
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> <em class="jxr_javadoccomment">   * correspond to a point in time view of the services.</em>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>   <strong class="jxr_keyword">public</strong> ImmutableMultimap&lt;State, Service&gt; servicesByState() {
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>     <strong class="jxr_keyword">return</strong> state.servicesByState();
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>   }
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> <em class="jxr_javadoccomment">   * Returns the service load times. This value will only return startup times for services that</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">   * have finished starting.</em>
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> <em class="jxr_javadoccomment">   * @return Map of services and their corresponding startup time in millis, the map entries will be</em>
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> <em class="jxr_javadoccomment">   *     ordered by startup time.</em>
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>   <strong class="jxr_keyword">public</strong> ImmutableMap&lt;Service, Long&gt; startupTimes() {
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>     <strong class="jxr_keyword">return</strong> state.startupTimes();
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>   }
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> 
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>   @Override
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>   <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>     <strong class="jxr_keyword">return</strong> MoreObjects.toStringHelper(ServiceManager.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>         .add(<span class="jxr_string">"services"</span>, Collections2.filter(services, not(instanceOf(NoOpService.<strong class="jxr_keyword">class</strong>))))
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>         .toString();
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>   }
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> <em class="jxr_javadoccomment">   * An encapsulation of all the mutable state of the {@link ServiceManager} that needs to be</em>
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> <em class="jxr_javadoccomment">   * accessed by instances of {@link ServiceListener}.</em>
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> ServiceManagerState {
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>     <strong class="jxr_keyword">final</strong> Monitor monitor = <strong class="jxr_keyword">new</strong> Monitor();
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> 
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>     @GuardedBy(<span class="jxr_string">"monitor"</span>)
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>     <strong class="jxr_keyword">final</strong> SetMultimap&lt;State, Service&gt; servicesByState =
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>         MultimapBuilder.enumKeys(State.<strong class="jxr_keyword">class</strong>).linkedHashSetValues().build();
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> 
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>     @GuardedBy(<span class="jxr_string">"monitor"</span>)
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>     <strong class="jxr_keyword">final</strong> Multiset&lt;State&gt; states = servicesByState.keys();
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> 
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>     @GuardedBy(<span class="jxr_string">"monitor"</span>)
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>     <strong class="jxr_keyword">final</strong> Map&lt;Service, Stopwatch&gt; startupTimers = Maps.newIdentityHashMap();
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> 
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> <em class="jxr_javadoccomment">     * These two booleans are used to mark the state as ready to start.</em>
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> <em class="jxr_javadoccomment">     * &lt;p&gt;{@link #ready}: is set by {@link #markReady} to indicate that all listeners have been</em>
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> <em class="jxr_javadoccomment">     * correctly installed</em>
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> <em class="jxr_javadoccomment">     * &lt;p&gt;{@link #transitioned}: is set by {@link #transitionService} to indicate that some</em>
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> <em class="jxr_javadoccomment">     * transition has been performed.</em>
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> <em class="jxr_javadoccomment">     * &lt;p&gt;Together, they allow us to enforce that all services have their listeners installed prior</em>
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> <em class="jxr_javadoccomment">     * to any service performing a transition, then we can fail in the ServiceManager constructor</em>
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> <em class="jxr_javadoccomment">     * rather than in a Service.Listener callback.</em>
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>     @GuardedBy(<span class="jxr_string">"monitor"</span>)
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>     <strong class="jxr_keyword">boolean</strong> ready;
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> 
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>     @GuardedBy(<span class="jxr_string">"monitor"</span>)
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>     <strong class="jxr_keyword">boolean</strong> transitioned;
+<a class="jxr_linenumber" name="L478" href="#L478">478</a> 
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> numberOfServices;
+<a class="jxr_linenumber" name="L480" href="#L480">480</a> 
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L482" href="#L482">482</a> <em class="jxr_javadoccomment">     * Controls how long to wait for all the services to either become healthy or reach a state from</em>
+<a class="jxr_linenumber" name="L483" href="#L483">483</a> <em class="jxr_javadoccomment">     * which it is guaranteed that it can never become healthy.</em>
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>     <strong class="jxr_keyword">final</strong> Monitor.Guard awaitHealthGuard = <strong class="jxr_keyword">new</strong> AwaitHealthGuard();
+<a class="jxr_linenumber" name="L486" href="#L486">486</a> 
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>     @WeakOuter
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> AwaitHealthGuard <strong class="jxr_keyword">extends</strong> Monitor.Guard {
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>       AwaitHealthGuard() {
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>         <strong class="jxr_keyword">super</strong>(ServiceManagerState.<strong class="jxr_keyword">this</strong>.monitor);
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>       }
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> 
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>       @Override
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>       @GuardedBy(<span class="jxr_string">"ServiceManagerState.this.monitor"</span>)
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isSatisfied() {
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>         <em class="jxr_comment">// All services have started or some service has terminated/failed.</em>
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>         <strong class="jxr_keyword">return</strong> states.count(RUNNING) == numberOfServices
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>             || states.contains(STOPPING)
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>             || states.contains(TERMINATED)
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>             || states.contains(FAILED);
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>       }
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>     }
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>     <em class="jxr_javadoccomment">/** Controls how long to wait for all services to reach a terminal state. */</em>
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>     <strong class="jxr_keyword">final</strong> Monitor.Guard stoppedGuard = <strong class="jxr_keyword">new</strong> StoppedGuard();
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> 
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>     @WeakOuter
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> StoppedGuard <strong class="jxr_keyword">extends</strong> Monitor.Guard {
+<a class="jxr_linenumber" name="L509" href="#L509">509</a>       StoppedGuard() {
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>         <strong class="jxr_keyword">super</strong>(ServiceManagerState.<strong class="jxr_keyword">this</strong>.monitor);
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>       }
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> 
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>       @Override
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>       @GuardedBy(<span class="jxr_string">"ServiceManagerState.this.monitor"</span>)
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isSatisfied() {
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>         <strong class="jxr_keyword">return</strong> states.count(TERMINATED) + states.count(FAILED) == numberOfServices;
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>       }
+<a class="jxr_linenumber" name="L518" href="#L518">518</a>     }
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> 
+<a class="jxr_linenumber" name="L520" href="#L520">520</a>     <em class="jxr_javadoccomment">/** The listeners to notify during a state transition. */</em>
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>     <strong class="jxr_keyword">final</strong> ListenerCallQueue&lt;Listener&gt; listeners = <strong class="jxr_keyword">new</strong> ListenerCallQueue&lt;&gt;();
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> 
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L524" href="#L524">524</a> <em class="jxr_javadoccomment">     * It is implicitly assumed that all the services are NEW and that they will all remain NEW</em>
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> <em class="jxr_javadoccomment">     * until all the Listeners are installed and {@link #markReady()} is called. It is our caller's</em>
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> <em class="jxr_javadoccomment">     * responsibility to only call {@link #markReady()} if all services were new at the time this</em>
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> <em class="jxr_javadoccomment">     * method was called and when all the listeners were installed.</em>
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L529" href="#L529">529</a>     ServiceManagerState(ImmutableCollection&lt;Service&gt; services) {
+<a class="jxr_linenumber" name="L530" href="#L530">530</a>       <strong class="jxr_keyword">this</strong>.numberOfServices = services.size();
+<a class="jxr_linenumber" name="L531" href="#L531">531</a>       servicesByState.putAll(NEW, services);
+<a class="jxr_linenumber" name="L532" href="#L532">532</a>     }
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> 
+<a class="jxr_linenumber" name="L534" href="#L534">534</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> <em class="jxr_javadoccomment">     * Attempts to start the timer immediately prior to the service being started via {@link</em>
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> <em class="jxr_javadoccomment">     * Service#startAsync()}.</em>
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L538" href="#L538">538</a>     <strong class="jxr_keyword">void</strong> tryStartTiming(Service service) {
+<a class="jxr_linenumber" name="L539" href="#L539">539</a>       monitor.enter();
+<a class="jxr_linenumber" name="L540" href="#L540">540</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L541" href="#L541">541</a>         Stopwatch stopwatch = startupTimers.get(service);
+<a class="jxr_linenumber" name="L542" href="#L542">542</a>         <strong class="jxr_keyword">if</strong> (stopwatch == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>           startupTimers.put(service, Stopwatch.createStarted());
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>         }
+<a class="jxr_linenumber" name="L545" href="#L545">545</a>       } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L546" href="#L546">546</a>         monitor.leave();
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>       }
+<a class="jxr_linenumber" name="L548" href="#L548">548</a>     }
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> 
+<a class="jxr_linenumber" name="L550" href="#L550">550</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> <em class="jxr_javadoccomment">     * Marks the {@link State} as ready to receive transitions. Returns true if no transitions have</em>
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> <em class="jxr_javadoccomment">     * been observed yet.</em>
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>     <strong class="jxr_keyword">void</strong> markReady() {
+<a class="jxr_linenumber" name="L555" href="#L555">555</a>       monitor.enter();
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>         <strong class="jxr_keyword">if</strong> (!transitioned) {
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>           <em class="jxr_comment">// nothing has transitioned since construction, good.</em>
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>           ready = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>           <em class="jxr_comment">// This should be an extremely rare race condition.</em>
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>           List&lt;Service&gt; servicesInBadStates = Lists.newArrayList();
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>           <strong class="jxr_keyword">for</strong> (Service service : servicesByState().values()) {
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>             <strong class="jxr_keyword">if</strong> (service.state() != NEW) {
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>               servicesInBadStates.add(service);
+<a class="jxr_linenumber" name="L566" href="#L566">566</a>             }
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>           }
+<a class="jxr_linenumber" name="L568" href="#L568">568</a>           <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>               <span class="jxr_string">"Services started transitioning asynchronously before "</span>
+<a class="jxr_linenumber" name="L570" href="#L570">570</a>                   + <span class="jxr_string">"the ServiceManager was constructed: "</span>
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>                   + servicesInBadStates);
+<a class="jxr_linenumber" name="L572" href="#L572">572</a>         }
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>       } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L574" href="#L574">574</a>         monitor.leave();
+<a class="jxr_linenumber" name="L575" href="#L575">575</a>       }
+<a class="jxr_linenumber" name="L576" href="#L576">576</a>     }
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> 
+<a class="jxr_linenumber" name="L578" href="#L578">578</a>     <strong class="jxr_keyword">void</strong> addListener(Listener listener, Executor executor) {
+<a class="jxr_linenumber" name="L579" href="#L579">579</a>       listeners.addListener(listener, executor);
+<a class="jxr_linenumber" name="L580" href="#L580">580</a>     }
+<a class="jxr_linenumber" name="L581" href="#L581">581</a> 
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>     <strong class="jxr_keyword">void</strong> awaitHealthy() {
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>       monitor.enterWhenUninterruptibly(awaitHealthGuard);
+<a class="jxr_linenumber" name="L584" href="#L584">584</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>         checkHealthy();
+<a class="jxr_linenumber" name="L586" href="#L586">586</a>       } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>         monitor.leave();
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>       }
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>     }
+<a class="jxr_linenumber" name="L590" href="#L590">590</a> 
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>     <strong class="jxr_keyword">void</strong> awaitHealthy(<strong class="jxr_keyword">long</strong> timeout, TimeUnit unit) <strong class="jxr_keyword">throws</strong> TimeoutException {
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>       monitor.enter();
+<a class="jxr_linenumber" name="L593" href="#L593">593</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L594" href="#L594">594</a>         <strong class="jxr_keyword">if</strong> (!monitor.waitForUninterruptibly(awaitHealthGuard, timeout, unit)) {
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>           <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> TimeoutException(
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>               <span class="jxr_string">"Timeout waiting for the services to become healthy. The "</span>
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>                   + <span class="jxr_string">"following services have not started: "</span>
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>                   + Multimaps.filterKeys(servicesByState, in(ImmutableSet.of(NEW, STARTING))));
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>         }
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>         checkHealthy();
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>       } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>         monitor.leave();
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>       }
+<a class="jxr_linenumber" name="L604" href="#L604">604</a>     }
+<a class="jxr_linenumber" name="L605" href="#L605">605</a> 
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>     <strong class="jxr_keyword">void</strong> awaitStopped() {
+<a class="jxr_linenumber" name="L607" href="#L607">607</a>       monitor.enterWhenUninterruptibly(stoppedGuard);
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>       monitor.leave();
+<a class="jxr_linenumber" name="L609" href="#L609">609</a>     }
+<a class="jxr_linenumber" name="L610" href="#L610">610</a> 
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>     <strong class="jxr_keyword">void</strong> awaitStopped(<strong class="jxr_keyword">long</strong> timeout, TimeUnit unit) <strong class="jxr_keyword">throws</strong> TimeoutException {
+<a class="jxr_linenumber" name="L612" href="#L612">612</a>       monitor.enter();
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>         <strong class="jxr_keyword">if</strong> (!monitor.waitForUninterruptibly(stoppedGuard, timeout, unit)) {
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>           <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> TimeoutException(
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>               <span class="jxr_string">"Timeout waiting for the services to stop. The following "</span>
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>                   + <span class="jxr_string">"services have not stopped: "</span>
+<a class="jxr_linenumber" name="L618" href="#L618">618</a>                   + Multimaps.filterKeys(servicesByState, not(in(EnumSet.of(TERMINATED, FAILED)))));
+<a class="jxr_linenumber" name="L619" href="#L619">619</a>         }
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>       } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>         monitor.leave();
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>       }
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>     }
+<a class="jxr_linenumber" name="L624" href="#L624">624</a> 
+<a class="jxr_linenumber" name="L625" href="#L625">625</a>     ImmutableMultimap&lt;State, Service&gt; servicesByState() {
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>       ImmutableSetMultimap.Builder&lt;State, Service&gt; builder = ImmutableSetMultimap.builder();
+<a class="jxr_linenumber" name="L627" href="#L627">627</a>       monitor.enter();
+<a class="jxr_linenumber" name="L628" href="#L628">628</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L629" href="#L629">629</a>         <strong class="jxr_keyword">for</strong> (Entry&lt;State, Service&gt; entry : servicesByState.entries()) {
+<a class="jxr_linenumber" name="L630" href="#L630">630</a>           <strong class="jxr_keyword">if</strong> (!(entry.getValue() instanceof NoOpService)) {
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>             builder.put(entry);
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>           }
+<a class="jxr_linenumber" name="L633" href="#L633">633</a>         }
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>       } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>         monitor.leave();
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>       }
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>       <strong class="jxr_keyword">return</strong> builder.build();
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>     }
+<a class="jxr_linenumber" name="L639" href="#L639">639</a> 
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>     ImmutableMap&lt;Service, Long&gt; startupTimes() {
+<a class="jxr_linenumber" name="L641" href="#L641">641</a>       List&lt;Entry&lt;Service, Long&gt;&gt; loadTimes;
+<a class="jxr_linenumber" name="L642" href="#L642">642</a>       monitor.enter();
+<a class="jxr_linenumber" name="L643" href="#L643">643</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L644" href="#L644">644</a>         loadTimes = Lists.newArrayListWithCapacity(startupTimers.size());
+<a class="jxr_linenumber" name="L645" href="#L645">645</a>         <em class="jxr_comment">// N.B. There will only be an entry in the map if the service has started</em>
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>         <strong class="jxr_keyword">for</strong> (Entry&lt;Service, Stopwatch&gt; entry : startupTimers.entrySet()) {
+<a class="jxr_linenumber" name="L647" href="#L647">647</a>           Service service = entry.getKey();
+<a class="jxr_linenumber" name="L648" href="#L648">648</a>           Stopwatch stopWatch = entry.getValue();
+<a class="jxr_linenumber" name="L649" href="#L649">649</a>           <strong class="jxr_keyword">if</strong> (!stopWatch.isRunning() &amp;&amp; !(service instanceof NoOpService)) {
+<a class="jxr_linenumber" name="L650" href="#L650">650</a>             loadTimes.add(Maps.immutableEntry(service, stopWatch.elapsed(MILLISECONDS)));
+<a class="jxr_linenumber" name="L651" href="#L651">651</a>           }
+<a class="jxr_linenumber" name="L652" href="#L652">652</a>         }
+<a class="jxr_linenumber" name="L653" href="#L653">653</a>       } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L654" href="#L654">654</a>         monitor.leave();
+<a class="jxr_linenumber" name="L655" href="#L655">655</a>       }
+<a class="jxr_linenumber" name="L656" href="#L656">656</a>       Collections.sort(
+<a class="jxr_linenumber" name="L657" href="#L657">657</a>           loadTimes,
+<a class="jxr_linenumber" name="L658" href="#L658">658</a>           Ordering.natural()
+<a class="jxr_linenumber" name="L659" href="#L659">659</a>               .onResultOf(
+<a class="jxr_linenumber" name="L660" href="#L660">660</a>                   <strong class="jxr_keyword">new</strong> Function&lt;Entry&lt;Service, Long&gt;, Long&gt;() {
+<a class="jxr_linenumber" name="L661" href="#L661">661</a>                     @Override
+<a class="jxr_linenumber" name="L662" href="#L662">662</a>                     <strong class="jxr_keyword">public</strong> Long apply(Entry&lt;Service, Long&gt; input) {
+<a class="jxr_linenumber" name="L663" href="#L663">663</a>                       <strong class="jxr_keyword">return</strong> input.getValue();
+<a class="jxr_linenumber" name="L664" href="#L664">664</a>                     }
+<a class="jxr_linenumber" name="L665" href="#L665">665</a>                   }));
+<a class="jxr_linenumber" name="L666" href="#L666">666</a>       <strong class="jxr_keyword">return</strong> ImmutableMap.copyOf(loadTimes);
+<a class="jxr_linenumber" name="L667" href="#L667">667</a>     }
+<a class="jxr_linenumber" name="L668" href="#L668">668</a> 
+<a class="jxr_linenumber" name="L669" href="#L669">669</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L670" href="#L670">670</a> <em class="jxr_javadoccomment">     * Updates the state with the given service transition.</em>
+<a class="jxr_linenumber" name="L671" href="#L671">671</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L672" href="#L672">672</a> <em class="jxr_javadoccomment">     * &lt;p&gt;This method performs the main logic of ServiceManager in the following steps.</em>
+<a class="jxr_linenumber" name="L673" href="#L673">673</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L674" href="#L674">674</a> <em class="jxr_javadoccomment">     * &lt;ol&gt;</em>
+<a class="jxr_linenumber" name="L675" href="#L675">675</a> <em class="jxr_javadoccomment">     *   &lt;li&gt;Update the {@link #servicesByState()}</em>
+<a class="jxr_linenumber" name="L676" href="#L676">676</a> <em class="jxr_javadoccomment">     *   &lt;li&gt;Update the {@link #startupTimers}</em>
+<a class="jxr_linenumber" name="L677" href="#L677">677</a> <em class="jxr_javadoccomment">     *   &lt;li&gt;Based on the new state queue listeners to run</em>
+<a class="jxr_linenumber" name="L678" href="#L678">678</a> <em class="jxr_javadoccomment">     *   &lt;li&gt;Run the listeners (outside of the lock)</em>
+<a class="jxr_linenumber" name="L679" href="#L679">679</a> <em class="jxr_javadoccomment">     * &lt;/ol&gt;</em>
+<a class="jxr_linenumber" name="L680" href="#L680">680</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L681" href="#L681">681</a>     <strong class="jxr_keyword">void</strong> transitionService(<strong class="jxr_keyword">final</strong> Service service, State from, State to) {
+<a class="jxr_linenumber" name="L682" href="#L682">682</a>       checkNotNull(service);
+<a class="jxr_linenumber" name="L683" href="#L683">683</a>       checkArgument(from != to);
+<a class="jxr_linenumber" name="L684" href="#L684">684</a>       monitor.enter();
+<a class="jxr_linenumber" name="L685" href="#L685">685</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L686" href="#L686">686</a>         transitioned = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L687" href="#L687">687</a>         <strong class="jxr_keyword">if</strong> (!ready) {
+<a class="jxr_linenumber" name="L688" href="#L688">688</a>           <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L689" href="#L689">689</a>         }
+<a class="jxr_linenumber" name="L690" href="#L690">690</a>         <em class="jxr_comment">// Update state.</em>
+<a class="jxr_linenumber" name="L691" href="#L691">691</a>         checkState(
+<a class="jxr_linenumber" name="L692" href="#L692">692</a>             servicesByState.remove(from, service),
+<a class="jxr_linenumber" name="L693" href="#L693">693</a>             <span class="jxr_string">"Service %s not at the expected location in the state map %s"</span>,
+<a class="jxr_linenumber" name="L694" href="#L694">694</a>             service,
+<a class="jxr_linenumber" name="L695" href="#L695">695</a>             from);
+<a class="jxr_linenumber" name="L696" href="#L696">696</a>         checkState(
+<a class="jxr_linenumber" name="L697" href="#L697">697</a>             servicesByState.put(to, service),
+<a class="jxr_linenumber" name="L698" href="#L698">698</a>             <span class="jxr_string">"Service %s in the state map unexpectedly at %s"</span>,
+<a class="jxr_linenumber" name="L699" href="#L699">699</a>             service,
+<a class="jxr_linenumber" name="L700" href="#L700">700</a>             to);
+<a class="jxr_linenumber" name="L701" href="#L701">701</a>         <em class="jxr_comment">// Update the timer</em>
+<a class="jxr_linenumber" name="L702" href="#L702">702</a>         Stopwatch stopwatch = startupTimers.get(service);
+<a class="jxr_linenumber" name="L703" href="#L703">703</a>         <strong class="jxr_keyword">if</strong> (stopwatch == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L704" href="#L704">704</a>           <em class="jxr_comment">// This means the service was started by some means other than ServiceManager.startAsync</em>
+<a class="jxr_linenumber" name="L705" href="#L705">705</a>           stopwatch = Stopwatch.createStarted();
+<a class="jxr_linenumber" name="L706" href="#L706">706</a>           startupTimers.put(service, stopwatch);
+<a class="jxr_linenumber" name="L707" href="#L707">707</a>         }
+<a class="jxr_linenumber" name="L708" href="#L708">708</a>         <strong class="jxr_keyword">if</strong> (to.compareTo(RUNNING) &gt;= 0 &amp;&amp; stopwatch.isRunning()) {
+<a class="jxr_linenumber" name="L709" href="#L709">709</a>           <em class="jxr_comment">// N.B. if we miss the STARTING event then we may never record a startup time.</em>
+<a class="jxr_linenumber" name="L710" href="#L710">710</a>           stopwatch.stop();
+<a class="jxr_linenumber" name="L711" href="#L711">711</a>           <strong class="jxr_keyword">if</strong> (!(service instanceof NoOpService)) {
+<a class="jxr_linenumber" name="L712" href="#L712">712</a>             logger.log(Level.FINE, <span class="jxr_string">"Started {0} in {1}."</span>, <strong class="jxr_keyword">new</strong> Object[] {service, stopwatch});
+<a class="jxr_linenumber" name="L713" href="#L713">713</a>           }
+<a class="jxr_linenumber" name="L714" href="#L714">714</a>         }
+<a class="jxr_linenumber" name="L715" href="#L715">715</a>         <em class="jxr_comment">// Queue our listeners</em>
+<a class="jxr_linenumber" name="L716" href="#L716">716</a> 
+<a class="jxr_linenumber" name="L717" href="#L717">717</a>         <em class="jxr_comment">// Did a service fail?</em>
+<a class="jxr_linenumber" name="L718" href="#L718">718</a>         <strong class="jxr_keyword">if</strong> (to == FAILED) {
+<a class="jxr_linenumber" name="L719" href="#L719">719</a>           enqueueFailedEvent(service);
+<a class="jxr_linenumber" name="L720" href="#L720">720</a>         }
+<a class="jxr_linenumber" name="L721" href="#L721">721</a> 
+<a class="jxr_linenumber" name="L722" href="#L722">722</a>         <strong class="jxr_keyword">if</strong> (states.count(RUNNING) == numberOfServices) {
+<a class="jxr_linenumber" name="L723" href="#L723">723</a>           <em class="jxr_comment">// This means that the manager is currently healthy. N.B. If other threads call isHealthy</em>
+<a class="jxr_linenumber" name="L724" href="#L724">724</a>           <em class="jxr_comment">// they are not guaranteed to get 'true', because any service could fail right now.</em>
+<a class="jxr_linenumber" name="L725" href="#L725">725</a>           enqueueHealthyEvent();
+<a class="jxr_linenumber" name="L726" href="#L726">726</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (states.count(TERMINATED) + states.count(FAILED) == numberOfServices) {
+<a class="jxr_linenumber" name="L727" href="#L727">727</a>           enqueueStoppedEvent();
+<a class="jxr_linenumber" name="L728" href="#L728">728</a>         }
+<a class="jxr_linenumber" name="L729" href="#L729">729</a>       } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L730" href="#L730">730</a>         monitor.leave();
+<a class="jxr_linenumber" name="L731" href="#L731">731</a>         <em class="jxr_comment">// Run our executors outside of the lock</em>
+<a class="jxr_linenumber" name="L732" href="#L732">732</a>         dispatchListenerEvents();
+<a class="jxr_linenumber" name="L733" href="#L733">733</a>       }
+<a class="jxr_linenumber" name="L734" href="#L734">734</a>     }
+<a class="jxr_linenumber" name="L735" href="#L735">735</a> 
+<a class="jxr_linenumber" name="L736" href="#L736">736</a>     <strong class="jxr_keyword">void</strong> enqueueStoppedEvent() {
+<a class="jxr_linenumber" name="L737" href="#L737">737</a>       listeners.enqueue(STOPPED_EVENT);
+<a class="jxr_linenumber" name="L738" href="#L738">738</a>     }
+<a class="jxr_linenumber" name="L739" href="#L739">739</a> 
+<a class="jxr_linenumber" name="L740" href="#L740">740</a>     <strong class="jxr_keyword">void</strong> enqueueHealthyEvent() {
+<a class="jxr_linenumber" name="L741" href="#L741">741</a>       listeners.enqueue(HEALTHY_EVENT);
+<a class="jxr_linenumber" name="L742" href="#L742">742</a>     }
+<a class="jxr_linenumber" name="L743" href="#L743">743</a> 
+<a class="jxr_linenumber" name="L744" href="#L744">744</a>     <strong class="jxr_keyword">void</strong> enqueueFailedEvent(<strong class="jxr_keyword">final</strong> Service service) {
+<a class="jxr_linenumber" name="L745" href="#L745">745</a>       listeners.enqueue(
+<a class="jxr_linenumber" name="L746" href="#L746">746</a>           <strong class="jxr_keyword">new</strong> ListenerCallQueue.Event&lt;Listener&gt;() {
+<a class="jxr_linenumber" name="L747" href="#L747">747</a>             @Override
+<a class="jxr_linenumber" name="L748" href="#L748">748</a>             <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> call(Listener listener) {
+<a class="jxr_linenumber" name="L749" href="#L749">749</a>               listener.failure(service);
+<a class="jxr_linenumber" name="L750" href="#L750">750</a>             }
+<a class="jxr_linenumber" name="L751" href="#L751">751</a> 
+<a class="jxr_linenumber" name="L752" href="#L752">752</a>             @Override
+<a class="jxr_linenumber" name="L753" href="#L753">753</a>             <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L754" href="#L754">754</a>               <strong class="jxr_keyword">return</strong> <span class="jxr_string">"failed({service="</span> + service + <span class="jxr_string">"})"</span>;
+<a class="jxr_linenumber" name="L755" href="#L755">755</a>             }
+<a class="jxr_linenumber" name="L756" href="#L756">756</a>           });
+<a class="jxr_linenumber" name="L757" href="#L757">757</a>     }
+<a class="jxr_linenumber" name="L758" href="#L758">758</a> 
+<a class="jxr_linenumber" name="L759" href="#L759">759</a>     <em class="jxr_javadoccomment">/** Attempts to execute all the listeners in {@link #listeners}. */</em>
+<a class="jxr_linenumber" name="L760" href="#L760">760</a>     <strong class="jxr_keyword">void</strong> dispatchListenerEvents() {
+<a class="jxr_linenumber" name="L761" href="#L761">761</a>       checkState(
+<a class="jxr_linenumber" name="L762" href="#L762">762</a>           !monitor.isOccupiedByCurrentThread(),
+<a class="jxr_linenumber" name="L763" href="#L763">763</a>           <span class="jxr_string">"It is incorrect to execute listeners with the monitor held."</span>);
+<a class="jxr_linenumber" name="L764" href="#L764">764</a>       listeners.dispatch();
+<a class="jxr_linenumber" name="L765" href="#L765">765</a>     }
+<a class="jxr_linenumber" name="L766" href="#L766">766</a> 
+<a class="jxr_linenumber" name="L767" href="#L767">767</a>     @GuardedBy(<span class="jxr_string">"monitor"</span>)
+<a class="jxr_linenumber" name="L768" href="#L768">768</a>     <strong class="jxr_keyword">void</strong> checkHealthy() {
+<a class="jxr_linenumber" name="L769" href="#L769">769</a>       <strong class="jxr_keyword">if</strong> (states.count(RUNNING) != numberOfServices) {
+<a class="jxr_linenumber" name="L770" href="#L770">770</a>         IllegalStateException exception =
+<a class="jxr_linenumber" name="L771" href="#L771">771</a>             <strong class="jxr_keyword">new</strong> IllegalStateException(
+<a class="jxr_linenumber" name="L772" href="#L772">772</a>                 <span class="jxr_string">"Expected to be healthy after starting. The following services are not running: "</span>
+<a class="jxr_linenumber" name="L773" href="#L773">773</a>                     + Multimaps.filterKeys(servicesByState, not(equalTo(RUNNING))));
+<a class="jxr_linenumber" name="L774" href="#L774">774</a>         <strong class="jxr_keyword">for</strong> (Service service : servicesByState.get(State.FAILED)) {
+<a class="jxr_linenumber" name="L775" href="#L775">775</a>           exception.addSuppressed(<strong class="jxr_keyword">new</strong> FailedService(service));
+<a class="jxr_linenumber" name="L776" href="#L776">776</a>         }
+<a class="jxr_linenumber" name="L777" href="#L777">777</a>         <strong class="jxr_keyword">throw</strong> exception;
+<a class="jxr_linenumber" name="L778" href="#L778">778</a>       }
+<a class="jxr_linenumber" name="L779" href="#L779">779</a>     }
+<a class="jxr_linenumber" name="L780" href="#L780">780</a>   }
+<a class="jxr_linenumber" name="L781" href="#L781">781</a> 
+<a class="jxr_linenumber" name="L782" href="#L782">782</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L783" href="#L783">783</a> <em class="jxr_javadoccomment">   * A {@link Service} that wraps another service and times how long it takes for it to start and</em>
+<a class="jxr_linenumber" name="L784" href="#L784">784</a> <em class="jxr_javadoccomment">   * also calls the {@link ServiceManagerState#transitionService(Service, State, State)}, to record</em>
+<a class="jxr_linenumber" name="L785" href="#L785">785</a> <em class="jxr_javadoccomment">   * the state transitions.</em>
+<a class="jxr_linenumber" name="L786" href="#L786">786</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> ServiceListener <strong class="jxr_keyword">extends</strong> Service.Listener {
+<a class="jxr_linenumber" name="L788" href="#L788">788</a>     <strong class="jxr_keyword">final</strong> Service service;
+<a class="jxr_linenumber" name="L789" href="#L789">789</a>     <em class="jxr_comment">// We store the state in a weak reference to ensure that if something went wrong while</em>
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>     <em class="jxr_comment">// constructing the ServiceManager we don't pointlessly keep updating the state.</em>
+<a class="jxr_linenumber" name="L791" href="#L791">791</a>     <strong class="jxr_keyword">final</strong> WeakReference&lt;ServiceManagerState&gt; state;
+<a class="jxr_linenumber" name="L792" href="#L792">792</a> 
+<a class="jxr_linenumber" name="L793" href="#L793">793</a>     ServiceListener(Service service, WeakReference&lt;ServiceManagerState&gt; state) {
+<a class="jxr_linenumber" name="L794" href="#L794">794</a>       <strong class="jxr_keyword">this</strong>.service = service;
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>       <strong class="jxr_keyword">this</strong>.state = state;
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>     }
+<a class="jxr_linenumber" name="L797" href="#L797">797</a> 
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>     @Override
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> starting() {
+<a class="jxr_linenumber" name="L800" href="#L800">800</a>       ServiceManagerState state = <strong class="jxr_keyword">this</strong>.state.get();
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>       <strong class="jxr_keyword">if</strong> (state != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>         state.transitionService(service, NEW, STARTING);
+<a class="jxr_linenumber" name="L803" href="#L803">803</a>         <strong class="jxr_keyword">if</strong> (!(service instanceof NoOpService)) {
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>           logger.log(Level.FINE, <span class="jxr_string">"Starting {0}."</span>, service);
+<a class="jxr_linenumber" name="L805" href="#L805">805</a>         }
+<a class="jxr_linenumber" name="L806" href="#L806">806</a>       }
+<a class="jxr_linenumber" name="L807" href="#L807">807</a>     }
+<a class="jxr_linenumber" name="L808" href="#L808">808</a> 
+<a class="jxr_linenumber" name="L809" href="#L809">809</a>     @Override
+<a class="jxr_linenumber" name="L810" href="#L810">810</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> running() {
+<a class="jxr_linenumber" name="L811" href="#L811">811</a>       ServiceManagerState state = <strong class="jxr_keyword">this</strong>.state.get();
+<a class="jxr_linenumber" name="L812" href="#L812">812</a>       <strong class="jxr_keyword">if</strong> (state != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L813" href="#L813">813</a>         state.transitionService(service, STARTING, RUNNING);
+<a class="jxr_linenumber" name="L814" href="#L814">814</a>       }
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>     }
+<a class="jxr_linenumber" name="L816" href="#L816">816</a> 
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>     @Override
+<a class="jxr_linenumber" name="L818" href="#L818">818</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> stopping(State from) {
+<a class="jxr_linenumber" name="L819" href="#L819">819</a>       ServiceManagerState state = <strong class="jxr_keyword">this</strong>.state.get();
+<a class="jxr_linenumber" name="L820" href="#L820">820</a>       <strong class="jxr_keyword">if</strong> (state != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L821" href="#L821">821</a>         state.transitionService(service, from, STOPPING);
+<a class="jxr_linenumber" name="L822" href="#L822">822</a>       }
+<a class="jxr_linenumber" name="L823" href="#L823">823</a>     }
+<a class="jxr_linenumber" name="L824" href="#L824">824</a> 
+<a class="jxr_linenumber" name="L825" href="#L825">825</a>     @Override
+<a class="jxr_linenumber" name="L826" href="#L826">826</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> terminated(State from) {
+<a class="jxr_linenumber" name="L827" href="#L827">827</a>       ServiceManagerState state = <strong class="jxr_keyword">this</strong>.state.get();
+<a class="jxr_linenumber" name="L828" href="#L828">828</a>       <strong class="jxr_keyword">if</strong> (state != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L829" href="#L829">829</a>         <strong class="jxr_keyword">if</strong> (!(service instanceof NoOpService)) {
+<a class="jxr_linenumber" name="L830" href="#L830">830</a>           logger.log(
+<a class="jxr_linenumber" name="L831" href="#L831">831</a>               Level.FINE,
+<a class="jxr_linenumber" name="L832" href="#L832">832</a>               <span class="jxr_string">"Service {0} has terminated. Previous state was: {1}"</span>,
+<a class="jxr_linenumber" name="L833" href="#L833">833</a>               <strong class="jxr_keyword">new</strong> Object[] {service, from});
+<a class="jxr_linenumber" name="L834" href="#L834">834</a>         }
+<a class="jxr_linenumber" name="L835" href="#L835">835</a>         state.transitionService(service, from, TERMINATED);
+<a class="jxr_linenumber" name="L836" href="#L836">836</a>       }
+<a class="jxr_linenumber" name="L837" href="#L837">837</a>     }
+<a class="jxr_linenumber" name="L838" href="#L838">838</a> 
+<a class="jxr_linenumber" name="L839" href="#L839">839</a>     @Override
+<a class="jxr_linenumber" name="L840" href="#L840">840</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> failed(State from, Throwable failure) {
+<a class="jxr_linenumber" name="L841" href="#L841">841</a>       ServiceManagerState state = <strong class="jxr_keyword">this</strong>.state.get();
+<a class="jxr_linenumber" name="L842" href="#L842">842</a>       <strong class="jxr_keyword">if</strong> (state != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L843" href="#L843">843</a>         <em class="jxr_comment">// Log before the transition, so that if the process exits in response to server failure,</em>
+<a class="jxr_linenumber" name="L844" href="#L844">844</a>         <em class="jxr_comment">// there is a higher likelihood that the cause will be in the logs.</em>
+<a class="jxr_linenumber" name="L845" href="#L845">845</a>         <strong class="jxr_keyword">boolean</strong> log = !(service instanceof NoOpService);
+<a class="jxr_linenumber" name="L846" href="#L846">846</a>         <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L847" href="#L847">847</a> <em class="jxr_comment">         * We have already exposed startup exceptions to the user in the form of suppressed</em>
+<a class="jxr_linenumber" name="L848" href="#L848">848</a> <em class="jxr_comment">         * exceptions. We don't need to log those exceptions again.</em>
+<a class="jxr_linenumber" name="L849" href="#L849">849</a> <em class="jxr_comment">         */</em>
+<a class="jxr_linenumber" name="L850" href="#L850">850</a>         log &amp;= from != State.STARTING;
+<a class="jxr_linenumber" name="L851" href="#L851">851</a>         <strong class="jxr_keyword">if</strong> (log) {
+<a class="jxr_linenumber" name="L852" href="#L852">852</a>           logger.log(
+<a class="jxr_linenumber" name="L853" href="#L853">853</a>               Level.SEVERE,
+<a class="jxr_linenumber" name="L854" href="#L854">854</a>               <span class="jxr_string">"Service "</span> + service + <span class="jxr_string">" has failed in the "</span> + from + <span class="jxr_string">" state."</span>,
+<a class="jxr_linenumber" name="L855" href="#L855">855</a>               failure);
+<a class="jxr_linenumber" name="L856" href="#L856">856</a>         }
+<a class="jxr_linenumber" name="L857" href="#L857">857</a>         state.transitionService(service, from, FAILED);
+<a class="jxr_linenumber" name="L858" href="#L858">858</a>       }
+<a class="jxr_linenumber" name="L859" href="#L859">859</a>     }
+<a class="jxr_linenumber" name="L860" href="#L860">860</a>   }
+<a class="jxr_linenumber" name="L861" href="#L861">861</a> 
+<a class="jxr_linenumber" name="L862" href="#L862">862</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L863" href="#L863">863</a> <em class="jxr_javadoccomment">   * A {@link Service} instance that does nothing. This is only useful as a placeholder to ensure</em>
+<a class="jxr_linenumber" name="L864" href="#L864">864</a> <em class="jxr_javadoccomment">   * that the {@link ServiceManager} functions properly even when it is managing no services.</em>
+<a class="jxr_linenumber" name="L865" href="#L865">865</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L866" href="#L866">866</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The use of this class is considered an implementation detail of ServiceManager and as such</em>
+<a class="jxr_linenumber" name="L867" href="#L867">867</a> <em class="jxr_javadoccomment">   * it is excluded from {@link #servicesByState}, {@link #startupTimes}, {@link #toString} and all</em>
+<a class="jxr_linenumber" name="L868" href="#L868">868</a> <em class="jxr_javadoccomment">   * logging statements.</em>
+<a class="jxr_linenumber" name="L869" href="#L869">869</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L870" href="#L870">870</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> NoOpService <strong class="jxr_keyword">extends</strong> AbstractService {
+<a class="jxr_linenumber" name="L871" href="#L871">871</a>     @Override
+<a class="jxr_linenumber" name="L872" href="#L872">872</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> doStart() {
+<a class="jxr_linenumber" name="L873" href="#L873">873</a>       notifyStarted();
+<a class="jxr_linenumber" name="L874" href="#L874">874</a>     }
+<a class="jxr_linenumber" name="L875" href="#L875">875</a> 
+<a class="jxr_linenumber" name="L876" href="#L876">876</a>     @Override
+<a class="jxr_linenumber" name="L877" href="#L877">877</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> doStop() {
+<a class="jxr_linenumber" name="L878" href="#L878">878</a>       notifyStopped();
+<a class="jxr_linenumber" name="L879" href="#L879">879</a>     }
+<a class="jxr_linenumber" name="L880" href="#L880">880</a>   }
+<a class="jxr_linenumber" name="L881" href="#L881">881</a> 
+<a class="jxr_linenumber" name="L882" href="#L882">882</a>   <em class="jxr_javadoccomment">/** This is never thrown but only used for logging. */</em>
+<a class="jxr_linenumber" name="L883" href="#L883">883</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> EmptyServiceManagerWarning <strong class="jxr_keyword">extends</strong> Throwable {}
+<a class="jxr_linenumber" name="L884" href="#L884">884</a> 
+<a class="jxr_linenumber" name="L885" href="#L885">885</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> FailedService <strong class="jxr_keyword">extends</strong> Throwable {
+<a class="jxr_linenumber" name="L886" href="#L886">886</a>     FailedService(Service service) {
+<a class="jxr_linenumber" name="L887" href="#L887">887</a>       <strong class="jxr_keyword">super</strong>(
+<a class="jxr_linenumber" name="L888" href="#L888">888</a>           service.toString(),
+<a class="jxr_linenumber" name="L889" href="#L889">889</a>           service.failureCause(),
+<a class="jxr_linenumber" name="L890" href="#L890">890</a>           false <em class="jxr_comment">/* don't enable suppression */</em>,
+<a class="jxr_linenumber" name="L891" href="#L891">891</a>           false <em class="jxr_comment">/* don't calculate a stack trace. */</em>);
+<a class="jxr_linenumber" name="L892" href="#L892">892</a>     }
+<a class="jxr_linenumber" name="L893" href="#L893">893</a>   }
+<a class="jxr_linenumber" name="L894" href="#L894">894</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

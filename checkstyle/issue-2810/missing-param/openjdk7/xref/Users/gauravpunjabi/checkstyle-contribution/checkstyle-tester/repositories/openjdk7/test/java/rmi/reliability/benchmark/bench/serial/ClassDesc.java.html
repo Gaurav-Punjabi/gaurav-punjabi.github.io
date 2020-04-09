@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>ClassDesc xref</title>
+<link type="text/css" rel="stylesheet" href="../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 1999, 2008, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">package</strong> bench.serial;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> bench.Benchmark;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> java.io.ObjectInputStream;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> java.io.ObjectOutputStream;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> java.io.ObjectStreamClass;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> java.io.Serializable;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment"> * Benchmark for testing speed of class descriptor reads/writes.</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> ClassDesc <strong class="jxr_keyword">implements</strong> Benchmark {
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy0 <strong class="jxr_keyword">implements</strong> Serializable { Dummy0 i0; }
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy1 <strong class="jxr_keyword">extends</strong> Dummy0 { Dummy1 i1; }
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy2 <strong class="jxr_keyword">extends</strong> Dummy1 { Dummy2 i2; }
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy3 <strong class="jxr_keyword">extends</strong> Dummy2 { Dummy3 i3; }
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy4 <strong class="jxr_keyword">extends</strong> Dummy3 { Dummy4 i4; }
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy5 <strong class="jxr_keyword">extends</strong> Dummy4 { Dummy5 i5; }
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy6 <strong class="jxr_keyword">extends</strong> Dummy5 { Dummy6 i6; }
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy7 <strong class="jxr_keyword">extends</strong> Dummy6 { Dummy7 i7; }
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy8 <strong class="jxr_keyword">extends</strong> Dummy7 { Dummy8 i8; }
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy9 <strong class="jxr_keyword">extends</strong> Dummy8 { Dummy9 i9; }
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy10 <strong class="jxr_keyword">extends</strong> Dummy9 { Dummy10 i10; }
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy11 <strong class="jxr_keyword">extends</strong> Dummy10 { Dummy11 i11; }
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy12 <strong class="jxr_keyword">extends</strong> Dummy11 { Dummy12 i12; }
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy13 <strong class="jxr_keyword">extends</strong> Dummy12 { Dummy13 i13; }
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy14 <strong class="jxr_keyword">extends</strong> Dummy13 { Dummy14 i14; }
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy15 <strong class="jxr_keyword">extends</strong> Dummy14 { Dummy15 i15; }
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy16 <strong class="jxr_keyword">extends</strong> Dummy15 { Dummy16 i16; }
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy17 <strong class="jxr_keyword">extends</strong> Dummy16 { Dummy17 i17; }
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy18 <strong class="jxr_keyword">extends</strong> Dummy17 { Dummy18 i18; }
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy19 <strong class="jxr_keyword">extends</strong> Dummy18 { Dummy19 i19; }
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy20 <strong class="jxr_keyword">extends</strong> Dummy19 { Dummy20 i20; }
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy21 <strong class="jxr_keyword">extends</strong> Dummy20 { Dummy21 i21; }
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy22 <strong class="jxr_keyword">extends</strong> Dummy21 { Dummy22 i22; }
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy23 <strong class="jxr_keyword">extends</strong> Dummy22 { Dummy23 i23; }
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy24 <strong class="jxr_keyword">extends</strong> Dummy23 { Dummy24 i24; }
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy25 <strong class="jxr_keyword">extends</strong> Dummy24 { Dummy25 i25; }
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy26 <strong class="jxr_keyword">extends</strong> Dummy25 { Dummy26 i26; }
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy27 <strong class="jxr_keyword">extends</strong> Dummy26 { Dummy27 i27; }
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy28 <strong class="jxr_keyword">extends</strong> Dummy27 { Dummy28 i28; }
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy29 <strong class="jxr_keyword">extends</strong> Dummy28 { Dummy29 i29; }
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy30 <strong class="jxr_keyword">extends</strong> Dummy29 { Dummy30 i30; }
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy31 <strong class="jxr_keyword">extends</strong> Dummy30 { Dummy31 i31; }
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy32 <strong class="jxr_keyword">extends</strong> Dummy31 { Dummy32 i32; }
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy33 <strong class="jxr_keyword">extends</strong> Dummy32 { Dummy33 i33; }
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy34 <strong class="jxr_keyword">extends</strong> Dummy33 { Dummy34 i34; }
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy35 <strong class="jxr_keyword">extends</strong> Dummy34 { Dummy35 i35; }
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy36 <strong class="jxr_keyword">extends</strong> Dummy35 { Dummy36 i36; }
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy37 <strong class="jxr_keyword">extends</strong> Dummy36 { Dummy37 i37; }
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy38 <strong class="jxr_keyword">extends</strong> Dummy37 { Dummy38 i38; }
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy39 <strong class="jxr_keyword">extends</strong> Dummy38 { Dummy39 i39; }
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy40 <strong class="jxr_keyword">extends</strong> Dummy39 { Dummy40 i40; }
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy41 <strong class="jxr_keyword">extends</strong> Dummy40 { Dummy41 i41; }
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy42 <strong class="jxr_keyword">extends</strong> Dummy41 { Dummy42 i42; }
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy43 <strong class="jxr_keyword">extends</strong> Dummy42 { Dummy43 i43; }
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy44 <strong class="jxr_keyword">extends</strong> Dummy43 { Dummy44 i44; }
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy45 <strong class="jxr_keyword">extends</strong> Dummy44 { Dummy45 i45; }
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy46 <strong class="jxr_keyword">extends</strong> Dummy45 { Dummy46 i46; }
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy47 <strong class="jxr_keyword">extends</strong> Dummy46 { Dummy47 i47; }
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy48 <strong class="jxr_keyword">extends</strong> Dummy47 { Dummy48 i48; }
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy49 <strong class="jxr_keyword">extends</strong> Dummy48 { Dummy49 i49; }
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dummy50 <strong class="jxr_keyword">extends</strong> Dummy49 { Dummy50 i50; }
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_javadoccomment">     * Write and read class descriptors to/from a stream.</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_javadoccomment">     * Arguments: &lt;# cycles&gt;</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> run(String[] args) <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>          <strong class="jxr_keyword">int</strong> ncycles = Integer.parseInt(args[0]);
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>          StreamBuffer sbuf = <strong class="jxr_keyword">new</strong> StreamBuffer();
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>         ObjectOutputStream oout =
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>             <strong class="jxr_keyword">new</strong> ObjectOutputStream(sbuf.getOutputStream());
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>         ObjectInputStream oin =
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>             <strong class="jxr_keyword">new</strong> ObjectInputStream(sbuf.getInputStream());
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>         ObjectStreamClass desc = ObjectStreamClass.lookup(Dummy50.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>         doReps(oout, oin, sbuf, desc, 1);       <em class="jxr_comment">// warmup</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>         <strong class="jxr_keyword">long</strong> start = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>         doReps(oout, oin, sbuf, desc, ncycles);
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>         <strong class="jxr_keyword">return</strong> System.currentTimeMillis() - start;
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>     }
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">     * Run benchmark for given number of cycles.</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>     <strong class="jxr_keyword">void</strong> doReps(ObjectOutputStream oout, ObjectInputStream oin,
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>                 StreamBuffer sbuf, ObjectStreamClass desc, <strong class="jxr_keyword">int</strong> ncycles)
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>         <strong class="jxr_keyword">throws</strong> Exception
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>     {
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; ncycles; i++) {
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>             sbuf.reset();
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>             oout.reset();
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>             oout.writeObject(desc);
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>             oout.flush();
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>             oin.readObject();
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>         }
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>     }
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

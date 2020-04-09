@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>FindSelfComparison2 xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> edu.umd.cs.findbugs.detect;
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.DCMPG;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.DCMPL;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.FCMPG;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.FCMPL;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.IAND;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.IF_ACMPEQ;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.IF_ACMPNE;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.IF_ICMPEQ;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.IF_ICMPGE;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.IF_ICMPGT;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.IF_ICMPLE;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.IF_ICMPLT;
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.IF_ICMPNE;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.INVOKEINTERFACE;
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.INVOKEVIRTUAL;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.IOR;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.ISUB;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.IXOR;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.LAND;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.LCMP;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.LOR;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.LSUB;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.LXOR;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.bcel.Const.POP;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.BitSet;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.Iterator;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.apache.bcel.classfile.Method;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.apache.bcel.<strong class="jxr_keyword">generic</strong>.ConstantPoolGen;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.apache.bcel.<strong class="jxr_keyword">generic</strong>.Instruction;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.apache.bcel.<strong class="jxr_keyword">generic</strong>.InvokeInstruction;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.apache.bcel.<strong class="jxr_keyword">generic</strong>.MethodGen;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.BugAnnotation;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.BugInstance;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.BugReporter;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.Detector;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.SourceLineAnnotation;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.SystemProperties;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.CFG;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.CFGBuilderException;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.ClassContext;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.DataflowAnalysisException;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.Location;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.MethodUnprofitableException;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.SignatureParser;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.XField;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.vna.ValueNumber;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.vna.ValueNumberDataflow;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.vna.ValueNumberFrame;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> edu.umd.cs.findbugs.ba.vna.ValueNumberSourceInfo;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> FindSelfComparison2 <strong class="jxr_keyword">implements</strong> Detector {
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> BugReporter bugReporter;
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>      <strong class="jxr_keyword">public</strong> FindSelfComparison2(BugReporter bugReporter) {
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>          <strong class="jxr_keyword">this</strong>.bugReporter = bugReporter;
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>      }
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>      @Override
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> visitClassContext(ClassContext classContext) {
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>          Method[] methodList = classContext.getJavaClass().getMethods();
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>          <strong class="jxr_keyword">for</strong> (Method method : methodList) {
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>              <strong class="jxr_keyword">if</strong> (method.getCode() == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>                  <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>              }
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>              <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>                  analyzeMethod(classContext, method);
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>              } <strong class="jxr_keyword">catch</strong> (MethodUnprofitableException mue) {
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>                  <strong class="jxr_keyword">if</strong> (SystemProperties.getBoolean(<span class="jxr_string">"unprofitable.debug"</span>)) {
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>                      <em class="jxr_comment">// don't</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>                      <em class="jxr_comment">// report</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>                      bugReporter.logError(<span class="jxr_string">"skipping unprofitable method in "</span> + getClass().getName());
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>                  }
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>              } <strong class="jxr_keyword">catch</strong> (CFGBuilderException e) {
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>                  bugReporter.logError(<span class="jxr_string">"Detector "</span> + <strong class="jxr_keyword">this</strong>.getClass().getName() + <span class="jxr_string">" caught exception"</span>, e);
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>              } <strong class="jxr_keyword">catch</strong> (DataflowAnalysisException e) {
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>                  bugReporter.logError(<span class="jxr_string">"Detector "</span> + <strong class="jxr_keyword">this</strong>.getClass().getName() + <span class="jxr_string">" caught exception"</span>, e);
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>              }
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>          }
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>      }
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> booleanComparisonMethod(String methodName) {
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>          <strong class="jxr_keyword">return</strong> <span class="jxr_string">"equals"</span>.equals(methodName) ||<span class="jxr_string">"endsWith"</span>.equals(methodName) || <span class="jxr_string">"startsWith"</span>.equals(methodName)
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>                  || <span class="jxr_string">"contains"</span>.equals(methodName) || <span class="jxr_string">"equalsIgnoreCase"</span>.equals(methodName);
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>      }
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> comparatorMethod(String methodName) {
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>          <strong class="jxr_keyword">return</strong>  <span class="jxr_string">"compareTo"</span>.equals(methodName) || <span class="jxr_string">"compareToIgnoreCase"</span>.equals(methodName);
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>      }
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> analyzeMethod(ClassContext classContext, Method method) <strong class="jxr_keyword">throws</strong> CFGBuilderException, DataflowAnalysisException {
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>          CFG cfg = classContext.getCFG(method);
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>          ValueNumberDataflow valueNumberDataflow = classContext.getValueNumberDataflow(method);
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>         ConstantPoolGen cpg = classContext.getConstantPoolGen();
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>         MethodGen methodGen = classContext.getMethodGen(method);
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>         String sourceFile = classContext.getJavaClass().getSourceFileName();
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>         <strong class="jxr_keyword">for</strong> (Iterator&lt;Location&gt; i = cfg.locationIterator(); i.hasNext();) {
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>             Location location = i.next();
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>             Instruction ins = location.getHandle().getInstruction();
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>             <strong class="jxr_keyword">switch</strong> (ins.getOpcode()) {
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>             <strong class="jxr_keyword">case</strong> INVOKEVIRTUAL:
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>             <strong class="jxr_keyword">case</strong> INVOKEINTERFACE:
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>                 InvokeInstruction iins = (InvokeInstruction) ins;
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>                 String invoking = iins.getName(cpg);
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>                 <strong class="jxr_keyword">if</strong> ( comparatorMethod(invoking) || booleanComparisonMethod(invoking) ) {
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>                     <strong class="jxr_keyword">if</strong> (methodGen.getName().toLowerCase().indexOf(<span class="jxr_string">"test"</span>) &gt;= 0) {
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>                     }
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>                     <strong class="jxr_keyword">if</strong> (methodGen.getClassName().toLowerCase().indexOf(<span class="jxr_string">"test"</span>) &gt;= 0) {
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>                     }
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>                     <strong class="jxr_keyword">if</strong> (classContext.getJavaClass().getSuperclassName().toLowerCase().indexOf(<span class="jxr_string">"test"</span>) &gt;= 0) {
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>                     }
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>                     <strong class="jxr_keyword">if</strong> (location.getHandle().getNext().getInstruction().getOpcode() == POP) {
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>                     }
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>                     String sig = iins.getSignature(cpg);
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>                     SignatureParser parser = <strong class="jxr_keyword">new</strong> SignatureParser(sig);
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>                     <strong class="jxr_keyword">if</strong> (parser.getNumParameters() == 1
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>                             &amp;&amp; ( booleanComparisonMethod(invoking)  &amp;&amp; sig.endsWith(<span class="jxr_string">";)Z"</span>) || comparatorMethod(invoking) &amp;&amp; sig.endsWith(<span class="jxr_string">";)I"</span>))) {
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>                         checkForSelfOperation(classContext, location, valueNumberDataflow, <span class="jxr_string">"COMPARISON"</span>, method, methodGen,
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>                                 sourceFile);
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>                     }
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>                 }
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>             <strong class="jxr_keyword">case</strong> LOR:
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>             <strong class="jxr_keyword">case</strong> LAND:
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>             <strong class="jxr_keyword">case</strong> LXOR:
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>             <strong class="jxr_keyword">case</strong> LSUB:
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>             <strong class="jxr_keyword">case</strong> IOR:
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>             <strong class="jxr_keyword">case</strong> IAND:
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>             <strong class="jxr_keyword">case</strong> IXOR:
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>             <strong class="jxr_keyword">case</strong> ISUB:
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>                 checkForSelfOperation(classContext, location, valueNumberDataflow, <span class="jxr_string">"COMPUTATION"</span>, method, methodGen, sourceFile);
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>             <strong class="jxr_keyword">case</strong> FCMPG:
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>             <strong class="jxr_keyword">case</strong> DCMPG:
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>             <strong class="jxr_keyword">case</strong> DCMPL:
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>             <strong class="jxr_keyword">case</strong> FCMPL:
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>             <strong class="jxr_keyword">case</strong> LCMP:
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>             <strong class="jxr_keyword">case</strong> IF_ACMPEQ:
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>             <strong class="jxr_keyword">case</strong> IF_ACMPNE:
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>             <strong class="jxr_keyword">case</strong> IF_ICMPNE:
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>             <strong class="jxr_keyword">case</strong> IF_ICMPEQ:
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>             <strong class="jxr_keyword">case</strong> IF_ICMPGT:
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>             <strong class="jxr_keyword">case</strong> IF_ICMPLE:
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>             <strong class="jxr_keyword">case</strong> IF_ICMPLT:
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>             <strong class="jxr_keyword">case</strong> IF_ICMPGE:
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>                 checkForSelfOperation(classContext, location, valueNumberDataflow, <span class="jxr_string">"COMPARISON"</span>, method, methodGen, sourceFile);
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>             <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>             }
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>         }
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>     }
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> <em class="jxr_javadoccomment">     * @param classContext</em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> <em class="jxr_javadoccomment">     * @param location</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment">     * @param method</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment">     * @param methodGen</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment">     * @param sourceFile</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">     * @throws DataflowAnalysisException</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> checkForSelfOperation(ClassContext classContext, Location location, ValueNumberDataflow valueNumberDataflow,
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>             String op, Method method, MethodGen methodGen, String sourceFile) <strong class="jxr_keyword">throws</strong> DataflowAnalysisException {
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>         ValueNumberFrame frame = valueNumberDataflow.getFactAtLocation(location);
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>         <strong class="jxr_keyword">if</strong> (!frame.isValid()) {
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>         }
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>         Instruction ins = location.getHandle().getInstruction();
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>         <strong class="jxr_keyword">int</strong> opcode = ins.getOpcode();
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>         <strong class="jxr_keyword">int</strong> offset = 1;
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>         <strong class="jxr_keyword">if</strong> (opcode == LCMP || opcode == LXOR || opcode == LAND || opcode == LOR || opcode == LSUB) {
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>             offset = 2;
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>         }
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>         ValueNumber v0 = frame.getStackValue(0);
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>         ValueNumber v1 = frame.getStackValue(offset);
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>         <strong class="jxr_keyword">if</strong> (!v1.equals(v0)) {
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>         }
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>         <strong class="jxr_keyword">if</strong> (v0.hasFlag(ValueNumber.CONSTANT_CLASS_OBJECT) || v0.hasFlag(ValueNumber.CONSTANT_VALUE)) {
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>         }
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> 
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>         <strong class="jxr_keyword">int</strong> priority = HIGH_PRIORITY;
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>         <strong class="jxr_keyword">if</strong> (opcode == ISUB || opcode == LSUB || opcode == INVOKEINTERFACE || opcode == INVOKEVIRTUAL) {
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>             priority = NORMAL_PRIORITY;
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>         }
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>         XField field = ValueNumberSourceInfo.findXFieldFromValueNumber(method, location, v0, frame);
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>         BugAnnotation annotation;
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>         String prefix;
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>         <strong class="jxr_keyword">if</strong> (field != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>             <strong class="jxr_keyword">if</strong> (field.isVolatile()) {
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>                 <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>             }
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>             <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">true</strong>) {
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>                 <strong class="jxr_keyword">return</strong>; <em class="jxr_comment">// don't report these; too many false positives</em>
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>             }
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>             <em class="jxr_comment">//            annotation = FieldAnnotation.fromXField(field);</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>             <em class="jxr_comment">//            prefix = "SA_FIELD_SELF_";</em>
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>             annotation = ValueNumberSourceInfo.findLocalAnnotationFromValueNumber(method, location, v0, frame);
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>             prefix = <span class="jxr_string">"SA_LOCAL_SELF_"</span>;
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>             <strong class="jxr_keyword">if</strong> (opcode == ISUB) {
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>                 <strong class="jxr_keyword">return</strong>; <em class="jxr_comment">// only report this if simple detector reports it</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>             }
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>         }
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>         <strong class="jxr_keyword">if</strong> (annotation == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>         }
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>         SourceLineAnnotation sourceLine = SourceLineAnnotation.fromVisitedInstruction(classContext, methodGen, sourceFile,
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>                 location.getHandle());
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>         <strong class="jxr_keyword">int</strong> line = sourceLine.getStartLine();
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>         BitSet occursMultipleTimes = classContext.linesMentionedMultipleTimes(method);
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>         <strong class="jxr_keyword">if</strong> (line &gt; 0 &amp;&amp; occursMultipleTimes.get(line)) {
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>         }
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>         BugInstance bug = <strong class="jxr_keyword">new</strong> BugInstance(<strong class="jxr_keyword">this</strong>, prefix + op, priority).addClassAndMethod(methodGen, sourceFile);
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>         <strong class="jxr_keyword">if</strong> (ins instanceof InvokeInstruction) {
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>             bug.addCalledMethod(classContext.getConstantPoolGen(), (InvokeInstruction) ins);
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>         }
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> 
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>         bug.add(annotation)
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>         .addSourceLine(classContext, methodGen, sourceFile, location.getHandle());
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>         bugReporter.reportBug(bug);
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>     }
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> 
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>     @Override
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> report() {
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>     }
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> 
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

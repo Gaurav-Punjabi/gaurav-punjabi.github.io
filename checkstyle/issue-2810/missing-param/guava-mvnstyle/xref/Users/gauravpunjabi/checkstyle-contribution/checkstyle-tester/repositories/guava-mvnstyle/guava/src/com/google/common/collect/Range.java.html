@@ -1,0 +1,727 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>Range xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (C) 2008 The Guava Authors</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * limitations under the License.</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">package</strong> com.google.common.collect;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkNotNull;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.GwtCompatible;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Equivalence;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Function;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Predicate;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.io.Serializable;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> java.util.Comparator;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.Iterator;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.NoSuchElementException;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.SortedSet;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.checkerframework.checker.nullness.qual.Nullable;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment"> * A range (or "interval") defines the &lt;i&gt;boundaries&lt;/i&gt; around a contiguous span of values of some</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> * {@code Comparable} type; for example, "integers from 1 to 100 inclusive." Note that it is not</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment"> * possible to &lt;i&gt;iterate&lt;/i&gt; over these contained values. To do so, pass this range instance and an</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment"> * appropriate {@link DiscreteDomain} to {@link ContiguousSet#create}.</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> * &lt;h3&gt;Types of ranges&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;Each end of the range may be bounded or unbounded. If bounded, there is an associated</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment"> * &lt;i&gt;endpoint&lt;/i&gt; value, and the range is considered to be either &lt;i&gt;open&lt;/i&gt; (does not include the</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment"> * endpoint) or &lt;i&gt;closed&lt;/i&gt; (includes the endpoint) on that side. With three possibilities on each</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment"> * side, this yields nine basic types of ranges, enumerated below. (Notation: a square bracket</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment"> * ({@code [ ]}) indicates that the range is closed on that side; a parenthesis ({@code ( )}) means</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment"> * it is either open or unbounded. The construct {@code {x | statement}} is read "the set of all</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment"> * &lt;i&gt;x&lt;/i&gt; such that &lt;i&gt;statement&lt;/i&gt;.")</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment"> * &lt;blockquote&gt;</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment"> * &lt;table&gt;</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment"> * &lt;caption&gt;Range Types&lt;/caption&gt;</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> * &lt;tr&gt;&lt;th&gt;Notation        &lt;th&gt;Definition               &lt;th&gt;Factory method</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> * &lt;tr&gt;&lt;td&gt;{@code (a..b)}  &lt;td&gt;{@code {x | a &lt; x &lt; b}}  &lt;td&gt;{@link Range#open open}</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> * &lt;tr&gt;&lt;td&gt;{@code [a..b]}  &lt;td&gt;{@code {x | a &lt;= x &lt;= b}}&lt;td&gt;{@link Range#closed closed}</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> * &lt;tr&gt;&lt;td&gt;{@code (a..b]}  &lt;td&gt;{@code {x | a &lt; x &lt;= b}} &lt;td&gt;{@link Range#openClosed openClosed}</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment"> * &lt;tr&gt;&lt;td&gt;{@code [a..b)}  &lt;td&gt;{@code {x | a &lt;= x &lt; b}} &lt;td&gt;{@link Range#closedOpen closedOpen}</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment"> * &lt;tr&gt;&lt;td&gt;{@code (a..+∞)} &lt;td&gt;{@code {x | x &gt; a}}      &lt;td&gt;{@link Range#greaterThan greaterThan}</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment"> * &lt;tr&gt;&lt;td&gt;{@code [a..+∞)} &lt;td&gt;{@code {x | x &gt;= a}}     &lt;td&gt;{@link Range#atLeast atLeast}</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment"> * &lt;tr&gt;&lt;td&gt;{@code (-∞..b)} &lt;td&gt;{@code {x | x &lt; b}}      &lt;td&gt;{@link Range#lessThan lessThan}</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> * &lt;tr&gt;&lt;td&gt;{@code (-∞..b]} &lt;td&gt;{@code {x | x &lt;= b}}     &lt;td&gt;{@link Range#atMost atMost}</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> * &lt;tr&gt;&lt;td&gt;{@code (-∞..+∞)}&lt;td&gt;{@code {x}}              &lt;td&gt;{@link Range#all all}</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> * &lt;/table&gt;</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> * &lt;/blockquote&gt;</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;When both endpoints exist, the upper endpoint may not be less than the lower. The endpoints</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment"> * may be equal only if at least one of the bounds is closed:</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment"> * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;{@code [a..a]} : a singleton range</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;{@code [a..a); (a..a]} : {@linkplain #isEmpty empty} ranges; also valid</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;{@code (a..a)} : &lt;b&gt;invalid&lt;/b&gt;; an exception will be thrown</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment"> * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment"> * &lt;h3&gt;Warnings&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment"> * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;Use immutable value types only, if at all possible. If you must use a mutable type, &lt;b&gt;do</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment"> *       not&lt;/b&gt; allow the endpoint instances to mutate after the range is created!</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;Your value type's comparison method should be {@linkplain Comparable consistent with</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_javadoccomment"> *       equals} if at all possible. Otherwise, be aware that concepts used throughout this</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment"> *       documentation such as "equal", "same", "unique" and so on actually refer to whether {@link</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment"> *       Comparable#compareTo compareTo} returns zero, not whether {@link Object#equals equals}</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment"> *       returns {@code true}.</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;A class which implements {@code Comparable&lt;UnrelatedType&gt;} is very broken, and will cause</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment"> *       undefined horrible things to happen in {@code Range}. For now, the Range API does not</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_javadoccomment"> *       prevent its use, because this would also rule out all ungenerified (pre-JDK1.5) data types.</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  <em class="jxr_javadoccomment"> *       &lt;b&gt;This may change in the future.&lt;/b&gt;</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  <em class="jxr_javadoccomment"> * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment"> * &lt;h3&gt;Other notes&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment"> * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;Instances of this type are obtained using the static factory methods in this class.</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;Ranges are &lt;i&gt;convex&lt;/i&gt;: whenever two values are contained, all values in between them</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment"> *       must also be contained. More formally, for any {@code c1 &lt;= c2 &lt;= c3} of type {@code C},</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment"> *       {@code r.contains(c1) &amp;&amp; r.contains(c3)} implies {@code r.contains(c2)}). This means that a</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment"> *       {@code Range&lt;Integer&gt;} can never be used to represent, say, "all &lt;i&gt;prime&lt;/i&gt; numbers from</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment"> *       1 to 100."</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment"> *   &lt;li&gt;When evaluated as a {@link Predicate}, a range yields the same result as invoking {@link</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment"> *       #contains}.</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment"> *   &lt;li&gt;Terminology note: a range {@code a} is said to be the &lt;i&gt;maximal&lt;/i&gt; range having property</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment"> *       &lt;i&gt;P&lt;/i&gt; if, for all ranges {@code b} also having property &lt;i&gt;P&lt;/i&gt;, {@code a.encloses(b)}.</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment"> *       Likewise, {@code a} is &lt;i&gt;minimal&lt;/i&gt; when {@code b.encloses(a)} for all {@code b} having</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment"> *       property &lt;i&gt;P&lt;/i&gt;. See, for example, the definition of {@link #intersection intersection}.</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment"> * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment"> * &lt;h3&gt;Further reading&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_javadoccomment"> * &lt;p&gt;See the Guava User Guide article on &lt;a</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_javadoccomment"> * href="<a href="https://github.com/google/guava/wiki/RangesExplained" target="alexandria_uri">https://github.com/google/guava/wiki/RangesExplained</a>"&gt;{@code Range}&lt;/a&gt;.</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment"> * @author Kevin Bourrillion</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment"> * @author Gregory Kick</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment"> * @since 10.0</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> @GwtCompatible
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> @SuppressWarnings(<span class="jxr_string">"rawtypes"</span>)
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> Range&lt;C <strong class="jxr_keyword">extends</strong> Comparable&gt; <strong class="jxr_keyword">extends</strong> RangeGwtSerializationDependencies
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>     <strong class="jxr_keyword">implements</strong> Predicate&lt;C&gt;, Serializable {
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>   <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> LowerBoundFn <strong class="jxr_keyword">implements</strong> Function&lt;Range, Cut&gt; {
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> LowerBoundFn INSTANCE = <strong class="jxr_keyword">new</strong> LowerBoundFn();
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>     @Override
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>     <strong class="jxr_keyword">public</strong> Cut apply(Range range) {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>       <strong class="jxr_keyword">return</strong> range.lowerBound;
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>     }
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>   }
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>   <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> UpperBoundFn <strong class="jxr_keyword">implements</strong> Function&lt;Range, Cut&gt; {
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> UpperBoundFn INSTANCE = <strong class="jxr_keyword">new</strong> UpperBoundFn();
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>     @Override
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>     <strong class="jxr_keyword">public</strong> Cut apply(Range range) {
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>       <strong class="jxr_keyword">return</strong> range.upperBound;
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>     }
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>   }
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>   @SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>   <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Function&lt;Range&lt;C&gt;, Cut&lt;C&gt;&gt; lowerBoundFn() {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>     <strong class="jxr_keyword">return</strong> (Function) LowerBoundFn.INSTANCE;
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>   }
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>   @SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>   <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Function&lt;Range&lt;C&gt;, Cut&lt;C&gt;&gt; upperBoundFn() {
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>     <strong class="jxr_keyword">return</strong> (Function) UpperBoundFn.INSTANCE;
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>   }
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>   <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Ordering&lt;Range&lt;C&gt;&gt; rangeLexOrdering() {
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>     <strong class="jxr_keyword">return</strong> (Ordering&lt;Range&lt;C&gt;&gt;) (Ordering) RangeLexOrdering.INSTANCE;
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>   }
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>   <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; create(Cut&lt;C&gt; lowerBound, Cut&lt;C&gt; upperBound) {
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Range&lt;C&gt;(lowerBound, upperBound);
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>   }
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> <em class="jxr_javadoccomment">   * Returns a range that contains all values strictly greater than {@code lower} and strictly less</em>
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> <em class="jxr_javadoccomment">   * than {@code upper}.</em>
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code lower} is greater than &lt;i&gt;or equal to&lt;/i&gt; {@code</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment">   *     upper}</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> <em class="jxr_javadoccomment">   * @throws ClassCastException if {@code lower} and {@code upper} are not mutually comparable</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; open(C lower, C upper) {
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>     <strong class="jxr_keyword">return</strong> create(Cut.aboveValue(lower), Cut.belowValue(upper));
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>   }
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> <em class="jxr_javadoccomment">   * Returns a range that contains all values greater than or equal to {@code lower} and less than</em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> <em class="jxr_javadoccomment">   * or equal to {@code upper}.</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code lower} is greater than {@code upper}</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment">   * @throws ClassCastException if {@code lower} and {@code upper} are not mutually comparable</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; closed(C lower, C upper) {
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>     <strong class="jxr_keyword">return</strong> create(Cut.belowValue(lower), Cut.aboveValue(upper));
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>   }
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_javadoccomment">   * Returns a range that contains all values greater than or equal to {@code lower} and strictly</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">   * less than {@code upper}.</em>
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code lower} is greater than {@code upper}</em>
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> <em class="jxr_javadoccomment">   * @throws ClassCastException if {@code lower} and {@code upper} are not mutually comparable</em>
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; closedOpen(C lower, C upper) {
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>     <strong class="jxr_keyword">return</strong> create(Cut.belowValue(lower), Cut.belowValue(upper));
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>   }
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> 
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_javadoccomment">   * Returns a range that contains all values strictly greater than {@code lower} and less than or</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_javadoccomment">   * equal to {@code upper}.</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code lower} is greater than {@code upper}</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment">   * @throws ClassCastException if {@code lower} and {@code upper} are not mutually comparable</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; openClosed(C lower, C upper) {
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>     <strong class="jxr_keyword">return</strong> create(Cut.aboveValue(lower), Cut.aboveValue(upper));
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>   }
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">   * Returns a range that contains any value from {@code lower} to {@code upper}, where each</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_javadoccomment">   * endpoint may be either inclusive (closed) or exclusive (open).</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code lower} is greater than {@code upper}</em>
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> <em class="jxr_javadoccomment">   * @throws ClassCastException if {@code lower} and {@code upper} are not mutually comparable</em>
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; range(
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>       C lower, BoundType lowerType, C upper, BoundType upperType) {
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>     checkNotNull(lowerType);
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>     checkNotNull(upperType);
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>     Cut&lt;C&gt; lowerBound =
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>         (lowerType == BoundType.OPEN) ? Cut.aboveValue(lower) : Cut.belowValue(lower);
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>     Cut&lt;C&gt; upperBound =
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>         (upperType == BoundType.OPEN) ? Cut.belowValue(upper) : Cut.aboveValue(upper);
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>     <strong class="jxr_keyword">return</strong> create(lowerBound, upperBound);
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>   }
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> <em class="jxr_javadoccomment">   * Returns a range that contains all values strictly less than {@code endpoint}.</em>
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; lessThan(C endpoint) {
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>     <strong class="jxr_keyword">return</strong> create(Cut.&lt;C&gt;belowAll(), Cut.belowValue(endpoint));
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>   }
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> 
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> <em class="jxr_javadoccomment">   * Returns a range that contains all values less than or equal to {@code endpoint}.</em>
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; atMost(C endpoint) {
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>     <strong class="jxr_keyword">return</strong> create(Cut.&lt;C&gt;belowAll(), Cut.aboveValue(endpoint));
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>   }
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> 
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_javadoccomment">   * Returns a range with no lower bound up to the given endpoint, which may be either inclusive</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_javadoccomment">   * (closed) or exclusive (open).</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; upTo(C endpoint, BoundType boundType) {
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>     <strong class="jxr_keyword">switch</strong> (boundType) {
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>       <strong class="jxr_keyword">case</strong> OPEN:
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>         <strong class="jxr_keyword">return</strong> lessThan(endpoint);
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>       <strong class="jxr_keyword">case</strong> CLOSED:
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>         <strong class="jxr_keyword">return</strong> atMost(endpoint);
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>       <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>         <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> AssertionError();
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>     }
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>   }
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> 
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> <em class="jxr_javadoccomment">   * Returns a range that contains all values strictly greater than {@code endpoint}.</em>
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; greaterThan(C endpoint) {
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>     <strong class="jxr_keyword">return</strong> create(Cut.aboveValue(endpoint), Cut.&lt;C&gt;aboveAll());
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>   }
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> 
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">   * Returns a range that contains all values greater than or equal to {@code endpoint}.</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; atLeast(C endpoint) {
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>     <strong class="jxr_keyword">return</strong> create(Cut.belowValue(endpoint), Cut.&lt;C&gt;aboveAll());
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>   }
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> 
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_javadoccomment">   * Returns a range from the given endpoint, which may be either inclusive (closed) or exclusive</em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_javadoccomment">   * (open), with no upper bound.</em>
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; downTo(C endpoint, BoundType boundType) {
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>     <strong class="jxr_keyword">switch</strong> (boundType) {
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>       <strong class="jxr_keyword">case</strong> OPEN:
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>         <strong class="jxr_keyword">return</strong> greaterThan(endpoint);
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>       <strong class="jxr_keyword">case</strong> CLOSED:
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>         <strong class="jxr_keyword">return</strong> atLeast(endpoint);
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>       <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>         <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> AssertionError();
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>     }
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>   }
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Range&lt;Comparable&gt; ALL = <strong class="jxr_keyword">new</strong> Range&lt;&gt;(Cut.belowAll(), Cut.aboveAll());
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> 
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> <em class="jxr_javadoccomment">   * Returns a range that contains every value of type {@code C}.</em>
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>   @SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; all() {
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>     <strong class="jxr_keyword">return</strong> (Range) ALL;
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>   }
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> <em class="jxr_javadoccomment">   * Returns a range that {@linkplain Range#contains(Comparable) contains} only the given value. The</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> <em class="jxr_javadoccomment">   * returned range is {@linkplain BoundType#CLOSED closed} on both ends.</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; singleton(C value) {
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>     <strong class="jxr_keyword">return</strong> closed(value, value);
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>   }
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> <em class="jxr_javadoccomment">   * Returns the minimal range that {@linkplain Range#contains(Comparable) contains} all of the</em>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> <em class="jxr_javadoccomment">   * given values. The returned range is {@linkplain BoundType#CLOSED closed} on both ends.</em>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> <em class="jxr_javadoccomment">   * @throws ClassCastException if the values are not mutually comparable</em>
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> <em class="jxr_javadoccomment">   * @throws NoSuchElementException if {@code values} is empty</em>
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if any of {@code values} is null</em>
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;C <strong class="jxr_keyword">extends</strong> Comparable&lt;?&gt;&gt; Range&lt;C&gt; encloseAll(Iterable&lt;C&gt; values) {
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>     checkNotNull(values);
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>     <strong class="jxr_keyword">if</strong> (values instanceof SortedSet) {
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>       SortedSet&lt;? <strong class="jxr_keyword">extends</strong> C&gt; set = <strong class="jxr_keyword">cast</strong>(values);
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>       Comparator&lt;?&gt; comparator = set.comparator();
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>       <strong class="jxr_keyword">if</strong> (Ordering.natural().equals(comparator) || comparator == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>         <strong class="jxr_keyword">return</strong> closed(set.first(), set.last());
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>       }
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>     }
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>     Iterator&lt;C&gt; valueIterator = values.iterator();
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>     C min = checkNotNull(valueIterator.next());
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>     C max = min;
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>     <strong class="jxr_keyword">while</strong> (valueIterator.hasNext()) {
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>       C value = checkNotNull(valueIterator.next());
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>       min = Ordering.natural().min(min, value);
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>       max = Ordering.natural().max(max, value);
+<a class="jxr_linenumber" name="L344" href="#L344">344</a>     }
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>     <strong class="jxr_keyword">return</strong> closed(min, max);
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>   }
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>   <strong class="jxr_keyword">final</strong> Cut&lt;C&gt; lowerBound;
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>   <strong class="jxr_keyword">final</strong> Cut&lt;C&gt; upperBound;
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>   <strong class="jxr_keyword">private</strong> Range(Cut&lt;C&gt; lowerBound, Cut&lt;C&gt; upperBound) {
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>     <strong class="jxr_keyword">this</strong>.lowerBound = checkNotNull(lowerBound);
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>     <strong class="jxr_keyword">this</strong>.upperBound = checkNotNull(upperBound);
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>     <strong class="jxr_keyword">if</strong> (lowerBound.compareTo(upperBound) &gt; 0
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>         || lowerBound == Cut.&lt;C&gt;aboveAll()
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>         || upperBound == Cut.&lt;C&gt;belowAll()) {
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>       <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Invalid range: "</span> + toString(lowerBound, upperBound));
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>     }
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>   }
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>   <em class="jxr_javadoccomment">/** Returns {@code true} if this range has a lower endpoint. */</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasLowerBound() {
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>     <strong class="jxr_keyword">return</strong> lowerBound != Cut.belowAll();
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>   }
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> 
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_javadoccomment">   * Returns the lower endpoint of this range.</em>
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> <em class="jxr_javadoccomment">   * @throws IllegalStateException if this range is unbounded below (that is, {@link</em>
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> <em class="jxr_javadoccomment">   *     #hasLowerBound()} returns {@code false})</em>
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>   <strong class="jxr_keyword">public</strong> C lowerEndpoint() {
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>     <strong class="jxr_keyword">return</strong> lowerBound.endpoint();
+<a class="jxr_linenumber" name="L374" href="#L374">374</a>   }
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> 
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_javadoccomment">   * Returns the type of this range's lower bound: {@link BoundType#CLOSED} if the range includes</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment">   * its lower endpoint, {@link BoundType#OPEN} if it does not.</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> <em class="jxr_javadoccomment">   * @throws IllegalStateException if this range is unbounded below (that is, {@link</em>
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> <em class="jxr_javadoccomment">   *     #hasLowerBound()} returns {@code false})</em>
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>   <strong class="jxr_keyword">public</strong> BoundType lowerBoundType() {
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>     <strong class="jxr_keyword">return</strong> lowerBound.typeAsLowerBound();
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>   }
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> 
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>   <em class="jxr_javadoccomment">/** Returns {@code true} if this range has an upper endpoint. */</em>
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasUpperBound() {
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>     <strong class="jxr_keyword">return</strong> upperBound != Cut.aboveAll();
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>   }
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> 
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> <em class="jxr_javadoccomment">   * Returns the upper endpoint of this range.</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> <em class="jxr_javadoccomment">   * @throws IllegalStateException if this range is unbounded above (that is, {@link</em>
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> <em class="jxr_javadoccomment">   *     #hasUpperBound()} returns {@code false})</em>
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>   <strong class="jxr_keyword">public</strong> C upperEndpoint() {
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>     <strong class="jxr_keyword">return</strong> upperBound.endpoint();
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>   }
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_javadoccomment">   * Returns the type of this range's upper bound: {@link BoundType#CLOSED} if the range includes</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_javadoccomment">   * its upper endpoint, {@link BoundType#OPEN} if it does not.</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> <em class="jxr_javadoccomment">   * @throws IllegalStateException if this range is unbounded above (that is, {@link</em>
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> <em class="jxr_javadoccomment">   *     #hasUpperBound()} returns {@code false})</em>
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>   <strong class="jxr_keyword">public</strong> BoundType upperBoundType() {
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>     <strong class="jxr_keyword">return</strong> upperBound.typeAsUpperBound();
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>   }
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> 
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> <em class="jxr_javadoccomment">   * Returns {@code true} if this range is of the form {@code [v..v)} or {@code (v..v]}. (This does</em>
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> <em class="jxr_javadoccomment">   * not encompass ranges of the form {@code (v..v)}, because such ranges are &lt;i&gt;invalid&lt;/i&gt; and</em>
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> <em class="jxr_javadoccomment">   * can't be constructed at all.)</em>
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Note that certain discrete ranges such as the integer range {@code (3..4)} are &lt;b&gt;not&lt;/b&gt;</em>
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> <em class="jxr_javadoccomment">   * considered empty, even though they contain no actual values. In these cases, it may be helpful</em>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> <em class="jxr_javadoccomment">   * to preprocess ranges with {@link #canonical(DiscreteDomain)}.</em>
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isEmpty() {
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>     <strong class="jxr_keyword">return</strong> lowerBound.equals(upperBound);
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>   }
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">   * Returns {@code true} if {@code value} is within the bounds of this range. For example, on the</em>
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> <em class="jxr_javadoccomment">   * range {@code [0..2)}, {@code contains(1)} returns {@code true}, while {@code contains(2)}</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> <em class="jxr_javadoccomment">   * returns {@code false}.</em>
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> contains(C value) {
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>     checkNotNull(value);
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>     <em class="jxr_comment">// let this throw CCE if there is some trickery going on</em>
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>     <strong class="jxr_keyword">return</strong> lowerBound.isLessThan(value) &amp;&amp; !upperBound.isLessThan(value);
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>   }
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> 
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> <em class="jxr_javadoccomment">   * @deprecated Provided only to satisfy the {@link Predicate} interface; use {@link #contains}</em>
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> <em class="jxr_javadoccomment">   *     instead.</em>
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>   @Deprecated
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>   @Override
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> apply(C input) {
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>     <strong class="jxr_keyword">return</strong> contains(input);
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>   }
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> 
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> <em class="jxr_javadoccomment">   * Returns {@code true} if every element in {@code values} is {@linkplain #contains contained} in</em>
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> <em class="jxr_javadoccomment">   * this range.</em>
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> containsAll(Iterable&lt;? <strong class="jxr_keyword">extends</strong> C&gt; values) {
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>     <strong class="jxr_keyword">if</strong> (Iterables.isEmpty(values)) {
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>     }
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> 
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>     <em class="jxr_comment">// this optimizes testing equality of two range-backed sets</em>
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>     <strong class="jxr_keyword">if</strong> (values instanceof SortedSet) {
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>       SortedSet&lt;? <strong class="jxr_keyword">extends</strong> C&gt; set = <strong class="jxr_keyword">cast</strong>(values);
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>       Comparator&lt;?&gt; comparator = set.comparator();
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>       <strong class="jxr_keyword">if</strong> (Ordering.natural().equals(comparator) || comparator == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>         <strong class="jxr_keyword">return</strong> contains(set.first()) &amp;&amp; contains(set.last());
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>       }
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>     }
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> 
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>     <strong class="jxr_keyword">for</strong> (C value : values) {
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>       <strong class="jxr_keyword">if</strong> (!contains(value)) {
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>       }
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>     }
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>   }
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> 
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> <em class="jxr_javadoccomment">   * Returns {@code true} if the bounds of {@code other} do not extend outside the bounds of this</em>
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> <em class="jxr_javadoccomment">   * range. Examples:</em>
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> <em class="jxr_javadoccomment">   * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L478" href="#L478">478</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code [3..6]} encloses {@code [4..5]}</em>
+<a class="jxr_linenumber" name="L479" href="#L479">479</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code (3..6)} encloses {@code (3..6)}</em>
+<a class="jxr_linenumber" name="L480" href="#L480">480</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code [3..6]} encloses {@code [4..4)} (even though the latter is empty)</em>
+<a class="jxr_linenumber" name="L481" href="#L481">481</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code (3..6]} does not enclose {@code [3..6]}</em>
+<a class="jxr_linenumber" name="L482" href="#L482">482</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code [4..5]} does not enclose {@code (3..6)} (even though it contains every value</em>
+<a class="jxr_linenumber" name="L483" href="#L483">483</a> <em class="jxr_javadoccomment">   *       contained by the latter range)</em>
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code [3..6]} does not enclose {@code (1..1]} (even though it contains every value</em>
+<a class="jxr_linenumber" name="L485" href="#L485">485</a> <em class="jxr_javadoccomment">   *       contained by the latter range)</em>
+<a class="jxr_linenumber" name="L486" href="#L486">486</a> <em class="jxr_javadoccomment">   * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L488" href="#L488">488</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Note that if {@code a.encloses(b)}, then {@code b.contains(v)} implies {@code</em>
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> <em class="jxr_javadoccomment">   * a.contains(v)}, but as the last two examples illustrate, the converse is not always true.</em>
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Being reflexive, antisymmetric and transitive, the {@code encloses} relation defines a</em>
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> <em class="jxr_javadoccomment">   * &lt;i&gt;partial order&lt;/i&gt; over ranges. There exists a unique {@linkplain Range#all maximal} range</em>
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> <em class="jxr_javadoccomment">   * according to this relation, and also numerous {@linkplain #isEmpty minimal} ranges. Enclosure</em>
+<a class="jxr_linenumber" name="L494" href="#L494">494</a> <em class="jxr_javadoccomment">   * also implies {@linkplain #isConnected connectedness}.</em>
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> encloses(Range&lt;C&gt; other) {
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>     <strong class="jxr_keyword">return</strong> lowerBound.compareTo(other.lowerBound) &lt;= 0
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>         &amp;&amp; upperBound.compareTo(other.upperBound) &gt;= 0;
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>   }
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> 
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> <em class="jxr_javadoccomment">   * Returns {@code true} if there exists a (possibly empty) range which is {@linkplain #encloses</em>
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> <em class="jxr_javadoccomment">   * enclosed} by both this range and {@code other}.</em>
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> <em class="jxr_javadoccomment">   * &lt;p&gt;For example,</em>
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L507" href="#L507">507</a> <em class="jxr_javadoccomment">   * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L508" href="#L508">508</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code [2, 4)} and {@code [5, 7)} are not connected</em>
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code [2, 4)} and {@code [3, 5)} are connected, because both enclose {@code [3, 4)}</em>
+<a class="jxr_linenumber" name="L510" href="#L510">510</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code [2, 4)} and {@code [4, 6)} are connected, because both enclose the empty range</em>
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> <em class="jxr_javadoccomment">   *       {@code [4, 4)}</em>
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> <em class="jxr_javadoccomment">   * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L514" href="#L514">514</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Note that this range and {@code other} have a well-defined {@linkplain #span union} and</em>
+<a class="jxr_linenumber" name="L515" href="#L515">515</a> <em class="jxr_javadoccomment">   * {@linkplain #intersection intersection} (as a single, possibly-empty range) if and only if this</em>
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> <em class="jxr_javadoccomment">   * method returns {@code true}.</em>
+<a class="jxr_linenumber" name="L517" href="#L517">517</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The connectedness relation is both reflexive and symmetric, but does not form an {@linkplain</em>
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> <em class="jxr_javadoccomment">   * Equivalence equivalence relation} as it is not transitive.</em>
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Note that certain discrete ranges are not considered connected, even though there are no</em>
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> <em class="jxr_javadoccomment">   * elements "between them." For example, {@code [3, 5]} is not considered connected to {@code [6,</em>
+<a class="jxr_linenumber" name="L523" href="#L523">523</a> <em class="jxr_javadoccomment">   * 10]}. In these cases, it may be desirable for both input ranges to be preprocessed with {@link</em>
+<a class="jxr_linenumber" name="L524" href="#L524">524</a> <em class="jxr_javadoccomment">   * #canonical(DiscreteDomain)} before testing for connectedness.</em>
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L526" href="#L526">526</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isConnected(Range&lt;C&gt; other) {
+<a class="jxr_linenumber" name="L527" href="#L527">527</a>     <strong class="jxr_keyword">return</strong> lowerBound.compareTo(other.upperBound) &lt;= 0
+<a class="jxr_linenumber" name="L528" href="#L528">528</a>         &amp;&amp; other.lowerBound.compareTo(upperBound) &lt;= 0;
+<a class="jxr_linenumber" name="L529" href="#L529">529</a>   }
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> 
+<a class="jxr_linenumber" name="L531" href="#L531">531</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> <em class="jxr_javadoccomment">   * Returns the maximal range {@linkplain #encloses enclosed} by both this range and {@code</em>
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> <em class="jxr_javadoccomment">   * connectedRange}, if such a range exists.</em>
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> <em class="jxr_javadoccomment">   * &lt;p&gt;For example, the intersection of {@code [1..5]} and {@code (3..7)} is {@code (3..5]}. The</em>
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> <em class="jxr_javadoccomment">   * resulting range may be empty; for example, {@code [1..5)} intersected with {@code [5..7)}</em>
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> <em class="jxr_javadoccomment">   * yields the empty range {@code [5..5)}.</em>
+<a class="jxr_linenumber" name="L538" href="#L538">538</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The intersection exists if and only if the two ranges are {@linkplain #isConnected</em>
+<a class="jxr_linenumber" name="L540" href="#L540">540</a> <em class="jxr_javadoccomment">   * connected}.</em>
+<a class="jxr_linenumber" name="L541" href="#L541">541</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L542" href="#L542">542</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The intersection operation is commutative, associative and idempotent, and its identity</em>
+<a class="jxr_linenumber" name="L543" href="#L543">543</a> <em class="jxr_javadoccomment">   * element is {@link Range#all}).</em>
+<a class="jxr_linenumber" name="L544" href="#L544">544</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L545" href="#L545">545</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code isConnected(connectedRange)} is {@code false}</em>
+<a class="jxr_linenumber" name="L546" href="#L546">546</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>   <strong class="jxr_keyword">public</strong> Range&lt;C&gt; intersection(Range&lt;C&gt; connectedRange) {
+<a class="jxr_linenumber" name="L548" href="#L548">548</a>     <strong class="jxr_keyword">int</strong> lowerCmp = lowerBound.compareTo(connectedRange.lowerBound);
+<a class="jxr_linenumber" name="L549" href="#L549">549</a>     <strong class="jxr_keyword">int</strong> upperCmp = upperBound.compareTo(connectedRange.upperBound);
+<a class="jxr_linenumber" name="L550" href="#L550">550</a>     <strong class="jxr_keyword">if</strong> (lowerCmp &gt;= 0 &amp;&amp; upperCmp &lt;= 0) {
+<a class="jxr_linenumber" name="L551" href="#L551">551</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L552" href="#L552">552</a>     } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (lowerCmp &lt;= 0 &amp;&amp; upperCmp &gt;= 0) {
+<a class="jxr_linenumber" name="L553" href="#L553">553</a>       <strong class="jxr_keyword">return</strong> connectedRange;
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L555" href="#L555">555</a>       Cut&lt;C&gt; newLower = (lowerCmp &gt;= 0) ? lowerBound : connectedRange.lowerBound;
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>       Cut&lt;C&gt; newUpper = (upperCmp &lt;= 0) ? upperBound : connectedRange.upperBound;
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>       <strong class="jxr_keyword">return</strong> create(newLower, newUpper);
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>     }
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>   }
+<a class="jxr_linenumber" name="L560" href="#L560">560</a> 
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L562" href="#L562">562</a> <em class="jxr_javadoccomment">   * Returns the maximal range lying between this range and {@code otherRange}, if such a range</em>
+<a class="jxr_linenumber" name="L563" href="#L563">563</a> <em class="jxr_javadoccomment">   * exists. The resulting range may be empty if the two ranges are adjacent but non-overlapping.</em>
+<a class="jxr_linenumber" name="L564" href="#L564">564</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L565" href="#L565">565</a> <em class="jxr_javadoccomment">   * &lt;p&gt;For example, the gap of {@code [1..5]} and {@code (7..10)} is {@code (5..7]}. The resulting</em>
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> <em class="jxr_javadoccomment">   * range may be empty; for example, the gap between {@code [1..5)} {@code [5..7)} yields the empty</em>
+<a class="jxr_linenumber" name="L567" href="#L567">567</a> <em class="jxr_javadoccomment">   * range {@code [5..5)}.</em>
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L569" href="#L569">569</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The gap exists if and only if the two ranges are either disconnected or immediately adjacent</em>
+<a class="jxr_linenumber" name="L570" href="#L570">570</a> <em class="jxr_javadoccomment">   * (any intersection must be an empty range).</em>
+<a class="jxr_linenumber" name="L571" href="#L571">571</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L572" href="#L572">572</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The gap operation is commutative.</em>
+<a class="jxr_linenumber" name="L573" href="#L573">573</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if this range and {@code otherRange} have a nonempty</em>
+<a class="jxr_linenumber" name="L575" href="#L575">575</a> <em class="jxr_javadoccomment">   *     intersection</em>
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> <em class="jxr_javadoccomment">   * @since 27.0</em>
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L578" href="#L578">578</a>   <strong class="jxr_keyword">public</strong> Range&lt;C&gt; gap(Range&lt;C&gt; otherRange) {
+<a class="jxr_linenumber" name="L579" href="#L579">579</a>     <strong class="jxr_keyword">boolean</strong> isThisFirst = <strong class="jxr_keyword">this</strong>.lowerBound.compareTo(otherRange.lowerBound) &lt; 0;
+<a class="jxr_linenumber" name="L580" href="#L580">580</a>     Range&lt;C&gt; firstRange = isThisFirst ? <strong class="jxr_keyword">this</strong> : otherRange;
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>     Range&lt;C&gt; secondRange = isThisFirst ? otherRange : <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>     <strong class="jxr_keyword">return</strong> create(firstRange.upperBound, secondRange.lowerBound);
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>   }
+<a class="jxr_linenumber" name="L584" href="#L584">584</a> 
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L586" href="#L586">586</a> <em class="jxr_javadoccomment">   * Returns the minimal range that {@linkplain #encloses encloses} both this range and {@code</em>
+<a class="jxr_linenumber" name="L587" href="#L587">587</a> <em class="jxr_javadoccomment">   * other}. For example, the span of {@code [1..3]} and {@code (5..7)} is {@code [1..7)}.</em>
+<a class="jxr_linenumber" name="L588" href="#L588">588</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L589" href="#L589">589</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;i&gt;If&lt;/i&gt; the input ranges are {@linkplain #isConnected connected}, the returned range can</em>
+<a class="jxr_linenumber" name="L590" href="#L590">590</a> <em class="jxr_javadoccomment">   * also be called their &lt;i&gt;union&lt;/i&gt;. If they are not, note that the span might contain values</em>
+<a class="jxr_linenumber" name="L591" href="#L591">591</a> <em class="jxr_javadoccomment">   * that are not contained in either input range.</em>
+<a class="jxr_linenumber" name="L592" href="#L592">592</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L593" href="#L593">593</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Like {@link #intersection(Range) intersection}, this operation is commutative, associative</em>
+<a class="jxr_linenumber" name="L594" href="#L594">594</a> <em class="jxr_javadoccomment">   * and idempotent. Unlike it, it is always well-defined for any two input ranges.</em>
+<a class="jxr_linenumber" name="L595" href="#L595">595</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>   <strong class="jxr_keyword">public</strong> Range&lt;C&gt; span(Range&lt;C&gt; other) {
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>     <strong class="jxr_keyword">int</strong> lowerCmp = lowerBound.compareTo(other.lowerBound);
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>     <strong class="jxr_keyword">int</strong> upperCmp = upperBound.compareTo(other.upperBound);
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>     <strong class="jxr_keyword">if</strong> (lowerCmp &lt;= 0 &amp;&amp; upperCmp &gt;= 0) {
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>     } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (lowerCmp &gt;= 0 &amp;&amp; upperCmp &lt;= 0) {
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>       <strong class="jxr_keyword">return</strong> other;
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L604" href="#L604">604</a>       Cut&lt;C&gt; newLower = (lowerCmp &lt;= 0) ? lowerBound : other.lowerBound;
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>       Cut&lt;C&gt; newUpper = (upperCmp &gt;= 0) ? upperBound : other.upperBound;
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>       <strong class="jxr_keyword">return</strong> create(newLower, newUpper);
+<a class="jxr_linenumber" name="L607" href="#L607">607</a>     }
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>   }
+<a class="jxr_linenumber" name="L609" href="#L609">609</a> 
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L611" href="#L611">611</a> <em class="jxr_javadoccomment">   * Returns the canonical form of this range in the given domain. The canonical form has the</em>
+<a class="jxr_linenumber" name="L612" href="#L612">612</a> <em class="jxr_javadoccomment">   * following properties:</em>
+<a class="jxr_linenumber" name="L613" href="#L613">613</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L614" href="#L614">614</a> <em class="jxr_javadoccomment">   * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L615" href="#L615">615</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;equivalence: {@code a.canonical().contains(v) == a.contains(v)} for all {@code v} (in</em>
+<a class="jxr_linenumber" name="L616" href="#L616">616</a> <em class="jxr_javadoccomment">   *       other words, {@code ContiguousSet.create(a.canonical(domain), domain).equals(</em>
+<a class="jxr_linenumber" name="L617" href="#L617">617</a> <em class="jxr_javadoccomment">   *       ContiguousSet.create(a, domain))}</em>
+<a class="jxr_linenumber" name="L618" href="#L618">618</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;uniqueness: unless {@code a.isEmpty()}, {@code ContiguousSet.create(a,</em>
+<a class="jxr_linenumber" name="L619" href="#L619">619</a> <em class="jxr_javadoccomment">   *       domain).equals(ContiguousSet.create(b, domain))} implies {@code</em>
+<a class="jxr_linenumber" name="L620" href="#L620">620</a> <em class="jxr_javadoccomment">   *       a.canonical(domain).equals(b.canonical(domain))}</em>
+<a class="jxr_linenumber" name="L621" href="#L621">621</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;idempotence: {@code a.canonical(domain).canonical(domain).equals(a.canonical(domain))}</em>
+<a class="jxr_linenumber" name="L622" href="#L622">622</a> <em class="jxr_javadoccomment">   * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L623" href="#L623">623</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L624" href="#L624">624</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Furthermore, this method guarantees that the range returned will be one of the following</em>
+<a class="jxr_linenumber" name="L625" href="#L625">625</a> <em class="jxr_javadoccomment">   * canonical forms:</em>
+<a class="jxr_linenumber" name="L626" href="#L626">626</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L627" href="#L627">627</a> <em class="jxr_javadoccomment">   * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L628" href="#L628">628</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;[start..end)</em>
+<a class="jxr_linenumber" name="L629" href="#L629">629</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;[start..+∞)</em>
+<a class="jxr_linenumber" name="L630" href="#L630">630</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;(-∞..end) (only if type {@code C} is unbounded below)</em>
+<a class="jxr_linenumber" name="L631" href="#L631">631</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;(-∞..+∞) (only if type {@code C} is unbounded below)</em>
+<a class="jxr_linenumber" name="L632" href="#L632">632</a> <em class="jxr_javadoccomment">   * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L633" href="#L633">633</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>   <strong class="jxr_keyword">public</strong> Range&lt;C&gt; canonical(DiscreteDomain&lt;C&gt; domain) {
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>     checkNotNull(domain);
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>     Cut&lt;C&gt; lower = lowerBound.canonical(domain);
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>     Cut&lt;C&gt; upper = upperBound.canonical(domain);
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>     <strong class="jxr_keyword">return</strong> (lower == lowerBound &amp;&amp; upper == upperBound) ? <strong class="jxr_keyword">this</strong> : create(lower, upper);
+<a class="jxr_linenumber" name="L639" href="#L639">639</a>   }
+<a class="jxr_linenumber" name="L640" href="#L640">640</a> 
+<a class="jxr_linenumber" name="L641" href="#L641">641</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L642" href="#L642">642</a> <em class="jxr_javadoccomment">   * Returns {@code true} if {@code object} is a range having the same endpoints and bound types as</em>
+<a class="jxr_linenumber" name="L643" href="#L643">643</a> <em class="jxr_javadoccomment">   * this range. Note that discrete ranges such as {@code (1..4)} and {@code [2..3]} are &lt;b&gt;not&lt;/b&gt;</em>
+<a class="jxr_linenumber" name="L644" href="#L644">644</a> <em class="jxr_javadoccomment">   * equal to one another, despite the fact that they each contain precisely the same set of values.</em>
+<a class="jxr_linenumber" name="L645" href="#L645">645</a> <em class="jxr_javadoccomment">   * Similarly, empty ranges are not equal unless they have exactly the same representation, so</em>
+<a class="jxr_linenumber" name="L646" href="#L646">646</a> <em class="jxr_javadoccomment">   * {@code [3..3)}, {@code (3..3]}, {@code (4..4]} are all unequal.</em>
+<a class="jxr_linenumber" name="L647" href="#L647">647</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L648" href="#L648">648</a>   @Override
+<a class="jxr_linenumber" name="L649" href="#L649">649</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> equals(@Nullable Object object) {
+<a class="jxr_linenumber" name="L650" href="#L650">650</a>     <strong class="jxr_keyword">if</strong> (object instanceof Range) {
+<a class="jxr_linenumber" name="L651" href="#L651">651</a>       Range&lt;?&gt; other = (Range&lt;?&gt;) object;
+<a class="jxr_linenumber" name="L652" href="#L652">652</a>       <strong class="jxr_keyword">return</strong> lowerBound.equals(other.lowerBound) &amp;&amp; upperBound.equals(other.upperBound);
+<a class="jxr_linenumber" name="L653" href="#L653">653</a>     }
+<a class="jxr_linenumber" name="L654" href="#L654">654</a>     <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L655" href="#L655">655</a>   }
+<a class="jxr_linenumber" name="L656" href="#L656">656</a> 
+<a class="jxr_linenumber" name="L657" href="#L657">657</a>   <em class="jxr_javadoccomment">/** Returns a hash code for this range. */</em>
+<a class="jxr_linenumber" name="L658" href="#L658">658</a>   @Override
+<a class="jxr_linenumber" name="L659" href="#L659">659</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> hashCode() {
+<a class="jxr_linenumber" name="L660" href="#L660">660</a>     <strong class="jxr_keyword">return</strong> lowerBound.hashCode() * 31 + upperBound.hashCode();
+<a class="jxr_linenumber" name="L661" href="#L661">661</a>   }
+<a class="jxr_linenumber" name="L662" href="#L662">662</a> 
+<a class="jxr_linenumber" name="L663" href="#L663">663</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L664" href="#L664">664</a> <em class="jxr_javadoccomment">   * Returns a string representation of this range, such as {@code "[3..5)"} (other examples are</em>
+<a class="jxr_linenumber" name="L665" href="#L665">665</a> <em class="jxr_javadoccomment">   * listed in the class documentation).</em>
+<a class="jxr_linenumber" name="L666" href="#L666">666</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L667" href="#L667">667</a>   @Override
+<a class="jxr_linenumber" name="L668" href="#L668">668</a>   <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L669" href="#L669">669</a>     <strong class="jxr_keyword">return</strong> toString(lowerBound, upperBound);
+<a class="jxr_linenumber" name="L670" href="#L670">670</a>   }
+<a class="jxr_linenumber" name="L671" href="#L671">671</a> 
+<a class="jxr_linenumber" name="L672" href="#L672">672</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String toString(Cut&lt;?&gt; lowerBound, Cut&lt;?&gt; upperBound) {
+<a class="jxr_linenumber" name="L673" href="#L673">673</a>     StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder(16);
+<a class="jxr_linenumber" name="L674" href="#L674">674</a>     lowerBound.describeAsLowerBound(sb);
+<a class="jxr_linenumber" name="L675" href="#L675">675</a>     sb.append(<span class="jxr_string">".."</span>);
+<a class="jxr_linenumber" name="L676" href="#L676">676</a>     upperBound.describeAsUpperBound(sb);
+<a class="jxr_linenumber" name="L677" href="#L677">677</a>     <strong class="jxr_keyword">return</strong> sb.toString();
+<a class="jxr_linenumber" name="L678" href="#L678">678</a>   }
+<a class="jxr_linenumber" name="L679" href="#L679">679</a> 
+<a class="jxr_linenumber" name="L680" href="#L680">680</a>   <em class="jxr_javadoccomment">/** Used to avoid http:</em><em class="jxr_comment">//bugs.sun.com/view_bug.do?bug_id=6558557 */</em>
+<a class="jxr_linenumber" name="L681" href="#L681">681</a> <em class="jxr_javadoccomment">  private static &lt;T&gt; SortedSet&lt;T&gt; cast(Iterable&lt;T&gt; iterable) {</em>
+<a class="jxr_linenumber" name="L682" href="#L682">682</a> <em class="jxr_javadoccomment">    return (SortedSet&lt;T&gt;) iterable;</em>
+<a class="jxr_linenumber" name="L683" href="#L683">683</a> <em class="jxr_javadoccomment">  }</em>
+<a class="jxr_linenumber" name="L684" href="#L684">684</a> 
+<a class="jxr_linenumber" name="L685" href="#L685">685</a> <em class="jxr_javadoccomment">  Object readResolve() {</em>
+<a class="jxr_linenumber" name="L686" href="#L686">686</a> <em class="jxr_javadoccomment">    if (this.equals(ALL)) {</em>
+<a class="jxr_linenumber" name="L687" href="#L687">687</a> <em class="jxr_javadoccomment">      return all();</em>
+<a class="jxr_linenumber" name="L688" href="#L688">688</a> <em class="jxr_javadoccomment">    } else {</em>
+<a class="jxr_linenumber" name="L689" href="#L689">689</a> <em class="jxr_javadoccomment">      return this;</em>
+<a class="jxr_linenumber" name="L690" href="#L690">690</a> <em class="jxr_javadoccomment">    }</em>
+<a class="jxr_linenumber" name="L691" href="#L691">691</a> <em class="jxr_javadoccomment">  }</em>
+<a class="jxr_linenumber" name="L692" href="#L692">692</a> 
+<a class="jxr_linenumber" name="L693" href="#L693">693</a> <em class="jxr_javadoccomment">  @SuppressWarnings("unchecked") // this method may throw CCE</em>
+<a class="jxr_linenumber" name="L694" href="#L694">694</a> <em class="jxr_javadoccomment">  static int compareOrThrow(Comparable left, Comparable right) {</em>
+<a class="jxr_linenumber" name="L695" href="#L695">695</a> <em class="jxr_javadoccomment">    return left.compareTo(right);</em>
+<a class="jxr_linenumber" name="L696" href="#L696">696</a> <em class="jxr_javadoccomment">  }</em>
+<a class="jxr_linenumber" name="L697" href="#L697">697</a> 
+<a class="jxr_linenumber" name="L698" href="#L698">698</a> <em class="jxr_javadoccomment">  /** Needed to serialize sorted collections of Ranges. */</em>
+<a class="jxr_linenumber" name="L699" href="#L699">699</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> RangeLexOrdering <strong class="jxr_keyword">extends</strong> Ordering&lt;Range&lt;?&gt;&gt; <strong class="jxr_keyword">implements</strong> Serializable {
+<a class="jxr_linenumber" name="L700" href="#L700">700</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Ordering&lt;Range&lt;?&gt;&gt; INSTANCE = <strong class="jxr_keyword">new</strong> RangeLexOrdering();
+<a class="jxr_linenumber" name="L701" href="#L701">701</a> 
+<a class="jxr_linenumber" name="L702" href="#L702">702</a>     @Override
+<a class="jxr_linenumber" name="L703" href="#L703">703</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> compare(Range&lt;?&gt; left, Range&lt;?&gt; right) {
+<a class="jxr_linenumber" name="L704" href="#L704">704</a>       <strong class="jxr_keyword">return</strong> ComparisonChain.start()
+<a class="jxr_linenumber" name="L705" href="#L705">705</a>           .compare(left.lowerBound, right.lowerBound)
+<a class="jxr_linenumber" name="L706" href="#L706">706</a>           .compare(left.upperBound, right.upperBound)
+<a class="jxr_linenumber" name="L707" href="#L707">707</a>           .result();
+<a class="jxr_linenumber" name="L708" href="#L708">708</a>     }
+<a class="jxr_linenumber" name="L709" href="#L709">709</a> 
+<a class="jxr_linenumber" name="L710" href="#L710">710</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> serialVersionUID = 0;
+<a class="jxr_linenumber" name="L711" href="#L711">711</a>   }
+<a class="jxr_linenumber" name="L712" href="#L712">712</a> 
+<a class="jxr_linenumber" name="L713" href="#L713">713</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> serialVersionUID = 0;
+<a class="jxr_linenumber" name="L714" href="#L714">714</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

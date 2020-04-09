@@ -1,0 +1,372 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>Resolver xref</title>
+<link type="text/css" rel="stylesheet" href="../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (C) 2009-2011 The Project Lombok Authors.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Permission is hereby granted, free of charge, to any person obtaining a copy</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * of this software and associated documentation files (the "Software"), to deal</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * in the Software without restriction, including without limitation the rights</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * copies of the Software, and to permit persons to whom the Software is</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * furnished to do so, subject to the following conditions:</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * The above copyright notice and this permission notice shall be included in</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * all copies or substantial portions of the Software.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * THE SOFTWARE.</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">package</strong> lombok.ast.resolve;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.lang.reflect.InvocationTargetException;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.lang.reflect.Method;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> java.lang.reflect.Proxy;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> lombok.ast.Annotation;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> lombok.ast.Block;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> lombok.ast.CompilationUnit;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> lombok.ast.Expression;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> lombok.ast.Identifier;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> lombok.ast.ImportDeclaration;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> lombok.ast.Node;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> lombok.ast.NullLiteral;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> lombok.ast.PackageDeclaration;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> lombok.ast.RawListAccessor;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> lombok.ast.ResolutionException;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> lombok.ast.Select;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> lombok.ast.TypeBody;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> lombok.ast.TypeDeclaration;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> lombok.ast.TypeReference;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Joiner;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableList;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableMap;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.Lists;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> * Contains simplistic (guesstimations) resolution that doesn't require full resolution and symbol lookup but it isn't perfect.</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> Resolver {
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">	 * If {@code value} is an enum constant of type {@code enumClass}, then the enum value will be returned.</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">	 * {@code null} will be returned if {@code value} is an actual null literal.</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment">	 * @throws ResolutionException If {@code value} cannot be converted.</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  	<strong class="jxr_keyword">public</strong> &lt;E <strong class="jxr_keyword">extends</strong> Enum&lt;E&gt;&gt; E resolveEnum(Class&lt;E&gt; enumClass, Node value) {
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  		<em class="jxr_comment">// case1: null</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		<strong class="jxr_keyword">if</strong> (value instanceof NullLiteral) <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		<em class="jxr_comment">// case2: Identifier</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		String enumName = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  		
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  		<strong class="jxr_keyword">if</strong> (value instanceof Identifier) {
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			enumName = ((Identifier)value).astValue();
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		}
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		<em class="jxr_comment">// case3: EnumSimpleName.Identifier or EnumFQN.Identifier</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		String typeName = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		String packageName = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">if</strong> (value instanceof Select) {
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  			List&lt;String&gt; chain = unwrapSelectChain((Select) value);
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  			<strong class="jxr_keyword">switch</strong> (chain.size()) {
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			<strong class="jxr_keyword">case</strong> 0:
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ResolutionException(value, <span class="jxr_string">"empty"</span>);
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  			<strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  				packageName = Joiner.on('.').join(chain.subList(0, chain.size() - 2));
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			<strong class="jxr_keyword">case</strong> 2:
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  				typeName = chain.get(chain.size() - 2);
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			<strong class="jxr_keyword">case</strong> 1:
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  				enumName = chain.get(chain.size() - 1);
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			}
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			<strong class="jxr_keyword">boolean</strong> unexpectedType = false;
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  			<strong class="jxr_keyword">if</strong> (packageName != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  				Package p = enumClass.getPackage();
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  				unexpectedType = p != <strong class="jxr_keyword">null</strong> &amp;&amp; !p.getName().equals(packageName);
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			}
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			unexpectedType |= (typeName != <strong class="jxr_keyword">null</strong> &amp;&amp; !enumClass.getSimpleName().equals(typeName));
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			<strong class="jxr_keyword">if</strong> (unexpectedType) <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ResolutionException(value, <span class="jxr_string">"Expected "</span> + enumClass.getName() + <span class="jxr_string">" and not "</span> + packageName + <span class="jxr_string">"."</span> + typeName);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		}
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		<strong class="jxr_keyword">for</strong> (E enumConstant : enumClass.getEnumConstants()) {
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 			String target = enumConstant.name();
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			<strong class="jxr_keyword">if</strong> (target.equals(enumName)) <strong class="jxr_keyword">return</strong> enumConstant;
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 		}
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ResolutionException(value, <span class="jxr_string">"Not a valid value for enum "</span> + enumClass.getSimpleName() + <span class="jxr_string">": "</span> + enumName);
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 	}
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 	
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 	<strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> List&lt;Class&lt;?&gt;&gt; NUMERIC_PRIMITIVE_CLASSES = ImmutableList.&lt;Class&lt;?&gt;&gt;of(
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 			<strong class="jxr_keyword">long</strong>.<strong class="jxr_keyword">class</strong>, <strong class="jxr_keyword">int</strong>.<strong class="jxr_keyword">class</strong>, <strong class="jxr_keyword">short</strong>.<strong class="jxr_keyword">class</strong>, byte.<strong class="jxr_keyword">class</strong>, <strong class="jxr_keyword">double</strong>.<strong class="jxr_keyword">class</strong>, <strong class="jxr_keyword">float</strong>.<strong class="jxr_keyword">class</strong>, <strong class="jxr_keyword">char</strong>.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 	<strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Map&lt;String, Class&lt;?&gt;&gt; PRIMITIVE_CLASS_MAP = ImmutableMap.&lt;String, Class&lt;?&gt;&gt;builder()
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			.put(<span class="jxr_string">"boolean"</span>, <strong class="jxr_keyword">boolean</strong>.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			.put(<span class="jxr_string">"byte"</span>, byte.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			.put(<span class="jxr_string">"short"</span>, <strong class="jxr_keyword">short</strong>.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			.put(<span class="jxr_string">"int"</span>, <strong class="jxr_keyword">int</strong>.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			.put(<span class="jxr_string">"long"</span>, <strong class="jxr_keyword">long</strong>.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			.put(<span class="jxr_string">"char"</span>, <strong class="jxr_keyword">char</strong>.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 			.put(<span class="jxr_string">"float"</span>, <strong class="jxr_keyword">float</strong>.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			.put(<span class="jxr_string">"double"</span>, <strong class="jxr_keyword">double</strong>.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			.build();
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 	
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> ImportList {
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 		<strong class="jxr_keyword">final</strong> List&lt;String&gt; explicits = <strong class="jxr_keyword">new</strong> ArrayList&lt;String&gt;();
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 		<strong class="jxr_keyword">final</strong> List&lt;String&gt; stars = <strong class="jxr_keyword">new</strong> ArrayList&lt;String&gt;();
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		ImportList() {
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 			stars.add(<span class="jxr_string">"java.lang"</span>);
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 		}
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	}
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	<strong class="jxr_keyword">private</strong> ImportList getImportList(Node n) {
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		ImportList il = <strong class="jxr_keyword">new</strong> ImportList();
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 		
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 		<strong class="jxr_keyword">while</strong> (n != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 			<strong class="jxr_keyword">if</strong> (n instanceof CompilationUnit) {
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 				CompilationUnit cu = (CompilationUnit) n;
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 				PackageDeclaration pkg = cu.astPackageDeclaration();
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 				<strong class="jxr_keyword">if</strong> (pkg != <strong class="jxr_keyword">null</strong>) il.stars.add(pkg.getPackageName());
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 				<strong class="jxr_keyword">for</strong> (ImportDeclaration imp : cu.astImportDeclarations()) {
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 					<strong class="jxr_keyword">if</strong> (imp.astStaticImport()) <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 					<strong class="jxr_keyword">if</strong> (imp.astStarImport()) {
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 						String i = imp.asFullyQualifiedName();
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 						i = i.substring(0, i.length() - 2);
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 						il.stars.add(i);
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 					} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 						il.explicits.add(imp.asFullyQualifiedName());
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 					}
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 				}
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			}
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 			n = n.getParent();
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 		}
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 		
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 		<strong class="jxr_keyword">return</strong> il;
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 	}
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 	
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> <em class="jxr_javadoccomment">	 * Checks if the given {@code typeReference} could legally be referring to the listed fully qualified {@code typeName}.</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> <em class="jxr_javadoccomment">	 * Will check import statements, and checks for any shadowing by types in this file with the same name.</em>
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> <em class="jxr_javadoccomment">	 * &lt;em&gt;WARNING:&lt;/em&gt; This method will return {@code true} if there's a star import of i.e. {@code java.util.*},</em>
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment">	 * you ask if {@code ArrayList} could be referring to {@code java.util.ArrayList}, and there is another class in the same package also named</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> <em class="jxr_javadoccomment">	 * {@code ArrayList}. The right answer is of course {@code false}, but without a classpath/sourcepath this cannot be determined. Therefore,</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment">	 * this method is 99% but not 100% accurate. Also, god kills a puppy everytime you write a star import.</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> <em class="jxr_javadoccomment">	 * &lt;em&gt;NB:&lt;/em&gt; Any type arguments (generics) on either the {@code typeReference} or {@code wanted} are stripped off before comparing the two.</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> <em class="jxr_javadoccomment">	 * &lt;em&gt;NB:&lt;/em&gt; If you want array types, just put array brackets at the end of your {@code wanted} string, for example: "{@code java.lang.String[]}".</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> <em class="jxr_javadoccomment">	 * @param wanted A fully qualified type name, such as {@code java.lang.String}.</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> <em class="jxr_javadoccomment">	 * @param typeReference A type reference node.</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> <em class="jxr_javadoccomment">	 * @return {@code true} if the typeReference is most likely a reference to {@code wanted}.</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> typesMatch(String wanted, TypeReference typeReference) {
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 		String name = stripGenerics(typeReference.getTypeName());
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 		wanted = stripGenerics(wanted);
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 		
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 		<strong class="jxr_keyword">if</strong> (name.equals(wanted)) <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 		
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 		<em class="jxr_comment">/* check array dimensions */</em> {
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 			<strong class="jxr_keyword">int</strong> dims1 = typeReference.astArrayDimensions();
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 			<strong class="jxr_keyword">int</strong> dims2 = 0;
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 			<strong class="jxr_keyword">while</strong> (wanted.endsWith(<span class="jxr_string">"[]"</span>)) {
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 				dims2++;
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 				wanted = wanted.substring(0, wanted.length() - 2);
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 			}
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 			<strong class="jxr_keyword">if</strong> (dims1 != dims2) <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 			<strong class="jxr_keyword">if</strong> (dims1 &gt; 0) name = name.substring(0, name.length() - dims1 * 2);
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 		}
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 		
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 		<strong class="jxr_keyword">int</strong> dot = wanted.lastIndexOf('.');
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 		String wantedPkg = dot == -1 ? <span class="jxr_string">""</span> : wanted.substring(0, dot);
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 		String wantedName = dot == -1 ? wanted : wanted.substring(dot + 1);
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 		
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> 		<em class="jxr_comment">// If type ref appears fully qualified and it hasn't matched by now, we're done.</em>
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 		<strong class="jxr_keyword">if</strong> (name.indexOf('.') &gt; -1) <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 		
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> 		<em class="jxr_comment">// 'Baz' will never be a match for foo.bar.NotBaz.</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> 		<strong class="jxr_keyword">if</strong> (!wantedName.equals(name)) <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> 		
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> 		ImportList imports = getImportList(typeReference);
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> 		
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 		<em class="jxr_comment">/* If matching List to java.util.List and java.awt.List is explicitly imported, no match. */</em> {
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 			String ending = <span class="jxr_string">"."</span> + wantedName;
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> 			<strong class="jxr_keyword">for</strong> (String explicit : imports.explicits) {
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> 				<strong class="jxr_keyword">if</strong> (explicit.endsWith(ending) &amp;&amp; !explicit.equals(wanted)) <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 			}
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> 		}
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> 		
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> 		potentialMatchFound:
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> 		<em class="jxr_comment">/* To match List to java.util.List either there has to be a java.util.* or java.util.List import. */</em> {
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> 			<strong class="jxr_keyword">if</strong> (wantedPkg.length() &gt; 0 &amp;&amp; imports.stars.contains(wantedPkg)) <strong class="jxr_keyword">break</strong> potentialMatchFound;
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 			<strong class="jxr_keyword">if</strong> (imports.explicits.contains(wanted)) <strong class="jxr_keyword">break</strong> potentialMatchFound;
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> 			<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> 		}
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 		
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> 		<em class="jxr_comment">//name is definitely a simple name, and it might match. Walk up type tree and if it doesn't match any of those, delve into import statements.</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 		Node n = typeReference.getParent();
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> 		Node prevN = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 		CompilationUnit cu = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> 		<strong class="jxr_keyword">while</strong> (n != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> 			RawListAccessor&lt;?, ?&gt; list;
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> 			<strong class="jxr_keyword">boolean</strong> stopAtSelf;
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 			
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> 			<strong class="jxr_keyword">if</strong> (n instanceof Block) {
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> 				list = ((Block) n).rawContents();
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 				stopAtSelf = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (n instanceof TypeBody) {
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> 				list = ((TypeBody) n).rawMembers();
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> 				stopAtSelf = false;
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (n instanceof CompilationUnit) {
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> 				list = ((CompilationUnit) n).rawTypeDeclarations();
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> 				cu = (CompilationUnit) n;
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> 				stopAtSelf = false;
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> 				list = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> 				stopAtSelf = false;
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> 			}
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> 			
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> 			<strong class="jxr_keyword">if</strong> (list != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> 				<strong class="jxr_keyword">for</strong> (Node c : list) {
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> 					<strong class="jxr_keyword">if</strong> (c instanceof TypeDeclaration &amp;&amp; namesMatch(name, ((TypeDeclaration) c).astName())) <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> 					<strong class="jxr_keyword">if</strong> (stopAtSelf &amp;&amp; c == prevN) <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> 				}
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> 			}
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> 			
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> 			prevN = n;
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> 			n = n.getParent();
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> 		}
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> 		
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> 		<em class="jxr_comment">//A locally defined type is definitely not what's targeted so it could still be our wanted type reference. Let's check imports.</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 		<strong class="jxr_keyword">if</strong> (wantedPkg.isEmpty()) <strong class="jxr_keyword">return</strong> cu == <strong class="jxr_keyword">null</strong> || cu.rawPackageDeclaration() == <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> 		
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> 	}
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> 	
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> 	<strong class="jxr_keyword">private</strong> String stripGenerics(String name) {
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> 		<strong class="jxr_keyword">int</strong> genericsStart = name.indexOf('&lt;');
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> 		<strong class="jxr_keyword">int</strong> genericsEnd = name.lastIndexOf('&gt;');
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> 		<strong class="jxr_keyword">if</strong> (genericsStart != -1 &amp;&amp; genericsEnd == name.length() -1) name = name.substring(0, genericsStart);
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> 		<strong class="jxr_keyword">return</strong> name;
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> 	}
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> 	
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> namesMatch(String name, Identifier astName) {
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> 		<strong class="jxr_keyword">return</strong> name == <strong class="jxr_keyword">null</strong> ? astName.astValue() == <strong class="jxr_keyword">null</strong> : name.equals(astName.astValue());
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> 	}
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> 	
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_javadoccomment">	 * Turns an annotation AST node into an actual instance of an annotation class provided you already know its type.</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> <em class="jxr_javadoccomment">	 * &lt;strong&gt;NB: non-literal compile-time constants cannot be converted, and you should avoid querying classes;</em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> <em class="jxr_javadoccomment">	 * instead call {@code resolver.getAnnotationClassAsString(objectReturnedByThisMethod, "annotation method name")}.</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">	 * @see #getAnnotationClassesAsStrings(java.lang.annotation.Annotation, String)</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_javadoccomment">	 * @see #getAnnotationClassAsString(java.lang.annotation.Annotation, String)</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> 	<strong class="jxr_keyword">public</strong> &lt;A <strong class="jxr_keyword">extends</strong> java.lang.annotation.Annotation&gt; A toAnnotationInstance(Class&lt;A&gt; type, Annotation node) {
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 		<strong class="jxr_keyword">return</strong> type.<strong class="jxr_keyword">cast</strong>(Proxy.newProxyInstance(type.getClassLoader(), <strong class="jxr_keyword">new</strong> Class[] { type }, <strong class="jxr_keyword">new</strong> AnnotationProxy(<strong class="jxr_keyword">this</strong>, node)));
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 	}
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> 	
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment">	 * Use together with {@link #toAnnotationInstance(Class, Annotation)}.</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_javadoccomment">	 * @see #getAnnotationClassesAsStrings(java.lang.annotation.Annotation, String)</em>
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> 	<strong class="jxr_keyword">public</strong> String getAnnotationClassAsString(java.lang.annotation.Annotation annotation, String methodName) {
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 			Method m = annotation.getClass().getMethod(methodName);
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> 			<strong class="jxr_keyword">if</strong> (m.getReturnType() != Class.<strong class="jxr_keyword">class</strong>) <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Method "</span> + methodName + <span class="jxr_string">" does not have 'Class' as return type"</span>);
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> 			<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> 				<strong class="jxr_keyword">return</strong> Class.<strong class="jxr_keyword">class</strong>.<strong class="jxr_keyword">cast</strong>(m.invoke(annotation)).toString();
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> 			} <strong class="jxr_keyword">catch</strong> (AnnotationClassNotAvailableException e) {
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> 				<strong class="jxr_keyword">return</strong> e.getClassName();
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> 			}
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> 		} <strong class="jxr_keyword">catch</strong> (IllegalAccessException e) {
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Method "</span> + methodName + <span class="jxr_string">" isn't accessible"</span>, e);
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> 		} <strong class="jxr_keyword">catch</strong> (InvocationTargetException e) {
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Method "</span> + methodName + <span class="jxr_string">" cannot be invoked"</span>, e);
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> 		} <strong class="jxr_keyword">catch</strong> (NoSuchMethodException e) {
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Method "</span> + methodName + <span class="jxr_string">" does not exist"</span>);
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> 		}
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> 	}
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 	
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> <em class="jxr_javadoccomment">	 * Use together with {@link #toAnnotationInstance(Class, Annotation)}.</em>
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> <em class="jxr_javadoccomment">	 * @see #getAnnotationClassAsString(java.lang.annotation.Annotation, String)</em>
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 	<strong class="jxr_keyword">public</strong> List&lt;String&gt; getAnnotationClassesAsStrings(java.lang.annotation.Annotation annotation, String methodName) {
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> 			Method m = annotation.getClass().getMethod(methodName);
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 			<strong class="jxr_keyword">boolean</strong> array;
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> 			<strong class="jxr_keyword">if</strong> (m.getReturnType() == Class.<strong class="jxr_keyword">class</strong>) array = false;
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> 			<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (m.getReturnType() == Class[].<strong class="jxr_keyword">class</strong>) array = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 			<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Method "</span> + methodName + <span class="jxr_string">" does not have 'Class' or 'Class[]' as return type"</span>);
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> 			
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> 			<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> 				Class&lt;?&gt;[] cs;
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 				<strong class="jxr_keyword">if</strong> (array) {
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 					cs = Class[].<strong class="jxr_keyword">class</strong>.<strong class="jxr_keyword">cast</strong>(m.invoke(annotation));
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 					cs = <strong class="jxr_keyword">new</strong> Class[1];
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 					cs[0] = Class.<strong class="jxr_keyword">class</strong>.<strong class="jxr_keyword">cast</strong>(m.invoke(annotation));
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 				}
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 				
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> 				List&lt;String&gt; result = Lists.newArrayList();
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 				<strong class="jxr_keyword">for</strong> (Class&lt;?&gt; c : cs) result.add(c.getName());
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 				<strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> 			} <strong class="jxr_keyword">catch</strong> (AnnotationClassNotAvailableException e) {
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 				<strong class="jxr_keyword">return</strong> e.getClassNames();
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 			}
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 		} <strong class="jxr_keyword">catch</strong> (IllegalAccessException e) {
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Method "</span> + methodName + <span class="jxr_string">" isn't accessible"</span>, e);
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> 		} <strong class="jxr_keyword">catch</strong> (InvocationTargetException e) {
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Method "</span> + methodName + <span class="jxr_string">" cannot be invoked"</span>, e);
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 		} <strong class="jxr_keyword">catch</strong> (NoSuchMethodException e) {
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Method "</span> + methodName + <span class="jxr_string">" does not exist"</span>);
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> 		}
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 	}
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> 	
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 	<strong class="jxr_keyword">private</strong> List&lt;String&gt; unwrapSelectChain(Select s) {
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 		List&lt;String&gt; list = Lists.newArrayList();
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 		<strong class="jxr_keyword">while</strong> (s != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> 			list.add(s.astIdentifier().astValue());
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> 			Expression parent = s.astOperand();
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 			<strong class="jxr_keyword">if</strong> (parent instanceof Select) {
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> 				s = (Select) parent;
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (parent instanceof Identifier) {
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 				s = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> 				list.add(((Identifier)parent).astValue());
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (parent == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ResolutionException(parent, <span class="jxr_string">"Identifies expected here, not a "</span> + parent.getClass().getSimpleName());
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 			}
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> 		}
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> 		
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> 		Collections.reverse(list);
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> 		<strong class="jxr_keyword">return</strong> list;
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 	}
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

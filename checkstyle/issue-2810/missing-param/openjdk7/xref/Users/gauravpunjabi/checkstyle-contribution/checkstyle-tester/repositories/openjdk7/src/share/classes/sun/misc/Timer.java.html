@@ -1,0 +1,660 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>Timer xref</title>
+<link type="text/css" rel="stylesheet" href="../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 1995, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.  Oracle designates this</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * particular file as subject to the "Classpath" exception as provided</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * by Oracle in the LICENSE file that accompanied this code.</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">package</strong> sun.misc;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_javadoccomment">    A Timer object is used by algorithms that require timed events.</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment">    For example, in an animation loop, a timer would help in</em>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_javadoccomment">    determining when to change frames.</em>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment">    A timer has an interval which determines when it "ticks";</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment">    that is, a timer delays for the specified interval and then</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment">    it calls the owner's tick() method.</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment">    Here's an example of creating a timer with a 5 sec interval:</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment">    &lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment">    class Main implements Timeable {</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment">        public void tick(Timer timer) {</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment">            System.out.println("tick");</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment">        }</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment">        public static void main(String args[]) {</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment">            (new Timer(this, 5000)).cont();</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">        }</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">    }</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment">    &lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment">    A timer can be stopped, continued, or reset at any time.</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment">    A timer's state is not stopped while it's calling the</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment">    owner's tick() method.</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment">    A timer can be regular or irregular.  If in regular mode,</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment">    a timer ticks at the specified interval, regardless of</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment">    how long the owner's tick() method takes.  While the timer</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment">    is running, no ticks are ever discarded.  That means that if</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">    the owner's tick() method takes longer than the interval,</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">    the ticks that would have occurred are delivered immediately.</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment">    In irregular mode, a timer starts delaying for exactly</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment">    the specified interval only after the tick() method returns.</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment">    Synchronization issues: do not hold the timer's monitor</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment">    while calling any of the Timer operations below otherwise</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment">    the Timer class will deadlock.</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment">    @author     Patrick Chan</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment">*/</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_comment">    Synchronization issues:  there are two data structures that</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_comment">    require locking.  A Timer object and the Timer queue</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_comment">    (described in the TimerThread class).  To avoid deadlock,</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_comment">    the timer queue monitor is always acquired before the timer</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_comment">    object's monitor.  However, the timer queue monitor is acquired</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_comment">    only if the timer operation will make use of the timer</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_comment">    queue, e.g. stop().</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_comment">    The class monitor on the class TimerThread severs as the monitor</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_comment">    to the timer queue.</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_comment">    Possible feature: perhaps a timer should have an associated</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_comment">    thread priority.  The thread that makes the callback temporarily</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_comment">    takes on that priority before calling the owner's tick() method.</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> Timer {
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment">     * This is the owner of the timer.  Its tick method is</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment">     * called when the timer ticks.</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>      <strong class="jxr_keyword">public</strong> Timeable owner;
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>      <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_comment">     * This is the interval of time in ms.</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>      <strong class="jxr_keyword">long</strong> interval;
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_comment">     * This variable is used for two different purposes.</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_comment">     * This is done in order to save space.</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_comment">     * If 'stopped' is true, this variable holds the time</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_comment">     * that the timer was stopped; otherwise, this variable</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_comment">     * is used by the TimerThread to determine when the timer</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_comment">     * should tick.</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>     <strong class="jxr_keyword">long</strong> sleepUntil;
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_comment">     * This is the time remaining before the timer ticks.  It</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_comment">     * is only valid if 'stopped' is true.  If the timer is</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_comment">     * continued, the next tick will happen remaingTime</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_comment">     * milliseconds later.</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>     <strong class="jxr_keyword">long</strong> remainingTime;
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_comment">     * True iff the timer is in regular mode.</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>     <strong class="jxr_keyword">boolean</strong> regular;
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_comment">     * True iff the timer has been stopped.</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>     <strong class="jxr_keyword">boolean</strong> stopped;
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>     <em class="jxr_comment">/* **************************************************************</em>
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> <em class="jxr_comment">     * Timer queue-related variables</em>
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> <em class="jxr_comment">     * ************************************************************** */</em>
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> <em class="jxr_comment">     * A link to another timer object.  This is used while the</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_comment">     * timer object is enqueued in the timer queue.</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>     Timer next;
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>     <em class="jxr_comment">/* **************************************************************</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_comment">     * Timer methods</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> <em class="jxr_comment">     * ************************************************************** */</em>
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> <em class="jxr_comment">     * This variable holds a handle to the TimerThread class for</em>
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> <em class="jxr_comment">     * the purpose of getting at the class monitor.  The reason</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_comment">     * why Class.forName("TimerThread") is not used is because it</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_comment">     * doesn't appear to work when loaded via a net class loader.</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>     <strong class="jxr_keyword">static</strong> TimerThread timerThread = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> <em class="jxr_javadoccomment">     * Creates a timer object that is owned by 'owner' and</em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> <em class="jxr_javadoccomment">     * with the interval 'interval' milliseconds.  The new timer</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> <em class="jxr_javadoccomment">     * object is stopped and is regular.  getRemainingTime()</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_javadoccomment">     * return 'interval' at this point.  getStopTime() returns</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> <em class="jxr_javadoccomment">     * the time this object was created.</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> <em class="jxr_javadoccomment">     * @param owner    owner of the timer object</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> <em class="jxr_javadoccomment">     * @param interval interval of the timer in milliseconds</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>     <strong class="jxr_keyword">public</strong> Timer(Timeable owner, <strong class="jxr_keyword">long</strong> interval) {
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>         <strong class="jxr_keyword">this</strong>.owner = owner;
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>         <strong class="jxr_keyword">this</strong>.interval = interval;
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>         remainingTime = interval;
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>         regular = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>         sleepUntil = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>         stopped = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>         <strong class="jxr_keyword">synchronized</strong> (getClass()) {
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>             <strong class="jxr_keyword">if</strong> (timerThread == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>                 timerThread = <strong class="jxr_keyword">new</strong> TimerThread();
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>             }
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>         }
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>     }
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment">     * Returns true if this timer is stopped.</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">boolean</strong> isStopped() {
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>         <strong class="jxr_keyword">return</strong> stopped;
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>     }
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> <em class="jxr_javadoccomment">     * Stops the timer.  The amount of time the timer has already</em>
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> <em class="jxr_javadoccomment">     * delayed is saved so if the timer is continued, it will only</em>
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> <em class="jxr_javadoccomment">     * delay for the amount of time remaining.</em>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_javadoccomment">     * Note that even after stopping a timer, one more tick may</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">     * still occur.</em>
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> <em class="jxr_javadoccomment">     * This method is MT-safe; i.e. it is synchronized but for</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> <em class="jxr_javadoccomment">     * implementation reasons, the synchronized modifier cannot</em>
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> <em class="jxr_javadoccomment">     * be included in the method declaration.</em>
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> stop() {
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>         <strong class="jxr_keyword">long</strong> now = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>         <strong class="jxr_keyword">synchronized</strong> (timerThread) {
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>             <strong class="jxr_keyword">synchronized</strong> (<strong class="jxr_keyword">this</strong>) {
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>                 <strong class="jxr_keyword">if</strong> (!stopped) {
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>                     TimerThread.dequeue(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>                     remainingTime = Math.max(0, sleepUntil - now);
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>                     sleepUntil = now;        <em class="jxr_comment">// stop time</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>                     stopped = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>                 }
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>             }
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>         }
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>     }
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> 
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">     * Continue the timer.  The next tick will come at getRemainingTime()</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment">     * milliseconds later.  If the timer is not stopped, this</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">     * call will be a no-op.</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_javadoccomment">     * This method is MT-safe; i.e. it is synchronized but for</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> <em class="jxr_javadoccomment">     * implementation reasons, the synchronized modifier cannot</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> <em class="jxr_javadoccomment">     * be included in the method declaration.</em>
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> cont() {
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>         <strong class="jxr_keyword">synchronized</strong> (timerThread) {
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>             <strong class="jxr_keyword">synchronized</strong> (<strong class="jxr_keyword">this</strong>) {
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>                 <strong class="jxr_keyword">if</strong> (stopped) {
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>                     <em class="jxr_comment">// The TimerTickThread avoids requeuing the</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>                     <em class="jxr_comment">// timer only if the sleepUntil value has changed.</em>
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>                     <em class="jxr_comment">// The following guarantees that the sleepUntil</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>                     <em class="jxr_comment">// value will be different; without this guarantee,</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>                     <em class="jxr_comment">// it's theoretically possible for the timer to be</em>
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>                     <em class="jxr_comment">// inserted twice.</em>
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>                     sleepUntil = Math.max(sleepUntil + 1,
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>                         System.currentTimeMillis() + remainingTime);
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>                     TimerThread.enqueue(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>                     stopped = false;
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>                 }
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>             }
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>         }
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>     }
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> 
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> <em class="jxr_javadoccomment">     * Resets the timer's remaining time to the timer's interval.</em>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> <em class="jxr_javadoccomment">     * If the timer's running state is not altered.</em>
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> reset() {
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>         <strong class="jxr_keyword">synchronized</strong> (timerThread) {
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>             <strong class="jxr_keyword">synchronized</strong> (<strong class="jxr_keyword">this</strong>) {
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>                 setRemainingTime(interval);
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>             }
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>         }
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>     }
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> 
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> <em class="jxr_javadoccomment">     * Returns the time at which the timer was last stopped.  The</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_javadoccomment">     * return value is valid only if the timer is stopped.</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">long</strong> getStopTime() {
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>         <strong class="jxr_keyword">return</strong> sleepUntil;
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>     }
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">     * Returns the timer's interval.</em>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">long</strong> getInterval() {
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>         <strong class="jxr_keyword">return</strong> interval;
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>     }
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> 
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> <em class="jxr_javadoccomment">     * Changes the timer's interval.  The new interval setting</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> <em class="jxr_javadoccomment">     * does not take effect until after the next tick.</em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">     * This method does not alter the remaining time or the</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> <em class="jxr_javadoccomment">     * running state of the timer.</em>
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">     * @param interval new interval of the timer in milliseconds</em>
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> setInterval(<strong class="jxr_keyword">long</strong> interval) {
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>         <strong class="jxr_keyword">this</strong>.interval = interval;
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>     }
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_javadoccomment">     * Returns the remaining time before the timer's next tick.</em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">     * The return value is valid only if timer is stopped.</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">long</strong> getRemainingTime() {
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>         <strong class="jxr_keyword">return</strong> remainingTime;
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>     }
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> <em class="jxr_javadoccomment">     * Sets the remaining time before the timer's next tick.</em>
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment">     * This method does not alter the timer's running state.</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_javadoccomment">     * This method is MT-safe; i.e. it is synchronized but for</em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_javadoccomment">     * implementation reasons, the synchronized modifier cannot</em>
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> <em class="jxr_javadoccomment">     * be included in the method declaration.</em>
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> <em class="jxr_javadoccomment">     * @param time new remaining time in milliseconds.</em>
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setRemainingTime(<strong class="jxr_keyword">long</strong> time) {
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>         <strong class="jxr_keyword">synchronized</strong> (timerThread) {
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>             <strong class="jxr_keyword">synchronized</strong> (<strong class="jxr_keyword">this</strong>) {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>                 <strong class="jxr_keyword">if</strong> (stopped) {
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>                     remainingTime = time;
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>                     stop();
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>                     remainingTime = time;
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>                     cont();
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>                 }
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>             }
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>         }
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>     }
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> 
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> <em class="jxr_javadoccomment">     * In regular mode, a timer ticks at the specified interval,</em>
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> <em class="jxr_javadoccomment">     * regardless of how long the owner's tick() method takes.</em>
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> <em class="jxr_javadoccomment">     * While the timer is running, no ticks are ever discarded.</em>
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> <em class="jxr_javadoccomment">     * That means that if the owner's tick() method takes longer</em>
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> <em class="jxr_javadoccomment">     * than the interval, the ticks that would have occurred are</em>
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> <em class="jxr_javadoccomment">     * delivered immediately.</em>
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> <em class="jxr_javadoccomment">     * In irregular mode, a timer starts delaying for exactly</em>
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> <em class="jxr_javadoccomment">     * the specified interval only after the tick() method returns.</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> setRegular(<strong class="jxr_keyword">boolean</strong> regular) {
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>         <strong class="jxr_keyword">this</strong>.regular = regular;
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>     }
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> 
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> <em class="jxr_comment">     * This method is used only for testing purposes.</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>     <strong class="jxr_keyword">protected</strong> Thread getTimerThread() {
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>         <strong class="jxr_keyword">return</strong> TimerThread.timerThread;
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>     }
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> }
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> <em class="jxr_comment">This class implements the timer queue and is exclusively used by the</em>
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> <em class="jxr_comment">Timer class.  There are only two methods exported to the Timer class -</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> <em class="jxr_comment">enqueue, for inserting a timer into queue and dequeue, for removing</em>
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> <em class="jxr_comment">a timer from the queue.</em>
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> <em class="jxr_comment">A timer in the timer queue is awaiting a tick.  When a timer is to be</em>
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> <em class="jxr_comment">ticked, it is removed from the timer queue before the owner's tick()</em>
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> <em class="jxr_comment">method is called.</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> <em class="jxr_comment">A single timer thread manages the timer queue.  This timer thread</em>
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> <em class="jxr_comment">looks at the head of the timer queue and delays until it's time for</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> <em class="jxr_comment">the timer to tick.  When the time comes, the timer thread creates a</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> <em class="jxr_comment">callback thread to call the timer owner's tick() method.  The timer</em>
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> <em class="jxr_comment">thread then processes the next timer in the queue.</em>
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> <em class="jxr_comment">When a timer is inserted at the head of the queue, the timer thread is</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> <em class="jxr_comment">notified.  This causes the timer thread to prematurely wake up and</em>
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> <em class="jxr_comment">process the new head of the queue.</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> <strong class="jxr_keyword">class</strong> TimerThread <strong class="jxr_keyword">extends</strong> Thread {
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> <em class="jxr_comment">     * Set to true to get debugging output.</em>
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> debug = false;
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> <em class="jxr_comment">     * This is a handle to the thread managing the thread queue.</em>
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>     <strong class="jxr_keyword">static</strong> TimerThread timerThread;
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> 
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> <em class="jxr_comment">     * This flag is set if the timer thread has been notified</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> <em class="jxr_comment">     * while it was in the timed wait.  This flag allows the</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> <em class="jxr_comment">     * timer thread to tell whether or not the wait completed.</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> notified = false;
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> 
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>     <strong class="jxr_keyword">protected</strong> TimerThread() {
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>         <strong class="jxr_keyword">super</strong>(<span class="jxr_string">"TimerThread"</span>);
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>         timerThread = <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>         start();
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>     }
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> 
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> run() {
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>         <strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>             <strong class="jxr_keyword">long</strong> delay;
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>             <strong class="jxr_keyword">while</strong> (timerQueue == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>                 <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L377" href="#L377">377</a>                     wait();
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>                 } <strong class="jxr_keyword">catch</strong> (InterruptedException ex) {
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>                    <em class="jxr_comment">// Just drop through and check timerQueue.</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>                 }
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>             }
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>             notified = false;
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>             delay = timerQueue.sleepUntil - System.currentTimeMillis();
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>             <strong class="jxr_keyword">if</strong> (delay &gt; 0) {
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>                 <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>                     wait(delay);
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>                 } <strong class="jxr_keyword">catch</strong> (InterruptedException ex) {
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>                     <em class="jxr_comment">// Just drop through.</em>
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>                 }
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>             }
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>             <em class="jxr_comment">// remove from timer queue.</em>
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>             <strong class="jxr_keyword">if</strong> (!notified) {
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>                 Timer timer = timerQueue;
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>                 timerQueue = timerQueue.next;
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>                 TimerTickThread thr = TimerTickThread.call(
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>                     timer, timer.sleepUntil);
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>                 <strong class="jxr_keyword">if</strong> (debug) {
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>                     <strong class="jxr_keyword">long</strong> delta = (System.currentTimeMillis() - timer.sleepUntil);
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>                     System.out.println(<span class="jxr_string">"tick("</span> + thr.getName() + <span class="jxr_string">","</span>
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>                         + timer.interval + <span class="jxr_string">","</span>+delta+ <span class="jxr_string">")"</span>);
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>                     <strong class="jxr_keyword">if</strong> (delta &gt; 250) {
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>                         System.out.println(<span class="jxr_string">"*** BIG DELAY ***"</span>);
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>                     }
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>                 }
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>             }
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>         }
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>     }
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>     <em class="jxr_comment">/* *******************************************************</em>
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> <em class="jxr_comment">       Timer Queue</em>
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> <em class="jxr_comment">       ******************************************************* */</em>
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> 
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> <em class="jxr_comment">     * The timer queue is a queue of timers waiting to tick.</em>
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>     <strong class="jxr_keyword">static</strong> Timer timerQueue = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> 
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> <em class="jxr_comment">     * Uses timer.sleepUntil to determine where in the queue</em>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> <em class="jxr_comment">     * to insert the timer object.</em>
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> <em class="jxr_comment">     * A new ticker thread is created only if the timer</em>
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> <em class="jxr_comment">     * is inserted at the beginning of the queue.</em>
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> <em class="jxr_comment">     * The timer must not already be in the queue.</em>
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> <em class="jxr_comment">     * Assumes the caller has the TimerThread monitor.</em>
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> enqueue(Timer timer) {
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>         Timer prev = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>         Timer cur = timerQueue;
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> 
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>         <strong class="jxr_keyword">if</strong> (cur == <strong class="jxr_keyword">null</strong> || timer.sleepUntil &lt;= cur.sleepUntil) {
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>             <em class="jxr_comment">// insert at front of queue</em>
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>             timer.next = timerQueue;
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>             timerQueue = timer;
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>             notified = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>             timerThread.notify();
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>             <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>                 prev = cur;
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>                 cur = cur.next;
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>             } <strong class="jxr_keyword">while</strong> (cur != <strong class="jxr_keyword">null</strong> &amp;&amp; timer.sleepUntil &gt; cur.sleepUntil);
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>             <em class="jxr_comment">// insert or append to the timer queue</em>
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>             timer.next = cur;
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>             prev.next = timer;
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>         }
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>         <strong class="jxr_keyword">if</strong> (debug) {
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>             <strong class="jxr_keyword">long</strong> now = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>             System.out.print(Thread.currentThread().getName()
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>                 + <span class="jxr_string">": enqueue "</span> + timer.interval + <span class="jxr_string">": "</span>);
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>             cur = timerQueue;
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>             <strong class="jxr_keyword">while</strong>(cur != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>                 <strong class="jxr_keyword">long</strong> delta = cur.sleepUntil - now;
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>                 System.out.print(cur.interval + <span class="jxr_string">"("</span> + delta + <span class="jxr_string">") "</span>);
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>                 cur = cur.next;
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>             }
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>             System.out.println();
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>         }
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>     }
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> 
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> <em class="jxr_comment">     * If the timer is not in the queue, returns false;</em>
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> <em class="jxr_comment">     * otherwise removes the timer from the timer queue and returns true.</em>
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> <em class="jxr_comment">     * Assumes the caller has the TimerThread monitor.</em>
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> dequeue(Timer timer) {
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>         Timer prev = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>         Timer cur = timerQueue;
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> 
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>         <strong class="jxr_keyword">while</strong> (cur != <strong class="jxr_keyword">null</strong> &amp;&amp; cur != timer) {
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>             prev = cur;
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>             cur = cur.next;
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>         }
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>         <strong class="jxr_keyword">if</strong> (cur == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>             <strong class="jxr_keyword">if</strong> (debug) {
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>                 System.out.println(Thread.currentThread().getName()
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>                     + <span class="jxr_string">": dequeue "</span> + timer.interval + <span class="jxr_string">": no-op"</span>);
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>             }
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>         }       <strong class="jxr_keyword">if</strong> (prev == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>             timerQueue = timer.next;
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>             notified = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>             timerThread.notify();
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>             prev.next = timer.next;
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>         }
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>         timer.next = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>         <strong class="jxr_keyword">if</strong> (debug) {
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>             <strong class="jxr_keyword">long</strong> now = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> 
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>             System.out.print(Thread.currentThread().getName()
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>                 + <span class="jxr_string">": dequeue "</span> + timer.interval + <span class="jxr_string">": "</span>);
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>             cur = timerQueue;
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>             <strong class="jxr_keyword">while</strong>(cur != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>                 <strong class="jxr_keyword">long</strong> delta = cur.sleepUntil - now;
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>                 System.out.print(cur.interval + <span class="jxr_string">"("</span> + delta + <span class="jxr_string">") "</span>);
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>                 cur = cur.next;
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>             }
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>             System.out.println();
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>         }
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>     }
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> 
+<a class="jxr_linenumber" name="L503" href="#L503">503</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> <em class="jxr_comment">     * Inserts the timer back into the queue.  This method</em>
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> <em class="jxr_comment">     * is used by a callback thread after it has called the</em>
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> <em class="jxr_comment">     * timer owner's tick() method.  This method recomputes</em>
+<a class="jxr_linenumber" name="L507" href="#L507">507</a> <em class="jxr_comment">     * the sleepUntil field.</em>
+<a class="jxr_linenumber" name="L508" href="#L508">508</a> <em class="jxr_comment">     * Assumes the caller has the TimerThread and Timer monitor.</em>
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> requeue(Timer timer) {
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>         <strong class="jxr_keyword">if</strong> (!timer.stopped) {
+<a class="jxr_linenumber" name="L512" href="#L512">512</a>             <strong class="jxr_keyword">long</strong> now = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>             <strong class="jxr_keyword">if</strong> (timer.regular) {
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>                 timer.sleepUntil += timer.interval;
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>                 timer.sleepUntil = now + timer.interval;
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>             }
+<a class="jxr_linenumber" name="L518" href="#L518">518</a>             enqueue(timer);
+<a class="jxr_linenumber" name="L519" href="#L519">519</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (debug) {
+<a class="jxr_linenumber" name="L520" href="#L520">520</a>             System.out.println(Thread.currentThread().getName()
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>                 + <span class="jxr_string">": requeue "</span> + timer.interval + <span class="jxr_string">": no-op"</span>);
+<a class="jxr_linenumber" name="L522" href="#L522">522</a>         }
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>     }
+<a class="jxr_linenumber" name="L524" href="#L524">524</a> }
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> 
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> 
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> <em class="jxr_comment">This class implements a simple thread whose only purpose is to call a</em>
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> <em class="jxr_comment">timer owner's tick() method.  A small fixed-sized pool of threads is</em>
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> <em class="jxr_comment">maintained and is protected by the class monitor.  If the pool is</em>
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> <em class="jxr_comment">exhausted, a new thread is temporarily created and destroyed when</em>
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> <em class="jxr_comment">done.</em>
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> 
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> <em class="jxr_comment">A thread that's in the pool waits on it's own monitor.  When the</em>
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> <em class="jxr_comment">thread is retrieved from the pool, the retriever notifies the thread's</em>
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> <em class="jxr_comment">monitor.</em>
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> 
+<a class="jxr_linenumber" name="L538" href="#L538">538</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> 
+<a class="jxr_linenumber" name="L540" href="#L540">540</a> <strong class="jxr_keyword">class</strong> TimerTickThread <strong class="jxr_keyword">extends</strong> Thread {
+<a class="jxr_linenumber" name="L541" href="#L541">541</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L542" href="#L542">542</a> <em class="jxr_comment">     * Maximum size of the thread pool.</em>
+<a class="jxr_linenumber" name="L543" href="#L543">543</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAX_POOL_SIZE = 3;
+<a class="jxr_linenumber" name="L545" href="#L545">545</a> 
+<a class="jxr_linenumber" name="L546" href="#L546">546</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L547" href="#L547">547</a> <em class="jxr_comment">     * Number of threads in the pool.</em>
+<a class="jxr_linenumber" name="L548" href="#L548">548</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L549" href="#L549">549</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> curPoolSize = 0;
+<a class="jxr_linenumber" name="L550" href="#L550">550</a> 
+<a class="jxr_linenumber" name="L551" href="#L551">551</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> <em class="jxr_comment">     * The pool of timer threads.</em>
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>     <strong class="jxr_keyword">static</strong> TimerTickThread pool = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L555" href="#L555">555</a> 
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L557" href="#L557">557</a> <em class="jxr_comment">     * Is used when linked into the thread pool.</em>
+<a class="jxr_linenumber" name="L558" href="#L558">558</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>     TimerTickThread next = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L560" href="#L560">560</a> 
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L562" href="#L562">562</a> <em class="jxr_comment">     * This is the handle to the timer whose owner's</em>
+<a class="jxr_linenumber" name="L563" href="#L563">563</a> <em class="jxr_comment">     * tick() method will be called.</em>
+<a class="jxr_linenumber" name="L564" href="#L564">564</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>     Timer timer;
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> 
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> <em class="jxr_comment">     * The value of a timer's sleepUntil value is captured here.</em>
+<a class="jxr_linenumber" name="L569" href="#L569">569</a> <em class="jxr_comment">     * This is used to determine whether or not the timer should</em>
+<a class="jxr_linenumber" name="L570" href="#L570">570</a> <em class="jxr_comment">     * be reinserted into the queue.  If the timer's sleepUntil</em>
+<a class="jxr_linenumber" name="L571" href="#L571">571</a> <em class="jxr_comment">     * value has changed, the timer is not reinserted.</em>
+<a class="jxr_linenumber" name="L572" href="#L572">572</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>     <strong class="jxr_keyword">long</strong> lastSleepUntil;
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> 
+<a class="jxr_linenumber" name="L575" href="#L575">575</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> <em class="jxr_comment">     * Creates a new callback thread to call the timer owner's</em>
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> <em class="jxr_comment">     * tick() method.  A thread is taken from the pool if one</em>
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> <em class="jxr_comment">     * is available, otherwise, a new thread is created.</em>
+<a class="jxr_linenumber" name="L579" href="#L579">579</a> <em class="jxr_comment">     * The thread handle is returned.</em>
+<a class="jxr_linenumber" name="L580" href="#L580">580</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">synchronized</strong> TimerTickThread call(
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>             Timer timer, <strong class="jxr_keyword">long</strong> sleepUntil) {
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>         TimerTickThread thread = pool;
+<a class="jxr_linenumber" name="L584" href="#L584">584</a> 
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>         <strong class="jxr_keyword">if</strong> (thread == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L586" href="#L586">586</a>             <em class="jxr_comment">// create one.</em>
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>             thread = <strong class="jxr_keyword">new</strong> TimerTickThread();
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>             thread.timer = timer;
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>             thread.lastSleepUntil = sleepUntil;
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>             thread.start();
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>             pool = pool.next;
+<a class="jxr_linenumber" name="L593" href="#L593">593</a>             thread.timer = timer;
+<a class="jxr_linenumber" name="L594" href="#L594">594</a>             thread.lastSleepUntil = sleepUntil;
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>             <strong class="jxr_keyword">synchronized</strong> (thread) {
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>                 thread.notify();
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>             }
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>         }
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>         <strong class="jxr_keyword">return</strong> thread;
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>     }
+<a class="jxr_linenumber" name="L601" href="#L601">601</a> 
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L603" href="#L603">603</a> <em class="jxr_comment">     * Returns false if the thread should simply exit;</em>
+<a class="jxr_linenumber" name="L604" href="#L604">604</a> <em class="jxr_comment">     * otherwise the thread is returned the pool, where</em>
+<a class="jxr_linenumber" name="L605" href="#L605">605</a> <em class="jxr_comment">     * it waits to be notified.  (I did try to use the</em>
+<a class="jxr_linenumber" name="L606" href="#L606">606</a> <em class="jxr_comment">     * class monitor but the time between the notify</em>
+<a class="jxr_linenumber" name="L607" href="#L607">607</a> <em class="jxr_comment">     * and breaking out of the wait seemed to take</em>
+<a class="jxr_linenumber" name="L608" href="#L608">608</a> <em class="jxr_comment">     * significantly longer; need to look into this later.)</em>
+<a class="jxr_linenumber" name="L609" href="#L609">609</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> returnToPool() {
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>         <strong class="jxr_keyword">synchronized</strong> (getClass()) {
+<a class="jxr_linenumber" name="L612" href="#L612">612</a>             <strong class="jxr_keyword">if</strong> (curPoolSize &gt;= MAX_POOL_SIZE) {
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>                 <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>             }
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>             next = pool;
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>             pool = <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>             curPoolSize++;
+<a class="jxr_linenumber" name="L618" href="#L618">618</a>             timer = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L619" href="#L619">619</a>         }
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>         <strong class="jxr_keyword">while</strong> (timer == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>             <strong class="jxr_keyword">synchronized</strong> (<strong class="jxr_keyword">this</strong>) {
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>                 <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>                     wait();
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>                 } <strong class="jxr_keyword">catch</strong> (InterruptedException ex) {
+<a class="jxr_linenumber" name="L625" href="#L625">625</a>                    <em class="jxr_comment">// Just drop through and retest timer.</em>
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>                 }
+<a class="jxr_linenumber" name="L627" href="#L627">627</a>             }
+<a class="jxr_linenumber" name="L628" href="#L628">628</a>         }
+<a class="jxr_linenumber" name="L629" href="#L629">629</a>         <strong class="jxr_keyword">synchronized</strong> (getClass()) {
+<a class="jxr_linenumber" name="L630" href="#L630">630</a>             curPoolSize--;
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>         }
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L633" href="#L633">633</a>     }
+<a class="jxr_linenumber" name="L634" href="#L634">634</a> 
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> run() {
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>         <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>             timer.owner.tick(timer);
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>             <strong class="jxr_keyword">synchronized</strong> (TimerThread.timerThread) {
+<a class="jxr_linenumber" name="L639" href="#L639">639</a>                 <strong class="jxr_keyword">synchronized</strong> (timer) {
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>                     <strong class="jxr_keyword">if</strong> (lastSleepUntil == timer.sleepUntil) {
+<a class="jxr_linenumber" name="L641" href="#L641">641</a>                         TimerThread.requeue(timer);
+<a class="jxr_linenumber" name="L642" href="#L642">642</a>                     }
+<a class="jxr_linenumber" name="L643" href="#L643">643</a>                 }
+<a class="jxr_linenumber" name="L644" href="#L644">644</a>             }
+<a class="jxr_linenumber" name="L645" href="#L645">645</a>         } <strong class="jxr_keyword">while</strong> (returnToPool());
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>     }
+<a class="jxr_linenumber" name="L647" href="#L647">647</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

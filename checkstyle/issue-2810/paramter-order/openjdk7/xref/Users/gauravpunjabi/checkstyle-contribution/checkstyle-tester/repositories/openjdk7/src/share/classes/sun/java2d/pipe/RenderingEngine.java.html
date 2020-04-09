@@ -1,0 +1,495 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>RenderingEngine xref</title>
+<link type="text/css" rel="stylesheet" href="../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.  Oracle designates this</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * particular file as subject to the "Classpath" exception as provided</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * by Oracle in the LICENSE file that accompanied this code.</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">package</strong> sun.java2d.pipe;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.awt.Shape;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.awt.BasicStroke;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> java.awt.geom.PathIterator;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> java.awt.geom.AffineTransform;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> java.security.PrivilegedAction;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> java.security.AccessController;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> java.util.ServiceLoader;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> sun.security.action.GetPropertyAction;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> sun.awt.geom.PathConsumer2D;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment"> * This class abstracts a number of features for which the Java 2D</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment"> * implementation relies on proprietary licensed software libraries.</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment"> * Access to those features is now achieved by retrieving the singleton</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment"> * instance of this class and calling the appropriate methods on it.</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment"> * The 3 primary features abstracted here include:</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment"> * &lt;dl&gt;</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment"> * &lt;dt&gt;Shape createStrokedShape(Shape, [BasicStroke attributes]);</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment"> * &lt;dd&gt;This method implements the functionality of the method of the</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment"> * same name on the {@link BasicStroke} class.</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment"> * &lt;dt&gt;void strokeTo(Shape, [rendering parameters], PathConsumer2D);</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment"> * &lt;dd&gt;This method performs widening of the source path on the fly</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> * and sends the results to the given {@link PathConsumer2D} object.</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> * This procedure avoids having to create an intermediate Shape</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> * object to hold the results of the {@code createStrokedShape} method.</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> * The main user of this method is the Java 2D non-antialiasing renderer.</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment"> * &lt;dt&gt;AATileGenerator getAATileGenerator(Shape, [rendering parameters]);</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment"> * &lt;dd&gt;This method returns an object which can iterate over the</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment"> * specified bounding box and produce tiles of coverage values for</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment"> * antialiased rendering.  The details of the operation of the</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> * {@link AATileGenerator} object are explained in its class comments.</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> * &lt;/dl&gt;</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> * Additionally, the following informational method supplies important</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> * data about the implementation.</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> * &lt;dl&gt;</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment"> * &lt;dt&gt;float getMinimumAAPenSize()</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment"> * &lt;dd&gt;This method provides information on how small the BasicStroke</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment"> * line width can get before dropouts occur.  Rendering with a BasicStroke</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment"> * is defined to never allow the line to have breaks, gaps, or dropouts</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment"> * even if the width is set to 0.0f, so this information allows the</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment"> * {@link SunGraphics2D} class to detect the "thin line" case and set</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment"> * the rendering attributes accordingly.</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment"> * &lt;/dl&gt;</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment"> * At startup the runtime will load a single instance of this class.</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment"> * It searches the classpath for a registered provider of this API</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment"> * and returns either the last one it finds, or the instance whose</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment"> * class name matches the value supplied in the System property</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment"> * {@code sun.java2d.renderer}.</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment"> * Additionally, a runtime System property flag can be set to trace</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment"> * all calls to methods on the {@code RenderingEngine} in use by</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment"> * setting the sun.java2d.renderer.trace property to any non-null value.</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment"> * Parts of the system that need to use any of the above features should</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment"> * call {@code RenderingEngine.getInstance()} to obtain the properly</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment"> * registered (and possibly trace-enabled) version of the RenderingEngine.</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> RenderingEngine {
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> RenderingEngine reImpl;
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment">     * Returns an instance of {@code RenderingEngine} as determined</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment">     * by the installation environment and runtime flags.</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment">     * A specific instance of the {@code RenderingEngine} can be</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_javadoccomment">     * chosen by specifying the runtime flag:</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_javadoccomment">     * &lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment">     *     java -Dsun.java2d.renderer=&amp;lt;classname&amp;gt;</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment">     * &lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">     * If no specific {@code RenderingEngine} is specified on the command</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">     * or Ductus renderer is specified, it will attempt loading the</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">     * sun.dc.DuctusRenderingEngine class using Class.forName as a fastpath;</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">     * if not found, use the ServiceLoader.</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment">     * If no specific {@code RenderingEngine} is specified on the command</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">     * line then the last one returned by enumerating all subclasses of</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">     * {@code RenderingEngine} known to the ServiceLoader is used.</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">     * Runtime tracing of the actions of the {@code RenderingEngine}</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">     * can be enabled by specifying the runtime flag:</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment">     * &lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_javadoccomment">     *     java -Dsun.java2d.renderer.trace=&amp;lt;any string&amp;gt;</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment">     * @return an instance of {@code RenderingEngine}</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">     * @since 1.7</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">synchronized</strong> RenderingEngine getInstance() {
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>         <strong class="jxr_keyword">if</strong> (reImpl != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>             <strong class="jxr_keyword">return</strong> reImpl;
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>         }
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>         reImpl = (RenderingEngine)
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>             AccessController.doPrivileged(<strong class="jxr_keyword">new</strong> PrivilegedAction() {
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>                 <strong class="jxr_keyword">public</strong> Object run() {
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>                     <strong class="jxr_keyword">final</strong> String ductusREClass = <span class="jxr_string">"sun.dc.DuctusRenderingEngine"</span>;
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>                     String reClass =
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>                         System.getProperty(<span class="jxr_string">"sun.java2d.renderer"</span>, ductusREClass);
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>                     <strong class="jxr_keyword">if</strong> (reClass.equals(ductusREClass)) {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>                         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>                             Class cls = Class.forName(ductusREClass);
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>                             <strong class="jxr_keyword">return</strong> cls.newInstance();
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>                         } <strong class="jxr_keyword">catch</strong> (ClassNotFoundException x) {
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>                             <em class="jxr_comment">// not found</em>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>                         } <strong class="jxr_keyword">catch</strong> (IllegalAccessException x) {
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>                             <em class="jxr_comment">// should not reach here</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>                         } <strong class="jxr_keyword">catch</strong> (InstantiationException x) {
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>                             <em class="jxr_comment">// should not reach here</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>                         }
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>                     }
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>                     ServiceLoader&lt;RenderingEngine&gt; reLoader =
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>                         ServiceLoader.loadInstalled(RenderingEngine.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>                     RenderingEngine service = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>                     <strong class="jxr_keyword">for</strong> (RenderingEngine re : reLoader) {
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>                         service = re;
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>                         <strong class="jxr_keyword">if</strong> (re.getClass().getName().equals(reClass)) {
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>                             <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>                         }
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>                     }
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>                     <strong class="jxr_keyword">return</strong> service;
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>                 }
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>             });
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>         <strong class="jxr_keyword">if</strong> (reImpl == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InternalError(<span class="jxr_string">"No RenderingEngine module found"</span>);
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>         }
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>         GetPropertyAction gpa =
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>             <strong class="jxr_keyword">new</strong> GetPropertyAction(<span class="jxr_string">"sun.java2d.renderer.trace"</span>);
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>         String reTrace = (String) AccessController.doPrivileged(gpa);
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>         <strong class="jxr_keyword">if</strong> (reTrace != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>             reImpl = <strong class="jxr_keyword">new</strong> Tracer(reImpl);
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>         }
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>         <strong class="jxr_keyword">return</strong> reImpl;
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>     }
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> <em class="jxr_javadoccomment">     * Create a widened path as specified by the parameters.</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> <em class="jxr_javadoccomment">     * The specified {@code src} {@link Shape} is widened according</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> <em class="jxr_javadoccomment">     * to the specified attribute parameters as per the</em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> <em class="jxr_javadoccomment">     * {@link BasicStroke} specification.</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment">     * @param src the source path to be widened</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment">     * @param width the width of the widened path as per {@code BasicStroke}</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">     * @param caps the end cap decorations as per {@code BasicStroke}</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">     * @param join the segment join decorations as per {@code BasicStroke}</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> <em class="jxr_javadoccomment">     * @param miterlimit the miter limit as per {@code BasicStroke}</em>
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> <em class="jxr_javadoccomment">     * @param dashes the dash length array as per {@code BasicStroke}</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> <em class="jxr_javadoccomment">     * @param dashphase the initial dash phase as per {@code BasicStroke}</em>
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> <em class="jxr_javadoccomment">     * @return the widened path stored in a new {@code Shape} object</em>
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> <em class="jxr_javadoccomment">     * @since 1.7</em>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> Shape createStrokedShape(Shape src,
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>                                              <strong class="jxr_keyword">float</strong> width,
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>                                              <strong class="jxr_keyword">int</strong> caps,
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>                                              <strong class="jxr_keyword">int</strong> join,
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>                                              <strong class="jxr_keyword">float</strong> miterlimit,
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>                                              <strong class="jxr_keyword">float</strong> dashes[],
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>                                              <strong class="jxr_keyword">float</strong> dashphase);
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> <em class="jxr_javadoccomment">     * Sends the geometry for a widened path as specified by the parameters</em>
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> <em class="jxr_javadoccomment">     * to the specified consumer.</em>
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_javadoccomment">     * The specified {@code src} {@link Shape} is widened according</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_javadoccomment">     * to the parameters specified by the {@link BasicStroke} object.</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_javadoccomment">     * Adjustments are made to the path as appropriate for the</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment">     * {@link VALUE_STROKE_NORMALIZE} hint if the {@code normalize}</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_javadoccomment">     * boolean parameter is true.</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">     * Adjustments are made to the path as appropriate for the</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> <em class="jxr_javadoccomment">     * {@link VALUE_ANTIALIAS_ON} hint if the {@code antialias}</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> <em class="jxr_javadoccomment">     * boolean parameter is true.</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">     * The geometry of the widened path is forwarded to the indicated</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment">     * {@link PathConsumer2D} object as it is calculated.</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_javadoccomment">     * @param src the source path to be widened</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> <em class="jxr_javadoccomment">     * @param bs the {@code BasicSroke} object specifying the</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> <em class="jxr_javadoccomment">     *           decorations to be applied to the widened path</em>
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> <em class="jxr_javadoccomment">     * @param normalize indicates whether stroke normalization should</em>
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> <em class="jxr_javadoccomment">     *                  be applied</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> <em class="jxr_javadoccomment">     * @param antialias indicates whether or not adjustments appropriate</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> <em class="jxr_javadoccomment">     *                  to antialiased rendering should be applied</em>
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> <em class="jxr_javadoccomment">     * @param consumer the {@code PathConsumer2D} instance to forward</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> <em class="jxr_javadoccomment">     *                 the widened geometry to</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> <em class="jxr_javadoccomment">     * @since 1.7</em>
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> strokeTo(Shape src,
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>                                   AffineTransform at,
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>                                   BasicStroke bs,
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>                                   <strong class="jxr_keyword">boolean</strong> thin,
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>                                   <strong class="jxr_keyword">boolean</strong> normalize,
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>                                   <strong class="jxr_keyword">boolean</strong> antialias,
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>                                   PathConsumer2D consumer);
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> <em class="jxr_javadoccomment">     * Construct an antialiased tile generator for the given shape with</em>
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> <em class="jxr_javadoccomment">     * the given rendering attributes and store the bounds of the tile</em>
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> <em class="jxr_javadoccomment">     * iteration in the bbox parameter.</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> <em class="jxr_javadoccomment">     * The {@code at} parameter specifies a transform that should affect</em>
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> <em class="jxr_javadoccomment">     * both the shape and the {@code BasicStroke} attributes.</em>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> <em class="jxr_javadoccomment">     * The {@code clip} parameter specifies the current clip in effect</em>
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> <em class="jxr_javadoccomment">     * in device coordinates and can be used to prune the data for the</em>
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> <em class="jxr_javadoccomment">     * operation, but the renderer is not required to perform any</em>
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> <em class="jxr_javadoccomment">     * clipping.</em>
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> <em class="jxr_javadoccomment">     * If the {@code BasicStroke} parameter is null then the shape</em>
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> <em class="jxr_javadoccomment">     * should be filled as is, otherwise the attributes of the</em>
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> <em class="jxr_javadoccomment">     * {@code BasicStroke} should be used to specify a draw operation.</em>
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> <em class="jxr_javadoccomment">     * The {@code thin} parameter indicates whether or not the</em>
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> <em class="jxr_javadoccomment">     * transformed {@code BasicStroke} represents coordinates smaller</em>
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> <em class="jxr_javadoccomment">     * than the minimum resolution of the antialiasing rasterizer as</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> <em class="jxr_javadoccomment">     * specified by the {@code getMinimumAAPenWidth()} method.</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_javadoccomment">     * Upon returning, this method will fill the {@code bbox} parameter</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_javadoccomment">     * with 4 values indicating the bounds of the iteration of the</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_javadoccomment">     * tile generator.</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> <em class="jxr_javadoccomment">     * The iteration order of the tiles will be as specified by the</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> <em class="jxr_javadoccomment">     * pseudo-code:</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> <em class="jxr_javadoccomment">     * &lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> <em class="jxr_javadoccomment">     *     for (y = bbox[1]; y &lt; bbox[3]; y += tileheight) {</em>
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">     *         for (x = bbox[0]; x &lt; bbox[2]; x += tilewidth) {</em>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> <em class="jxr_javadoccomment">     *         }</em>
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> <em class="jxr_javadoccomment">     *     }</em>
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> <em class="jxr_javadoccomment">     * If there is no output to be rendered, this method may return</em>
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> <em class="jxr_javadoccomment">     * null.</em>
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> <em class="jxr_javadoccomment">     * @param s the shape to be rendered (fill or draw)</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> <em class="jxr_javadoccomment">     * @param at the transform to be applied to the shape and the</em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">     *           stroke attributes</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> <em class="jxr_javadoccomment">     * @param clip the current clip in effect in device coordinates</em>
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">     * @param bs if non-null, a {@code BasicStroke} whose attributes</em>
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_javadoccomment">     *           should be applied to this operation</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_javadoccomment">     * @param thin true if the transformed stroke attributes are smaller</em>
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_javadoccomment">     *             than the minimum dropout pen width</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_javadoccomment">     * @param normalize true if the {@code VALUE_STROKE_NORMALIZE}</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> <em class="jxr_javadoccomment">     *                  {@code RenderingHint} is in effect</em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> <em class="jxr_javadoccomment">     * @param bbox returns the bounds of the iteration</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_javadoccomment">     * @return the {@code AATileGenerator} instance to be consulted</em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">     *         for tile coverages, or null if there is no output to render</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_javadoccomment">     * @since 1.7</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> AATileGenerator getAATileGenerator(Shape s,
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>                                                        AffineTransform at,
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>                                                        Region clip,
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>                                                        BasicStroke bs,
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>                                                        <strong class="jxr_keyword">boolean</strong> thin,
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>                                                        <strong class="jxr_keyword">boolean</strong> normalize,
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>                                                        <strong class="jxr_keyword">int</strong> bbox[]);
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> 
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> <em class="jxr_javadoccomment">     * Construct an antialiased tile generator for the given parallelogram</em>
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> <em class="jxr_javadoccomment">     * store the bounds of the tile iteration in the bbox parameter.</em>
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> <em class="jxr_javadoccomment">     * The parallelogram is specified as a starting point and 2 delta</em>
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> <em class="jxr_javadoccomment">     * vectors that indicate the slopes of the 2 pairs of sides of the</em>
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> <em class="jxr_javadoccomment">     * parallelogram.</em>
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> <em class="jxr_javadoccomment">     * The 4 corners of the parallelogram are defined by the 4 points:</em>
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> <em class="jxr_javadoccomment">     * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> <em class="jxr_javadoccomment">     * &lt;li&gt; {@code x}, {@code y}</em>
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> <em class="jxr_javadoccomment">     * &lt;li&gt; {@code x+dx1}, {@code y+dy1}</em>
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> <em class="jxr_javadoccomment">     * &lt;li&gt; {@code x+dx1+dx2}, {@code y+dy1+dy2}</em>
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> <em class="jxr_javadoccomment">     * &lt;li&gt; {@code x+dx2}, {@code y+dy2}</em>
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> <em class="jxr_javadoccomment">     * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> <em class="jxr_javadoccomment">     * The {@code lw1} and {@code lw2} parameters provide a specification</em>
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> <em class="jxr_javadoccomment">     * for an optionally stroked parallelogram if they are positive numbers.</em>
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> <em class="jxr_javadoccomment">     * The {@code lw1} parameter is the ratio of the length of the {@code dx1},</em>
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> <em class="jxr_javadoccomment">     * {@code dx2} delta vector to half of the line width in that same</em>
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> <em class="jxr_javadoccomment">     * direction.</em>
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> <em class="jxr_javadoccomment">     * The {@code lw2} parameter provides the same ratio for the other delta</em>
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> <em class="jxr_javadoccomment">     * vector.</em>
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> <em class="jxr_javadoccomment">     * If {@code lw1} and {@code lw2} are both greater than zero, then</em>
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> <em class="jxr_javadoccomment">     * the parallelogram figure is doubled by both expanding and contracting</em>
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> <em class="jxr_javadoccomment">     * each delta vector by its corresponding {@code lw} value.</em>
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> <em class="jxr_javadoccomment">     * If either (@code lw1) or {@code lw2} are also greater than 1, then</em>
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> <em class="jxr_javadoccomment">     * the inner (contracted) parallelogram disappears and the figure is</em>
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> <em class="jxr_javadoccomment">     * simply a single expanded parallelogram.</em>
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> <em class="jxr_javadoccomment">     * The {@code clip} parameter specifies the current clip in effect</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> <em class="jxr_javadoccomment">     * in device coordinates and can be used to prune the data for the</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> <em class="jxr_javadoccomment">     * operation, but the renderer is not required to perform any</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> <em class="jxr_javadoccomment">     * clipping.</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> <em class="jxr_javadoccomment">     * Upon returning, this method will fill the {@code bbox} parameter</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> <em class="jxr_javadoccomment">     * with 4 values indicating the bounds of the iteration of the</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> <em class="jxr_javadoccomment">     * tile generator.</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> <em class="jxr_javadoccomment">     * The iteration order of the tiles will be as specified by the</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> <em class="jxr_javadoccomment">     * pseudo-code:</em>
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> <em class="jxr_javadoccomment">     * &lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> <em class="jxr_javadoccomment">     *     for (y = bbox[1]; y &lt; bbox[3]; y += tileheight) {</em>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> <em class="jxr_javadoccomment">     *         for (x = bbox[0]; x &lt; bbox[2]; x += tilewidth) {</em>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> <em class="jxr_javadoccomment">     *         }</em>
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> <em class="jxr_javadoccomment">     *     }</em>
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> <em class="jxr_javadoccomment">     * If there is no output to be rendered, this method may return</em>
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> <em class="jxr_javadoccomment">     * null.</em>
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> <em class="jxr_javadoccomment">     * @param x the X coordinate of the first corner of the parallelogram</em>
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> <em class="jxr_javadoccomment">     * @param y the Y coordinate of the first corner of the parallelogram</em>
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> <em class="jxr_javadoccomment">     * @param dx1 the X coordinate delta of the first leg of the parallelogram</em>
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> <em class="jxr_javadoccomment">     * @param dy1 the Y coordinate delta of the first leg of the parallelogram</em>
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> <em class="jxr_javadoccomment">     * @param dx2 the X coordinate delta of the second leg of the parallelogram</em>
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> <em class="jxr_javadoccomment">     * @param dy2 the Y coordinate delta of the second leg of the parallelogram</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> <em class="jxr_javadoccomment">     * @param lw1 the line width ratio for the first leg of the parallelogram</em>
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> <em class="jxr_javadoccomment">     * @param lw2 the line width ratio for the second leg of the parallelogram</em>
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> <em class="jxr_javadoccomment">     * @param clip the current clip in effect in device coordinates</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> <em class="jxr_javadoccomment">     * @param bbox returns the bounds of the iteration</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> <em class="jxr_javadoccomment">     * @return the {@code AATileGenerator} instance to be consulted</em>
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> <em class="jxr_javadoccomment">     *         for tile coverages, or null if there is no output to render</em>
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> <em class="jxr_javadoccomment">     * @since 1.7</em>
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> AATileGenerator getAATileGenerator(<strong class="jxr_keyword">double</strong> x, <strong class="jxr_keyword">double</strong> y,
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>                                                        <strong class="jxr_keyword">double</strong> dx1, <strong class="jxr_keyword">double</strong> dy1,
+<a class="jxr_linenumber" name="L344" href="#L344">344</a>                                                        <strong class="jxr_keyword">double</strong> dx2, <strong class="jxr_keyword">double</strong> dy2,
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>                                                        <strong class="jxr_keyword">double</strong> lw1, <strong class="jxr_keyword">double</strong> lw2,
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>                                                        Region clip,
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>                                                        <strong class="jxr_keyword">int</strong> bbox[]);
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> 
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> <em class="jxr_javadoccomment">     * Returns the minimum pen width that the antialiasing rasterizer</em>
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> <em class="jxr_javadoccomment">     * can represent without dropouts occuring.</em>
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> <em class="jxr_javadoccomment">     * @since 1.7</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">float</strong> getMinimumAAPenSize();
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> 
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> <em class="jxr_javadoccomment">     * Utility method to feed a {@link PathConsumer2D} object from a</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> <em class="jxr_javadoccomment">     * given {@link PathIterator}.</em>
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> <em class="jxr_javadoccomment">     * This method deals with the details of running the iterator and</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> <em class="jxr_javadoccomment">     * feeding the consumer a segment at a time.</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> feedConsumer(PathIterator pi, PathConsumer2D consumer) {
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>         <strong class="jxr_keyword">float</strong> coords[] = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">float</strong>[6];
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>         <strong class="jxr_keyword">while</strong> (!pi.isDone()) {
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>             <strong class="jxr_keyword">switch</strong> (pi.currentSegment(coords)) {
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>             <strong class="jxr_keyword">case</strong> PathIterator.SEG_MOVETO:
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>                 consumer.moveTo(coords[0], coords[1]);
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>             <strong class="jxr_keyword">case</strong> PathIterator.SEG_LINETO:
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>                 consumer.lineTo(coords[0], coords[1]);
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>             <strong class="jxr_keyword">case</strong> PathIterator.SEG_QUADTO:
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>                 consumer.quadTo(coords[0], coords[1],
+<a class="jxr_linenumber" name="L374" href="#L374">374</a>                                 coords[2], coords[3]);
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>             <strong class="jxr_keyword">case</strong> PathIterator.SEG_CUBICTO:
+<a class="jxr_linenumber" name="L377" href="#L377">377</a>                 consumer.curveTo(coords[0], coords[1],
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>                                  coords[2], coords[3],
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>                                  coords[4], coords[5]);
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>             <strong class="jxr_keyword">case</strong> PathIterator.SEG_CLOSE:
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>                 consumer.closePath();
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>             }
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>             pi.next();
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>         }
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>     }
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Tracer <strong class="jxr_keyword">extends</strong> RenderingEngine {
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>         RenderingEngine target;
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>         String name;
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>         <strong class="jxr_keyword">public</strong> Tracer(RenderingEngine target) {
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>             <strong class="jxr_keyword">this</strong>.target = target;
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>             name = target.getClass().getName();
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>         }
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> 
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>         <strong class="jxr_keyword">public</strong> Shape createStrokedShape(Shape src,
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>                                         <strong class="jxr_keyword">float</strong> width,
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>                                         <strong class="jxr_keyword">int</strong> caps,
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>                                         <strong class="jxr_keyword">int</strong> join,
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>                                         <strong class="jxr_keyword">float</strong> miterlimit,
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>                                         <strong class="jxr_keyword">float</strong> dashes[],
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>                                         <strong class="jxr_keyword">float</strong> dashphase)
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>         {
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>             System.out.println(name+<span class="jxr_string">".createStrokedShape("</span>+
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>                                src.getClass().getName()+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>                                <span class="jxr_string">"width = "</span>+width+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>                                <span class="jxr_string">"caps = "</span>+caps+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>                                <span class="jxr_string">"join = "</span>+join+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>                                <span class="jxr_string">"miter = "</span>+miterlimit+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>                                <span class="jxr_string">"dashes = "</span>+dashes+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>                                <span class="jxr_string">"dashphase = "</span>+dashphase+<span class="jxr_string">")"</span>);
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>             <strong class="jxr_keyword">return</strong> target.createStrokedShape(src,
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>                                              width, caps, join, miterlimit,
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>                                              dashes, dashphase);
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>         }
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> 
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>         <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> strokeTo(Shape src,
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>                              AffineTransform at,
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>                              BasicStroke bs,
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>                              <strong class="jxr_keyword">boolean</strong> thin,
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>                              <strong class="jxr_keyword">boolean</strong> normalize,
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>                              <strong class="jxr_keyword">boolean</strong> antialias,
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>                              PathConsumer2D consumer)
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>         {
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>             System.out.println(name+<span class="jxr_string">".strokeTo("</span>+
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>                                src.getClass().getName()+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>                                at+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>                                bs+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>                                (thin ? <span class="jxr_string">"thin"</span> : <span class="jxr_string">"wide"</span>)+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>                                (normalize ? <span class="jxr_string">"normalized"</span> : <span class="jxr_string">"pure"</span>)+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>                                (antialias ? <span class="jxr_string">"AA"</span> : <span class="jxr_string">"non-AA"</span>)+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>                                consumer.getClass().getName()+<span class="jxr_string">")"</span>);
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>             target.strokeTo(src, at, bs, thin, normalize, antialias, consumer);
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>         }
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> 
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>         <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">float</strong> getMinimumAAPenSize() {
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>             System.out.println(name+<span class="jxr_string">".getMinimumAAPenSize()"</span>);
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>             <strong class="jxr_keyword">return</strong> target.getMinimumAAPenSize();
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>         }
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>         <strong class="jxr_keyword">public</strong> AATileGenerator getAATileGenerator(Shape s,
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>                                                   AffineTransform at,
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>                                                   Region clip,
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>                                                   BasicStroke bs,
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>                                                   <strong class="jxr_keyword">boolean</strong> thin,
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>                                                   <strong class="jxr_keyword">boolean</strong> normalize,
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>                                                   <strong class="jxr_keyword">int</strong> bbox[])
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>         {
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>             System.out.println(name+<span class="jxr_string">".getAATileGenerator("</span>+
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>                                s.getClass().getName()+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>                                at+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>                                clip+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>                                bs+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>                                (thin ? <span class="jxr_string">"thin"</span> : <span class="jxr_string">"wide"</span>)+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>                                (normalize ? <span class="jxr_string">"normalized"</span> : <span class="jxr_string">"pure"</span>)+<span class="jxr_string">")"</span>);
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>             <strong class="jxr_keyword">return</strong> target.getAATileGenerator(s, at, clip,
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>                                              bs, thin, normalize,
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>                                              bbox);
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>         }
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>         <strong class="jxr_keyword">public</strong> AATileGenerator getAATileGenerator(<strong class="jxr_keyword">double</strong> x, <strong class="jxr_keyword">double</strong> y,
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>                                                   <strong class="jxr_keyword">double</strong> dx1, <strong class="jxr_keyword">double</strong> dy1,
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>                                                   <strong class="jxr_keyword">double</strong> dx2, <strong class="jxr_keyword">double</strong> dy2,
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>                                                   <strong class="jxr_keyword">double</strong> lw1, <strong class="jxr_keyword">double</strong> lw2,
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>                                                   Region clip,
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>                                                   <strong class="jxr_keyword">int</strong> bbox[])
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>         {
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>             System.out.println(name+<span class="jxr_string">".getAATileGenerator("</span>+
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>                                x+<span class="jxr_string">", "</span>+y+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>                                dx1+<span class="jxr_string">", "</span>+dy1+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>                                dx2+<span class="jxr_string">", "</span>+dy2+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>                                lw1+<span class="jxr_string">", "</span>+lw2+<span class="jxr_string">", "</span>+
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>                                clip+<span class="jxr_string">")"</span>);
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>             <strong class="jxr_keyword">return</strong> target.getAATileGenerator(x, y,
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>                                              dx1, dy1,
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>                                              dx2, dy2,
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>                                              lw1, lw2,
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>                                              clip, bbox);
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>         }
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>     }
+<a class="jxr_linenumber" name="L482" href="#L482">482</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

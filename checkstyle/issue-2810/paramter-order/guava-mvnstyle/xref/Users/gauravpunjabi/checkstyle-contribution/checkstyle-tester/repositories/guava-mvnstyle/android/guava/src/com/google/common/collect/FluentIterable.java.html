@@ -1,0 +1,858 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>FluentIterable xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (C) 2008 The Guava Authors</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * in compliance with the License. You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software distributed under the License</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * or implied. See the License for the specific language governing permissions and limitations under</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * the License.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">package</strong> com.google.common.collect;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkNotNull;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.Beta;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.GwtCompatible;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.GwtIncompatible;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Function;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Joiner;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Optional;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Predicate;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> com.google.errorprone.annotations.CanIgnoreReturnValue;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.Arrays;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.Collection;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.Comparator;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> java.util.Iterator;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> java.util.SortedSet;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.checkerframework.checker.nullness.compatqual.NullableDecl;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment"> * An expanded {@code Iterable} API, providing functionality similar to Java 8's powerful &lt;a href=</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment"> * "<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html" target="alexandria_uri">https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html</a>#package.description"</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> * &gt;streams library&lt;/a&gt; in a slightly different way.</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;The following types of methods are provided:</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment"> * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;chaining methods which return a new {@code FluentIterable} based in some way on the</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment"> *       contents of the current one (for example {@link #transform})</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;element extraction methods which facilitate the retrieval of certain elements (for example</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment"> *       {@link #last})</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;query methods which answer questions about the {@code FluentIterable}'s contents (for</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment"> *       example {@link #anyMatch})</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;conversion methods which copy the {@code FluentIterable}'s contents into a new collection</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment"> *       or array (for example {@link #toList})</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment"> * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;Several lesser-used features are currently available only as static methods on the {@link</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> * Iterables} class.</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;&lt;a id="streams"&gt;&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment"> * &lt;h3&gt;Comparison to streams&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;Starting with Java 8, the core Java class libraries provide a new "Streams" library (in {@code</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> * java.util.stream}), which is similar to {@code FluentIterable} but generally more powerful. Key</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> * differences include:</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;A stream is &lt;i&gt;single-use&lt;/i&gt;; it becomes invalid as soon as any "terminal operation" such</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment"> *       as {@code findFirst()} or {@code iterator()} is invoked. (Even though {@code Stream}</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment"> *       contains all the right method &lt;i&gt;signatures&lt;/i&gt; to implement {@link Iterable}, it does not</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment"> *       actually do so, to avoid implying repeat-iterability.) {@code FluentIterable}, on the other</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment"> *       hand, is multiple-use, and does implement {@link Iterable}.</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;Streams offer many features not found here, including {@code min/max}, {@code distinct},</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment"> *       {@code reduce}, {@code sorted}, the very powerful {@code collect}, and built-in support for</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment"> *       parallelizing stream operations.</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;{@code FluentIterable} contains several features not available on {@code Stream}, which are</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment"> *       noted in the method descriptions below.</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;Streams include primitive-specialized variants such as {@code IntStream}, the use of which</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment"> *       is strongly recommended.</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;Streams are standard Java, not requiring a third-party dependency (but do render your code</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment"> *       incompatible with Java 7 and earlier).</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment"> * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_javadoccomment"> * &lt;h3&gt;Example&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;Here is an example that accepts a list from a database call, filters it based on a predicate,</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment"> * transforms it by invoking {@code toString()} on each element, and returns the first 10 elements</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment"> * as a {@code List}:</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_javadoccomment"> * &lt;pre&gt;{@code</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  <em class="jxr_javadoccomment"> * ImmutableList&lt;String&gt; results =</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  <em class="jxr_javadoccomment"> *     FluentIterable.from(database.getClientList())</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment"> *         .filter(Client::isActiveInLastMonth)</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment"> *         .transform(Object::toString)</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment"> *         .limit(10)</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment"> *         .toList();</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_javadoccomment"> * }&lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment"> * The approximate stream equivalent is:</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment"> * &lt;pre&gt;{@code</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment"> * List&lt;String&gt; results =</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment"> *     database.getClientList()</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment"> *         .stream()</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment"> *         .filter(Client::isActiveInLastMonth)</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment"> *         .map(Object::toString)</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment"> *         .limit(10)</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment"> *         .collect(Collectors.toList());</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment"> * }&lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment"> * @author Marcin Mikosik</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment"> * @since 12.0</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> @GwtCompatible(emulated = <strong class="jxr_keyword">true</strong>)
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> FluentIterable&lt;E&gt; <strong class="jxr_keyword">implements</strong> Iterable&lt;E&gt; {
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>   <em class="jxr_comment">// We store 'iterable' and use it instead of 'this' to allow Iterables to perform instanceof</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>   <em class="jxr_comment">// checks on the _original_ iterable when FluentIterable.from is used.</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>   <em class="jxr_comment">// To avoid a self retain cycle under j2objc, we store Optional.absent() instead of</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>   <em class="jxr_comment">// Optional.of(this). To access the iterator delegate, call #getDelegate(), which converts to</em>
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>   <em class="jxr_comment">// absent() back to 'this'.</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Optional&lt;Iterable&lt;E&gt;&gt; iterableDelegate;
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>   <em class="jxr_javadoccomment">/** Constructor for use by subclasses. */</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>   <strong class="jxr_keyword">protected</strong> FluentIterable() {
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>     <strong class="jxr_keyword">this</strong>.iterableDelegate = Optional.absent();
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>   }
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>   FluentIterable(Iterable&lt;E&gt; iterable) {
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>     checkNotNull(iterable);
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>     <strong class="jxr_keyword">this</strong>.iterableDelegate = Optional.fromNullable(<strong class="jxr_keyword">this</strong> != iterable ? iterable : <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>   }
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>   <strong class="jxr_keyword">private</strong> Iterable&lt;E&gt; getDelegate() {
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>     <strong class="jxr_keyword">return</strong> iterableDelegate.or(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>   }
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable that wraps {@code iterable}, or {@code iterable} itself if it is</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> <em class="jxr_javadoccomment">   * already a {@code FluentIterable}.</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code iterable.stream()} if {@code iterable} is a {@link</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_javadoccomment">   * Collection}; {@code StreamSupport.stream(iterable.spliterator(), false)} otherwise.</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;E&gt; FluentIterable&lt;E&gt; from(<strong class="jxr_keyword">final</strong> Iterable&lt;E&gt; iterable) {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>     <strong class="jxr_keyword">return</strong> (iterable instanceof FluentIterable)
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>         ? (FluentIterable&lt;E&gt;) iterable
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>         : <strong class="jxr_keyword">new</strong> FluentIterable&lt;E&gt;(iterable) {
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>           @Override
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>           <strong class="jxr_keyword">public</strong> Iterator&lt;E&gt; iterator() {
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>             <strong class="jxr_keyword">return</strong> iterable.iterator();
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>           }
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>         };
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>   }
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable containing {@code elements} in the specified order.</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The returned iterable is an unmodifiable view of the input array.</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@link java.util.stream.Stream#of(Object[])</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> <em class="jxr_javadoccomment">   * Stream.of(T...)}.</em>
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> <em class="jxr_javadoccomment">   * @since 20.0 (since 18.0 as an overload of {@code of})</em>
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>   @Beta
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;E&gt; FluentIterable&lt;E&gt; from(E[] elements) {
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>     <strong class="jxr_keyword">return</strong> from(Arrays.asList(elements));
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>   }
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> <em class="jxr_javadoccomment">   * Construct a fluent iterable from another fluent iterable. This is obviously never necessary,</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> <em class="jxr_javadoccomment">   * but is intended to help call out cases where one migration from {@code Iterable} to {@code</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> <em class="jxr_javadoccomment">   * FluentIterable} has obviated the need to explicitly convert to a {@code FluentIterable}.</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> <em class="jxr_javadoccomment">   * @deprecated instances of {@code FluentIterable} don't need to be converted to {@code</em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> <em class="jxr_javadoccomment">   *     FluentIterable}</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>   @Deprecated
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;E&gt; FluentIterable&lt;E&gt; from(FluentIterable&lt;E&gt; iterable) {
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>     <strong class="jxr_keyword">return</strong> checkNotNull(iterable);
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>   }
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable that combines two iterables. The returned iterable has an iterator</em>
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> <em class="jxr_javadoccomment">   * that traverses the elements in {@code a}, followed by the elements in {@code b}. The source</em>
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> <em class="jxr_javadoccomment">   * iterators are not polled until necessary.</em>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The returned iterable's iterator supports {@code remove()} when the corresponding input</em>
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> <em class="jxr_javadoccomment">   * iterator supports it.</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@link Stream#concat}.</em>
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> <em class="jxr_javadoccomment">   * @since 20.0</em>
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>   @Beta
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; FluentIterable&lt;T&gt; concat(Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt; a, Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt; b) {
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>     <strong class="jxr_keyword">return</strong> concatNoDefensiveCopy(a, b);
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>   }
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable that combines three iterables. The returned iterable has an iterator</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_javadoccomment">   * that traverses the elements in {@code a}, followed by the elements in {@code b}, followed by</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment">   * the elements in {@code c}. The source iterators are not polled until necessary.</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The returned iterable's iterator supports {@code remove()} when the corresponding input</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> <em class="jxr_javadoccomment">   * iterator supports it.</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; use nested calls to {@link Stream#concat}, or see the</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">   * advice in {@link #concat(Iterable...)}.</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">   * @since 20.0</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>   @Beta
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; FluentIterable&lt;T&gt; concat(
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>       Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt; a, Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt; b, Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt; c) {
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>     <strong class="jxr_keyword">return</strong> concatNoDefensiveCopy(a, b, c);
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>   }
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable that combines four iterables. The returned iterable has an iterator</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> <em class="jxr_javadoccomment">   * that traverses the elements in {@code a}, followed by the elements in {@code b}, followed by</em>
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> <em class="jxr_javadoccomment">   * the elements in {@code c}, followed by the elements in {@code d}. The source iterators are not</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> <em class="jxr_javadoccomment">   * polled until necessary.</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The returned iterable's iterator supports {@code remove()} when the corresponding input</em>
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> <em class="jxr_javadoccomment">   * iterator supports it.</em>
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; use nested calls to {@link Stream#concat}, or see the</em>
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> <em class="jxr_javadoccomment">   * advice in {@link #concat(Iterable...)}.</em>
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> <em class="jxr_javadoccomment">   * @since 20.0</em>
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>   @Beta
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; FluentIterable&lt;T&gt; concat(
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>       Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt; a,
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>       Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt; b,
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>       Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt; c,
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>       Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt; d) {
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>     <strong class="jxr_keyword">return</strong> concatNoDefensiveCopy(a, b, c, d);
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>   }
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> 
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable that combines several iterables. The returned iterable has an</em>
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> <em class="jxr_javadoccomment">   * iterator that traverses the elements of each iterable in {@code inputs}. The input iterators</em>
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> <em class="jxr_javadoccomment">   * are not polled until necessary.</em>
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The returned iterable's iterator supports {@code remove()} when the corresponding input</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> <em class="jxr_javadoccomment">   * iterator supports it.</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; to concatenate an arbitrary number of streams, use {@code</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_javadoccomment">   * Stream.of(stream1, stream2, ...).flatMap(s -&gt; s)}. If the sources are iterables, use {@code</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> <em class="jxr_javadoccomment">   * Stream.of(iter1, iter2, ...).flatMap(Streams::stream)}.</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if any of the provided iterables is {@code null}</em>
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> <em class="jxr_javadoccomment">   * @since 20.0</em>
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>   @Beta
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; FluentIterable&lt;T&gt; concat(Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt;... inputs) {
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>     <strong class="jxr_keyword">return</strong> concatNoDefensiveCopy(Arrays.copyOf(inputs, inputs.length));
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>   }
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> 
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable that combines several iterables. The returned iterable has an</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> <em class="jxr_javadoccomment">   * iterator that traverses the elements of each iterable in {@code inputs}. The input iterators</em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">   * are not polled until necessary.</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The returned iterable's iterator supports {@code remove()} when the corresponding input</em>
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_javadoccomment">   * iterator supports it. The methods of the returned iterable may throw {@code</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_javadoccomment">   * NullPointerException} if any of the input iterators is {@code null}.</em>
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code streamOfStreams.flatMap(s -&gt; s)} or {@code</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> <em class="jxr_javadoccomment">   * streamOfIterables.flatMap(Streams::stream)}. (See {@link Streams#stream}.)</em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_javadoccomment">   * @since 20.0</em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>   @Beta
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; FluentIterable&lt;T&gt; concat(
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>       <strong class="jxr_keyword">final</strong> Iterable&lt;? <strong class="jxr_keyword">extends</strong> Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt;&gt; inputs) {
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>     checkNotNull(inputs);
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> FluentIterable&lt;T&gt;() {
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>       @Override
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>       <strong class="jxr_keyword">public</strong> Iterator&lt;T&gt; iterator() {
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>         <strong class="jxr_keyword">return</strong> Iterators.concat(Iterators.transform(inputs.iterator(), Iterables.&lt;T&gt;toIterator()));
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>       }
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>     };
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>   }
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> 
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>   <em class="jxr_javadoccomment">/** Concatenates a varargs array of iterables without making a defensive copy of the array. */</em>
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;T&gt; FluentIterable&lt;T&gt; concatNoDefensiveCopy(
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>       <strong class="jxr_keyword">final</strong> Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt;... inputs) {
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>     <strong class="jxr_keyword">for</strong> (Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt; input : inputs) {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>       checkNotNull(input);
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>     }
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> FluentIterable&lt;T&gt;() {
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>       @Override
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>       <strong class="jxr_keyword">public</strong> Iterator&lt;T&gt; iterator() {
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>         <strong class="jxr_keyword">return</strong> Iterators.concat(
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>             <em class="jxr_comment">/* lazily generate the iterators on each input only as needed */</em>
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>             <strong class="jxr_keyword">new</strong> AbstractIndexedListIterator&lt;Iterator&lt;? <strong class="jxr_keyword">extends</strong> T&gt;&gt;(inputs.length) {
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>               @Override
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>               <strong class="jxr_keyword">public</strong> Iterator&lt;? <strong class="jxr_keyword">extends</strong> T&gt; get(<strong class="jxr_keyword">int</strong> i) {
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>                 <strong class="jxr_keyword">return</strong> inputs[i].iterator();
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>               }
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>             });
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>       }
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>     };
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>   }
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable containing no elements.</em>
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code Stream.empty()}.</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> <em class="jxr_javadoccomment">   * @since 20.0</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>   @Beta
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;E&gt; FluentIterable&lt;E&gt; of() {
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>     <strong class="jxr_keyword">return</strong> FluentIterable.from(ImmutableList.&lt;E&gt;of());
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>   }
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable containing the specified elements in order.</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@link java.util.stream.Stream#of(Object[])</em>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> <em class="jxr_javadoccomment">   * Stream.of(T...)}.</em>
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> <em class="jxr_javadoccomment">   * @since 20.0</em>
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>   @Beta
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> &lt;E&gt; FluentIterable&lt;E&gt; of(@NullableDecl E element, E... elements) {
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>     <strong class="jxr_keyword">return</strong> from(Lists.asList(element, elements));
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>   }
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> <em class="jxr_javadoccomment">   * Returns a string representation of this fluent iterable, with the format {@code [e1, e2, ...,</em>
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> <em class="jxr_javadoccomment">   * en]}.</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code stream.collect(Collectors.joining(", ", "[", "]"))}</em>
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> <em class="jxr_javadoccomment">   * or (less efficiently) {@code stream.collect(Collectors.toList()).toString()}.</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>   @Override
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>   <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>     <strong class="jxr_keyword">return</strong> Iterables.toString(getDelegate());
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>   }
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> 
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> <em class="jxr_javadoccomment">   * Returns the number of elements in this fluent iterable.</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code stream.count()}.</em>
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> size() {
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>     <strong class="jxr_keyword">return</strong> Iterables.size(getDelegate());
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>   }
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> <em class="jxr_javadoccomment">   * Returns {@code true} if this fluent iterable contains any object for which {@code</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> <em class="jxr_javadoccomment">   * equals(target)} is true.</em>
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code stream.anyMatch(Predicate.isEqual(target))}.</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> contains(@NullableDecl Object target) {
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>     <strong class="jxr_keyword">return</strong> Iterables.contains(getDelegate(), target);
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>   }
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> 
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable whose {@code Iterator} cycles indefinitely over the elements of this</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> <em class="jxr_javadoccomment">   * fluent iterable.</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> <em class="jxr_javadoccomment">   * &lt;p&gt;That iterator supports {@code remove()} if {@code iterable.iterator()} does. After {@code</em>
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_javadoccomment">   * remove()} is called, subsequent cycles omit the removed element, which is no longer in this</em>
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> <em class="jxr_javadoccomment">   * fluent iterable. The iterator's {@code hasNext()} method returns {@code true} until this fluent</em>
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> <em class="jxr_javadoccomment">   * iterable is empty.</em>
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;Warning:&lt;/b&gt; Typical uses of the resulting iterator may produce an infinite loop. You</em>
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> <em class="jxr_javadoccomment">   * should use an explicit {@code break} or be certain that you will eventually remove all the</em>
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> <em class="jxr_javadoccomment">   * elements.</em>
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; if the source iterable has only a single element {@code</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> <em class="jxr_javadoccomment">   * e}, use {@code Stream.generate(() -&gt; e)}. Otherwise, collect your stream into a collection and</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_javadoccomment">   * use {@code Stream.generate(() -&gt; collection).flatMap(Collection::stream)}.</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> FluentIterable&lt;E&gt; cycle() {
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>     <strong class="jxr_keyword">return</strong> from(Iterables.cycle(getDelegate()));
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>   }
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable whose iterators traverse first the elements of this fluent iterable,</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> <em class="jxr_javadoccomment">   * followed by those of {@code other}. The iterators are not polled until necessary.</em>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The returned iterable's {@code Iterator} supports {@code remove()} when the corresponding</em>
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> <em class="jxr_javadoccomment">   * {@code Iterator} supports it.</em>
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@link Stream#concat}.</em>
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> <em class="jxr_javadoccomment">   * @since 18.0</em>
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>   @Beta
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> FluentIterable&lt;E&gt; append(Iterable&lt;? <strong class="jxr_keyword">extends</strong> E&gt; other) {
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>     <strong class="jxr_keyword">return</strong> FluentIterable.concat(getDelegate(), other);
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>   }
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable whose iterators traverse first the elements of this fluent iterable,</em>
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> <em class="jxr_javadoccomment">   * followed by {@code elements}.</em>
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code Stream.concat(thisStream, Stream.of(elements))}.</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_javadoccomment">   * @since 18.0</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>   @Beta
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> FluentIterable&lt;E&gt; append(E... elements) {
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>     <strong class="jxr_keyword">return</strong> FluentIterable.concat(getDelegate(), Arrays.asList(elements));
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>   }
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> 
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> <em class="jxr_javadoccomment">   * Returns the elements from this fluent iterable that satisfy a predicate. The resulting fluent</em>
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> <em class="jxr_javadoccomment">   * iterable's iterator does not support {@code remove()}.</em>
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@link Stream#filter} (same).</em>
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> FluentIterable&lt;E&gt; filter(Predicate&lt;? <strong class="jxr_keyword">super</strong> E&gt; predicate) {
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>     <strong class="jxr_keyword">return</strong> from(Iterables.filter(getDelegate(), predicate));
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>   }
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> 
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> <em class="jxr_javadoccomment">   * Returns the elements from this fluent iterable that are instances of class {@code type}.</em>
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code stream.filter(type::isInstance).map(type::cast)}.</em>
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> <em class="jxr_javadoccomment">   * This does perform a little more work than necessary, so another option is to insert an</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">   * unchecked cast at some later point:</em>
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> <em class="jxr_javadoccomment">   * &lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> <em class="jxr_javadoccomment">   * {@code @SuppressWarnings("unchecked") // safe because of ::isInstance check</em>
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> <em class="jxr_javadoccomment">   * ImmutableList&lt;NewType&gt; result =</em>
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> <em class="jxr_javadoccomment">   *     (ImmutableList) stream.filter(NewType.class::isInstance).collect(toImmutableList());}</em>
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> <em class="jxr_javadoccomment">   * &lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>   @GwtIncompatible <em class="jxr_comment">// Class.isInstance</em>
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> &lt;T&gt; FluentIterable&lt;T&gt; filter(Class&lt;T&gt; type) {
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>     <strong class="jxr_keyword">return</strong> from(Iterables.filter(getDelegate(), type));
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>   }
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> 
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L441" href="#L441">441</a> <em class="jxr_javadoccomment">   * Returns {@code true} if any element in this fluent iterable satisfies the predicate.</em>
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@link Stream#anyMatch} (same).</em>
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> anyMatch(Predicate&lt;? <strong class="jxr_keyword">super</strong> E&gt; predicate) {
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>     <strong class="jxr_keyword">return</strong> Iterables.any(getDelegate(), predicate);
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>   }
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> 
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> <em class="jxr_javadoccomment">   * Returns {@code true} if every element in this fluent iterable satisfies the predicate. If this</em>
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> <em class="jxr_javadoccomment">   * fluent iterable is empty, {@code true} is returned.</em>
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@link Stream#allMatch} (same).</em>
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> allMatch(Predicate&lt;? <strong class="jxr_keyword">super</strong> E&gt; predicate) {
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>     <strong class="jxr_keyword">return</strong> Iterables.all(getDelegate(), predicate);
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>   }
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> 
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> <em class="jxr_javadoccomment">   * Returns an {@link Optional} containing the first element in this fluent iterable that satisfies</em>
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> <em class="jxr_javadoccomment">   * the given predicate, if such an element exists.</em>
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;Warning:&lt;/b&gt; avoid using a {@code predicate} that matches {@code null}. If {@code null}</em>
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> <em class="jxr_javadoccomment">   * is matched in this fluent iterable, a {@link NullPointerException} will be thrown.</em>
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code stream.filter(predicate).findFirst()}.</em>
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> Optional&lt;E&gt; firstMatch(Predicate&lt;? <strong class="jxr_keyword">super</strong> E&gt; predicate) {
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>     <strong class="jxr_keyword">return</strong> Iterables.tryFind(getDelegate(), predicate);
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>   }
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> 
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> <em class="jxr_javadoccomment">   * Returns a fluent iterable that applies {@code function} to each element of this fluent</em>
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> <em class="jxr_javadoccomment">   * iterable.</em>
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The returned fluent iterable's iterator supports {@code remove()} if this iterable's</em>
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> <em class="jxr_javadoccomment">   * iterator does. After a successful {@code remove()} call, this fluent iterable no longer</em>
+<a class="jxr_linenumber" name="L478" href="#L478">478</a> <em class="jxr_javadoccomment">   * contains the corresponding element.</em>
+<a class="jxr_linenumber" name="L479" href="#L479">479</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L480" href="#L480">480</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@link Stream#map}.</em>
+<a class="jxr_linenumber" name="L481" href="#L481">481</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> &lt;T&gt; FluentIterable&lt;T&gt; transform(Function&lt;? <strong class="jxr_keyword">super</strong> E, T&gt; function) {
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>     <strong class="jxr_keyword">return</strong> from(Iterables.transform(getDelegate(), function));
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>   }
+<a class="jxr_linenumber" name="L485" href="#L485">485</a> 
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> <em class="jxr_javadoccomment">   * Applies {@code function} to each element of this fluent iterable and returns a fluent iterable</em>
+<a class="jxr_linenumber" name="L488" href="#L488">488</a> <em class="jxr_javadoccomment">   * with the concatenated combination of results. {@code function} returns an Iterable of results.</em>
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The returned fluent iterable's iterator supports {@code remove()} if this function-returned</em>
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> <em class="jxr_javadoccomment">   * iterables' iterator does. After a successful {@code remove()} call, the returned fluent</em>
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> <em class="jxr_javadoccomment">   * iterable no longer contains the corresponding element.</em>
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L494" href="#L494">494</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@link Stream#flatMap} (using a function that produces</em>
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> <em class="jxr_javadoccomment">   * streams, not iterables).</em>
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> <em class="jxr_javadoccomment">   * @since 13.0 (required {@code Function&lt;E, Iterable&lt;T&gt;&gt;} until 14.0)</em>
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>   <strong class="jxr_keyword">public</strong> &lt;T&gt; FluentIterable&lt;T&gt; transformAndConcat(
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>       Function&lt;? <strong class="jxr_keyword">super</strong> E, ? <strong class="jxr_keyword">extends</strong> Iterable&lt;? <strong class="jxr_keyword">extends</strong> T&gt;&gt; function) {
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>     <strong class="jxr_keyword">return</strong> FluentIterable.concat(transform(function));
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>   }
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> <em class="jxr_javadoccomment">   * Returns an {@link Optional} containing the first element in this fluent iterable. If the</em>
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> <em class="jxr_javadoccomment">   * iterable is empty, {@code Optional.absent()} is returned.</em>
+<a class="jxr_linenumber" name="L507" href="#L507">507</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L508" href="#L508">508</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; if the goal is to obtain any element, {@link</em>
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> <em class="jxr_javadoccomment">   * Stream#findAny}; if it must specifically be the &lt;i&gt;first&lt;/i&gt; element, {@code Stream#findFirst}.</em>
+<a class="jxr_linenumber" name="L510" href="#L510">510</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if the first element is null; if this is a possibility, use {@code</em>
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> <em class="jxr_javadoccomment">   *     iterator().next()} or {@link Iterables#getFirst} instead.</em>
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> Optional&lt;E&gt; first() {
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>     Iterator&lt;E&gt; iterator = getDelegate().iterator();
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>     <strong class="jxr_keyword">return</strong> iterator.hasNext() ? Optional.of(iterator.next()) : Optional.&lt;E&gt;absent();
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>   }
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> 
+<a class="jxr_linenumber" name="L519" href="#L519">519</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> <em class="jxr_javadoccomment">   * Returns an {@link Optional} containing the last element in this fluent iterable. If the</em>
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> <em class="jxr_javadoccomment">   * iterable is empty, {@code Optional.absent()} is returned. If the underlying {@code iterable} is</em>
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> <em class="jxr_javadoccomment">   * a {@link List} with {@link java.util.RandomAccess} support, then this operation is guaranteed</em>
+<a class="jxr_linenumber" name="L523" href="#L523">523</a> <em class="jxr_javadoccomment">   * to be {@code O(1)}.</em>
+<a class="jxr_linenumber" name="L524" href="#L524">524</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code stream.reduce((a, b) -&gt; b)}.</em>
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if the last element is null; if this is a possibility, use {@link</em>
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> <em class="jxr_javadoccomment">   *     Iterables#getLast} instead.</em>
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L530" href="#L530">530</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> Optional&lt;E&gt; last() {
+<a class="jxr_linenumber" name="L531" href="#L531">531</a>     <em class="jxr_comment">// Iterables#getLast was inlined here so we don't have to throw/catch a NSEE</em>
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> 
+<a class="jxr_linenumber" name="L533" href="#L533">533</a>     <em class="jxr_comment">// TODO(kevinb): Support a concurrently modified collection?</em>
+<a class="jxr_linenumber" name="L534" href="#L534">534</a>     Iterable&lt;E&gt; iterable = getDelegate();
+<a class="jxr_linenumber" name="L535" href="#L535">535</a>     <strong class="jxr_keyword">if</strong> (iterable instanceof List) {
+<a class="jxr_linenumber" name="L536" href="#L536">536</a>       List&lt;E&gt; list = (List&lt;E&gt;) iterable;
+<a class="jxr_linenumber" name="L537" href="#L537">537</a>       <strong class="jxr_keyword">if</strong> (list.isEmpty()) {
+<a class="jxr_linenumber" name="L538" href="#L538">538</a>         <strong class="jxr_keyword">return</strong> Optional.absent();
+<a class="jxr_linenumber" name="L539" href="#L539">539</a>       }
+<a class="jxr_linenumber" name="L540" href="#L540">540</a>       <strong class="jxr_keyword">return</strong> Optional.of(list.get(list.size() - 1));
+<a class="jxr_linenumber" name="L541" href="#L541">541</a>     }
+<a class="jxr_linenumber" name="L542" href="#L542">542</a>     Iterator&lt;E&gt; iterator = iterable.iterator();
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>     <strong class="jxr_keyword">if</strong> (!iterator.hasNext()) {
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>       <strong class="jxr_keyword">return</strong> Optional.absent();
+<a class="jxr_linenumber" name="L545" href="#L545">545</a>     }
+<a class="jxr_linenumber" name="L546" href="#L546">546</a> 
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L548" href="#L548">548</a> <em class="jxr_comment">     * TODO(kevinb): consider whether this "optimization" is worthwhile. Users with SortedSets tend</em>
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> <em class="jxr_comment">     * to know they are SortedSets and probably would not call this method.</em>
+<a class="jxr_linenumber" name="L550" href="#L550">550</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L551" href="#L551">551</a>     <strong class="jxr_keyword">if</strong> (iterable instanceof SortedSet) {
+<a class="jxr_linenumber" name="L552" href="#L552">552</a>       SortedSet&lt;E&gt; sortedSet = (SortedSet&lt;E&gt;) iterable;
+<a class="jxr_linenumber" name="L553" href="#L553">553</a>       <strong class="jxr_keyword">return</strong> Optional.of(sortedSet.last());
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>     }
+<a class="jxr_linenumber" name="L555" href="#L555">555</a> 
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>     <strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>       E current = iterator.next();
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>       <strong class="jxr_keyword">if</strong> (!iterator.hasNext()) {
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>         <strong class="jxr_keyword">return</strong> Optional.of(current);
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>       }
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>     }
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>   }
+<a class="jxr_linenumber" name="L563" href="#L563">563</a> 
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L565" href="#L565">565</a> <em class="jxr_javadoccomment">   * Returns a view of this fluent iterable that skips its first {@code numberToSkip} elements. If</em>
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> <em class="jxr_javadoccomment">   * this fluent iterable contains fewer than {@code numberToSkip} elements, the returned fluent</em>
+<a class="jxr_linenumber" name="L567" href="#L567">567</a> <em class="jxr_javadoccomment">   * iterable skips all of its elements.</em>
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L569" href="#L569">569</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Modifications to this fluent iterable before a call to {@code iterator()} are reflected in</em>
+<a class="jxr_linenumber" name="L570" href="#L570">570</a> <em class="jxr_javadoccomment">   * the returned fluent iterable. That is, the its iterator skips the first {@code numberToSkip}</em>
+<a class="jxr_linenumber" name="L571" href="#L571">571</a> <em class="jxr_javadoccomment">   * elements that exist when the iterator is created, not when {@code skip()} is called.</em>
+<a class="jxr_linenumber" name="L572" href="#L572">572</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L573" href="#L573">573</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The returned fluent iterable's iterator supports {@code remove()} if the {@code Iterator} of</em>
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> <em class="jxr_javadoccomment">   * this fluent iterable supports it. Note that it is &lt;i&gt;not&lt;/i&gt; possible to delete the last</em>
+<a class="jxr_linenumber" name="L575" href="#L575">575</a> <em class="jxr_javadoccomment">   * skipped element by immediately calling {@code remove()} on the returned fluent iterable's</em>
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> <em class="jxr_javadoccomment">   * iterator, as the {@code Iterator} contract states that a call to {@code * remove()} before a</em>
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> <em class="jxr_javadoccomment">   * call to {@code next()} will throw an {@link IllegalStateException}.</em>
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L579" href="#L579">579</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@link Stream#skip} (same).</em>
+<a class="jxr_linenumber" name="L580" href="#L580">580</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> FluentIterable&lt;E&gt; skip(<strong class="jxr_keyword">int</strong> numberToSkip) {
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>     <strong class="jxr_keyword">return</strong> from(Iterables.skip(getDelegate(), numberToSkip));
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>   }
+<a class="jxr_linenumber" name="L584" href="#L584">584</a> 
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L586" href="#L586">586</a> <em class="jxr_javadoccomment">   * Creates a fluent iterable with the first {@code size} elements of this fluent iterable. If this</em>
+<a class="jxr_linenumber" name="L587" href="#L587">587</a> <em class="jxr_javadoccomment">   * fluent iterable does not contain that many elements, the returned fluent iterable will have the</em>
+<a class="jxr_linenumber" name="L588" href="#L588">588</a> <em class="jxr_javadoccomment">   * same behavior as this fluent iterable. The returned fluent iterable's iterator supports {@code</em>
+<a class="jxr_linenumber" name="L589" href="#L589">589</a> <em class="jxr_javadoccomment">   * remove()} if this fluent iterable's iterator does.</em>
+<a class="jxr_linenumber" name="L590" href="#L590">590</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L591" href="#L591">591</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@link Stream#limit} (same).</em>
+<a class="jxr_linenumber" name="L592" href="#L592">592</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L593" href="#L593">593</a> <em class="jxr_javadoccomment">   * @param maxSize the maximum number of elements in the returned fluent iterable</em>
+<a class="jxr_linenumber" name="L594" href="#L594">594</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code size} is negative</em>
+<a class="jxr_linenumber" name="L595" href="#L595">595</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> FluentIterable&lt;E&gt; limit(<strong class="jxr_keyword">int</strong> maxSize) {
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>     <strong class="jxr_keyword">return</strong> from(Iterables.limit(getDelegate(), maxSize));
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>   }
+<a class="jxr_linenumber" name="L599" href="#L599">599</a> 
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L601" href="#L601">601</a> <em class="jxr_javadoccomment">   * Determines whether this fluent iterable is empty.</em>
+<a class="jxr_linenumber" name="L602" href="#L602">602</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L603" href="#L603">603</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code !stream.findAny().isPresent()}.</em>
+<a class="jxr_linenumber" name="L604" href="#L604">604</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> isEmpty() {
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>     <strong class="jxr_keyword">return</strong> !getDelegate().iterator().hasNext();
+<a class="jxr_linenumber" name="L607" href="#L607">607</a>   }
+<a class="jxr_linenumber" name="L608" href="#L608">608</a> 
+<a class="jxr_linenumber" name="L609" href="#L609">609</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L610" href="#L610">610</a> <em class="jxr_javadoccomment">   * Returns an {@code ImmutableList} containing all of the elements from this fluent iterable in</em>
+<a class="jxr_linenumber" name="L611" href="#L611">611</a> <em class="jxr_javadoccomment">   * proper sequence.</em>
+<a class="jxr_linenumber" name="L612" href="#L612">612</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L613" href="#L613">613</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code ImmutableList.copyOf(stream.iterator())}, or pass</em>
+<a class="jxr_linenumber" name="L614" href="#L614">614</a> <em class="jxr_javadoccomment">   * {@link ImmutableList#toImmutableList} to {@code stream.collect()}.</em>
+<a class="jxr_linenumber" name="L615" href="#L615">615</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L616" href="#L616">616</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if any element is {@code null}</em>
+<a class="jxr_linenumber" name="L617" href="#L617">617</a> <em class="jxr_javadoccomment">   * @since 14.0 (since 12.0 as {@code toImmutableList()}).</em>
+<a class="jxr_linenumber" name="L618" href="#L618">618</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L619" href="#L619">619</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> ImmutableList&lt;E&gt; toList() {
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>     <strong class="jxr_keyword">return</strong> ImmutableList.copyOf(getDelegate());
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>   }
+<a class="jxr_linenumber" name="L622" href="#L622">622</a> 
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L624" href="#L624">624</a> <em class="jxr_javadoccomment">   * Returns an {@code ImmutableList} containing all of the elements from this {@code</em>
+<a class="jxr_linenumber" name="L625" href="#L625">625</a> <em class="jxr_javadoccomment">   * FluentIterable} in the order specified by {@code comparator}. To produce an {@code</em>
+<a class="jxr_linenumber" name="L626" href="#L626">626</a> <em class="jxr_javadoccomment">   * ImmutableList} sorted by its natural ordering, use {@code toSortedList(Ordering.natural())}.</em>
+<a class="jxr_linenumber" name="L627" href="#L627">627</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L628" href="#L628">628</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code</em>
+<a class="jxr_linenumber" name="L629" href="#L629">629</a> <em class="jxr_javadoccomment">   * ImmutableList.copyOf(stream.sorted(comparator).iterator())}, or pass {@link</em>
+<a class="jxr_linenumber" name="L630" href="#L630">630</a> <em class="jxr_javadoccomment">   * ImmutableList#toImmutableList} to {@code stream.sorted(comparator).collect()}.</em>
+<a class="jxr_linenumber" name="L631" href="#L631">631</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L632" href="#L632">632</a> <em class="jxr_javadoccomment">   * @param comparator the function by which to sort list elements</em>
+<a class="jxr_linenumber" name="L633" href="#L633">633</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if any element of this iterable is {@code null}</em>
+<a class="jxr_linenumber" name="L634" href="#L634">634</a> <em class="jxr_javadoccomment">   * @since 14.0 (since 13.0 as {@code toSortedImmutableList()}).</em>
+<a class="jxr_linenumber" name="L635" href="#L635">635</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> ImmutableList&lt;E&gt; toSortedList(Comparator&lt;? <strong class="jxr_keyword">super</strong> E&gt; comparator) {
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>     <strong class="jxr_keyword">return</strong> Ordering.from(comparator).immutableSortedCopy(getDelegate());
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>   }
+<a class="jxr_linenumber" name="L639" href="#L639">639</a> 
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L641" href="#L641">641</a> <em class="jxr_javadoccomment">   * Returns an {@code ImmutableSet} containing all of the elements from this fluent iterable with</em>
+<a class="jxr_linenumber" name="L642" href="#L642">642</a> <em class="jxr_javadoccomment">   * duplicates removed.</em>
+<a class="jxr_linenumber" name="L643" href="#L643">643</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L644" href="#L644">644</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code ImmutableSet.copyOf(stream.iterator())}, or pass</em>
+<a class="jxr_linenumber" name="L645" href="#L645">645</a> <em class="jxr_javadoccomment">   * {@link ImmutableSet#toImmutableSet} to {@code stream.collect()}.</em>
+<a class="jxr_linenumber" name="L646" href="#L646">646</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L647" href="#L647">647</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if any element is {@code null}</em>
+<a class="jxr_linenumber" name="L648" href="#L648">648</a> <em class="jxr_javadoccomment">   * @since 14.0 (since 12.0 as {@code toImmutableSet()}).</em>
+<a class="jxr_linenumber" name="L649" href="#L649">649</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L650" href="#L650">650</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> ImmutableSet&lt;E&gt; toSet() {
+<a class="jxr_linenumber" name="L651" href="#L651">651</a>     <strong class="jxr_keyword">return</strong> ImmutableSet.copyOf(getDelegate());
+<a class="jxr_linenumber" name="L652" href="#L652">652</a>   }
+<a class="jxr_linenumber" name="L653" href="#L653">653</a> 
+<a class="jxr_linenumber" name="L654" href="#L654">654</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L655" href="#L655">655</a> <em class="jxr_javadoccomment">   * Returns an {@code ImmutableSortedSet} containing all of the elements from this {@code</em>
+<a class="jxr_linenumber" name="L656" href="#L656">656</a> <em class="jxr_javadoccomment">   * FluentIterable} in the order specified by {@code comparator}, with duplicates (determined by</em>
+<a class="jxr_linenumber" name="L657" href="#L657">657</a> <em class="jxr_javadoccomment">   * {@code comparator.compare(x, y) == 0}) removed. To produce an {@code ImmutableSortedSet} sorted</em>
+<a class="jxr_linenumber" name="L658" href="#L658">658</a> <em class="jxr_javadoccomment">   * by its natural ordering, use {@code toSortedSet(Ordering.natural())}.</em>
+<a class="jxr_linenumber" name="L659" href="#L659">659</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L660" href="#L660">660</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code ImmutableSortedSet.copyOf(comparator,</em>
+<a class="jxr_linenumber" name="L661" href="#L661">661</a> <em class="jxr_javadoccomment">   * stream.iterator())}, or pass {@link ImmutableSortedSet#toImmutableSortedSet} to {@code</em>
+<a class="jxr_linenumber" name="L662" href="#L662">662</a> <em class="jxr_javadoccomment">   * stream.collect()}.</em>
+<a class="jxr_linenumber" name="L663" href="#L663">663</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L664" href="#L664">664</a> <em class="jxr_javadoccomment">   * @param comparator the function by which to sort set elements</em>
+<a class="jxr_linenumber" name="L665" href="#L665">665</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if any element of this iterable is {@code null}</em>
+<a class="jxr_linenumber" name="L666" href="#L666">666</a> <em class="jxr_javadoccomment">   * @since 14.0 (since 12.0 as {@code toImmutableSortedSet()}).</em>
+<a class="jxr_linenumber" name="L667" href="#L667">667</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L668" href="#L668">668</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> ImmutableSortedSet&lt;E&gt; toSortedSet(Comparator&lt;? <strong class="jxr_keyword">super</strong> E&gt; comparator) {
+<a class="jxr_linenumber" name="L669" href="#L669">669</a>     <strong class="jxr_keyword">return</strong> ImmutableSortedSet.copyOf(comparator, getDelegate());
+<a class="jxr_linenumber" name="L670" href="#L670">670</a>   }
+<a class="jxr_linenumber" name="L671" href="#L671">671</a> 
+<a class="jxr_linenumber" name="L672" href="#L672">672</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L673" href="#L673">673</a> <em class="jxr_javadoccomment">   * Returns an {@code ImmutableMultiset} containing all of the elements from this fluent iterable.</em>
+<a class="jxr_linenumber" name="L674" href="#L674">674</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L675" href="#L675">675</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code ImmutableMultiset.copyOf(stream.iterator())}, or</em>
+<a class="jxr_linenumber" name="L676" href="#L676">676</a> <em class="jxr_javadoccomment">   * pass {@link ImmutableMultiset#toImmutableMultiset} to {@code stream.collect()}.</em>
+<a class="jxr_linenumber" name="L677" href="#L677">677</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L678" href="#L678">678</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if any element is null</em>
+<a class="jxr_linenumber" name="L679" href="#L679">679</a> <em class="jxr_javadoccomment">   * @since 19.0</em>
+<a class="jxr_linenumber" name="L680" href="#L680">680</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L681" href="#L681">681</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> ImmutableMultiset&lt;E&gt; toMultiset() {
+<a class="jxr_linenumber" name="L682" href="#L682">682</a>     <strong class="jxr_keyword">return</strong> ImmutableMultiset.copyOf(getDelegate());
+<a class="jxr_linenumber" name="L683" href="#L683">683</a>   }
+<a class="jxr_linenumber" name="L684" href="#L684">684</a> 
+<a class="jxr_linenumber" name="L685" href="#L685">685</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L686" href="#L686">686</a> <em class="jxr_javadoccomment">   * Returns an immutable map whose keys are the distinct elements of this {@code FluentIterable}</em>
+<a class="jxr_linenumber" name="L687" href="#L687">687</a> <em class="jxr_javadoccomment">   * and whose value for each key was computed by {@code valueFunction}. The map's iteration order</em>
+<a class="jxr_linenumber" name="L688" href="#L688">688</a> <em class="jxr_javadoccomment">   * is the order of the first appearance of each key in this iterable.</em>
+<a class="jxr_linenumber" name="L689" href="#L689">689</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L690" href="#L690">690</a> <em class="jxr_javadoccomment">   * &lt;p&gt;When there are multiple instances of a key in this iterable, it is unspecified whether</em>
+<a class="jxr_linenumber" name="L691" href="#L691">691</a> <em class="jxr_javadoccomment">   * {@code valueFunction} will be applied to more than one instance of that key and, if it is,</em>
+<a class="jxr_linenumber" name="L692" href="#L692">692</a> <em class="jxr_javadoccomment">   * which result will be mapped to that key in the returned map.</em>
+<a class="jxr_linenumber" name="L693" href="#L693">693</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L694" href="#L694">694</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; use {@code stream.collect(ImmutableMap.toImmutableMap(k -&gt;</em>
+<a class="jxr_linenumber" name="L695" href="#L695">695</a> <em class="jxr_javadoccomment">   * k, valueFunction))}. {@code ImmutableMap.copyOf(stream.collect(Collectors.toMap(k -&gt; k,</em>
+<a class="jxr_linenumber" name="L696" href="#L696">696</a> <em class="jxr_javadoccomment">   * valueFunction)))} behaves similarly, but may not preserve the order of entries.</em>
+<a class="jxr_linenumber" name="L697" href="#L697">697</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L698" href="#L698">698</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if any element of this iterable is {@code null}, or if {@code</em>
+<a class="jxr_linenumber" name="L699" href="#L699">699</a> <em class="jxr_javadoccomment">   *     valueFunction} produces {@code null} for any key</em>
+<a class="jxr_linenumber" name="L700" href="#L700">700</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L701" href="#L701">701</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L702" href="#L702">702</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> &lt;V&gt; ImmutableMap&lt;E, V&gt; toMap(Function&lt;? <strong class="jxr_keyword">super</strong> E, V&gt; valueFunction) {
+<a class="jxr_linenumber" name="L703" href="#L703">703</a>     <strong class="jxr_keyword">return</strong> Maps.toMap(getDelegate(), valueFunction);
+<a class="jxr_linenumber" name="L704" href="#L704">704</a>   }
+<a class="jxr_linenumber" name="L705" href="#L705">705</a> 
+<a class="jxr_linenumber" name="L706" href="#L706">706</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L707" href="#L707">707</a> <em class="jxr_javadoccomment">   * Creates an index {@code ImmutableListMultimap} that contains the results of applying a</em>
+<a class="jxr_linenumber" name="L708" href="#L708">708</a> <em class="jxr_javadoccomment">   * specified function to each item in this {@code FluentIterable} of values. Each element of this</em>
+<a class="jxr_linenumber" name="L709" href="#L709">709</a> <em class="jxr_javadoccomment">   * iterable will be stored as a value in the resulting multimap, yielding a multimap with the same</em>
+<a class="jxr_linenumber" name="L710" href="#L710">710</a> <em class="jxr_javadoccomment">   * size as this iterable. The key used to store that value in the multimap will be the result of</em>
+<a class="jxr_linenumber" name="L711" href="#L711">711</a> <em class="jxr_javadoccomment">   * calling the function on that value. The resulting multimap is created as an immutable snapshot.</em>
+<a class="jxr_linenumber" name="L712" href="#L712">712</a> <em class="jxr_javadoccomment">   * In the returned multimap, keys appear in the order they are first encountered, and the values</em>
+<a class="jxr_linenumber" name="L713" href="#L713">713</a> <em class="jxr_javadoccomment">   * corresponding to each key appear in the same order as they are encountered.</em>
+<a class="jxr_linenumber" name="L714" href="#L714">714</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L715" href="#L715">715</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code stream.collect(Collectors.groupingBy(keyFunction))}</em>
+<a class="jxr_linenumber" name="L716" href="#L716">716</a> <em class="jxr_javadoccomment">   * behaves similarly, but returns a mutable {@code Map&lt;K, List&lt;E&gt;&gt;} instead, and may not preserve</em>
+<a class="jxr_linenumber" name="L717" href="#L717">717</a> <em class="jxr_javadoccomment">   * the order of entries.</em>
+<a class="jxr_linenumber" name="L718" href="#L718">718</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L719" href="#L719">719</a> <em class="jxr_javadoccomment">   * @param keyFunction the function used to produce the key for each value</em>
+<a class="jxr_linenumber" name="L720" href="#L720">720</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if any element of this iterable is {@code null}, or if {@code</em>
+<a class="jxr_linenumber" name="L721" href="#L721">721</a> <em class="jxr_javadoccomment">   *     keyFunction} produces {@code null} for any key</em>
+<a class="jxr_linenumber" name="L722" href="#L722">722</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L723" href="#L723">723</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L724" href="#L724">724</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> &lt;K&gt; ImmutableListMultimap&lt;K, E&gt; index(Function&lt;? <strong class="jxr_keyword">super</strong> E, K&gt; keyFunction) {
+<a class="jxr_linenumber" name="L725" href="#L725">725</a>     <strong class="jxr_keyword">return</strong> Multimaps.index(getDelegate(), keyFunction);
+<a class="jxr_linenumber" name="L726" href="#L726">726</a>   }
+<a class="jxr_linenumber" name="L727" href="#L727">727</a> 
+<a class="jxr_linenumber" name="L728" href="#L728">728</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L729" href="#L729">729</a> <em class="jxr_javadoccomment">   * Returns a map with the contents of this {@code FluentIterable} as its {@code values}, indexed</em>
+<a class="jxr_linenumber" name="L730" href="#L730">730</a> <em class="jxr_javadoccomment">   * by keys derived from those values. In other words, each input value produces an entry in the</em>
+<a class="jxr_linenumber" name="L731" href="#L731">731</a> <em class="jxr_javadoccomment">   * map whose key is the result of applying {@code keyFunction} to that value. These entries appear</em>
+<a class="jxr_linenumber" name="L732" href="#L732">732</a> <em class="jxr_javadoccomment">   * in the same order as they appeared in this fluent iterable. Example usage:</em>
+<a class="jxr_linenumber" name="L733" href="#L733">733</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L734" href="#L734">734</a> <em class="jxr_javadoccomment">   * &lt;pre&gt;{@code</em>
+<a class="jxr_linenumber" name="L735" href="#L735">735</a> <em class="jxr_javadoccomment">   * Color red = new Color("red", 255, 0, 0);</em>
+<a class="jxr_linenumber" name="L736" href="#L736">736</a> <em class="jxr_javadoccomment">   * ...</em>
+<a class="jxr_linenumber" name="L737" href="#L737">737</a> <em class="jxr_javadoccomment">   * FluentIterable&lt;Color&gt; allColors = FluentIterable.from(ImmutableSet.of(red, green, blue));</em>
+<a class="jxr_linenumber" name="L738" href="#L738">738</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L739" href="#L739">739</a> <em class="jxr_javadoccomment">   * Map&lt;String, Color&gt; colorForName = allColors.uniqueIndex(toStringFunction());</em>
+<a class="jxr_linenumber" name="L740" href="#L740">740</a> <em class="jxr_javadoccomment">   * assertThat(colorForName).containsEntry("red", red);</em>
+<a class="jxr_linenumber" name="L741" href="#L741">741</a> <em class="jxr_javadoccomment">   * }&lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L742" href="#L742">742</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L743" href="#L743">743</a> <em class="jxr_javadoccomment">   * &lt;p&gt;If your index may associate multiple values with each key, use {@link #index(Function)</em>
+<a class="jxr_linenumber" name="L744" href="#L744">744</a> <em class="jxr_javadoccomment">   * index}.</em>
+<a class="jxr_linenumber" name="L745" href="#L745">745</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L746" href="#L746">746</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; use {@code</em>
+<a class="jxr_linenumber" name="L747" href="#L747">747</a> <em class="jxr_javadoccomment">   * stream.collect(ImmutableMap.toImmutableMap(keyFunction, v -&gt; v))}. {@code</em>
+<a class="jxr_linenumber" name="L748" href="#L748">748</a> <em class="jxr_javadoccomment">   * ImmutableMap.copyOf(stream.collect(Collectors.toMap(keyFunction, v -&gt; v)))}, but be aware that</em>
+<a class="jxr_linenumber" name="L749" href="#L749">749</a> <em class="jxr_javadoccomment">   * this may not preserve the order of entries.</em>
+<a class="jxr_linenumber" name="L750" href="#L750">750</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L751" href="#L751">751</a> <em class="jxr_javadoccomment">   * @param keyFunction the function used to produce the key for each value</em>
+<a class="jxr_linenumber" name="L752" href="#L752">752</a> <em class="jxr_javadoccomment">   * @return a map mapping the result of evaluating the function {@code keyFunction} on each value</em>
+<a class="jxr_linenumber" name="L753" href="#L753">753</a> <em class="jxr_javadoccomment">   *     in this fluent iterable to that value</em>
+<a class="jxr_linenumber" name="L754" href="#L754">754</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code keyFunction} produces the same key for more than one</em>
+<a class="jxr_linenumber" name="L755" href="#L755">755</a> <em class="jxr_javadoccomment">   *     value in this fluent iterable</em>
+<a class="jxr_linenumber" name="L756" href="#L756">756</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if any element of this iterable is {@code null}, or if {@code</em>
+<a class="jxr_linenumber" name="L757" href="#L757">757</a> <em class="jxr_javadoccomment">   *     keyFunction} produces {@code null} for any key</em>
+<a class="jxr_linenumber" name="L758" href="#L758">758</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L759" href="#L759">759</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L760" href="#L760">760</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> &lt;K&gt; ImmutableMap&lt;K, E&gt; uniqueIndex(Function&lt;? <strong class="jxr_keyword">super</strong> E, K&gt; keyFunction) {
+<a class="jxr_linenumber" name="L761" href="#L761">761</a>     <strong class="jxr_keyword">return</strong> Maps.uniqueIndex(getDelegate(), keyFunction);
+<a class="jxr_linenumber" name="L762" href="#L762">762</a>   }
+<a class="jxr_linenumber" name="L763" href="#L763">763</a> 
+<a class="jxr_linenumber" name="L764" href="#L764">764</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L765" href="#L765">765</a> <em class="jxr_javadoccomment">   * Returns an array containing all of the elements from this fluent iterable in iteration order.</em>
+<a class="jxr_linenumber" name="L766" href="#L766">766</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L767" href="#L767">767</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; if an object array is acceptable, use {@code</em>
+<a class="jxr_linenumber" name="L768" href="#L768">768</a> <em class="jxr_javadoccomment">   * stream.toArray()}; if {@code type} is a class literal such as {@code MyType.class}, use {@code</em>
+<a class="jxr_linenumber" name="L769" href="#L769">769</a> <em class="jxr_javadoccomment">   * stream.toArray(MyType[]::new)}. Otherwise use {@code stream.toArray( len -&gt; (E[])</em>
+<a class="jxr_linenumber" name="L770" href="#L770">770</a> <em class="jxr_javadoccomment">   * Array.newInstance(type, len))}.</em>
+<a class="jxr_linenumber" name="L771" href="#L771">771</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L772" href="#L772">772</a> <em class="jxr_javadoccomment">   * @param type the type of the elements</em>
+<a class="jxr_linenumber" name="L773" href="#L773">773</a> <em class="jxr_javadoccomment">   * @return a newly-allocated array into which all the elements of this fluent iterable have been</em>
+<a class="jxr_linenumber" name="L774" href="#L774">774</a> <em class="jxr_javadoccomment">   *     copied</em>
+<a class="jxr_linenumber" name="L775" href="#L775">775</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L776" href="#L776">776</a>   @GwtIncompatible <em class="jxr_comment">// Array.newArray(Class, int)</em>
+<a class="jxr_linenumber" name="L777" href="#L777">777</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> E[] toArray(Class&lt;E&gt; type) {
+<a class="jxr_linenumber" name="L778" href="#L778">778</a>     <strong class="jxr_keyword">return</strong> Iterables.toArray(getDelegate(), type);
+<a class="jxr_linenumber" name="L779" href="#L779">779</a>   }
+<a class="jxr_linenumber" name="L780" href="#L780">780</a> 
+<a class="jxr_linenumber" name="L781" href="#L781">781</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L782" href="#L782">782</a> <em class="jxr_javadoccomment">   * Copies all the elements from this fluent iterable to {@code collection}. This is equivalent to</em>
+<a class="jxr_linenumber" name="L783" href="#L783">783</a> <em class="jxr_javadoccomment">   * calling {@code Iterables.addAll(collection, this)}.</em>
+<a class="jxr_linenumber" name="L784" href="#L784">784</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L785" href="#L785">785</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code stream.forEachOrdered(collection::add)} or {@code</em>
+<a class="jxr_linenumber" name="L786" href="#L786">786</a> <em class="jxr_javadoccomment">   * stream.forEach(collection::add)}.</em>
+<a class="jxr_linenumber" name="L787" href="#L787">787</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L788" href="#L788">788</a> <em class="jxr_javadoccomment">   * @param collection the collection to copy elements to</em>
+<a class="jxr_linenumber" name="L789" href="#L789">789</a> <em class="jxr_javadoccomment">   * @return {@code collection}, for convenience</em>
+<a class="jxr_linenumber" name="L790" href="#L790">790</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L791" href="#L791">791</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>   @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L793" href="#L793">793</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> &lt;C <strong class="jxr_keyword">extends</strong> Collection&lt;? <strong class="jxr_keyword">super</strong> E&gt;&gt; C copyInto(C collection) {
+<a class="jxr_linenumber" name="L794" href="#L794">794</a>     checkNotNull(collection);
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>     Iterable&lt;E&gt; iterable = getDelegate();
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>     <strong class="jxr_keyword">if</strong> (iterable instanceof Collection) {
+<a class="jxr_linenumber" name="L797" href="#L797">797</a>       collection.addAll(Collections2.<strong class="jxr_keyword">cast</strong>(iterable));
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>       <strong class="jxr_keyword">for</strong> (E item : iterable) {
+<a class="jxr_linenumber" name="L800" href="#L800">800</a>         collection.add(item);
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>       }
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>     }
+<a class="jxr_linenumber" name="L803" href="#L803">803</a>     <strong class="jxr_keyword">return</strong> collection;
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>   }
+<a class="jxr_linenumber" name="L805" href="#L805">805</a> 
+<a class="jxr_linenumber" name="L806" href="#L806">806</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L807" href="#L807">807</a> <em class="jxr_javadoccomment">   * Returns a {@link String} containing all of the elements of this fluent iterable joined with</em>
+<a class="jxr_linenumber" name="L808" href="#L808">808</a> <em class="jxr_javadoccomment">   * {@code joiner}.</em>
+<a class="jxr_linenumber" name="L809" href="#L809">809</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L810" href="#L810">810</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code joiner.join(stream.iterator())}, or, if you are not</em>
+<a class="jxr_linenumber" name="L811" href="#L811">811</a> <em class="jxr_javadoccomment">   * using any optional {@code Joiner} features, {@code</em>
+<a class="jxr_linenumber" name="L812" href="#L812">812</a> <em class="jxr_javadoccomment">   * stream.collect(Collectors.joining(delimiter)}.</em>
+<a class="jxr_linenumber" name="L813" href="#L813">813</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L814" href="#L814">814</a> <em class="jxr_javadoccomment">   * @since 18.0</em>
+<a class="jxr_linenumber" name="L815" href="#L815">815</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L816" href="#L816">816</a>   @Beta
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> String join(Joiner joiner) {
+<a class="jxr_linenumber" name="L818" href="#L818">818</a>     <strong class="jxr_keyword">return</strong> joiner.join(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L819" href="#L819">819</a>   }
+<a class="jxr_linenumber" name="L820" href="#L820">820</a> 
+<a class="jxr_linenumber" name="L821" href="#L821">821</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L822" href="#L822">822</a> <em class="jxr_javadoccomment">   * Returns the element at the specified position in this fluent iterable.</em>
+<a class="jxr_linenumber" name="L823" href="#L823">823</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L824" href="#L824">824</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;{@code Stream} equivalent:&lt;/b&gt; {@code stream.skip(position).findFirst().get()} (but note</em>
+<a class="jxr_linenumber" name="L825" href="#L825">825</a> <em class="jxr_javadoccomment">   * that this throws different exception types, and throws an exception if {@code null} would be</em>
+<a class="jxr_linenumber" name="L826" href="#L826">826</a> <em class="jxr_javadoccomment">   * returned).</em>
+<a class="jxr_linenumber" name="L827" href="#L827">827</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L828" href="#L828">828</a> <em class="jxr_javadoccomment">   * @param position position of the element to return</em>
+<a class="jxr_linenumber" name="L829" href="#L829">829</a> <em class="jxr_javadoccomment">   * @return the element at the specified position in this fluent iterable</em>
+<a class="jxr_linenumber" name="L830" href="#L830">830</a> <em class="jxr_javadoccomment">   * @throws IndexOutOfBoundsException if {@code position} is negative or greater than or equal to</em>
+<a class="jxr_linenumber" name="L831" href="#L831">831</a> <em class="jxr_javadoccomment">   *     the size of this fluent iterable</em>
+<a class="jxr_linenumber" name="L832" href="#L832">832</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L833" href="#L833">833</a>   <em class="jxr_comment">// TODO(kevinb): add @NullableDecl?</em>
+<a class="jxr_linenumber" name="L834" href="#L834">834</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> E get(<strong class="jxr_keyword">int</strong> position) {
+<a class="jxr_linenumber" name="L835" href="#L835">835</a>     <strong class="jxr_keyword">return</strong> Iterables.get(getDelegate(), position);
+<a class="jxr_linenumber" name="L836" href="#L836">836</a>   }
+<a class="jxr_linenumber" name="L837" href="#L837">837</a> 
+<a class="jxr_linenumber" name="L838" href="#L838">838</a>   <em class="jxr_javadoccomment">/** Function that transforms {@code Iterable&lt;E&gt;} into a fluent iterable. */</em>
+<a class="jxr_linenumber" name="L839" href="#L839">839</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> FromIterableFunction&lt;E&gt; <strong class="jxr_keyword">implements</strong> Function&lt;Iterable&lt;E&gt;, FluentIterable&lt;E&gt;&gt; {
+<a class="jxr_linenumber" name="L840" href="#L840">840</a>     @Override
+<a class="jxr_linenumber" name="L841" href="#L841">841</a>     <strong class="jxr_keyword">public</strong> FluentIterable&lt;E&gt; apply(Iterable&lt;E&gt; fromObject) {
+<a class="jxr_linenumber" name="L842" href="#L842">842</a>       <strong class="jxr_keyword">return</strong> FluentIterable.from(fromObject);
+<a class="jxr_linenumber" name="L843" href="#L843">843</a>     }
+<a class="jxr_linenumber" name="L844" href="#L844">844</a>   }
+<a class="jxr_linenumber" name="L845" href="#L845">845</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

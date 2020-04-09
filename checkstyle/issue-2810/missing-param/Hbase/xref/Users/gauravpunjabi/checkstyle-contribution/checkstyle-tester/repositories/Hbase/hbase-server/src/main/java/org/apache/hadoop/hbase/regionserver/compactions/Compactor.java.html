@@ -1,0 +1,358 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>Compactor xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_javadoccomment"> * Licensed to the Apache Software Foundation (ASF) under one</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_javadoccomment"> * or more contributor license agreements.  See the NOTICE file</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_javadoccomment"> * distributed with this work for additional information</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_javadoccomment"> * regarding copyright ownership.  The ASF licenses this file</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_javadoccomment"> * to you under the Apache License, Version 2.0 (the</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_javadoccomment"> * "License"); you may not use this file except in compliance</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_javadoccomment"> * with the License.  You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_javadoccomment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_javadoccomment"> * Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_javadoccomment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_javadoccomment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_javadoccomment"> * See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_javadoccomment"> * limitations under the License.</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">package</strong> org.apache.hadoop.hbase.regionserver.compactions;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> java.io.InterruptedIOException;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.util.Collection;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.logging.Log;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.logging.LogFactory;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.conf.Configuration;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.Cell;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.CellUtil;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.HConstants;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.KeyValueUtil;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.classification.InterfaceAudience;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.client.Scan;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.io.compress.Compression;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.io.hfile.HFile.FileInfo;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.io.hfile.HFileWriterV2;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.HStore;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.InternalScanner;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.ScanType;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.ScannerContext;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.Store;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.StoreFile;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.StoreFileScanner;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.regionserver.StoreScanner;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.Bytes;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.EnvironmentEdgeManager;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.util.StringUtils.TraditionalBinaryPrefix;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> * A compactor is a compaction algorithm associated a given policy. Base class also contains</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> * reusable parts for implementing compactors (what is common and what isn't is evolving).</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  @InterfaceAudience.Private
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> Compactor {
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Log LOG = LogFactory.getLog(Compactor.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>    <strong class="jxr_keyword">protected</strong> CompactionProgress progress;
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>    <strong class="jxr_keyword">protected</strong> Configuration conf;
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>    <strong class="jxr_keyword">protected</strong> Store store;
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> compactionKVMax;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>    <strong class="jxr_keyword">protected</strong> Compression.Algorithm compactionCompression;
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>    
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>    <em class="jxr_javadoccomment">/** specify how many days to keep MVCC values during major compaction **/</em> 
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>    <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">int</strong> keepSeqIdPeriod;
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>    <em class="jxr_comment">//TODO: depending on Store is not good but, realistically, all compactors currently do.</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>    Compactor(<strong class="jxr_keyword">final</strong> Configuration conf, <strong class="jxr_keyword">final</strong> Store store) {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>      <strong class="jxr_keyword">this</strong>.conf = conf;
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>      <strong class="jxr_keyword">this</strong>.store = store;
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>      <strong class="jxr_keyword">this</strong>.compactionKVMax =
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>        <strong class="jxr_keyword">this</strong>.conf.getInt(HConstants.COMPACTION_KV_MAX, HConstants.COMPACTION_KV_MAX_DEFAULT);
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>      <strong class="jxr_keyword">this</strong>.compactionCompression = (<strong class="jxr_keyword">this</strong>.store.getFamily() == <strong class="jxr_keyword">null</strong>) ?
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>          Compression.Algorithm.NONE : <strong class="jxr_keyword">this</strong>.store.getFamily().getCompactionCompression();
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>      <strong class="jxr_keyword">this</strong>.keepSeqIdPeriod = Math.max(<strong class="jxr_keyword">this</strong>.conf.getInt(HConstants.KEEP_SEQID_PERIOD, 
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>        HConstants.MIN_KEEP_SEQID_PERIOD), HConstants.MIN_KEEP_SEQID_PERIOD);
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>    }
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> CellSink {
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>      <strong class="jxr_keyword">void</strong> append(Cell cell) <strong class="jxr_keyword">throws</strong> IOException;
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>    }
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>    <strong class="jxr_keyword">public</strong> CompactionProgress getProgress() {
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>      <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>.progress;
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>    }
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>    <em class="jxr_javadoccomment">/** The sole reason this class exists is that java has no ref/out/pointer parameters. */</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>    <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> FileDetails {
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>      <em class="jxr_javadoccomment">/** Maximum key count after compaction (for blooms) */</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> maxKeyCount = 0;
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>      <em class="jxr_javadoccomment">/** Earliest put timestamp if major compaction */</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> earliestPutTs = HConstants.LATEST_TIMESTAMP;
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>      <em class="jxr_javadoccomment">/** The last key in the files we're compacting. */</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> maxSeqId = 0;
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>      <em class="jxr_javadoccomment">/** Latest memstore read point found in any of the involved files */</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> maxMVCCReadpoint = 0;
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>      <em class="jxr_javadoccomment">/** Max tags length**/</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> maxTagsLength = 0;
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>     <em class="jxr_javadoccomment">/** Min SeqId to keep during a major compaction **/</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> minSeqIdToKeep = 0;
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>   }
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">   * Extracts some details about the files to compact that are commonly needed by compactors.</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">   * @param filesToCompact Files.</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">   * @param allFiles Whether all files are included for compaction</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">   * @return The result.</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>   <strong class="jxr_keyword">protected</strong> FileDetails getFileDetails(
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>       Collection&lt;StoreFile&gt; filesToCompact, <strong class="jxr_keyword">boolean</strong> allFiles) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>     FileDetails fd = <strong class="jxr_keyword">new</strong> FileDetails();
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>     <strong class="jxr_keyword">long</strong> oldestHFileTimeStampToKeepMVCC = System.currentTimeMillis() - 
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>       (1000L * 60 * 60 * 24 * <strong class="jxr_keyword">this</strong>.keepSeqIdPeriod);  
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>     <strong class="jxr_keyword">for</strong> (StoreFile file : filesToCompact) {
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>       <strong class="jxr_keyword">if</strong>(allFiles &amp;&amp; (file.getModificationTimeStamp() &lt; oldestHFileTimeStampToKeepMVCC)) {
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>         <em class="jxr_comment">// when isAllFiles is true, all files are compacted so we can calculate the smallest </em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>         <em class="jxr_comment">// MVCC value to keep</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>         <strong class="jxr_keyword">if</strong>(fd.minSeqIdToKeep &lt; file.getMaxMemstoreTS()) {
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>           fd.minSeqIdToKeep = file.getMaxMemstoreTS();
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>         }
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>       }
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>       <strong class="jxr_keyword">long</strong> seqNum = file.getMaxSequenceId();
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>       fd.maxSeqId = Math.max(fd.maxSeqId, seqNum);
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>       StoreFile.Reader r = file.getReader();
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>       <strong class="jxr_keyword">if</strong> (r == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>         LOG.warn(<span class="jxr_string">"Null reader for "</span> + file.getPath());
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>         <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>       }
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>       <em class="jxr_comment">// NOTE: use getEntries when compacting instead of getFilterEntries, otherwise under-sized</em>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>       <em class="jxr_comment">// blooms can cause progress to be miscalculated or if the user switches bloom</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>       <em class="jxr_comment">// type (e.g. from ROW to ROWCOL)</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>       <strong class="jxr_keyword">long</strong> keyCount = r.getEntries();
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>       fd.maxKeyCount += keyCount;
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>       <em class="jxr_comment">// calculate the latest MVCC readpoint in any of the involved store files</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>       Map&lt;byte[], byte[]&gt; fileInfo = r.loadFileInfo();
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>       byte tmp[] = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>       <em class="jxr_comment">// Get and set the real MVCCReadpoint for bulk loaded files, which is the</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>       <em class="jxr_comment">// SeqId number.</em>
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>       <strong class="jxr_keyword">if</strong> (r.isBulkLoaded()) {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>         fd.maxMVCCReadpoint = Math.max(fd.maxMVCCReadpoint, r.getSequenceID());
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>       }
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>       <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>         tmp = fileInfo.get(HFileWriterV2.MAX_MEMSTORE_TS_KEY);
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>         <strong class="jxr_keyword">if</strong> (tmp != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>           fd.maxMVCCReadpoint = Math.max(fd.maxMVCCReadpoint, Bytes.toLong(tmp));
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>         }
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>       }
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>       tmp = fileInfo.get(FileInfo.MAX_TAGS_LEN);
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>       <strong class="jxr_keyword">if</strong> (tmp != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>         fd.maxTagsLength = Math.max(fd.maxTagsLength, Bytes.toInt(tmp));
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>       }
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>       <em class="jxr_comment">// If required, calculate the earliest put timestamp of all involved storefiles.</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>       <em class="jxr_comment">// This is used to remove family delete marker during compaction.</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>       <strong class="jxr_keyword">long</strong> earliestPutTs = 0;
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>       <strong class="jxr_keyword">if</strong> (allFiles) {
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>         tmp = fileInfo.get(StoreFile.EARLIEST_PUT_TS);
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>         <strong class="jxr_keyword">if</strong> (tmp == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>           <em class="jxr_comment">// There's a file with no information, must be an old one</em>
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>           <em class="jxr_comment">// assume we have very old puts</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>           fd.earliestPutTs = earliestPutTs = HConstants.OLDEST_TIMESTAMP;
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>           earliestPutTs = Bytes.toLong(tmp);
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>           fd.earliestPutTs = Math.min(fd.earliestPutTs, earliestPutTs);
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>         }
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>       }
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>       <strong class="jxr_keyword">if</strong> (LOG.isDebugEnabled()) {
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>         LOG.debug(<span class="jxr_string">"Compacting "</span> + file +
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>           <span class="jxr_string">", keycount="</span> + keyCount +
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>           <span class="jxr_string">", bloomtype="</span> + r.getBloomFilterType().toString() +
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>           <span class="jxr_string">", size="</span> + TraditionalBinaryPrefix.<strong class="jxr_keyword">long</strong>2String(r.length(), <span class="jxr_string">""</span>, 1) +
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>           <span class="jxr_string">", encoding="</span> + r.getHFileReader().getDataBlockEncoding() +
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>           <span class="jxr_string">", seqNum="</span> + seqNum +
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>           (allFiles ? <span class="jxr_string">", earliestPutTs="</span> + earliestPutTs: <span class="jxr_string">""</span>));
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>       }
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>     }
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>     <strong class="jxr_keyword">return</strong> fd;
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>   }
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> <em class="jxr_javadoccomment">   * Creates file scanners for compaction.</em>
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> <em class="jxr_javadoccomment">   * @param filesToCompact Files.</em>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_javadoccomment">   * @return Scanners.</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>   <strong class="jxr_keyword">protected</strong> List&lt;StoreFileScanner&gt; createFileScanners(
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>       <strong class="jxr_keyword">final</strong> Collection&lt;StoreFile&gt; filesToCompact, <strong class="jxr_keyword">long</strong> smallestReadPoint) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>     <strong class="jxr_keyword">return</strong> StoreFileScanner.getScannersForStoreFiles(filesToCompact, false, false, <strong class="jxr_keyword">true</strong>,
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>       smallestReadPoint);
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>   }
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>   <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">long</strong> getSmallestReadPoint() {
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>     <strong class="jxr_keyword">return</strong> store.getSmallestReadPoint();
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>   }
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_javadoccomment">   * Calls coprocessor, if any, to create compaction scanner - before normal scanner creation.</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_javadoccomment">   * @param request Compaction request.</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_javadoccomment">   * @param scanType Scan type.</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment">   * @param earliestPutTs Earliest put ts.</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_javadoccomment">   * @param scanners File scanners for compaction files.</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">   * @return Scanner override by coprocessor; null if not overriding.</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>   <strong class="jxr_keyword">protected</strong> InternalScanner preCreateCoprocScanner(<strong class="jxr_keyword">final</strong> CompactionRequest request,
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>       ScanType scanType, <strong class="jxr_keyword">long</strong> earliestPutTs,  List&lt;StoreFileScanner&gt; scanners) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>     <strong class="jxr_keyword">if</strong> (store.getCoprocessorHost() == <strong class="jxr_keyword">null</strong>) <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>     <strong class="jxr_keyword">return</strong> store.getCoprocessorHost()
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>         .preCompactScannerOpen(store, scanners, scanType, earliestPutTs, request);
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>   }
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> 
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> <em class="jxr_javadoccomment">   * Calls coprocessor, if any, to create scanners - after normal scanner creation.</em>
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> <em class="jxr_javadoccomment">   * @param request Compaction request.</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> <em class="jxr_javadoccomment">   * @param scanType Scan type.</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> <em class="jxr_javadoccomment">   * @param scanner The default scanner created for compaction.</em>
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> <em class="jxr_javadoccomment">   * @return Scanner scanner to use (usually the default); null if compaction should not proceed.</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>    <strong class="jxr_keyword">protected</strong> InternalScanner postCreateCoprocScanner(<strong class="jxr_keyword">final</strong> CompactionRequest request,
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>       ScanType scanType, InternalScanner scanner) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>     <strong class="jxr_keyword">if</strong> (store.getCoprocessorHost() == <strong class="jxr_keyword">null</strong>) <strong class="jxr_keyword">return</strong> scanner;
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>     <strong class="jxr_keyword">return</strong> store.getCoprocessorHost().preCompact(store, scanner, scanType, request);
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>   }
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> <em class="jxr_javadoccomment">   * Performs the compaction.</em>
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> <em class="jxr_javadoccomment">   * @param scanner Where to read from.</em>
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> <em class="jxr_javadoccomment">   * @param writer Where to write to.</em>
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> <em class="jxr_javadoccomment">   * @param smallestReadPoint Smallest read point.</em>
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> <em class="jxr_javadoccomment">   * @param cleanSeqId When true, remove seqId(used to be mvcc) value which is &lt;= smallestReadPoint</em>
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> <em class="jxr_javadoccomment">   * @return Whether compaction ended; false if it was interrupted for some reason.</em>
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>   <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> performCompaction(InternalScanner scanner, CellSink writer,
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>       <strong class="jxr_keyword">long</strong> smallestReadPoint, <strong class="jxr_keyword">boolean</strong> cleanSeqId,
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>       CompactionThroughputController throughputController) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>     <strong class="jxr_keyword">long</strong> bytesWritten = 0;
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>     <strong class="jxr_keyword">long</strong> bytesWrittenProgress = 0;
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>     <em class="jxr_comment">// Since scanner.next() can return 'false' but still be delivering data,</em>
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>     <em class="jxr_comment">// we have to use a do/while loop.</em>
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>     List&lt;Cell&gt; cells = <strong class="jxr_keyword">new</strong> ArrayList&lt;Cell&gt;();
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>     <strong class="jxr_keyword">long</strong> closeCheckInterval = HStore.getCloseCheckInterval();
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>     <strong class="jxr_keyword">long</strong> lastMillis = 0;
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>     <strong class="jxr_keyword">if</strong> (LOG.isDebugEnabled()) {
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>       lastMillis = EnvironmentEdgeManager.currentTime();
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>     }
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>     String compactionName =
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>         store.getRegionInfo().getRegionNameAsString() + <span class="jxr_string">"#"</span> + store.getFamily().getNameAsString();
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>     <strong class="jxr_keyword">long</strong> now = 0;
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>     <strong class="jxr_keyword">boolean</strong> hasMore;
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>     ScannerContext scannerContext =
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>         ScannerContext.newBuilder().setBatchLimit(compactionKVMax).build();
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>     throughputController.start(compactionName);
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>       <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>         hasMore = scanner.next(cells, scannerContext);
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>         <strong class="jxr_keyword">if</strong> (LOG.isDebugEnabled()) {
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>           now = EnvironmentEdgeManager.currentTime();
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>         }
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>         <em class="jxr_comment">// output to writer:</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>         <strong class="jxr_keyword">for</strong> (Cell c : cells) {
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>           <strong class="jxr_keyword">if</strong> (cleanSeqId &amp;&amp; c.getSequenceId() &lt;= smallestReadPoint) {
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>             CellUtil.setSequenceId(c, 0);
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>           }
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>           writer.append(c);
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>           <strong class="jxr_keyword">int</strong> len = KeyValueUtil.length(c);
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>           ++progress.currentCompactedKVs;
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>           progress.totalCompactedSize += len;
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>           <strong class="jxr_keyword">if</strong> (LOG.isDebugEnabled()) {
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>             bytesWrittenProgress += len;
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>           }
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>           throughputController.control(compactionName, len);
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>           <em class="jxr_comment">// check periodically to see if a system stop is requested</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>           <strong class="jxr_keyword">if</strong> (closeCheckInterval &gt; 0) {
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>             bytesWritten += len;
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>             <strong class="jxr_keyword">if</strong> (bytesWritten &gt; closeCheckInterval) {
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>               bytesWritten = 0;
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>               <strong class="jxr_keyword">if</strong> (!store.areWritesEnabled()) {
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>                 progress.cancel();
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>                 <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>               }
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>             }
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>           }
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>         }
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>         <em class="jxr_comment">// Log the progress of long running compactions every minute if</em>
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>         <em class="jxr_comment">// logging at DEBUG level</em>
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>         <strong class="jxr_keyword">if</strong> (LOG.isDebugEnabled()) {
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>           <strong class="jxr_keyword">if</strong> ((now - lastMillis) &gt;= 60 * 1000) {
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>             LOG.debug(<span class="jxr_string">"Compaction progress: "</span>
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>                 + compactionName
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>                 + <span class="jxr_string">" "</span>
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>                 + progress
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>                 + String.format(<span class="jxr_string">", rate=%.2f kB/sec"</span>, (bytesWrittenProgress / 1024.0)
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>                     / ((now - lastMillis) / 1000.0)) + <span class="jxr_string">", throughputController is "</span>
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>                 + throughputController);
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>             lastMillis = now;
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>             bytesWrittenProgress = 0;
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>           }
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>         }
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>         cells.clear();
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>       } <strong class="jxr_keyword">while</strong> (hasMore);
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>     } <strong class="jxr_keyword">catch</strong> (InterruptedException e) {
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>       progress.cancel();
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>       <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InterruptedIOException(<span class="jxr_string">"Interrupted while control throughput of compacting "</span>
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>           + compactionName);
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>     } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>       throughputController.finish(compactionName);
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>     }
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>     progress.complete();
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>   }
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> 
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> <em class="jxr_javadoccomment">   * @param store store</em>
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> <em class="jxr_javadoccomment">   * @param scanners Store file scanners.</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> <em class="jxr_javadoccomment">   * @param scanType Scan type.</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> <em class="jxr_javadoccomment">   * @param smallestReadPoint Smallest MVCC read point.</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> <em class="jxr_javadoccomment">   * @param earliestPutTs Earliest put across all files.</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> <em class="jxr_javadoccomment">   * @return A compaction scanner.</em>
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>   <strong class="jxr_keyword">protected</strong> InternalScanner createScanner(Store store, List&lt;StoreFileScanner&gt; scanners,
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>       ScanType scanType, <strong class="jxr_keyword">long</strong> smallestReadPoint, <strong class="jxr_keyword">long</strong> earliestPutTs) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>     Scan scan = <strong class="jxr_keyword">new</strong> Scan();
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>     scan.setMaxVersions(store.getFamily().getMaxVersions());
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> StoreScanner(store, store.getScanInfo(), scan, scanners,
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>         scanType, smallestReadPoint, earliestPutTs);
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>   }
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> 
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> <em class="jxr_javadoccomment">   * @param store The store.</em>
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> <em class="jxr_javadoccomment">   * @param scanners Store file scanners.</em>
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> <em class="jxr_javadoccomment">   * @param smallestReadPoint Smallest MVCC read point.</em>
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> <em class="jxr_javadoccomment">   * @param earliestPutTs Earliest put across all files.</em>
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> <em class="jxr_javadoccomment">   * @param dropDeletesFromRow Drop deletes starting with this row, inclusive. Can be null.</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> <em class="jxr_javadoccomment">   * @param dropDeletesToRow Drop deletes ending with this row, exclusive. Can be null.</em>
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> <em class="jxr_javadoccomment">   * @return A compaction scanner.</em>
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>   <strong class="jxr_keyword">protected</strong> InternalScanner createScanner(Store store, List&lt;StoreFileScanner&gt; scanners,
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>      <strong class="jxr_keyword">long</strong> smallestReadPoint, <strong class="jxr_keyword">long</strong> earliestPutTs, byte[] dropDeletesFromRow,
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>      byte[] dropDeletesToRow) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>     Scan scan = <strong class="jxr_keyword">new</strong> Scan();
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>     scan.setMaxVersions(store.getFamily().getMaxVersions());
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> StoreScanner(store, store.getScanInfo(), scan, scanners, smallestReadPoint,
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>         earliestPutTs, dropDeletesFromRow, dropDeletesToRow);
+<a class="jxr_linenumber" name="L344" href="#L344">344</a>   }
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

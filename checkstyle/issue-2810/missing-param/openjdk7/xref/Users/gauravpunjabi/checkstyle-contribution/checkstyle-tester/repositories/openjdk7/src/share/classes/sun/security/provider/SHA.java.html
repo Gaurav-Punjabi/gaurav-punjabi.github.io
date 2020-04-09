@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>SHA xref</title>
+<link type="text/css" rel="stylesheet" href="../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 1996, 2006, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.  Oracle designates this</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * particular file as subject to the "Classpath" exception as provided</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * by Oracle in the LICENSE file that accompanied this code.</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">package</strong> sun.security.provider;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> sun.security.provider.ByteArrayAccess.*;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_javadoccomment"> * This class implements the Secure Hash Algorithm (SHA) developed by</em>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment"> * the National Institute of Standards and Technology along with the</em>
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment"> * National Security Agency.  This is the updated version of SHA</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> * fip-180 as superseded by fip-180-1.</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;It implement JavaSecurity MessageDigest, and can be used by in</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment"> * the Java Security framework, as a pluggable implementation, as a</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> * filter for the digest stream classes.</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment"> * @author      Roger Riggs</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment"> * @author      Benjamin Renaud</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment"> * @author      Andreas Sterbenz</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> SHA <strong class="jxr_keyword">extends</strong> DigestBase {
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>      <em class="jxr_comment">// Buffer of int's and count of characters accumulated</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>      <em class="jxr_comment">// 64 bytes are included in each hash block so the low order</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>      <em class="jxr_comment">// bits of count are used to know how to pack the bytes into ints</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <em class="jxr_comment">// and to know when to compute the block and start the next one.</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong>[] W;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>      <em class="jxr_comment">// state of this</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong>[] state;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment">     * Creates a new SHA object.</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>      <strong class="jxr_keyword">public</strong> SHA() {
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>          <strong class="jxr_keyword">super</strong>(<span class="jxr_string">"SHA-1"</span>, 20, 64);
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>          state = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">int</strong>[5];
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>          W = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">int</strong>[80];
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>          implReset();
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>      }
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment">     * Creates a SHA object.with state (for cloning) */</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>      <strong class="jxr_keyword">private</strong> SHA(SHA base) {
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>          <strong class="jxr_keyword">super</strong>(base);
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>          <strong class="jxr_keyword">this</strong>.state = base.state.clone();
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>          <strong class="jxr_keyword">this</strong>.W = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">int</strong>[80];
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>      }
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>      <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_comment">     * Clones this object.</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>      <strong class="jxr_keyword">public</strong> Object clone() {
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> SHA(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>      }
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_javadoccomment">     * Resets the buffers and hash value to start a new hash.</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>      <strong class="jxr_keyword">void</strong> implReset() {
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>          state[0] = 0x67452301;
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>          state[1] = 0xefcdab89;
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>          state[2] = 0x98badcfe;
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>          state[3] = 0x10325476;
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>          state[4] = 0xc3d2e1f0;
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>      }
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment">     * Computes the final hash and copies the 20 bytes to the output array.</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>      <strong class="jxr_keyword">void</strong> implDigest(byte[] out, <strong class="jxr_keyword">int</strong> ofs) {
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>          <strong class="jxr_keyword">long</strong> bitsProcessed = bytesProcessed &lt;&lt; 3;
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>          <strong class="jxr_keyword">int</strong> index = (<strong class="jxr_keyword">int</strong>)bytesProcessed &amp; 0x3f;
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>          <strong class="jxr_keyword">int</strong> padLen = (index &lt; 56) ? (56 - index) : (120 - index);
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>          engineUpdate(padding, 0, padLen);
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>         i2bBig4((<strong class="jxr_keyword">int</strong>)(bitsProcessed &gt;&gt;&gt; 32), buffer, 56);
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>         i2bBig4((<strong class="jxr_keyword">int</strong>)bitsProcessed, buffer, 60);
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>         implCompress(buffer, 0);
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>         i2bBig(state, 0, out, ofs, 20);
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>     }
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>     <em class="jxr_comment">// Constants for each round</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> round1_kt = 0x5a827999;
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> round2_kt = 0x6ed9eba1;
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> round3_kt = 0x8f1bbcdc;
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> round4_kt = 0xca62c1d6;
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment">     * Compute a the hash for the current block.</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> <em class="jxr_javadoccomment">     * This is in the same vein as Peter Gutmann's algorithm listed in</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> <em class="jxr_javadoccomment">     * the back of Applied Cryptography, Compact implementation of</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">     * "old" NIST Secure Hash Algorithm.</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>     <strong class="jxr_keyword">void</strong> implCompress(byte[] buf, <strong class="jxr_keyword">int</strong> ofs) {
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>         b2iBig64(buf, ofs, W);
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>         <em class="jxr_comment">// The first 16 ints have the byte stream, compute the rest of</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>         <em class="jxr_comment">// the buffer</em>
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> t = 16; t &lt;= 79; t++) {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>             <strong class="jxr_keyword">int</strong> temp = W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16];
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>             W[t] = (temp &lt;&lt; 1) | (temp &gt;&gt;&gt; 31);
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>         }
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>         <strong class="jxr_keyword">int</strong> a = state[0];
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>         <strong class="jxr_keyword">int</strong> b = state[1];
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>         <strong class="jxr_keyword">int</strong> c = state[2];
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>         <strong class="jxr_keyword">int</strong> d = state[3];
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>         <strong class="jxr_keyword">int</strong> e = state[4];
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>         <em class="jxr_comment">// Round 1</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; 20; i++) {
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>             <strong class="jxr_keyword">int</strong> temp = ((a&lt;&lt;5) | (a&gt;&gt;&gt;(32-5))) +
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>                 ((b&amp;c)|((~b)&amp;d))+ e + W[i] + round1_kt;
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>             e = d;
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>             d = c;
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>             c = ((b&lt;&lt;30) | (b&gt;&gt;&gt;(32-30)));
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>             b = a;
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>             a = temp;
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>         }
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>         <em class="jxr_comment">// Round 2</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 20; i &lt; 40; i++) {
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>             <strong class="jxr_keyword">int</strong> temp = ((a&lt;&lt;5) | (a&gt;&gt;&gt;(32-5))) +
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>                 (b ^ c ^ d) + e + W[i] + round2_kt;
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>             e = d;
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>             d = c;
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>             c = ((b&lt;&lt;30) | (b&gt;&gt;&gt;(32-30)));
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>             b = a;
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>             a = temp;
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>         }
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>         <em class="jxr_comment">// Round 3</em>
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 40; i &lt; 60; i++) {
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>             <strong class="jxr_keyword">int</strong> temp = ((a&lt;&lt;5) | (a&gt;&gt;&gt;(32-5))) +
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>                 ((b&amp;c)|(b&amp;d)|(c&amp;d)) + e + W[i] + round3_kt;
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>             e = d;
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>             d = c;
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>             c = ((b&lt;&lt;30) | (b&gt;&gt;&gt;(32-30)));
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>             b = a;
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>             a = temp;
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>         }
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>         <em class="jxr_comment">// Round 4</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 60; i &lt; 80; i++) {
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>             <strong class="jxr_keyword">int</strong> temp = ((a&lt;&lt;5) | (a&gt;&gt;&gt;(32-5))) +
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>                 (b ^ c ^ d) + e + W[i] + round4_kt;
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>             e = d;
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>             d = c;
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>             c = ((b&lt;&lt;30) | (b&gt;&gt;&gt;(32-30)));
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>             b = a;
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>             a = temp;
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>         }
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>         state[0] += a;
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>         state[1] += b;
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>         state[2] += c;
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>         state[3] += d;
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>         state[4] += e;
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>     }
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

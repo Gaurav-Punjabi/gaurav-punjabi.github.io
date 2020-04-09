@@ -1,0 +1,847 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>XTree xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 2004, 2008, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.  Oracle designates this</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * particular file as subject to the "Classpath" exception as provided</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * by Oracle in the LICENSE file that accompanied this code.</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">package</strong> sun.tools.jconsole.inspector;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.*;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> javax.management.*;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> javax.swing.*;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> javax.swing.tree.*;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> sun.tools.jconsole.JConsole;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> sun.tools.jconsole.MBeansTab;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> sun.tools.jconsole.Resources;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> sun.tools.jconsole.inspector.XNodeInfo;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> sun.tools.jconsole.inspector.XNodeInfo.Type;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  @SuppressWarnings(<span class="jxr_string">"serial"</span>)
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> XTree <strong class="jxr_keyword">extends</strong> JTree {
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> List&lt;String&gt; orderedKeyPropertyList =
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>              <strong class="jxr_keyword">new</strong> ArrayList&lt;String&gt;();
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>      <strong class="jxr_keyword">static</strong> {
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>          String keyPropertyList =
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>                  System.getProperty(<span class="jxr_string">"com.sun.tools.jconsole.mbeans.keyPropertyList"</span>);
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>          <strong class="jxr_keyword">if</strong> (keyPropertyList == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>              orderedKeyPropertyList.add(<span class="jxr_string">"type"</span>);
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>              orderedKeyPropertyList.add(<span class="jxr_string">"j2eeType"</span>);
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>          } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>              StringTokenizer st = <strong class="jxr_keyword">new</strong> StringTokenizer(keyPropertyList, <span class="jxr_string">","</span>);
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>              <strong class="jxr_keyword">while</strong> (st.hasMoreTokens()) {
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>                  orderedKeyPropertyList.add(st.nextToken());
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>              }
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>          }
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>      }
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>      <strong class="jxr_keyword">private</strong> MBeansTab mbeansTab;
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>      <strong class="jxr_keyword">private</strong> Map&lt;String, DefaultMutableTreeNode&gt; nodes =
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>              <strong class="jxr_keyword">new</strong> HashMap&lt;String, DefaultMutableTreeNode&gt;();
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>      <strong class="jxr_keyword">public</strong> XTree(MBeansTab mbeansTab) {
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>          <strong class="jxr_keyword">this</strong>(<strong class="jxr_keyword">new</strong> DefaultMutableTreeNode(<span class="jxr_string">"MBeanTreeRootNode"</span>), mbeansTab);
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>      }
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>      <strong class="jxr_keyword">public</strong> XTree(TreeNode root, MBeansTab mbeansTab) {
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>          <strong class="jxr_keyword">super</strong>(root, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>          <strong class="jxr_keyword">this</strong>.mbeansTab = mbeansTab;
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>          setRootVisible(false);
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>          setShowsRootHandles(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>          ToolTipManager.sharedInstance().registerComponent(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>      }
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment">     * This method removes the node from its parent</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>      <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> removeChildNode(DefaultMutableTreeNode child) {
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>          DefaultTreeModel model = (DefaultTreeModel) getModel();
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>          model.removeNodeFromParent(child);
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>      }
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment">     * This method adds the child to the specified parent node</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment">     * at specific index.</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>      <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> addChildNode(
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>              DefaultMutableTreeNode parent,
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>              DefaultMutableTreeNode child,
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>              <strong class="jxr_keyword">int</strong> index) {
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>          DefaultTreeModel model = (DefaultTreeModel) getModel();
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>          model.insertNodeInto(child, parent, index);
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>      }
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment">     * This method adds the child to the specified parent node.</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">     * The index where the child is to be added depends on the</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">     * child node being Comparable or not. If the child node is</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">     * not Comparable then it is added at the end, i.e. right</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">     * after the current parent's children.</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>     <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> addChildNode(
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>             DefaultMutableTreeNode parent, DefaultMutableTreeNode child) {
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>         <strong class="jxr_keyword">int</strong> childCount = parent.getChildCount();
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>         <strong class="jxr_keyword">if</strong> (childCount == 0) {
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>             addChildNode(parent, child, 0);
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>         }
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>         <strong class="jxr_keyword">if</strong> (child instanceof ComparableDefaultMutableTreeNode) {
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>             ComparableDefaultMutableTreeNode comparableChild =
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>                     (ComparableDefaultMutableTreeNode) child;
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = childCount - 1; i &gt;= 0; i--) {
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>                 DefaultMutableTreeNode brother =
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>                         (DefaultMutableTreeNode) parent.getChildAt(i);
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>                 <em class="jxr_comment">// expr1: child node must be inserted after metadata nodes</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>                 <em class="jxr_comment">// - OR -</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>                 <em class="jxr_comment">// expr2: "child &gt;= brother"</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>                 <strong class="jxr_keyword">if</strong> ((i &lt;= 2 &amp;&amp; isMetadataNode(brother)) ||
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>                         comparableChild.compareTo(brother) &gt;= 0) {
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>                     addChildNode(parent, child, i + 1);
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>                     <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>                 }
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>             }
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>             <em class="jxr_comment">// "child &lt; all brothers", add at the beginning</em>
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>             addChildNode(parent, child, 0);
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>         }
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>         <em class="jxr_comment">// "child not comparable", add at the end</em>
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>         addChildNode(parent, child, childCount);
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>     }
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_javadoccomment">     * This method removes all the displayed nodes from the tree,</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> <em class="jxr_javadoccomment">     * but does not affect actual MBeanServer contents.</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>     <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>     @Override
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> removeAll() {
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>         DefaultTreeModel model = (DefaultTreeModel) getModel();
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>         DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>         root.removeAllChildren();
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>         model.nodeStructureChanged(root);
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>         nodes.clear();
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>     }
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>     <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> removeMBeanFromView(ObjectName mbean) {
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>         <em class="jxr_comment">// We assume here that MBeans are removed one by one (on MBean</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>         <em class="jxr_comment">// unregistered notification). Deletes the tree node associated</em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>         <em class="jxr_comment">// with the given MBean and recursively all the node parents</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>         <em class="jxr_comment">// which are leaves and non XMBean.</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>         <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>         DefaultMutableTreeNode node = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>         Dn dn = <strong class="jxr_keyword">new</strong> Dn(mbean);
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>         <strong class="jxr_keyword">if</strong> (dn.getTokenCount() &gt; 0) {
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>             DefaultTreeModel model = (DefaultTreeModel) getModel();
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>             Token token = dn.getToken(0);
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>             String hashKey = dn.getHashKey(token);
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>             node = nodes.get(hashKey);
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>             <strong class="jxr_keyword">if</strong> ((node != <strong class="jxr_keyword">null</strong>) &amp;&amp; (!node.isRoot())) {
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>                 <strong class="jxr_keyword">if</strong> (hasNonMetadataNodes(node)) {
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>                     removeMetadataNodes(node);
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>                     String label = token.getValue();
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>                     XNodeInfo userObject = <strong class="jxr_keyword">new</strong> XNodeInfo(
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>                             Type.NONMBEAN, label,
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>                             label, token.getTokenValue());
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>                     changeNodeValue(node, userObject);
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>                     DefaultMutableTreeNode parent =
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>                             (DefaultMutableTreeNode) node.getParent();
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>                     model.removeNodeFromParent(node);
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>                     nodes.remove(hashKey);
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>                     removeParentFromView(dn, 1, parent);
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>                 }
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>             }
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>         }
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>     }
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> <em class="jxr_javadoccomment">     * Returns true if any of the children nodes is a non MBean metadata node.</em>
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> hasNonMetadataNodes(DefaultMutableTreeNode node) {
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>         <strong class="jxr_keyword">for</strong> (Enumeration e = node.children(); e.hasMoreElements();) {
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>             DefaultMutableTreeNode n = (DefaultMutableTreeNode) e.nextElement();
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>             Object uo = n.getUserObject();
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>             <strong class="jxr_keyword">if</strong> (uo instanceof XNodeInfo) {
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>                 <strong class="jxr_keyword">switch</strong> (((XNodeInfo) uo).getType()) {
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>                     <strong class="jxr_keyword">case</strong> ATTRIBUTES:
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>                     <strong class="jxr_keyword">case</strong> NOTIFICATIONS:
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>                     <strong class="jxr_keyword">case</strong> OPERATIONS:
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>                     <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>                         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>                 }
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>                 <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>             }
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>         }
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>     }
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_javadoccomment">     * Returns true if any of the children nodes is an MBean metadata node.</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasMetadataNodes(DefaultMutableTreeNode node) {
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>         <strong class="jxr_keyword">for</strong> (Enumeration e = node.children(); e.hasMoreElements();) {
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>             DefaultMutableTreeNode n = (DefaultMutableTreeNode) e.nextElement();
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>             Object uo = n.getUserObject();
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>             <strong class="jxr_keyword">if</strong> (uo instanceof XNodeInfo) {
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>                 <strong class="jxr_keyword">switch</strong> (((XNodeInfo) uo).getType()) {
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>                     <strong class="jxr_keyword">case</strong> ATTRIBUTES:
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>                     <strong class="jxr_keyword">case</strong> NOTIFICATIONS:
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>                     <strong class="jxr_keyword">case</strong> OPERATIONS:
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>                         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>                     <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>                 }
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>                 <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>             }
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>         }
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>     }
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> <em class="jxr_javadoccomment">     * Returns true if the given node is an MBean metadata node.</em>
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isMetadataNode(DefaultMutableTreeNode node) {
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>         Object uo = node.getUserObject();
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>         <strong class="jxr_keyword">if</strong> (uo instanceof XNodeInfo) {
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>             <strong class="jxr_keyword">switch</strong> (((XNodeInfo) uo).getType()) {
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>                 <strong class="jxr_keyword">case</strong> ATTRIBUTES:
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>                 <strong class="jxr_keyword">case</strong> NOTIFICATIONS:
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>                 <strong class="jxr_keyword">case</strong> OPERATIONS:
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>                     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>                 <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>                     <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>             }
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>         }
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>     }
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> 
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_javadoccomment">     * Remove the metadata nodes associated with a given MBean node.</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>     <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> removeMetadataNodes(DefaultMutableTreeNode node) {
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>         Set&lt;DefaultMutableTreeNode&gt; metadataNodes =
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>                 <strong class="jxr_keyword">new</strong> HashSet&lt;DefaultMutableTreeNode&gt;();
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>         DefaultTreeModel model = (DefaultTreeModel) getModel();
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>         <strong class="jxr_keyword">for</strong> (Enumeration e = node.children(); e.hasMoreElements();) {
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>             DefaultMutableTreeNode n = (DefaultMutableTreeNode) e.nextElement();
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>             Object uo = n.getUserObject();
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>             <strong class="jxr_keyword">if</strong> (uo instanceof XNodeInfo) {
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>                 <strong class="jxr_keyword">switch</strong> (((XNodeInfo) uo).getType()) {
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>                     <strong class="jxr_keyword">case</strong> ATTRIBUTES:
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>                     <strong class="jxr_keyword">case</strong> NOTIFICATIONS:
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>                     <strong class="jxr_keyword">case</strong> OPERATIONS:
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>                         metadataNodes.add(n);
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>                     <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>                 }
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>             }
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>         }
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>         <strong class="jxr_keyword">for</strong> (DefaultMutableTreeNode n : metadataNodes) {
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>             model.removeNodeFromParent(n);
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>         }
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>     }
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> <em class="jxr_javadoccomment">     * Removes only the parent nodes which are non MBean and leaf.</em>
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> <em class="jxr_javadoccomment">     * This method assumes the child nodes have been removed before.</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>     <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>     <strong class="jxr_keyword">private</strong> DefaultMutableTreeNode removeParentFromView(
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>             Dn dn, <strong class="jxr_keyword">int</strong> index, DefaultMutableTreeNode node) {
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>         <strong class="jxr_keyword">if</strong> ((!node.isRoot()) &amp;&amp; node.isLeaf() &amp;&amp;
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>                 (!(((XNodeInfo) node.getUserObject()).getType().equals(Type.MBEAN)))) {
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>             DefaultMutableTreeNode parent =
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>                     (DefaultMutableTreeNode) node.getParent();
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>             removeChildNode(node);
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>             String hashKey = dn.getHashKey(dn.getToken(index));
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>             nodes.remove(hashKey);
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>             removeParentFromView(dn, index + 1, parent);
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>         }
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>         <strong class="jxr_keyword">return</strong> node;
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>     }
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> 
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>     <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> addMBeansToView(Set&lt;ObjectName&gt; mbeans) {
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>         Set&lt;Dn&gt; dns = <strong class="jxr_keyword">new</strong> TreeSet&lt;Dn&gt;();
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>         <strong class="jxr_keyword">for</strong> (ObjectName mbean : mbeans) {
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>             Dn dn = <strong class="jxr_keyword">new</strong> Dn(mbean);
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>             dns.add(dn);
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>         }
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>         <strong class="jxr_keyword">for</strong> (Dn dn : dns) {
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>             ObjectName mbean = dn.getObjectName();
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>             XMBean xmbean = <strong class="jxr_keyword">new</strong> XMBean(mbean, mbeansTab);
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>             addMBeanToView(mbean, xmbean, dn);
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>         }
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>     }
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> 
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>     <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> addMBeanToView(ObjectName mbean) {
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>         <em class="jxr_comment">// Build XMBean for the given MBean</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>         <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>         XMBean xmbean = <strong class="jxr_keyword">new</strong> XMBean(mbean, mbeansTab);
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>         <em class="jxr_comment">// Build Dn for the given MBean</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>         <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>         Dn dn = <strong class="jxr_keyword">new</strong> Dn(mbean);
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>         <em class="jxr_comment">// Add the new nodes to the MBean tree from leaf to root</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>         <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>         addMBeanToView(mbean, xmbean, dn);
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>     }
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> 
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>     <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> addMBeanToView(
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>             ObjectName mbean, XMBean xmbean, Dn dn) {
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>         DefaultMutableTreeNode childNode = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>         DefaultMutableTreeNode parentNode = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>         <em class="jxr_comment">// Add the node or replace its user object if already added</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>         <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>         Token token = dn.getToken(0);
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>         String hashKey = dn.getHashKey(token);
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>         <strong class="jxr_keyword">if</strong> (nodes.containsKey(hashKey)) {
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>             <em class="jxr_comment">// Found existing node previously created when adding another node</em>
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>             <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>             childNode = nodes.get(hashKey);
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>             <em class="jxr_comment">// Replace user object to reflect that this node is an MBean</em>
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>             <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>             Object data = createNodeValue(xmbean, token);
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>             String label = data.toString();
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>             XNodeInfo userObject =
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>                     <strong class="jxr_keyword">new</strong> XNodeInfo(Type.MBEAN, data, label, mbean.toString());
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>             changeNodeValue(childNode, userObject);
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>         }
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>         <em class="jxr_comment">// Create new leaf node</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>         <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>         childNode = createDnNode(dn, token, xmbean);
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>         nodes.put(hashKey, childNode);
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>         <em class="jxr_comment">// Add intermediate non MBean nodes</em>
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>         <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 1; i &lt; dn.getTokenCount(); i++) {
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>             token = dn.getToken(i);
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>             hashKey = dn.getHashKey(token);
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>             <strong class="jxr_keyword">if</strong> (nodes.containsKey(hashKey)) {
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>                 <em class="jxr_comment">// Intermediate node already present, add new node as child</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>                 <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>                 parentNode = nodes.get(hashKey);
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>                 addChildNode(parentNode, childNode);
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>                 <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>                 <em class="jxr_comment">// Create new intermediate node</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>                 <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>                 <strong class="jxr_keyword">if</strong> (<span class="jxr_string">"domain"</span>.equals(token.getTokenType())) {
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>                     parentNode = createDomainNode(dn, token);
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>                     DefaultMutableTreeNode root =
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>                             (DefaultMutableTreeNode) getModel().getRoot();
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>                     addChildNode(root, parentNode);
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>                     parentNode = createSubDnNode(dn, token);
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>                 }
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>                 nodes.put(hashKey, parentNode);
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>                 addChildNode(parentNode, childNode);
+<a class="jxr_linenumber" name="L374" href="#L374">374</a>             }
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>             childNode = parentNode;
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>         }
+<a class="jxr_linenumber" name="L377" href="#L377">377</a>     }
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> 
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>     <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> changeNodeValue(
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>             DefaultMutableTreeNode node, XNodeInfo nodeValue) {
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>         <strong class="jxr_keyword">if</strong> (node instanceof ComparableDefaultMutableTreeNode) {
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>             <em class="jxr_comment">// should it stay at the same place?</em>
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>             DefaultMutableTreeNode clone =
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>                     (DefaultMutableTreeNode) node.clone();
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>             clone.setUserObject(nodeValue);
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>             <strong class="jxr_keyword">if</strong> (((ComparableDefaultMutableTreeNode) node).compareTo(clone) == 0) {
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>                 <em class="jxr_comment">// the order in the tree didn't change</em>
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>                 node.setUserObject(nodeValue);
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>                 DefaultTreeModel model = (DefaultTreeModel) getModel();
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>                 model.nodeChanged(node);
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>                 <em class="jxr_comment">// delete the node and re-order it in case the</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>                 <em class="jxr_comment">// node value modifies the order in the tree</em>
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>                 DefaultMutableTreeNode parent =
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>                         (DefaultMutableTreeNode) node.getParent();
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>                 removeChildNode(node);
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>                 node.setUserObject(nodeValue);
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>                 addChildNode(parent, node);
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>             }
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>             <em class="jxr_comment">// not comparable stays at the same place</em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>             node.setUserObject(nodeValue);
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>             DefaultTreeModel model = (DefaultTreeModel) getModel();
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>             model.nodeChanged(node);
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>         }
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>         <em class="jxr_comment">// Load the MBean metadata if type is MBEAN</em>
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>         <strong class="jxr_keyword">if</strong> (nodeValue.getType().equals(Type.MBEAN)) {
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>             removeMetadataNodes(node);
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>             TreeNode[] treeNodes = node.getPath();
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>             TreePath path = <strong class="jxr_keyword">new</strong> TreePath(treeNodes);
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>             <strong class="jxr_keyword">if</strong> (isExpanded(path)) {
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>                 addMetadataNodes(node);
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>             }
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>         }
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>         <em class="jxr_comment">// Clear the current selection and set it</em>
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>         <em class="jxr_comment">// again so valueChanged() gets called</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>         <strong class="jxr_keyword">if</strong> (node == getLastSelectedPathComponent()) {
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>             TreePath selectionPath = getSelectionPath();
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>             clearSelection();
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>             setSelectionPath(selectionPath);
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>         }
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>     }
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> <em class="jxr_javadoccomment">     * Creates the domain node.</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>     <strong class="jxr_keyword">private</strong> DefaultMutableTreeNode createDomainNode(Dn dn, Token token) {
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>         DefaultMutableTreeNode node = <strong class="jxr_keyword">new</strong> ComparableDefaultMutableTreeNode();
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>         String label = dn.getDomain();
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>         XNodeInfo userObject =
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>                 <strong class="jxr_keyword">new</strong> XNodeInfo(Type.NONMBEAN, label, label, label);
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>         node.setUserObject(userObject);
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>         <strong class="jxr_keyword">return</strong> node;
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>     }
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> 
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> <em class="jxr_javadoccomment">     * Creates the node corresponding to the whole Dn, i.e. an MBean.</em>
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>     <strong class="jxr_keyword">private</strong> DefaultMutableTreeNode createDnNode(
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>             Dn dn, Token token, XMBean xmbean) {
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>         DefaultMutableTreeNode node = <strong class="jxr_keyword">new</strong> ComparableDefaultMutableTreeNode();
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>         Object data = createNodeValue(xmbean, token);
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>         String label = data.toString();
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>         XNodeInfo userObject = <strong class="jxr_keyword">new</strong> XNodeInfo(Type.MBEAN, data, label,
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>                 xmbean.getObjectName().toString());
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>         node.setUserObject(userObject);
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>         <strong class="jxr_keyword">return</strong> node;
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>     }
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> 
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> <em class="jxr_javadoccomment">     * Creates the node corresponding to a subDn, i.e. a non-MBean</em>
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> <em class="jxr_javadoccomment">     * intermediate node.</em>
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>     <strong class="jxr_keyword">private</strong> DefaultMutableTreeNode createSubDnNode(Dn dn, Token token) {
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>         DefaultMutableTreeNode node = <strong class="jxr_keyword">new</strong> ComparableDefaultMutableTreeNode();
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>         String label = isKeyValueView() ? token.getTokenValue() : token.getValue();
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>         XNodeInfo userObject =
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>                 <strong class="jxr_keyword">new</strong> XNodeInfo(Type.NONMBEAN, label, label, token.getTokenValue());
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>         node.setUserObject(userObject);
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>         <strong class="jxr_keyword">return</strong> node;
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>     }
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> 
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>     <strong class="jxr_keyword">private</strong> Object createNodeValue(XMBean xmbean, Token token) {
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>         String label = isKeyValueView() ? token.getTokenValue() : token.getValue();
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>         xmbean.setText(label);
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>         <strong class="jxr_keyword">return</strong> xmbean;
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>     }
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> 
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> <em class="jxr_javadoccomment">     * Parses the MBean ObjectName comma-separated properties string and puts</em>
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> <em class="jxr_javadoccomment">     * the individual key/value pairs into the map. Key order in the properties</em>
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> <em class="jxr_javadoccomment">     * string is preserved by the map.</em>
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Map&lt;String, String&gt; extractKeyValuePairs(
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>             String props, ObjectName mbean) {
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>         Map&lt;String, String&gt; map = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;String, String&gt;();
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>         <strong class="jxr_keyword">int</strong> eq = props.indexOf(<span class="jxr_string">"="</span>);
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>         <strong class="jxr_keyword">while</strong> (eq != -1) {
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>             String key = props.substring(0, eq);
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>             String value = mbean.getKeyProperty(key);
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>             map.put(key, value);
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>             props = props.substring(key.length() + 1 + value.length());
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>             <strong class="jxr_keyword">if</strong> (props.startsWith(<span class="jxr_string">","</span>)) {
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>                 props = props.substring(1);
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>             }
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>             eq = props.indexOf(<span class="jxr_string">"="</span>);
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>         }
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>         <strong class="jxr_keyword">return</strong> map;
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>     }
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> 
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> <em class="jxr_javadoccomment">     * Returns the ordered key property list that will be used to build the</em>
+<a class="jxr_linenumber" name="L494" href="#L494">494</a> <em class="jxr_javadoccomment">     * MBean tree. If the "com.sun.tools.jconsole.mbeans.keyPropertyList" system</em>
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> <em class="jxr_javadoccomment">     * property is not specified, then the ordered key property list used</em>
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> <em class="jxr_javadoccomment">     * to build the MBean tree will be the one returned by the method</em>
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> <em class="jxr_javadoccomment">     * ObjectName.getKeyPropertyListString() with "type" as first key,</em>
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> <em class="jxr_javadoccomment">     * and "j2eeType" as second key, if present. If any of the keys specified</em>
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> <em class="jxr_javadoccomment">     * in the comma-separated key property list does not apply to the given</em>
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> <em class="jxr_javadoccomment">     * MBean then it will be discarded.</em>
+<a class="jxr_linenumber" name="L501" href="#L501">501</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> String getKeyPropertyListString(ObjectName mbean) {
+<a class="jxr_linenumber" name="L503" href="#L503">503</a>         String props = mbean.getKeyPropertyListString();
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>         Map&lt;String, String&gt; map = extractKeyValuePairs(props, mbean);
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>         StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>         <em class="jxr_comment">// Add the key/value pairs to the buffer following the</em>
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>         <em class="jxr_comment">// key order defined by the "orderedKeyPropertyList"</em>
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>         <strong class="jxr_keyword">for</strong> (String key : orderedKeyPropertyList) {
+<a class="jxr_linenumber" name="L509" href="#L509">509</a>             <strong class="jxr_keyword">if</strong> (map.containsKey(key)) {
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>                 sb.append(key + <span class="jxr_string">"="</span> + map.get(key) + <span class="jxr_string">","</span>);
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>                 map.remove(key);
+<a class="jxr_linenumber" name="L512" href="#L512">512</a>             }
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>         }
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>         <em class="jxr_comment">// Add the remaining key/value pairs to the buffer</em>
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>         <strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, String&gt; entry : map.entrySet()) {
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>             sb.append(entry.getKey() + <span class="jxr_string">"="</span> + entry.getValue() + <span class="jxr_string">","</span>);
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>         }
+<a class="jxr_linenumber" name="L518" href="#L518">518</a>         String orderedKeyPropertyListString = sb.toString();
+<a class="jxr_linenumber" name="L519" href="#L519">519</a>         orderedKeyPropertyListString = orderedKeyPropertyListString.substring(
+<a class="jxr_linenumber" name="L520" href="#L520">520</a>                 0, orderedKeyPropertyListString.length() - 1);
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>         <strong class="jxr_keyword">return</strong> orderedKeyPropertyListString;
+<a class="jxr_linenumber" name="L522" href="#L522">522</a>     }
+<a class="jxr_linenumber" name="L523" href="#L523">523</a> 
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>     <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L525" href="#L525">525</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addMetadataNodes(DefaultMutableTreeNode node) {
+<a class="jxr_linenumber" name="L526" href="#L526">526</a>         XMBean mbean = (XMBean) ((XNodeInfo) node.getUserObject()).getData();
+<a class="jxr_linenumber" name="L527" href="#L527">527</a>         DefaultTreeModel model = (DefaultTreeModel) getModel();
+<a class="jxr_linenumber" name="L528" href="#L528">528</a>         MBeanInfoNodesSwingWorker sw =
+<a class="jxr_linenumber" name="L529" href="#L529">529</a>                 <strong class="jxr_keyword">new</strong> MBeanInfoNodesSwingWorker(model, node, mbean);
+<a class="jxr_linenumber" name="L530" href="#L530">530</a>         <strong class="jxr_keyword">if</strong> (sw != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L531" href="#L531">531</a>             sw.execute();
+<a class="jxr_linenumber" name="L532" href="#L532">532</a>         }
+<a class="jxr_linenumber" name="L533" href="#L533">533</a>     }
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> 
+<a class="jxr_linenumber" name="L535" href="#L535">535</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> MBeanInfoNodesSwingWorker
+<a class="jxr_linenumber" name="L536" href="#L536">536</a>             <strong class="jxr_keyword">extends</strong> SwingWorker&lt;Object[], Void&gt; {
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> 
+<a class="jxr_linenumber" name="L538" href="#L538">538</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> DefaultTreeModel model;
+<a class="jxr_linenumber" name="L539" href="#L539">539</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> DefaultMutableTreeNode node;
+<a class="jxr_linenumber" name="L540" href="#L540">540</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> XMBean mbean;
+<a class="jxr_linenumber" name="L541" href="#L541">541</a> 
+<a class="jxr_linenumber" name="L542" href="#L542">542</a>         <strong class="jxr_keyword">public</strong> MBeanInfoNodesSwingWorker(
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>                 DefaultTreeModel model,
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>                 DefaultMutableTreeNode node,
+<a class="jxr_linenumber" name="L545" href="#L545">545</a>                 XMBean mbean) {
+<a class="jxr_linenumber" name="L546" href="#L546">546</a>             <strong class="jxr_keyword">this</strong>.model = model;
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>             <strong class="jxr_keyword">this</strong>.node = node;
+<a class="jxr_linenumber" name="L548" href="#L548">548</a>             <strong class="jxr_keyword">this</strong>.mbean = mbean;
+<a class="jxr_linenumber" name="L549" href="#L549">549</a>         }
+<a class="jxr_linenumber" name="L550" href="#L550">550</a> 
+<a class="jxr_linenumber" name="L551" href="#L551">551</a>         @Override
+<a class="jxr_linenumber" name="L552" href="#L552">552</a>         <strong class="jxr_keyword">public</strong> Object[] doInBackground() <strong class="jxr_keyword">throws</strong> InstanceNotFoundException,
+<a class="jxr_linenumber" name="L553" href="#L553">553</a>                 IntrospectionException, ReflectionException, IOException {
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>             Object result[] = <strong class="jxr_keyword">new</strong> Object[2];
+<a class="jxr_linenumber" name="L555" href="#L555">555</a>             <em class="jxr_comment">// Retrieve MBeanInfo for this MBean</em>
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>             result[0] = mbean.getMBeanInfo();
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>             <em class="jxr_comment">// Check if this MBean is a notification emitter</em>
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>             result[1] = mbean.isBroadcaster();
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>             <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>         }
+<a class="jxr_linenumber" name="L561" href="#L561">561</a> 
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>         @Override
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>         <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> done() {
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>             <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>                 Object result[] = get();
+<a class="jxr_linenumber" name="L566" href="#L566">566</a>                 MBeanInfo mbeanInfo = (MBeanInfo) result[0];
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>                 Boolean isBroadcaster = (Boolean) result[1];
+<a class="jxr_linenumber" name="L568" href="#L568">568</a>                 <strong class="jxr_keyword">if</strong> (mbeanInfo != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>                     addMBeanInfoNodes(model, node, mbean, mbeanInfo, isBroadcaster);
+<a class="jxr_linenumber" name="L570" href="#L570">570</a>                 }
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>             } <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L572" href="#L572">572</a>                 Throwable t = Utils.getActualException(e);
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>                 <strong class="jxr_keyword">if</strong> (JConsole.isDebug()) {
+<a class="jxr_linenumber" name="L574" href="#L574">574</a>                     t.printStackTrace();
+<a class="jxr_linenumber" name="L575" href="#L575">575</a>                 }
+<a class="jxr_linenumber" name="L576" href="#L576">576</a>             }
+<a class="jxr_linenumber" name="L577" href="#L577">577</a>         }
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> 
+<a class="jxr_linenumber" name="L579" href="#L579">579</a>         <em class="jxr_comment">// Call on EDT</em>
+<a class="jxr_linenumber" name="L580" href="#L580">580</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addMBeanInfoNodes(
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>                 DefaultTreeModel tree, DefaultMutableTreeNode node,
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>                 XMBean mbean, MBeanInfo mbeanInfo, Boolean isBroadcaster) {
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>             MBeanAttributeInfo[] ai = mbeanInfo.getAttributes();
+<a class="jxr_linenumber" name="L584" href="#L584">584</a>             MBeanOperationInfo[] oi = mbeanInfo.getOperations();
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>             MBeanNotificationInfo[] ni = mbeanInfo.getNotifications();
+<a class="jxr_linenumber" name="L586" href="#L586">586</a> 
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>             <em class="jxr_comment">// Insert the Attributes/Operations/Notifications metadata nodes as</em>
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>             <em class="jxr_comment">// the three first children of this MBean node. This is only useful</em>
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>             <em class="jxr_comment">// when this MBean node denotes an MBean but it's not a leaf in the</em>
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>             <em class="jxr_comment">// MBean tree</em>
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>             <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>             <strong class="jxr_keyword">int</strong> childIndex = 0;
+<a class="jxr_linenumber" name="L593" href="#L593">593</a> 
+<a class="jxr_linenumber" name="L594" href="#L594">594</a>             <em class="jxr_comment">// MBeanAttributeInfo node</em>
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>             <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>             <strong class="jxr_keyword">if</strong> (ai != <strong class="jxr_keyword">null</strong> &amp;&amp; ai.length &gt; 0) {
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>                 DefaultMutableTreeNode attributes = <strong class="jxr_keyword">new</strong> DefaultMutableTreeNode();
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>                 XNodeInfo attributesUO = <strong class="jxr_keyword">new</strong> XNodeInfo(Type.ATTRIBUTES, mbean,
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>                         Resources.getText(<span class="jxr_string">"Attributes"</span>), <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>                 attributes.setUserObject(attributesUO);
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>                 node.insert(attributes, childIndex++);
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>                 <strong class="jxr_keyword">for</strong> (MBeanAttributeInfo mbai : ai) {
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>                     DefaultMutableTreeNode attribute = <strong class="jxr_keyword">new</strong> DefaultMutableTreeNode();
+<a class="jxr_linenumber" name="L604" href="#L604">604</a>                     XNodeInfo attributeUO = <strong class="jxr_keyword">new</strong> XNodeInfo(Type.ATTRIBUTE,
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>                             <strong class="jxr_keyword">new</strong> Object[]{mbean, mbai}, mbai.getName(), <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>                     attribute.setUserObject(attributeUO);
+<a class="jxr_linenumber" name="L607" href="#L607">607</a>                     attribute.setAllowsChildren(false);
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>                     attributes.add(attribute);
+<a class="jxr_linenumber" name="L609" href="#L609">609</a>                 }
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>             }
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>             <em class="jxr_comment">// MBeanOperationInfo node</em>
+<a class="jxr_linenumber" name="L612" href="#L612">612</a>             <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>             <strong class="jxr_keyword">if</strong> (oi != <strong class="jxr_keyword">null</strong> &amp;&amp; oi.length &gt; 0) {
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>                 DefaultMutableTreeNode operations = <strong class="jxr_keyword">new</strong> DefaultMutableTreeNode();
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>                 XNodeInfo operationsUO = <strong class="jxr_keyword">new</strong> XNodeInfo(Type.OPERATIONS, mbean,
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>                         Resources.getText(<span class="jxr_string">"Operations"</span>), <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>                 operations.setUserObject(operationsUO);
+<a class="jxr_linenumber" name="L618" href="#L618">618</a>                 node.insert(operations, childIndex++);
+<a class="jxr_linenumber" name="L619" href="#L619">619</a>                 <strong class="jxr_keyword">for</strong> (MBeanOperationInfo mboi : oi) {
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>                     <em class="jxr_comment">// Compute the operation's tool tip text:</em>
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>                     <em class="jxr_comment">// "operationname(param1type,param2type,...)"</em>
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>                     <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>                     StringBuilder sb = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>                     <strong class="jxr_keyword">for</strong> (MBeanParameterInfo mbpi : mboi.getSignature()) {
+<a class="jxr_linenumber" name="L625" href="#L625">625</a>                         sb.append(mbpi.getType() + <span class="jxr_string">","</span>);
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>                     }
+<a class="jxr_linenumber" name="L627" href="#L627">627</a>                     String signature = sb.toString();
+<a class="jxr_linenumber" name="L628" href="#L628">628</a>                     <strong class="jxr_keyword">if</strong> (signature.length() &gt; 0) {
+<a class="jxr_linenumber" name="L629" href="#L629">629</a>                         <em class="jxr_comment">// Remove the trailing ','</em>
+<a class="jxr_linenumber" name="L630" href="#L630">630</a>                         <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>                         signature = signature.substring(0, signature.length() - 1);
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>                     }
+<a class="jxr_linenumber" name="L633" href="#L633">633</a>                     String toolTipText = mboi.getName() + <span class="jxr_string">"("</span> + signature + <span class="jxr_string">")"</span>;
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>                     <em class="jxr_comment">// Create operation node</em>
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>                     <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>                     DefaultMutableTreeNode operation = <strong class="jxr_keyword">new</strong> DefaultMutableTreeNode();
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>                     XNodeInfo operationUO = <strong class="jxr_keyword">new</strong> XNodeInfo(Type.OPERATION,
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>                             <strong class="jxr_keyword">new</strong> Object[]{mbean, mboi}, mboi.getName(), toolTipText);
+<a class="jxr_linenumber" name="L639" href="#L639">639</a>                     operation.setUserObject(operationUO);
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>                     operation.setAllowsChildren(false);
+<a class="jxr_linenumber" name="L641" href="#L641">641</a>                     operations.add(operation);
+<a class="jxr_linenumber" name="L642" href="#L642">642</a>                 }
+<a class="jxr_linenumber" name="L643" href="#L643">643</a>             }
+<a class="jxr_linenumber" name="L644" href="#L644">644</a>             <em class="jxr_comment">// MBeanNotificationInfo node</em>
+<a class="jxr_linenumber" name="L645" href="#L645">645</a>             <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>             <strong class="jxr_keyword">if</strong> (isBroadcaster != <strong class="jxr_keyword">null</strong> &amp;&amp; isBroadcaster.booleanValue()) {
+<a class="jxr_linenumber" name="L647" href="#L647">647</a>                 DefaultMutableTreeNode notifications = <strong class="jxr_keyword">new</strong> DefaultMutableTreeNode();
+<a class="jxr_linenumber" name="L648" href="#L648">648</a>                 XNodeInfo notificationsUO = <strong class="jxr_keyword">new</strong> XNodeInfo(Type.NOTIFICATIONS, mbean,
+<a class="jxr_linenumber" name="L649" href="#L649">649</a>                         Resources.getText(<span class="jxr_string">"Notifications"</span>), <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L650" href="#L650">650</a>                 notifications.setUserObject(notificationsUO);
+<a class="jxr_linenumber" name="L651" href="#L651">651</a>                 node.insert(notifications, childIndex++);
+<a class="jxr_linenumber" name="L652" href="#L652">652</a>                 <strong class="jxr_keyword">if</strong> (ni != <strong class="jxr_keyword">null</strong> &amp;&amp; ni.length &gt; 0) {
+<a class="jxr_linenumber" name="L653" href="#L653">653</a>                     <strong class="jxr_keyword">for</strong> (MBeanNotificationInfo mbni : ni) {
+<a class="jxr_linenumber" name="L654" href="#L654">654</a>                         DefaultMutableTreeNode notification =
+<a class="jxr_linenumber" name="L655" href="#L655">655</a>                                 <strong class="jxr_keyword">new</strong> DefaultMutableTreeNode();
+<a class="jxr_linenumber" name="L656" href="#L656">656</a>                         XNodeInfo notificationUO = <strong class="jxr_keyword">new</strong> XNodeInfo(Type.NOTIFICATION,
+<a class="jxr_linenumber" name="L657" href="#L657">657</a>                                 mbni, mbni.getName(), <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L658" href="#L658">658</a>                         notification.setUserObject(notificationUO);
+<a class="jxr_linenumber" name="L659" href="#L659">659</a>                         notification.setAllowsChildren(false);
+<a class="jxr_linenumber" name="L660" href="#L660">660</a>                         notifications.add(notification);
+<a class="jxr_linenumber" name="L661" href="#L661">661</a>                     }
+<a class="jxr_linenumber" name="L662" href="#L662">662</a>                 }
+<a class="jxr_linenumber" name="L663" href="#L663">663</a>             }
+<a class="jxr_linenumber" name="L664" href="#L664">664</a>             <em class="jxr_comment">// Update tree model</em>
+<a class="jxr_linenumber" name="L665" href="#L665">665</a>             <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L666" href="#L666">666</a>             model.reload(node);
+<a class="jxr_linenumber" name="L667" href="#L667">667</a>         }
+<a class="jxr_linenumber" name="L668" href="#L668">668</a>     }
+<a class="jxr_linenumber" name="L669" href="#L669">669</a>     <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L670" href="#L670">670</a>     <em class="jxr_comment">// Tree preferences</em>
+<a class="jxr_linenumber" name="L671" href="#L671">671</a>     <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L672" href="#L672">672</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> treeView;
+<a class="jxr_linenumber" name="L673" href="#L673">673</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> treeViewInit = false;
+<a class="jxr_linenumber" name="L674" href="#L674">674</a> 
+<a class="jxr_linenumber" name="L675" href="#L675">675</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isTreeView() {
+<a class="jxr_linenumber" name="L676" href="#L676">676</a>         <strong class="jxr_keyword">if</strong> (!treeViewInit) {
+<a class="jxr_linenumber" name="L677" href="#L677">677</a>             treeView = getTreeViewValue();
+<a class="jxr_linenumber" name="L678" href="#L678">678</a>             treeViewInit = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L679" href="#L679">679</a>         }
+<a class="jxr_linenumber" name="L680" href="#L680">680</a>         <strong class="jxr_keyword">return</strong> treeView;
+<a class="jxr_linenumber" name="L681" href="#L681">681</a>     }
+<a class="jxr_linenumber" name="L682" href="#L682">682</a> 
+<a class="jxr_linenumber" name="L683" href="#L683">683</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> getTreeViewValue() {
+<a class="jxr_linenumber" name="L684" href="#L684">684</a>         String tv = System.getProperty(<span class="jxr_string">"treeView"</span>);
+<a class="jxr_linenumber" name="L685" href="#L685">685</a>         <strong class="jxr_keyword">return</strong> ((tv == <strong class="jxr_keyword">null</strong>) ? <strong class="jxr_keyword">true</strong> : !(tv.equals(<span class="jxr_string">"false"</span>)));
+<a class="jxr_linenumber" name="L686" href="#L686">686</a>     }
+<a class="jxr_linenumber" name="L687" href="#L687">687</a>     <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L688" href="#L688">688</a>     <em class="jxr_comment">// MBean key-value preferences</em>
+<a class="jxr_linenumber" name="L689" href="#L689">689</a>     <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L690" href="#L690">690</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> keyValueView = Boolean.getBoolean(<span class="jxr_string">"keyValueView"</span>);
+<a class="jxr_linenumber" name="L691" href="#L691">691</a> 
+<a class="jxr_linenumber" name="L692" href="#L692">692</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> isKeyValueView() {
+<a class="jxr_linenumber" name="L693" href="#L693">693</a>         <strong class="jxr_keyword">return</strong> keyValueView;
+<a class="jxr_linenumber" name="L694" href="#L694">694</a>     }
+<a class="jxr_linenumber" name="L695" href="#L695">695</a> 
+<a class="jxr_linenumber" name="L696" href="#L696">696</a>     <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L697" href="#L697">697</a>     <em class="jxr_comment">// Utility classes</em>
+<a class="jxr_linenumber" name="L698" href="#L698">698</a>     <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L699" href="#L699">699</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> ComparableDefaultMutableTreeNode
+<a class="jxr_linenumber" name="L700" href="#L700">700</a>             <strong class="jxr_keyword">extends</strong> DefaultMutableTreeNode
+<a class="jxr_linenumber" name="L701" href="#L701">701</a>             <strong class="jxr_keyword">implements</strong> Comparable&lt;DefaultMutableTreeNode&gt; {
+<a class="jxr_linenumber" name="L702" href="#L702">702</a> 
+<a class="jxr_linenumber" name="L703" href="#L703">703</a>         <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> compareTo(DefaultMutableTreeNode node) {
+<a class="jxr_linenumber" name="L704" href="#L704">704</a>             <strong class="jxr_keyword">return</strong> (<strong class="jxr_keyword">this</strong>.toString().compareTo(node.toString()));
+<a class="jxr_linenumber" name="L705" href="#L705">705</a>         }
+<a class="jxr_linenumber" name="L706" href="#L706">706</a>     }
+<a class="jxr_linenumber" name="L707" href="#L707">707</a> 
+<a class="jxr_linenumber" name="L708" href="#L708">708</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Dn <strong class="jxr_keyword">implements</strong> Comparable&lt;Dn&gt; {
+<a class="jxr_linenumber" name="L709" href="#L709">709</a> 
+<a class="jxr_linenumber" name="L710" href="#L710">710</a>         <strong class="jxr_keyword">private</strong> ObjectName mbean;
+<a class="jxr_linenumber" name="L711" href="#L711">711</a>         <strong class="jxr_keyword">private</strong> String domain;
+<a class="jxr_linenumber" name="L712" href="#L712">712</a>         <strong class="jxr_keyword">private</strong> String keyPropertyList;
+<a class="jxr_linenumber" name="L713" href="#L713">713</a>         <strong class="jxr_keyword">private</strong> String hashDn;
+<a class="jxr_linenumber" name="L714" href="#L714">714</a>         <strong class="jxr_keyword">private</strong> List&lt;Token&gt; tokens = <strong class="jxr_keyword">new</strong> ArrayList&lt;Token&gt;();
+<a class="jxr_linenumber" name="L715" href="#L715">715</a> 
+<a class="jxr_linenumber" name="L716" href="#L716">716</a>         <strong class="jxr_keyword">public</strong> Dn(ObjectName mbean) {
+<a class="jxr_linenumber" name="L717" href="#L717">717</a>             <strong class="jxr_keyword">this</strong>.mbean = mbean;
+<a class="jxr_linenumber" name="L718" href="#L718">718</a>             <strong class="jxr_keyword">this</strong>.domain = mbean.getDomain();
+<a class="jxr_linenumber" name="L719" href="#L719">719</a>             <strong class="jxr_keyword">this</strong>.keyPropertyList = getKeyPropertyListString(mbean);
+<a class="jxr_linenumber" name="L720" href="#L720">720</a> 
+<a class="jxr_linenumber" name="L721" href="#L721">721</a>             <strong class="jxr_keyword">if</strong> (isTreeView()) {
+<a class="jxr_linenumber" name="L722" href="#L722">722</a>                 <em class="jxr_comment">// Tree view</em>
+<a class="jxr_linenumber" name="L723" href="#L723">723</a>                 Map&lt;String, String&gt; map =
+<a class="jxr_linenumber" name="L724" href="#L724">724</a>                         extractKeyValuePairs(keyPropertyList, mbean);
+<a class="jxr_linenumber" name="L725" href="#L725">725</a>                 <strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, String&gt; entry : map.entrySet()) {
+<a class="jxr_linenumber" name="L726" href="#L726">726</a>                     tokens.add(<strong class="jxr_keyword">new</strong> Token(<span class="jxr_string">"key"</span>, entry.getKey() + <span class="jxr_string">"="</span> + entry.getValue()));
+<a class="jxr_linenumber" name="L727" href="#L727">727</a>                 }
+<a class="jxr_linenumber" name="L728" href="#L728">728</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L729" href="#L729">729</a>                 <em class="jxr_comment">// Flat view</em>
+<a class="jxr_linenumber" name="L730" href="#L730">730</a>                 tokens.add(<strong class="jxr_keyword">new</strong> Token(<span class="jxr_string">"key"</span>, <span class="jxr_string">"properties="</span> + keyPropertyList));
+<a class="jxr_linenumber" name="L731" href="#L731">731</a>             }
+<a class="jxr_linenumber" name="L732" href="#L732">732</a> 
+<a class="jxr_linenumber" name="L733" href="#L733">733</a>             <em class="jxr_comment">// Add the domain as the first token in the Dn</em>
+<a class="jxr_linenumber" name="L734" href="#L734">734</a>             tokens.add(0, <strong class="jxr_keyword">new</strong> Token(<span class="jxr_string">"domain"</span>, <span class="jxr_string">"domain="</span> + domain));
+<a class="jxr_linenumber" name="L735" href="#L735">735</a> 
+<a class="jxr_linenumber" name="L736" href="#L736">736</a>             <em class="jxr_comment">// Reverse the Dn (from leaf to root)</em>
+<a class="jxr_linenumber" name="L737" href="#L737">737</a>             Collections.reverse(tokens);
+<a class="jxr_linenumber" name="L738" href="#L738">738</a> 
+<a class="jxr_linenumber" name="L739" href="#L739">739</a>             <em class="jxr_comment">// Compute hash for Dn</em>
+<a class="jxr_linenumber" name="L740" href="#L740">740</a>             computeHashDn();
+<a class="jxr_linenumber" name="L741" href="#L741">741</a>         }
+<a class="jxr_linenumber" name="L742" href="#L742">742</a> 
+<a class="jxr_linenumber" name="L743" href="#L743">743</a>         <strong class="jxr_keyword">public</strong> ObjectName getObjectName() {
+<a class="jxr_linenumber" name="L744" href="#L744">744</a>             <strong class="jxr_keyword">return</strong> mbean;
+<a class="jxr_linenumber" name="L745" href="#L745">745</a>         }
+<a class="jxr_linenumber" name="L746" href="#L746">746</a> 
+<a class="jxr_linenumber" name="L747" href="#L747">747</a>         <strong class="jxr_keyword">public</strong> String getDomain() {
+<a class="jxr_linenumber" name="L748" href="#L748">748</a>             <strong class="jxr_keyword">return</strong> domain;
+<a class="jxr_linenumber" name="L749" href="#L749">749</a>         }
+<a class="jxr_linenumber" name="L750" href="#L750">750</a> 
+<a class="jxr_linenumber" name="L751" href="#L751">751</a>         <strong class="jxr_keyword">public</strong> String getKeyPropertyList() {
+<a class="jxr_linenumber" name="L752" href="#L752">752</a>             <strong class="jxr_keyword">return</strong> keyPropertyList;
+<a class="jxr_linenumber" name="L753" href="#L753">753</a>         }
+<a class="jxr_linenumber" name="L754" href="#L754">754</a> 
+<a class="jxr_linenumber" name="L755" href="#L755">755</a>         <strong class="jxr_keyword">public</strong> Token getToken(<strong class="jxr_keyword">int</strong> index) {
+<a class="jxr_linenumber" name="L756" href="#L756">756</a>             <strong class="jxr_keyword">return</strong> tokens.get(index);
+<a class="jxr_linenumber" name="L757" href="#L757">757</a>         }
+<a class="jxr_linenumber" name="L758" href="#L758">758</a> 
+<a class="jxr_linenumber" name="L759" href="#L759">759</a>         <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> getTokenCount() {
+<a class="jxr_linenumber" name="L760" href="#L760">760</a>             <strong class="jxr_keyword">return</strong> tokens.size();
+<a class="jxr_linenumber" name="L761" href="#L761">761</a>         }
+<a class="jxr_linenumber" name="L762" href="#L762">762</a> 
+<a class="jxr_linenumber" name="L763" href="#L763">763</a>         <strong class="jxr_keyword">public</strong> String getHashDn() {
+<a class="jxr_linenumber" name="L764" href="#L764">764</a>             <strong class="jxr_keyword">return</strong> hashDn;
+<a class="jxr_linenumber" name="L765" href="#L765">765</a>         }
+<a class="jxr_linenumber" name="L766" href="#L766">766</a> 
+<a class="jxr_linenumber" name="L767" href="#L767">767</a>         <strong class="jxr_keyword">public</strong> String getHashKey(Token token) {
+<a class="jxr_linenumber" name="L768" href="#L768">768</a>             <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> begin = hashDn.indexOf(token.getTokenValue());
+<a class="jxr_linenumber" name="L769" href="#L769">769</a>             <strong class="jxr_keyword">return</strong> hashDn.substring(begin, hashDn.length());
+<a class="jxr_linenumber" name="L770" href="#L770">770</a>         }
+<a class="jxr_linenumber" name="L771" href="#L771">771</a> 
+<a class="jxr_linenumber" name="L772" href="#L772">772</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> computeHashDn() {
+<a class="jxr_linenumber" name="L773" href="#L773">773</a>             <strong class="jxr_keyword">if</strong> (tokens.isEmpty()) {
+<a class="jxr_linenumber" name="L774" href="#L774">774</a>                 <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L775" href="#L775">775</a>             }
+<a class="jxr_linenumber" name="L776" href="#L776">776</a>             <strong class="jxr_keyword">final</strong> StringBuilder hdn = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L777" href="#L777">777</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; tokens.size(); i++) {
+<a class="jxr_linenumber" name="L778" href="#L778">778</a>                 hdn.append(tokens.get(i).getTokenValue());
+<a class="jxr_linenumber" name="L779" href="#L779">779</a>                 hdn.append(<span class="jxr_string">","</span>);
+<a class="jxr_linenumber" name="L780" href="#L780">780</a>             }
+<a class="jxr_linenumber" name="L781" href="#L781">781</a>             hashDn = hdn.substring(0, hdn.length() - 1);
+<a class="jxr_linenumber" name="L782" href="#L782">782</a>         }
+<a class="jxr_linenumber" name="L783" href="#L783">783</a> 
+<a class="jxr_linenumber" name="L784" href="#L784">784</a>         @Override
+<a class="jxr_linenumber" name="L785" href="#L785">785</a>         <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L786" href="#L786">786</a>             <strong class="jxr_keyword">return</strong> domain + <span class="jxr_string">":"</span> + keyPropertyList;
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>         }
+<a class="jxr_linenumber" name="L788" href="#L788">788</a> 
+<a class="jxr_linenumber" name="L789" href="#L789">789</a>         <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> compareTo(Dn dn) {
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>.toString().compareTo(dn.toString());
+<a class="jxr_linenumber" name="L791" href="#L791">791</a>         }
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>     }
+<a class="jxr_linenumber" name="L793" href="#L793">793</a> 
+<a class="jxr_linenumber" name="L794" href="#L794">794</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Token {
+<a class="jxr_linenumber" name="L795" href="#L795">795</a> 
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>         <strong class="jxr_keyword">private</strong> String tokenType;
+<a class="jxr_linenumber" name="L797" href="#L797">797</a>         <strong class="jxr_keyword">private</strong> String tokenValue;
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>         <strong class="jxr_keyword">private</strong> String key;
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>         <strong class="jxr_keyword">private</strong> String value;
+<a class="jxr_linenumber" name="L800" href="#L800">800</a> 
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>         <strong class="jxr_keyword">public</strong> Token(String tokenType, String tokenValue) {
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>             <strong class="jxr_keyword">this</strong>.tokenType = tokenType;
+<a class="jxr_linenumber" name="L803" href="#L803">803</a>             <strong class="jxr_keyword">this</strong>.tokenValue = tokenValue;
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>             buildKeyValue();
+<a class="jxr_linenumber" name="L805" href="#L805">805</a>         }
+<a class="jxr_linenumber" name="L806" href="#L806">806</a> 
+<a class="jxr_linenumber" name="L807" href="#L807">807</a>         <strong class="jxr_keyword">public</strong> String getTokenType() {
+<a class="jxr_linenumber" name="L808" href="#L808">808</a>             <strong class="jxr_keyword">return</strong> tokenType;
+<a class="jxr_linenumber" name="L809" href="#L809">809</a>         }
+<a class="jxr_linenumber" name="L810" href="#L810">810</a> 
+<a class="jxr_linenumber" name="L811" href="#L811">811</a>         <strong class="jxr_keyword">public</strong> String getTokenValue() {
+<a class="jxr_linenumber" name="L812" href="#L812">812</a>             <strong class="jxr_keyword">return</strong> tokenValue;
+<a class="jxr_linenumber" name="L813" href="#L813">813</a>         }
+<a class="jxr_linenumber" name="L814" href="#L814">814</a> 
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>         <strong class="jxr_keyword">public</strong> String getKey() {
+<a class="jxr_linenumber" name="L816" href="#L816">816</a>             <strong class="jxr_keyword">return</strong> key;
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>         }
+<a class="jxr_linenumber" name="L818" href="#L818">818</a> 
+<a class="jxr_linenumber" name="L819" href="#L819">819</a>         <strong class="jxr_keyword">public</strong> String getValue() {
+<a class="jxr_linenumber" name="L820" href="#L820">820</a>             <strong class="jxr_keyword">return</strong> value;
+<a class="jxr_linenumber" name="L821" href="#L821">821</a>         }
+<a class="jxr_linenumber" name="L822" href="#L822">822</a> 
+<a class="jxr_linenumber" name="L823" href="#L823">823</a>         <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> buildKeyValue() {
+<a class="jxr_linenumber" name="L824" href="#L824">824</a>             <strong class="jxr_keyword">int</strong> index = tokenValue.indexOf(<span class="jxr_string">"="</span>);
+<a class="jxr_linenumber" name="L825" href="#L825">825</a>             <strong class="jxr_keyword">if</strong> (index &lt; 0) {
+<a class="jxr_linenumber" name="L826" href="#L826">826</a>                 key = tokenValue;
+<a class="jxr_linenumber" name="L827" href="#L827">827</a>                 value = tokenValue;
+<a class="jxr_linenumber" name="L828" href="#L828">828</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L829" href="#L829">829</a>                 key = tokenValue.substring(0, index);
+<a class="jxr_linenumber" name="L830" href="#L830">830</a>                 value = tokenValue.substring(index + 1, tokenValue.length());
+<a class="jxr_linenumber" name="L831" href="#L831">831</a>             }
+<a class="jxr_linenumber" name="L832" href="#L832">832</a>         }
+<a class="jxr_linenumber" name="L833" href="#L833">833</a>     }
+<a class="jxr_linenumber" name="L834" href="#L834">834</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

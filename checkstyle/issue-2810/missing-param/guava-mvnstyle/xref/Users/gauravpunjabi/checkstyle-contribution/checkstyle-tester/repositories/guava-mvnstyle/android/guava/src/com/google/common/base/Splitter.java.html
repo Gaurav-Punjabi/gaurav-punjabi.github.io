@@ -1,0 +1,629 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>Splitter xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (C) 2009 The Guava Authors</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * in compliance with the License. You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software distributed under the License</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * or implied. See the License for the specific language governing permissions and limitations under</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * the License.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">package</strong> com.google.common.base;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkArgument;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkNotNull;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.Beta;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.GwtCompatible;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.GwtIncompatible;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.util.Iterator;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> java.util.LinkedHashMap;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.regex.Pattern;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment"> * Extracts non-overlapping substrings from an input string, typically by recognizing appearances of</em>
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment"> * a &lt;i&gt;separator&lt;/i&gt; sequence. This separator can be specified as a single {@linkplain #on(char)</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> * character}, fixed {@linkplain #on(String) string}, {@linkplain #onPattern regular expression} or</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment"> * {@link #on(CharMatcher) CharMatcher} instance. Or, instead of using a separator at all, a</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment"> * splitter can extract adjacent substrings of a given {@linkplain #fixedLength fixed length}.</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;For example, this expression:</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment"> * &lt;pre&gt;{@code</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment"> * Splitter.on(',').split("foo,bar,qux")</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment"> * }&lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment"> * ... produces an {@code Iterable} containing {@code "foo"}, {@code "bar"} and {@code "qux"}, in</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment"> * that order.</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;By default, {@code Splitter}'s behavior is simplistic and unassuming. The following</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment"> * expression:</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment"> * &lt;pre&gt;{@code</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment"> * Splitter.on(',').split(" foo,,,  bar ,")</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> * }&lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> * ... yields the substrings {@code [" foo", "", "", " bar ", ""]}. If this is not the desired</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> * behavior, use configuration methods to obtain a &lt;i&gt;new&lt;/i&gt; splitter instance with modified</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment"> * behavior:</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment"> * &lt;pre&gt;{@code</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment"> * private static final Splitter MY_SPLITTER = Splitter.on(',')</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> *     .trimResults()</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> *     .omitEmptyStrings();</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> * }&lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;Now {@code MY_SPLITTER.split("foo,,, bar ,")} returns just {@code ["foo", "bar"]}. Note that</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment"> * the order in which these configuration methods are called is never significant.</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;&lt;b&gt;Warning:&lt;/b&gt; Splitter instances are immutable. Invoking a configuration method has no</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment"> * effect on the receiving instance; you must store and use the new splitter instance it returns</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment"> * instead.</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment"> * &lt;pre&gt;{@code</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment"> * // Do NOT do this</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment"> * Splitter splitter = Splitter.on('/');</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment"> * splitter.trimResults(); // does nothing!</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment"> * return splitter.split("wrong / wrong / wrong");</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment"> * }&lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;For separator-based splitters that do not use {@code omitEmptyStrings}, an input string</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment"> * containing {@code n} occurrences of the separator naturally yields an iterable of size {@code n +</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment"> * 1}. So if the separator does not occur anywhere in the input, a single substring is returned</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_javadoccomment"> * containing the entire input. Consequently, all splitters split the empty string to {@code [""]}</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment"> * (note: even fixed-length splitters).</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;Splitter instances are thread-safe immutable, and are therefore safe to store as {@code static</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment"> * final} constants.</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;The {@link Joiner} class provides the inverse operation to splitting, but note that a</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  <em class="jxr_javadoccomment"> * round-trip between the two should be assumed to be lossy.</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;See the Guava User Guide article on &lt;a</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment"> * href="<a href="https://github.com/google/guava/wiki/StringsExplained" target="alexandria_uri">https://github.com/google/guava/wiki/StringsExplained</a>#splitter"&gt;{@code Splitter}&lt;/a&gt;.</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment"> * @author Julien Silland</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_javadoccomment"> * @author Jesse Wilson</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_javadoccomment"> * @author Kevin Bourrillion</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment"> * @author Louis Wasserman</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment"> * @since 1.0</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  @GwtCompatible(emulated = <strong class="jxr_keyword">true</strong>)
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> Splitter {
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> CharMatcher trimmer;
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> omitEmptyStrings;
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Strategy strategy;
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> limit;
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>   <strong class="jxr_keyword">private</strong> Splitter(Strategy strategy) {
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>     <strong class="jxr_keyword">this</strong>(strategy, false, CharMatcher.none(), Integer.MAX_VALUE);
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>   }
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>   <strong class="jxr_keyword">private</strong> Splitter(Strategy strategy, <strong class="jxr_keyword">boolean</strong> omitEmptyStrings, CharMatcher trimmer, <strong class="jxr_keyword">int</strong> limit) {
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>     <strong class="jxr_keyword">this</strong>.strategy = strategy;
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>     <strong class="jxr_keyword">this</strong>.omitEmptyStrings = omitEmptyStrings;
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>     <strong class="jxr_keyword">this</strong>.trimmer = trimmer;
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>     <strong class="jxr_keyword">this</strong>.limit = limit;
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>   }
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> <em class="jxr_javadoccomment">   * Returns a splitter that uses the given single-character separator. For example, {@code</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">   * Splitter.on(',').split("foo,,bar")} returns an iterable containing {@code ["foo", "", "bar"]}.</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment">   * @param separator the character to recognize as a separator</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">   * @return a splitter, with default settings, that recognizes that separator</em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Splitter on(<strong class="jxr_keyword">char</strong> separator) {
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>     <strong class="jxr_keyword">return</strong> on(CharMatcher.is(separator));
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>   }
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> <em class="jxr_javadoccomment">   * Returns a splitter that considers any single character matched by the given {@code CharMatcher}</em>
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> <em class="jxr_javadoccomment">   * to be a separator. For example, {@code</em>
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> <em class="jxr_javadoccomment">   * Splitter.on(CharMatcher.anyOf(";,")).split("foo,;bar,quux")} returns an iterable containing</em>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> <em class="jxr_javadoccomment">   * {@code ["foo", "", "bar", "quux"]}.</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_javadoccomment">   * @param separatorMatcher a {@link CharMatcher} that determines whether a character is a</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_javadoccomment">   *     separator</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> <em class="jxr_javadoccomment">   * @return a splitter, with default settings, that uses this matcher</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Splitter on(<strong class="jxr_keyword">final</strong> CharMatcher separatorMatcher) {
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>     checkNotNull(separatorMatcher);
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Splitter(
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>         <strong class="jxr_keyword">new</strong> Strategy() {
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>           @Override
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>           <strong class="jxr_keyword">public</strong> SplittingIterator iterator(Splitter splitter, <strong class="jxr_keyword">final</strong> CharSequence toSplit) {
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> SplittingIterator(splitter, toSplit) {
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>               @Override
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>               <strong class="jxr_keyword">int</strong> separatorStart(<strong class="jxr_keyword">int</strong> start) {
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>                 <strong class="jxr_keyword">return</strong> separatorMatcher.indexIn(toSplit, start);
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>               }
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>               @Override
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>               <strong class="jxr_keyword">int</strong> separatorEnd(<strong class="jxr_keyword">int</strong> separatorPosition) {
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>                 <strong class="jxr_keyword">return</strong> separatorPosition + 1;
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>               }
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>             };
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>           }
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>         });
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>   }
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment">   * Returns a splitter that uses the given fixed string as a separator. For example, {@code</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> <em class="jxr_javadoccomment">   * Splitter.on(", ").split("foo, bar,baz")} returns an iterable containing {@code ["foo",</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment">   * "bar,baz"]}.</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> <em class="jxr_javadoccomment">   * @param separator the literal, nonempty string to recognize as a separator</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> <em class="jxr_javadoccomment">   * @return a splitter, with default settings, that recognizes that separator</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Splitter on(<strong class="jxr_keyword">final</strong> String separator) {
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>     checkArgument(separator.length() != 0, <span class="jxr_string">"The separator may not be the empty string."</span>);
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>     <strong class="jxr_keyword">if</strong> (separator.length() == 1) {
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>       <strong class="jxr_keyword">return</strong> Splitter.on(separator.charAt(0));
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>     }
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Splitter(
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>         <strong class="jxr_keyword">new</strong> Strategy() {
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>           @Override
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>           <strong class="jxr_keyword">public</strong> SplittingIterator iterator(Splitter splitter, CharSequence toSplit) {
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> SplittingIterator(splitter, toSplit) {
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>               @Override
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>               <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> separatorStart(<strong class="jxr_keyword">int</strong> start) {
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>                 <strong class="jxr_keyword">int</strong> separatorLength = separator.length();
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>                 positions:
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>                 <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> p = start, last = toSplit.length() - separatorLength; p &lt;= last; p++) {
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>                   <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; separatorLength; i++) {
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>                     <strong class="jxr_keyword">if</strong> (toSplit.charAt(i + p) != separator.charAt(i)) {
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>                       <strong class="jxr_keyword">continue</strong> positions;
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>                     }
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>                   }
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>                   <strong class="jxr_keyword">return</strong> p;
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>                 }
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>                 <strong class="jxr_keyword">return</strong> -1;
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>               }
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>               @Override
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>               <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> separatorEnd(<strong class="jxr_keyword">int</strong> separatorPosition) {
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>                 <strong class="jxr_keyword">return</strong> separatorPosition + separator.length();
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>               }
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>             };
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>           }
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>         });
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>   }
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> <em class="jxr_javadoccomment">   * Returns a splitter that considers any subsequence matching {@code pattern} to be a separator.</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_javadoccomment">   * For example, {@code Splitter.on(Pattern.compile("\r?\n")).split(entireFile)} splits a string</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">   * into lines whether it uses DOS-style or UNIX-style line terminators.</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">   * @param separatorPattern the pattern that determines whether a subsequence is a separator. This</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_javadoccomment">   *     pattern may not match the empty string.</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> <em class="jxr_javadoccomment">   * @return a splitter, with default settings, that uses this pattern</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code separatorPattern} matches the empty string</em>
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>   @GwtIncompatible <em class="jxr_comment">// java.util.regex</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Splitter on(Pattern separatorPattern) {
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>     <strong class="jxr_keyword">return</strong> on(<strong class="jxr_keyword">new</strong> JdkPattern(separatorPattern));
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>   }
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Splitter on(<strong class="jxr_keyword">final</strong> CommonPattern separatorPattern) {
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>     checkArgument(
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>         !separatorPattern.matcher(<span class="jxr_string">""</span>).matches(),
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>         <span class="jxr_string">"The pattern may not match the empty string: %s"</span>,
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>         separatorPattern);
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Splitter(
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>         <strong class="jxr_keyword">new</strong> Strategy() {
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>           @Override
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>           <strong class="jxr_keyword">public</strong> SplittingIterator iterator(<strong class="jxr_keyword">final</strong> Splitter splitter, CharSequence toSplit) {
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>             <strong class="jxr_keyword">final</strong> CommonMatcher matcher = separatorPattern.matcher(toSplit);
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> SplittingIterator(splitter, toSplit) {
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>               @Override
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>               <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> separatorStart(<strong class="jxr_keyword">int</strong> start) {
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>                 <strong class="jxr_keyword">return</strong> matcher.find(start) ? matcher.start() : -1;
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>               }
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>               @Override
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>               <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> separatorEnd(<strong class="jxr_keyword">int</strong> separatorPosition) {
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>                 <strong class="jxr_keyword">return</strong> matcher.end();
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>               }
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>             };
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>           }
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>         });
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>   }
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> 
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> <em class="jxr_javadoccomment">   * Returns a splitter that considers any subsequence matching a given pattern (regular expression)</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_javadoccomment">   * to be a separator. For example, {@code Splitter.onPattern("\r?\n").split(entireFile)} splits a</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_javadoccomment">   * string into lines whether it uses DOS-style or UNIX-style line terminators. This is equivalent</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_javadoccomment">   * to {@code Splitter.on(Pattern.compile(pattern))}.</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> <em class="jxr_javadoccomment">   * @param separatorPattern the pattern that determines whether a subsequence is a separator. This</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> <em class="jxr_javadoccomment">   *     pattern may not match the empty string.</em>
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> <em class="jxr_javadoccomment">   * @return a splitter, with default settings, that uses this pattern</em>
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code separatorPattern} matches the empty string or is a</em>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> <em class="jxr_javadoccomment">   *     malformed expression</em>
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>   @GwtIncompatible <em class="jxr_comment">// java.util.regex</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Splitter onPattern(String separatorPattern) {
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>     <strong class="jxr_keyword">return</strong> on(Platform.compilePattern(separatorPattern));
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>   }
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> 
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">   * Returns a splitter that divides strings into pieces of the given length. For example, {@code</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> <em class="jxr_javadoccomment">   * Splitter.fixedLength(2).split("abcde")} returns an iterable containing {@code ["ab", "cd",</em>
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">   * "e"]}. The last piece can be smaller than {@code length} but will never be empty.</em>
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;Note:&lt;/b&gt; if {@link #fixedLength} is used in conjunction with {@link #limit}, the final</em>
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_javadoccomment">   * split piece &lt;i&gt;may be longer than the specified fixed length&lt;/i&gt;. This is because the splitter</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_javadoccomment">   * will &lt;i&gt;stop splitting when the limit is reached&lt;/i&gt;, and just return the final piece as-is.</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;Exception:&lt;/b&gt; for consistency with separator-based splitters, {@code split("")} does not</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_javadoccomment">   * yield an empty iterable, but an iterable containing {@code ""}. This is the only case in which</em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">   * {@code Iterables.size(split(input))} does not equal {@code IntMath.divide(input.length(),</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_javadoccomment">   * length, CEILING)}. To avoid this behavior, use {@code omitEmptyStrings}.</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> <em class="jxr_javadoccomment">   * @param length the desired length of pieces after splitting, a positive integer</em>
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> <em class="jxr_javadoccomment">   * @return a splitter, with default settings, that can split into fixed sized pieces</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code length} is zero or negative</em>
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> Splitter fixedLength(<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> length) {
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>     checkArgument(length &gt; 0, <span class="jxr_string">"The length may not be less than 1"</span>);
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> 
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Splitter(
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>         <strong class="jxr_keyword">new</strong> Strategy() {
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>           @Override
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>           <strong class="jxr_keyword">public</strong> SplittingIterator iterator(<strong class="jxr_keyword">final</strong> Splitter splitter, CharSequence toSplit) {
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> SplittingIterator(splitter, toSplit) {
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>               @Override
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>               <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> separatorStart(<strong class="jxr_keyword">int</strong> start) {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>                 <strong class="jxr_keyword">int</strong> nextChunkStart = start + length;
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>                 <strong class="jxr_keyword">return</strong> (nextChunkStart &lt; toSplit.length() ? nextChunkStart : -1);
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>               }
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> 
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>               @Override
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>               <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> separatorEnd(<strong class="jxr_keyword">int</strong> separatorPosition) {
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>                 <strong class="jxr_keyword">return</strong> separatorPosition;
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>               }
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>             };
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>           }
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>         });
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>   }
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> <em class="jxr_javadoccomment">   * Returns a splitter that behaves equivalently to {@code this} splitter, but automatically omits</em>
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> <em class="jxr_javadoccomment">   * empty strings from the results. For example, {@code</em>
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> <em class="jxr_javadoccomment">   * Splitter.on(',').omitEmptyStrings().split(",a,,,b,c,,")} returns an iterable containing only</em>
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> <em class="jxr_javadoccomment">   * {@code ["a", "b", "c"]}.</em>
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> <em class="jxr_javadoccomment">   * &lt;p&gt;If either {@code trimResults} option is also specified when creating a splitter, that</em>
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> <em class="jxr_javadoccomment">   * splitter always trims results first before checking for emptiness. So, for example, {@code</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> <em class="jxr_javadoccomment">   * Splitter.on(':').omitEmptyStrings().trimResults().split(": : : ")} returns an empty iterable.</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Note that it is ordinarily not possible for {@link #split(CharSequence)} to return an empty</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> <em class="jxr_javadoccomment">   * iterable, but when using this option, it can (if the input sequence consists of nothing but</em>
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> <em class="jxr_javadoccomment">   * separators).</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> <em class="jxr_javadoccomment">   * @return a splitter with the desired configuration</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>   <strong class="jxr_keyword">public</strong> Splitter omitEmptyStrings() {
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Splitter(strategy, <strong class="jxr_keyword">true</strong>, trimmer, limit);
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>   }
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> <em class="jxr_javadoccomment">   * Returns a splitter that behaves equivalently to {@code this} splitter but stops splitting after</em>
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> <em class="jxr_javadoccomment">   * it reaches the limit. The limit defines the maximum number of items returned by the iterator,</em>
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> <em class="jxr_javadoccomment">   * or the maximum size of the list returned by {@link #splitToList}.</em>
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> <em class="jxr_javadoccomment">   * &lt;p&gt;For example, {@code Splitter.on(',').limit(3).split("a,b,c,d")} returns an iterable</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> <em class="jxr_javadoccomment">   * containing {@code ["a", "b", "c,d"]}. When omitting empty strings, the omitted strings do not</em>
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> <em class="jxr_javadoccomment">   * count. Hence, {@code Splitter.on(',').limit(3).omitEmptyStrings().split("a,,,b,,,c,d")} returns</em>
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> <em class="jxr_javadoccomment">   * an iterable containing {@code ["a", "b", "c,d"}. When trim is requested, all entries are</em>
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> <em class="jxr_javadoccomment">   * trimmed, including the last. Hence {@code Splitter.on(',').limit(3).trimResults().split(" a , b</em>
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> <em class="jxr_javadoccomment">   * , c , d ")} results in {@code ["a", "b", "c , d"]}.</em>
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> <em class="jxr_javadoccomment">   * @param maxItems the maximum number of items returned</em>
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> <em class="jxr_javadoccomment">   * @return a splitter with the desired configuration</em>
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> <em class="jxr_javadoccomment">   * @since 9.0</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>   <strong class="jxr_keyword">public</strong> Splitter limit(<strong class="jxr_keyword">int</strong> maxItems) {
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>     checkArgument(maxItems &gt; 0, <span class="jxr_string">"must be greater than zero: %s"</span>, maxItems);
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Splitter(strategy, omitEmptyStrings, trimmer, maxItems);
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>   }
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> 
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> <em class="jxr_javadoccomment">   * Returns a splitter that behaves equivalently to {@code this} splitter, but automatically</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> <em class="jxr_javadoccomment">   * removes leading and trailing {@linkplain CharMatcher#whitespace whitespace} from each returned</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> <em class="jxr_javadoccomment">   * substring; equivalent to {@code trimResults(CharMatcher.whitespace())}. For example, {@code</em>
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> <em class="jxr_javadoccomment">   * Splitter.on(',').trimResults().split(" a, b ,c ")} returns an iterable containing {@code ["a",</em>
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> <em class="jxr_javadoccomment">   * "b", "c"]}.</em>
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> <em class="jxr_javadoccomment">   * @return a splitter with the desired configuration</em>
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>   <strong class="jxr_keyword">public</strong> Splitter trimResults() {
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>     <strong class="jxr_keyword">return</strong> trimResults(CharMatcher.whitespace());
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>   }
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> 
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> <em class="jxr_javadoccomment">   * Returns a splitter that behaves equivalently to {@code this} splitter, but removes all leading</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> <em class="jxr_javadoccomment">   * or trailing characters matching the given {@code CharMatcher} from each returned substring. For</em>
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> <em class="jxr_javadoccomment">   * example, {@code Splitter.on(',').trimResults(CharMatcher.is('_')).split("_a ,_b_ ,c__")}</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> <em class="jxr_javadoccomment">   * returns an iterable containing {@code ["a ", "b_ ", "c"]}.</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> <em class="jxr_javadoccomment">   * @param trimmer a {@link CharMatcher} that determines whether a character should be removed from</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> <em class="jxr_javadoccomment">   *     the beginning/end of a subsequence</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> <em class="jxr_javadoccomment">   * @return a splitter with the desired configuration</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>   <em class="jxr_comment">// TODO(kevinb): throw if a trimmer was already specified!</em>
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>   <strong class="jxr_keyword">public</strong> Splitter trimResults(CharMatcher trimmer) {
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>     checkNotNull(trimmer);
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Splitter(strategy, omitEmptyStrings, trimmer, limit);
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>   }
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> <em class="jxr_javadoccomment">   * Splits {@code sequence} into string components and makes them available through an {@link</em>
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> <em class="jxr_javadoccomment">   * Iterator}, which may be lazily evaluated. If you want an eagerly computed {@link List}, use</em>
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> <em class="jxr_javadoccomment">   * {@link #splitToList(CharSequence)}.</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_javadoccomment">   * @param sequence the sequence of characters to split</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment">   * @return an iteration over the segments split from the parameter</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>   <strong class="jxr_keyword">public</strong> Iterable&lt;String&gt; split(<strong class="jxr_keyword">final</strong> CharSequence sequence) {
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>     checkNotNull(sequence);
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Iterable&lt;String&gt;() {
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>       @Override
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>       <strong class="jxr_keyword">public</strong> Iterator&lt;String&gt; iterator() {
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>         <strong class="jxr_keyword">return</strong> splittingIterator(sequence);
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>       }
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>       @Override
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>       <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>         <strong class="jxr_keyword">return</strong> Joiner.on(<span class="jxr_string">", "</span>)
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>             .appendTo(<strong class="jxr_keyword">new</strong> StringBuilder().append('['), <strong class="jxr_keyword">this</strong>)
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>             .append(']')
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>             .toString();
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>       }
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>     };
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>   }
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>   <strong class="jxr_keyword">private</strong> Iterator&lt;String&gt; splittingIterator(CharSequence sequence) {
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>     <strong class="jxr_keyword">return</strong> strategy.iterator(<strong class="jxr_keyword">this</strong>, sequence);
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>   }
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_javadoccomment">   * Splits {@code sequence} into string components and returns them as an immutable list. If you</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_javadoccomment">   * want an {@link Iterable} which may be lazily evaluated, use {@link #split(CharSequence)}.</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> <em class="jxr_javadoccomment">   * @param sequence the sequence of characters to split</em>
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> <em class="jxr_javadoccomment">   * @return an immutable list of the segments split from the parameter</em>
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> <em class="jxr_javadoccomment">   * @since 15.0</em>
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>   <strong class="jxr_keyword">public</strong> List&lt;String&gt; splitToList(CharSequence sequence) {
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>     checkNotNull(sequence);
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> 
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>     Iterator&lt;String&gt; iterator = splittingIterator(sequence);
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>     List&lt;String&gt; result = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> 
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>     <strong class="jxr_keyword">while</strong> (iterator.hasNext()) {
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>       result.add(iterator.next());
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>     }
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>     <strong class="jxr_keyword">return</strong> Collections.unmodifiableList(result);
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>   }
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> 
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> <em class="jxr_javadoccomment">   * Returns a {@code MapSplitter} which splits entries based on this splitter, and splits entries</em>
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> <em class="jxr_javadoccomment">   * into keys and values using the specified separator.</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> <em class="jxr_javadoccomment">   * @since 10.0</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>   @Beta
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>   <strong class="jxr_keyword">public</strong> MapSplitter withKeyValueSeparator(String separator) {
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>     <strong class="jxr_keyword">return</strong> withKeyValueSeparator(on(separator));
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>   }
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> 
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> <em class="jxr_javadoccomment">   * Returns a {@code MapSplitter} which splits entries based on this splitter, and splits entries</em>
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> <em class="jxr_javadoccomment">   * into keys and values using the specified separator.</em>
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>   @Beta
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>   <strong class="jxr_keyword">public</strong> MapSplitter withKeyValueSeparator(<strong class="jxr_keyword">char</strong> separator) {
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>     <strong class="jxr_keyword">return</strong> withKeyValueSeparator(on(separator));
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>   }
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> 
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> <em class="jxr_javadoccomment">   * Returns a {@code MapSplitter} which splits entries based on this splitter, and splits entries</em>
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> <em class="jxr_javadoccomment">   * into keys and values using the specified key-value splitter.</em>
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Note: Any configuration option configured on this splitter, such as {@link #trimResults},</em>
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> <em class="jxr_javadoccomment">   * does not change the behavior of the {@code keyValueSplitter}.</em>
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Example:</em>
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> <em class="jxr_javadoccomment">   * &lt;pre&gt;{@code</em>
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> <em class="jxr_javadoccomment">   * String toSplit = " x -&gt; y, z-&gt; a ";</em>
+<a class="jxr_linenumber" name="L457" href="#L457">457</a> <em class="jxr_javadoccomment">   * Splitter outerSplitter = Splitter.on(',').trimResults();</em>
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> <em class="jxr_javadoccomment">   * MapSplitter mapSplitter = outerSplitter.withKeyValueSeparator(Splitter.on("-&gt;"));</em>
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> <em class="jxr_javadoccomment">   * Map&lt;String, String&gt; result = mapSplitter.split(toSplit);</em>
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> <em class="jxr_javadoccomment">   * assertThat(result).isEqualTo(ImmutableMap.of("x ", " y", "z", " a"));</em>
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> <em class="jxr_javadoccomment">   * }&lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> <em class="jxr_javadoccomment">   * @since 10.0</em>
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>   @Beta
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>   <strong class="jxr_keyword">public</strong> MapSplitter withKeyValueSeparator(Splitter keyValueSplitter) {
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> MapSplitter(<strong class="jxr_keyword">this</strong>, keyValueSplitter);
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>   }
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> 
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> <em class="jxr_javadoccomment">   * An object that splits strings into maps as {@code Splitter} splits iterables and lists. Like</em>
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> <em class="jxr_javadoccomment">   * {@code Splitter}, it is thread-safe and immutable. The common way to build instances is by</em>
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> <em class="jxr_javadoccomment">   * providing an additional {@linkplain Splitter#withKeyValueSeparator key-value separator} to</em>
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> <em class="jxr_javadoccomment">   * {@link Splitter}.</em>
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> <em class="jxr_javadoccomment">   * @since 10.0</em>
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>   @Beta
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> MapSplitter {
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String INVALID_ENTRY_MESSAGE = <span class="jxr_string">"Chunk [%s] is not a valid entry"</span>;
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Splitter outerSplitter;
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Splitter entrySplitter;
+<a class="jxr_linenumber" name="L483" href="#L483">483</a> 
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>     <strong class="jxr_keyword">private</strong> MapSplitter(Splitter outerSplitter, Splitter entrySplitter) {
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>       <strong class="jxr_keyword">this</strong>.outerSplitter = outerSplitter; <em class="jxr_comment">// only "this" is passed</em>
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>       <strong class="jxr_keyword">this</strong>.entrySplitter = checkNotNull(entrySplitter);
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>     }
+<a class="jxr_linenumber" name="L488" href="#L488">488</a> 
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> <em class="jxr_javadoccomment">     * Splits {@code sequence} into substrings, splits each substring into an entry, and returns an</em>
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> <em class="jxr_javadoccomment">     * unmodifiable map with each of the entries. For example, {@code</em>
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> <em class="jxr_javadoccomment">     * Splitter.on(';').trimResults().withKeyValueSeparator("=&gt;").split("a=&gt;b ; c=&gt;b")} will return</em>
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> <em class="jxr_javadoccomment">     * a mapping from {@code "a"} to {@code "b"} and {@code "c"} to {@code "b"}.</em>
+<a class="jxr_linenumber" name="L494" href="#L494">494</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> <em class="jxr_javadoccomment">     * &lt;p&gt;The returned map preserves the order of the entries from {@code sequence}.</em>
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> <em class="jxr_javadoccomment">     * @throws IllegalArgumentException if the specified sequence does not split into valid map</em>
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> <em class="jxr_javadoccomment">     *     entries, or if there are duplicate keys</em>
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>     <strong class="jxr_keyword">public</strong> Map&lt;String, String&gt; split(CharSequence sequence) {
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>       Map&lt;String, String&gt; map = <strong class="jxr_keyword">new</strong> LinkedHashMap&lt;&gt;();
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>       <strong class="jxr_keyword">for</strong> (String entry : outerSplitter.split(sequence)) {
+<a class="jxr_linenumber" name="L503" href="#L503">503</a>         Iterator&lt;String&gt; entryFields = entrySplitter.splittingIterator(entry);
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> 
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>         checkArgument(entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>         String key = entryFields.next();
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>         checkArgument(!map.containsKey(key), <span class="jxr_string">"Duplicate key [%s] found."</span>, key);
+<a class="jxr_linenumber" name="L508" href="#L508">508</a> 
+<a class="jxr_linenumber" name="L509" href="#L509">509</a>         checkArgument(entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>         String value = entryFields.next();
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>         map.put(key, value);
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> 
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>         checkArgument(!entryFields.hasNext(), INVALID_ENTRY_MESSAGE, entry);
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>       }
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>       <strong class="jxr_keyword">return</strong> Collections.unmodifiableMap(map);
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>     }
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>   }
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> 
+<a class="jxr_linenumber" name="L519" href="#L519">519</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">interface</strong> Strategy {
+<a class="jxr_linenumber" name="L520" href="#L520">520</a>     Iterator&lt;String&gt; iterator(Splitter splitter, CharSequence toSplit);
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>   }
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> 
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> SplittingIterator <strong class="jxr_keyword">extends</strong> AbstractIterator&lt;String&gt; {
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>     <strong class="jxr_keyword">final</strong> CharSequence toSplit;
+<a class="jxr_linenumber" name="L525" href="#L525">525</a>     <strong class="jxr_keyword">final</strong> CharMatcher trimmer;
+<a class="jxr_linenumber" name="L526" href="#L526">526</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> omitEmptyStrings;
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> 
+<a class="jxr_linenumber" name="L528" href="#L528">528</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> <em class="jxr_javadoccomment">     * Returns the first index in {@code toSplit} at or after {@code start} that contains the</em>
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> <em class="jxr_javadoccomment">     * separator.</em>
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L532" href="#L532">532</a>     <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">int</strong> separatorStart(<strong class="jxr_keyword">int</strong> start);
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> 
+<a class="jxr_linenumber" name="L534" href="#L534">534</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> <em class="jxr_javadoccomment">     * Returns the first index in {@code toSplit} after {@code separatorPosition} that does not</em>
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> <em class="jxr_javadoccomment">     * contain a separator. This method is only invoked after a call to {@code separatorStart}.</em>
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L538" href="#L538">538</a>     <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">int</strong> separatorEnd(<strong class="jxr_keyword">int</strong> separatorPosition);
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> 
+<a class="jxr_linenumber" name="L540" href="#L540">540</a>     <strong class="jxr_keyword">int</strong> offset = 0;
+<a class="jxr_linenumber" name="L541" href="#L541">541</a>     <strong class="jxr_keyword">int</strong> limit;
+<a class="jxr_linenumber" name="L542" href="#L542">542</a> 
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>     <strong class="jxr_keyword">protected</strong> SplittingIterator(Splitter splitter, CharSequence toSplit) {
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>       <strong class="jxr_keyword">this</strong>.trimmer = splitter.trimmer;
+<a class="jxr_linenumber" name="L545" href="#L545">545</a>       <strong class="jxr_keyword">this</strong>.omitEmptyStrings = splitter.omitEmptyStrings;
+<a class="jxr_linenumber" name="L546" href="#L546">546</a>       <strong class="jxr_keyword">this</strong>.limit = splitter.limit;
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>       <strong class="jxr_keyword">this</strong>.toSplit = toSplit;
+<a class="jxr_linenumber" name="L548" href="#L548">548</a>     }
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> 
+<a class="jxr_linenumber" name="L550" href="#L550">550</a>     @Override
+<a class="jxr_linenumber" name="L551" href="#L551">551</a>     <strong class="jxr_keyword">protected</strong> String computeNext() {
+<a class="jxr_linenumber" name="L552" href="#L552">552</a>       <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> <em class="jxr_comment">       * The returned string will be from the end of the last match to the beginning of the next</em>
+<a class="jxr_linenumber" name="L554" href="#L554">554</a> <em class="jxr_comment">       * one. nextStart is the start position of the returned substring, while offset is the place</em>
+<a class="jxr_linenumber" name="L555" href="#L555">555</a> <em class="jxr_comment">       * to start looking for a separator.</em>
+<a class="jxr_linenumber" name="L556" href="#L556">556</a> <em class="jxr_comment">       */</em>
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>       <strong class="jxr_keyword">int</strong> nextStart = offset;
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>       <strong class="jxr_keyword">while</strong> (offset != -1) {
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>         <strong class="jxr_keyword">int</strong> start = nextStart;
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>         <strong class="jxr_keyword">int</strong> end;
+<a class="jxr_linenumber" name="L561" href="#L561">561</a> 
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>         <strong class="jxr_keyword">int</strong> separatorPosition = separatorStart(offset);
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>         <strong class="jxr_keyword">if</strong> (separatorPosition == -1) {
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>           end = toSplit.length();
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>           offset = -1;
+<a class="jxr_linenumber" name="L566" href="#L566">566</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>           end = separatorPosition;
+<a class="jxr_linenumber" name="L568" href="#L568">568</a>           offset = separatorEnd(separatorPosition);
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>         }
+<a class="jxr_linenumber" name="L570" href="#L570">570</a>         <strong class="jxr_keyword">if</strong> (offset == nextStart) {
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>           <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L572" href="#L572">572</a> <em class="jxr_comment">           * This occurs when some pattern has an empty match, even if it doesn't match the empty</em>
+<a class="jxr_linenumber" name="L573" href="#L573">573</a> <em class="jxr_comment">           * string -- for example, if it requires lookahead or the like. The offset must be</em>
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> <em class="jxr_comment">           * increased to look for separators beyond this point, without changing the start position</em>
+<a class="jxr_linenumber" name="L575" href="#L575">575</a> <em class="jxr_comment">           * of the next returned substring -- so nextStart stays the same.</em>
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> <em class="jxr_comment">           */</em>
+<a class="jxr_linenumber" name="L577" href="#L577">577</a>           offset++;
+<a class="jxr_linenumber" name="L578" href="#L578">578</a>           <strong class="jxr_keyword">if</strong> (offset &gt; toSplit.length()) {
+<a class="jxr_linenumber" name="L579" href="#L579">579</a>             offset = -1;
+<a class="jxr_linenumber" name="L580" href="#L580">580</a>           }
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>           <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>         }
+<a class="jxr_linenumber" name="L583" href="#L583">583</a> 
+<a class="jxr_linenumber" name="L584" href="#L584">584</a>         <strong class="jxr_keyword">while</strong> (start &lt; end &amp;&amp; trimmer.matches(toSplit.charAt(start))) {
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>           start++;
+<a class="jxr_linenumber" name="L586" href="#L586">586</a>         }
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>         <strong class="jxr_keyword">while</strong> (end &gt; start &amp;&amp; trimmer.matches(toSplit.charAt(end - 1))) {
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>           end--;
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>         }
+<a class="jxr_linenumber" name="L590" href="#L590">590</a> 
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>         <strong class="jxr_keyword">if</strong> (omitEmptyStrings &amp;&amp; start == end) {
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>           <em class="jxr_comment">// Don't include the (unused) separator in next split string.</em>
+<a class="jxr_linenumber" name="L593" href="#L593">593</a>           nextStart = offset;
+<a class="jxr_linenumber" name="L594" href="#L594">594</a>           <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>         }
+<a class="jxr_linenumber" name="L596" href="#L596">596</a> 
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>         <strong class="jxr_keyword">if</strong> (limit == 1) {
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>           <em class="jxr_comment">// The limit has been reached, return the rest of the string as the</em>
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>           <em class="jxr_comment">// final item. This is tested after empty string removal so that</em>
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>           <em class="jxr_comment">// empty strings do not count towards the limit.</em>
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>           end = toSplit.length();
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>           offset = -1;
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>           <em class="jxr_comment">// Since we may have changed the end, we need to trim it again.</em>
+<a class="jxr_linenumber" name="L604" href="#L604">604</a>           <strong class="jxr_keyword">while</strong> (end &gt; start &amp;&amp; trimmer.matches(toSplit.charAt(end - 1))) {
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>             end--;
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>           }
+<a class="jxr_linenumber" name="L607" href="#L607">607</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>           limit--;
+<a class="jxr_linenumber" name="L609" href="#L609">609</a>         }
+<a class="jxr_linenumber" name="L610" href="#L610">610</a> 
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>         <strong class="jxr_keyword">return</strong> toSplit.subSequence(start, end).toString();
+<a class="jxr_linenumber" name="L612" href="#L612">612</a>       }
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>       <strong class="jxr_keyword">return</strong> endOfData();
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>     }
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>   }
+<a class="jxr_linenumber" name="L616" href="#L616">616</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

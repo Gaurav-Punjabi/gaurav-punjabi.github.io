@@ -1,0 +1,337 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>FOPCreator xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/* ***** BEGIN LICENSE BLOCK *****</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Version: MPL 1.1/GPL 2.0/LGPL 2.1</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * The contents of this file are subject to the Mozilla Public License Version</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * 1.1 (the "License"); you may not use this file except in compliance with</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * the License. You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * <a href="http://www.mozilla.org/MPL/" target="alexandria_uri">http://www.mozilla.org/MPL/</a></em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Software distributed under the License is distributed on an "AS IS" basis,</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * for the specific language governing rights and limitations under the</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * License.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * The Original Code is part of dcm4che, an implementation of DICOM(TM) in</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Java(TM), available at <a href="http://sourceforge.net/projects/dcm4che." target="alexandria_uri">http://sourceforge.net/projects/dcm4che.</a></em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * The Initial Developer of the Original Code is</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * TIANI Medgraph AG.</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Portions created by the Initial Developer are Copyright (C) 2003-2005</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * the Initial Developer. All Rights Reserved.</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * Contributor(s):</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * Gunter Zeilinger &lt;gunter.zeilinger@tiani.com&gt;</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> * Franz Willer &lt;franz.willer@gwi-ag.com&gt;</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_comment"> * Alternatively, the contents of this file may be used under the terms of</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_comment"> * either the GNU General Public License Version 2 or later (the "GPL"), or</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_comment"> * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),</em>
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_comment"> * in which case the provisions of the GPL or the LGPL are applicable instead</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_comment"> * of those above. If you wish to allow use of your version of this file only</em>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_comment"> * under the terms of either the GPL or the LGPL, and not to allow others to</em>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_comment"> * use your version of this file under the terms of the MPL, indicate your</em>
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_comment"> * decision by deleting the provisions above and replace them with the notice</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_comment"> * and other provisions required by the GPL or the LGPL. If you do not delete</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_comment"> * the provisions above, a recipient may use your version of this file under</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_comment"> * the terms of any one of the MPL, the GPL or the LGPL.</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_comment"> * ***** END LICENSE BLOCK ***** */</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">package</strong> org.dcm4chex.rid.mbean.ecg.xml;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> java.io.OutputStream;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> java.text.DecimalFormat;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> java.text.DecimalFormatSymbols;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> java.text.NumberFormat;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> java.util.Locale;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> javax.xml.transform.OutputKeys;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> javax.xml.transform.TransformerConfigurationException;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> javax.xml.transform.TransformerFactory;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> javax.xml.transform.sax.SAXTransformerFactory;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> javax.xml.transform.sax.TransformerHandler;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> javax.xml.transform.stream.StreamResult;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <strong class="jxr_keyword">import</strong> org.apache.log4j.Logger;
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">import</strong> org.dcm4chex.rid.mbean.ECGSupport;
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <strong class="jxr_keyword">import</strong> org.dcm4chex.rid.mbean.ecg.WaveformGroup;
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <strong class="jxr_keyword">import</strong> org.dcm4chex.rid.mbean.ecg.WaveformInfo;
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <strong class="jxr_keyword">import</strong> org.dcm4chex.rid.mbean.ecg.xml.SVGCreator;
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <strong class="jxr_keyword">import</strong> org.dcm4chex.rid.mbean.xml.XMLResponseObject;
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <strong class="jxr_keyword">import</strong> org.dcm4chex.rid.mbean.xml.XMLUtil;
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <strong class="jxr_keyword">import</strong> org.xml.sax.SAXException;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <strong class="jxr_keyword">import</strong> org.xml.sax.helpers.AttributesImpl;
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment"> * @author franz.willer</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment"> * TODO To change the template for this generated type comment go to</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment"> * Window - Preferences - Java - Code Style - Code Templates</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> FOPCreator <strong class="jxr_keyword">implements</strong> XMLResponseObject{
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> NumberFormat cmFormatter = <strong class="jxr_keyword">new</strong> DecimalFormat(<span class="jxr_string">"##.##cm"</span>, <strong class="jxr_keyword">new</strong> DecimalFormatSymbols( <strong class="jxr_keyword">new</strong> Locale( <span class="jxr_string">"en"</span>, <span class="jxr_string">"us"</span>)));
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Logger log = Logger.getLogger( ECGSupport.<strong class="jxr_keyword">class</strong>.getName() );
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">private</strong> TransformerHandler th;
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  	<strong class="jxr_keyword">private</strong> XMLUtil util;
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  	<strong class="jxr_keyword">private</strong> Float pageHeight;
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	<strong class="jxr_keyword">private</strong> Float pageWidth;
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">private</strong> Float graphHeight;
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  	<strong class="jxr_keyword">private</strong> Float graphWidth;
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	<strong class="jxr_keyword">private</strong> WaveformGroup[] waveformGroups;
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  	<strong class="jxr_keyword">private</strong> WaveformInfo info;
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_javadoccomment">	 * @param wfgrps</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  <em class="jxr_javadoccomment">	 * @param wfInfo</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  <em class="jxr_javadoccomment">	 * @param float1</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment">	 * @param float2</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  	<strong class="jxr_keyword">public</strong> FOPCreator(WaveformGroup[] wfgrps, WaveformInfo wfInfo, Float width, Float height) {
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		waveformGroups = wfgrps;
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		info = wfInfo;
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  		pageWidth = width;
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  		pageHeight = height;
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  		graphHeight = <strong class="jxr_keyword">new</strong> Float( pageHeight.floatValue() - 4.0f );
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		graphWidth = <strong class="jxr_keyword">new</strong> Float( pageWidth.floatValue() - 2.0f );
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		<strong class="jxr_keyword">if</strong> ( log.isDebugEnabled() ) log.debug(<span class="jxr_string">"page (h*w):"</span>+pageHeight+<span class="jxr_string">"*"</span>+pageWidth);
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		<strong class="jxr_keyword">if</strong> ( log.isDebugEnabled() ) log.debug(<span class="jxr_string">"graph (h*w):"</span>+graphHeight+<span class="jxr_string">"*"</span>+graphWidth);
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 	}
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> toXML( OutputStream out ) <strong class="jxr_keyword">throws</strong> TransformerConfigurationException, SAXException {
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>         SAXTransformerFactory tf = (SAXTransformerFactory) TransformerFactory.newInstance();
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 		th = tf.newTransformerHandler();
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		th.getTransformer().setOutputProperty(OutputKeys.INDENT, <span class="jxr_string">"yes"</span>);
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		th.setResult( <strong class="jxr_keyword">new</strong> StreamResult(out) );
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		th.startDocument();
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		toXML();
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 		th.endDocument();
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	    <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			out.flush();
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			out.close();
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 		} <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			<em class="jxr_comment">// TODO Auto-generated catch block</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			log.error(<span class="jxr_string">"Could not create XML."</span>, e);
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 		}
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 	}
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 	
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> embedXML( TransformerHandler th ) <strong class="jxr_keyword">throws</strong> TransformerConfigurationException, SAXException {
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		<strong class="jxr_keyword">this</strong>.th = th;
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		toXML();
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	}
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> toXML() <strong class="jxr_keyword">throws</strong> SAXException, TransformerConfigurationException {
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		util = <strong class="jxr_keyword">new</strong> XMLUtil( th );
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 		util.startElement( <span class="jxr_string">"fo:root"</span>, <span class="jxr_string">"xmlns:fo"</span>, <span class="jxr_string">"http://www.w3.org/1999/XSL/Format"</span> );
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 		{
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 			addLayoutMasterSet();
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 			util.startElement( <span class="jxr_string">"fo:page-sequence"</span>, <span class="jxr_string">"master-reference"</span>, <span class="jxr_string">"page"</span> );
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 			{
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 				addHeader();
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 				util.startElement( <span class="jxr_string">"fo:flow"</span>, <span class="jxr_string">"flow-name"</span>, <span class="jxr_string">"xsl-region-body"</span>);
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 				<strong class="jxr_keyword">int</strong> len = waveformGroups.length;
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 				<strong class="jxr_keyword">for</strong> ( <strong class="jxr_keyword">int</strong> i = 0 ; i &lt; len ; i++ ) {
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 					addGraphicHeader( waveformGroups[i] );
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 					addGraphic( waveformGroups[i] );
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 					addGraphicFooter( waveformGroups[i] );
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 				}
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 				addFooter();
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 				util.endElement( <span class="jxr_string">"fo:flow"</span> );
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 			}
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			util.endElement( <span class="jxr_string">"fo:page-sequence"</span> );
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			<em class="jxr_comment">//addTestPage();</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 		}
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 		util.endElement( <span class="jxr_string">"fo:root"</span> );
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 	}
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> <em class="jxr_javadoccomment">	 * @throws SAXException</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addTestPage() <strong class="jxr_keyword">throws</strong> SAXException {
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 		util.startElement( <span class="jxr_string">"fo:page-sequence"</span>, <span class="jxr_string">"master-reference"</span>, <span class="jxr_string">"test"</span> );
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 		util.startElement( <span class="jxr_string">"fo:flow"</span>, <span class="jxr_string">"flow-name"</span>, <span class="jxr_string">"xsl-region-body"</span>);
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 		util.startElement( <span class="jxr_string">"fo:block"</span>, XMLUtil.EMPTY_ATTRIBUTES );
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 		util.startElement( <span class="jxr_string">"fo:instream-foreign-object"</span>, <span class="jxr_string">"xmlns:svg"</span>, <span class="jxr_string">"http://www.w3.org/2000/svg"</span> );
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 		SVGCreator creator = <strong class="jxr_keyword">new</strong> SVGCreator( <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, graphWidth, graphHeight  );
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 			creator.setXMLUtil( <strong class="jxr_keyword">new</strong> XMLUtil( th, <span class="jxr_string">"svg"</span> ) );
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			creator.addSVGStart();
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 			creator.addDefs();
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 			creator.addGrid(pageWidth.intValue(), pageHeight.intValue());
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			util.endElement(<span class="jxr_string">"svg:svg"</span>);
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 		util.endElement( <span class="jxr_string">"fo:instream-foreign-object"</span> );
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 	util.endElement( <span class="jxr_string">"fo:block"</span> );
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 		util.endElement( <span class="jxr_string">"fo:flow"</span> );
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 		util.endElement( <span class="jxr_string">"fo:page-sequence"</span> );
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 	}
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment">	 * @throws SAXException</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addLayoutMasterSet() <strong class="jxr_keyword">throws</strong> SAXException {
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		util.startElement( <span class="jxr_string">"fo:layout-master-set"</span>, XMLUtil.EMPTY_ATTRIBUTES );
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 		{
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 			AttributesImpl attr = util.newAttribute( <span class="jxr_string">"master-name"</span>, <span class="jxr_string">"page"</span>);
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 			util.addAttribute( attr, <span class="jxr_string">"page-height"</span>, cmFormatter.format( pageHeight ) );
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 			util.addAttribute( attr, <span class="jxr_string">"page-width"</span>, cmFormatter.format( pageWidth ) );
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 			util.addAttribute( attr, <span class="jxr_string">"margin-left"</span>, <span class="jxr_string">"5mm"</span> );
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 			util.addAttribute( attr, <span class="jxr_string">"margin-right"</span>, <span class="jxr_string">"5mm"</span> );
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 			util.addAttribute( attr, <span class="jxr_string">"margin-top"</span>, <span class="jxr_string">"10mm"</span> );
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 			util.addAttribute( attr, <span class="jxr_string">"margin-bottom"</span>, <span class="jxr_string">"0mm"</span> );
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 			util.startElement( <span class="jxr_string">"fo:simple-page-master"</span>, attr );
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 			{
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>                             util.startElement( <span class="jxr_string">"fo:region-body"</span>, <span class="jxr_string">"margin-top"</span>, <span class="jxr_string">"1cm"</span> );
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>                             util.endElement( <span class="jxr_string">"fo:region-body"</span> );
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>                             util.startElement( <span class="jxr_string">"fo:region-before"</span>, <span class="jxr_string">"extent"</span>, <span class="jxr_string">"1cm"</span> );
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>                             util.endElement( <span class="jxr_string">"fo:region-before"</span> );
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>                             util.startElement( <span class="jxr_string">"fo:region-after"</span>, <span class="jxr_string">"extent"</span>, <span class="jxr_string">"0.5cm"</span> );
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>                             util.endElement( <span class="jxr_string">"fo:region-after"</span> );
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> 			}
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> 			util.endElement( <span class="jxr_string">"fo:simple-page-master"</span> );
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> 			AttributesImpl attr2 = util.newAttribute( <span class="jxr_string">"master-name"</span>, <span class="jxr_string">"test"</span>);
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> 			util.addAttribute( attr2, <span class="jxr_string">"page-height"</span>, cmFormatter.format( pageHeight ) );
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> 			util.addAttribute( attr2, <span class="jxr_string">"page-width"</span>, cmFormatter.format( pageWidth ) );
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 			util.addAttribute( attr2, <span class="jxr_string">"margin-left"</span>, <span class="jxr_string">"0mm"</span> );
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 			util.addAttribute( attr2, <span class="jxr_string">"margin-right"</span>, <span class="jxr_string">"0mm"</span> );
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> 			util.addAttribute( attr2, <span class="jxr_string">"margin-top"</span>, <span class="jxr_string">"0mm"</span> );
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> 			util.addAttribute( attr2, <span class="jxr_string">"margin-bottom"</span>, <span class="jxr_string">"0mm"</span> );
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 			util.startElement( <span class="jxr_string">"fo:simple-page-master"</span>, attr2 );
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> 			{
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>                             util.startElement( <span class="jxr_string">"fo:region-body"</span>, <span class="jxr_string">"margin-top"</span>, <span class="jxr_string">"0cm"</span> );
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>                             util.endElement( <span class="jxr_string">"fo:region-body"</span> );
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>                             util.startElement( <span class="jxr_string">"fo:region-before"</span>, <span class="jxr_string">"extent"</span>, <span class="jxr_string">"0cm"</span> );
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>                             util.endElement( <span class="jxr_string">"fo:region-before"</span> );
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>                             util.startElement( <span class="jxr_string">"fo:region-after"</span>, <span class="jxr_string">"extent"</span>, <span class="jxr_string">"0cm"</span> );
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>                             util.endElement( <span class="jxr_string">"fo:region-after"</span> );
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> 			}
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 			util.endElement( <span class="jxr_string">"fo:simple-page-master"</span> );
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> 		}
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 		util.endElement( <span class="jxr_string">"fo:layout-master-set"</span> );
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> 	}
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 	
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addHeader() <strong class="jxr_keyword">throws</strong> SAXException {
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> 		util.startElement( <span class="jxr_string">"fo:static-content"</span>, <span class="jxr_string">"flow-name"</span>, <span class="jxr_string">"xsl-region-before"</span>);
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> 		{
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 			AttributesImpl attr = util.newAttribute( <span class="jxr_string">"font-size"</span>, <span class="jxr_string">"12pt"</span>);
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> 			util.addAttribute( attr, <span class="jxr_string">"text-align"</span>, <span class="jxr_string">"center"</span> );
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> 			util.addAttribute( attr, <span class="jxr_string">"font-weight"</span>, <span class="jxr_string">"bold"</span> );
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 			util.startElement( <span class="jxr_string">"fo:block"</span>, attr);
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 			util.addValue( info.getPatientName() );
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> 				util.endElement( <span class="jxr_string">"fo:block"</span>);
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> 				AttributesImpl attr1 = util.newAttribute( <span class="jxr_string">"font-size"</span>, <span class="jxr_string">"10pt"</span>);
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> 				util.addAttribute( attr1, <span class="jxr_string">"text-align"</span>, <span class="jxr_string">"center"</span> );
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> 				util.startElement( <span class="jxr_string">"fo:block"</span>, attr1);
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> 				util.addValue( <span class="jxr_string">"("</span>+info.getPatientID()+<span class="jxr_string">")"</span> );
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> 			util.endElement( <span class="jxr_string">"fo:block"</span>);
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 		}
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> 		util.endElement( <span class="jxr_string">"fo:static-content"</span> );
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> 	}
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> <em class="jxr_javadoccomment">	 * @param group</em>
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> <em class="jxr_javadoccomment">	 * @throws SAXException</em>
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addGraphicHeader(WaveformGroup group) <strong class="jxr_keyword">throws</strong> SAXException {
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> 		AttributesImpl attr = util.newAttribute( <span class="jxr_string">"font-size"</span>, <span class="jxr_string">"10pt"</span>);
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> 		util.startElement( <span class="jxr_string">"fo:block"</span>, attr);
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> 		addTable( <span class="jxr_string">"none"</span>,
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> 				  <strong class="jxr_keyword">new</strong> String[]{<span class="jxr_string">"15mm"</span>,<span class="jxr_string">"40mm"</span>,<span class="jxr_string">"20mm"</span>,<span class="jxr_string">"40mm"</span>,<span class="jxr_string">"15mm"</span>,<span class="jxr_string">"25mm"</span>,<span class="jxr_string">"50mm"</span>,<span class="jxr_string">"20mm"</span>,<span class="jxr_string">"3mm"</span>,<span class="jxr_string">"20mm"</span>},
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> 				  <strong class="jxr_keyword">new</strong> String[]{<span class="jxr_string">"left"</span>,<span class="jxr_string">"right"</span>,<span class="jxr_string">"left"</span>,<span class="jxr_string">"left"</span>,<span class="jxr_string">"left"</span>,<span class="jxr_string">"left"</span>,<span class="jxr_string">"left"</span>,<span class="jxr_string">"right"</span>,<span class="jxr_string">"left"</span>,<span class="jxr_string">"left"</span>},
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> 				  <strong class="jxr_keyword">new</strong> String[][]{ {<span class="jxr_string">""</span>,<span class="jxr_string">"Acquis. Date:"</span>,info.getAcquisDate(),info.getAcquisTime(),<strong class="jxr_keyword">null</strong>,<span class="jxr_string">"CONFIRMED"</span>,<strong class="jxr_keyword">null</strong>,<span class="jxr_string">"Department:"</span>,<strong class="jxr_keyword">null</strong>,<span class="jxr_string">""</span> },
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> 								  {<strong class="jxr_keyword">null</strong>,<strong class="jxr_keyword">null</strong>,<strong class="jxr_keyword">null</strong>,<strong class="jxr_keyword">null</strong>,<strong class="jxr_keyword">null</strong>,<strong class="jxr_keyword">null</strong>,<strong class="jxr_keyword">null</strong>,<span class="jxr_string">"Room:"</span>,<strong class="jxr_keyword">null</strong>,<span class="jxr_string">""</span> },
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> 				  				  {<strong class="jxr_keyword">null</strong>,<span class="jxr_string">"Birth Date:"</span>,info.getBirthday(),info.getSex(),<span class="jxr_string">"0/0"</span>,info.getPatientSize(),info.getPatientWeight(),<span class="jxr_string">"Operator:"</span>,<strong class="jxr_keyword">null</strong>,<span class="jxr_string">""</span> }
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 								  				}
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> 				);
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> 		util.endElement( <span class="jxr_string">"fo:block"</span>);
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> 	}
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> 
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> <em class="jxr_javadoccomment">	 * @param group</em>
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> <em class="jxr_javadoccomment">	 * @param out</em>
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> <em class="jxr_javadoccomment">	 * @throws SAXException</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> <em class="jxr_javadoccomment">	 * @throws TransformerConfigurationException</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addGraphic(WaveformGroup group) <strong class="jxr_keyword">throws</strong> TransformerConfigurationException, SAXException {
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> 		util.startElement( <span class="jxr_string">"fo:block"</span>, XMLUtil.EMPTY_ATTRIBUTES );
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> 			util.startElement( <span class="jxr_string">"fo:instream-foreign-object"</span>, <span class="jxr_string">"xmlns:svg"</span>, <span class="jxr_string">"http://www.w3.org/2000/svg"</span> );
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> 			SVGCreator creator = <strong class="jxr_keyword">new</strong> SVGCreator( group, <strong class="jxr_keyword">null</strong>, graphWidth, graphHeight  );
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> 				creator.embedXML( th );
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> 			util.endElement( <span class="jxr_string">"fo:instream-foreign-object"</span> );
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 		util.endElement( <span class="jxr_string">"fo:block"</span> );
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> 	}
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> 
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_javadoccomment">	 * @throws SAXException</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addGraphicFooter( WaveformGroup group ) <strong class="jxr_keyword">throws</strong> SAXException {
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 		AttributesImpl attr = util.newAttribute( <span class="jxr_string">"font-size"</span>, <span class="jxr_string">"10pt"</span>);
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> 		util.addAttribute( attr, <span class="jxr_string">"text-align"</span>, <span class="jxr_string">"center"</span> );
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> 		util.startElement( <span class="jxr_string">"fo:block"</span>, attr);
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> 		{
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> 			<strong class="jxr_keyword">if</strong> ( group.getNrOfChannels() == 12 ) { <em class="jxr_comment">//TODO: Hack, only know that 12lead use this scaling, also should be checked via CUID!</em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> 				util.singleElement(<span class="jxr_string">"fo:inline"</span>, <strong class="jxr_keyword">null</strong>, <span class="jxr_string">"25mm/sec"</span> );
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> 				util.singleElement(<span class="jxr_string">"fo:inline"</span>, <strong class="jxr_keyword">null</strong>, <span class="jxr_string">"10mm/mV"</span> );
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> 			}
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 			util.singleElement(<span class="jxr_string">"fo:inline"</span>, <strong class="jxr_keyword">null</strong>, group.getFilterText() );
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 		}
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> 		util.endElement( <span class="jxr_string">"fo:block"</span>);
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> 	}
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> 	
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addTable( String border, String[] columnWidths, String[] textAligns, String[][] data) <strong class="jxr_keyword">throws</strong> SAXException {
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> 		AttributesImpl tblAttr = util.newAttribute( <span class="jxr_string">"border-style"</span>, border);
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> 		util.addAttribute( tblAttr, <span class="jxr_string">"table-layout"</span>, <span class="jxr_string">"fixed"</span> );
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> 		util.startElement( <span class="jxr_string">"fo:table"</span>, tblAttr);
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> 		AttributesImpl colAttr = util.newAttribute( <span class="jxr_string">"column-number"</span>, border);
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> 		<strong class="jxr_keyword">for</strong> ( <strong class="jxr_keyword">int</strong> i = 0 ; i &lt; columnWidths.length ; i++ ) {
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 			util.singleElement(<span class="jxr_string">"fo:table-column"</span>, util.newAttribute( <span class="jxr_string">"column-width"</span>, columnWidths[i]), <strong class="jxr_keyword">null</strong> );
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> 		}
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> 		util.startElement( <span class="jxr_string">"fo:table-body"</span>, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> 		<strong class="jxr_keyword">int</strong> rows = data.length;
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> 		<strong class="jxr_keyword">int</strong> cols = data[0].length;
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 		AttributesImpl cellAttr = util.newAttribute( <span class="jxr_string">"border-style"</span>, <span class="jxr_string">"none"</span>);
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> 		<strong class="jxr_keyword">for</strong> ( <strong class="jxr_keyword">int</strong> row = 0 ; row &lt; rows ; row++ ) {
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> 			util.startElement( <span class="jxr_string">"fo:table-row"</span>, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> 			<strong class="jxr_keyword">for</strong> ( <strong class="jxr_keyword">int</strong> col = 0 ; col &lt; cols ; col++ ) {
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 				util.startElement( <span class="jxr_string">"fo:table-cell"</span>, cellAttr );
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> 				util.singleElement(<span class="jxr_string">"fo:block"</span>, util.newAttribute( <span class="jxr_string">"text-align"</span>, textAligns[col]), data[row][col] );
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 				util.endElement( <span class="jxr_string">"fo:table-cell"</span>);
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 			}
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> 			util.endElement( <span class="jxr_string">"fo:table-row"</span>);
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 		}
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> 		util.endElement( <span class="jxr_string">"fo:table-body"</span>);
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> 		util.endElement( <span class="jxr_string">"fo:table"</span>);
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 	}
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> 
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addFooter() {
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> 		<em class="jxr_comment">// TODO Auto-generated method stub</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 		
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 	}
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

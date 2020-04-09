@@ -1,0 +1,1373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>CacheNotifierImpl xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> org.infinispan.notifications.cachelistener;
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> org.infinispan.Cache;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> org.infinispan.commands.FlagAffectedCommand;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> org.infinispan.commands.write.ClearCommand;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.infinispan.commons.CacheListenerException;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> org.infinispan.commons.util.CloseableIterator;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> org.infinispan.commons.util.InfinispanCollections;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> org.infinispan.commons.util.ServiceFinder;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> org.infinispan.compat.TypeConverter;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> org.infinispan.configuration.cache.CacheMode;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> org.infinispan.configuration.cache.Configuration;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> org.infinispan.container.InternalEntryFactory;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <strong class="jxr_keyword">import</strong> org.infinispan.container.entries.CacheEntry;
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">import</strong> org.infinispan.container.entries.InternalCacheEntry;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> org.infinispan.context.Flag;
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> org.infinispan.context.InvocationContext;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> org.infinispan.context.impl.TxInvocationContext;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> org.infinispan.distexec.DistributedCallable;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> org.infinispan.distexec.DistributedExecutionCompletionService;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> org.infinispan.distexec.DistributedExecutorService;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> org.infinispan.distribution.DistributionManager;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> org.infinispan.distribution.ch.ConsistentHash;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> org.infinispan.factories.ComponentRegistry;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> org.infinispan.factories.annotations.Inject;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.infinispan.filter.Converter;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.infinispan.filter.KeyFilter;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.infinispan.filter.KeyValueFilter;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.infinispan.interceptors.locking.ClusteringDependentLogic;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.infinispan.iteration.impl.EntryRetriever;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.infinispan.manager.EmbeddedCacheManager;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.infinispan.metadata.Metadata;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.Listener;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.cachelistener.annotation.*;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.cachelistener.cluster.ClusterCacheNotifier;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.cachelistener.cluster.ClusterEventManager;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.cachelistener.cluster.ClusterListenerRemoveCallable;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.cachelistener.cluster.ClusterListenerReplicateCallable;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.cachelistener.cluster.RemoteClusterListener;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.cachelistener.event.*;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.cachelistener.event.impl.EventImpl;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.cachelistener.filter.*;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.impl.AbstractListenerImpl;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.infinispan.notifications.impl.ListenerInvocation;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> org.infinispan.partitionhandling.AvailabilityMode;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> org.infinispan.remoting.transport.Address;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> org.infinispan.topology.CacheTopology;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> org.infinispan.transaction.xa.GlobalTransaction;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> org.infinispan.util.logging.Log;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> org.infinispan.util.logging.LogFactory;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> javax.transaction.Status;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> javax.transaction.Transaction;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> javax.transaction.TransactionManager;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">import</strong> java.lang.annotation.Annotation;
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <strong class="jxr_keyword">import</strong> java.util.Collection;
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <strong class="jxr_keyword">import</strong> java.util.HashMap;
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <strong class="jxr_keyword">import</strong> java.util.HashSet;
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <strong class="jxr_keyword">import</strong> java.util.Set;
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <strong class="jxr_keyword">import</strong> java.util.UUID;
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.Callable;
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.ConcurrentHashMap;
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.ConcurrentMap;
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.CopyOnWriteArrayList;
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.ExecutionException;
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.Future;
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.infinispan.commons.util.InfinispanCollections.transformCollectionToMap;
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.infinispan.notifications.cachelistener.event.Event.Type.*;
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment"> * Helper class that handles all notifications to registered listeners.</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment"> * @author Manik Surtani (manik AT infinispan DOT org)</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment"> * @author Mircea.Markus@jboss.com</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_javadoccomment"> * @author William Burns</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment"> * @author anistor@redhat.com</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment"> * @since 4.0</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> CacheNotifierImpl&lt;K, V&gt; <strong class="jxr_keyword">extends</strong> AbstractListenerImpl&lt;Event&lt;K, V&gt;, CacheEntryListenerInvocation&lt;K, V&gt;&gt;
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>        <strong class="jxr_keyword">implements</strong> ClusterCacheNotifier&lt;K, V&gt; {
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Log log = LogFactory.getLog(CacheNotifierImpl.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt;, Class&lt;?&gt;&gt; allowedListeners = <strong class="jxr_keyword">new</strong> HashMap&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt;, Class&lt;?&gt;&gt;(16);
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt;, Class&lt;?&gt;&gt; clusterAllowedListeners =
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>           <strong class="jxr_keyword">new</strong> HashMap&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt;, Class&lt;?&gt;&gt;(4);
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>     <strong class="jxr_keyword">static</strong> {
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>        allowedListeners.put(CacheEntryCreated.<strong class="jxr_keyword">class</strong>, CacheEntryCreatedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>        allowedListeners.put(CacheEntryRemoved.<strong class="jxr_keyword">class</strong>, CacheEntryRemovedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>        allowedListeners.put(CacheEntryVisited.<strong class="jxr_keyword">class</strong>, CacheEntryVisitedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>        allowedListeners.put(CacheEntryModified.<strong class="jxr_keyword">class</strong>, CacheEntryModifiedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>        allowedListeners.put(CacheEntryActivated.<strong class="jxr_keyword">class</strong>, CacheEntryActivatedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>       allowedListeners.put(CacheEntryPassivated.<strong class="jxr_keyword">class</strong>, CacheEntryPassivatedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>       allowedListeners.put(CacheEntryLoaded.<strong class="jxr_keyword">class</strong>, CacheEntryLoadedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>       allowedListeners.put(CacheEntriesEvicted.<strong class="jxr_keyword">class</strong>, CacheEntriesEvictedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>       allowedListeners.put(TransactionRegistered.<strong class="jxr_keyword">class</strong>, TransactionRegisteredEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>       allowedListeners.put(TransactionCompleted.<strong class="jxr_keyword">class</strong>, TransactionCompletedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>       allowedListeners.put(CacheEntryInvalidated.<strong class="jxr_keyword">class</strong>, CacheEntryInvalidatedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>       allowedListeners.put(DataRehashed.<strong class="jxr_keyword">class</strong>, DataRehashedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>       allowedListeners.put(TopologyChanged.<strong class="jxr_keyword">class</strong>, TopologyChangedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>       allowedListeners.put(PartitionStatusChanged.<strong class="jxr_keyword">class</strong>, PartitionStatusChangedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>       <em class="jxr_comment">// For backward compat</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>       allowedListeners.put(CacheEntryEvicted.<strong class="jxr_keyword">class</strong>, CacheEntryEvictedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>       clusterAllowedListeners.put(CacheEntryCreated.<strong class="jxr_keyword">class</strong>, CacheEntryCreatedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>       clusterAllowedListeners.put(CacheEntryModified.<strong class="jxr_keyword">class</strong>, CacheEntryModifiedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>       clusterAllowedListeners.put(CacheEntryRemoved.<strong class="jxr_keyword">class</strong>, CacheEntryRemovedEvent.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>    }
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; cacheEntryCreatedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; cacheEntryRemovedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; cacheEntryVisitedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; cacheEntryModifiedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; cacheEntryActivatedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; cacheEntryPassivatedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; cacheEntryLoadedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; cacheEntryInvalidatedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; cacheEntriesEvictedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; transactionRegisteredListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; transactionCompletedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; dataRehashedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; topologyChangedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; partitionChangedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>    <em class="jxr_comment">// For backward compat</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>    <strong class="jxr_keyword">final</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; cacheEntryEvictedListeners = <strong class="jxr_keyword">new</strong> CopyOnWriteArrayList&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt;();
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>    <strong class="jxr_keyword">private</strong> Cache&lt;K, V&gt; cache;
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>    <strong class="jxr_keyword">private</strong> ClusteringDependentLogic clusteringDependentLogic;
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>    <strong class="jxr_keyword">private</strong> TransactionManager transactionManager;
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>    <strong class="jxr_keyword">private</strong> DistributedExecutorService distExecutorService;
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>    <strong class="jxr_keyword">private</strong> Configuration config;
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>    <strong class="jxr_keyword">private</strong> DistributionManager distributionManager;
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>    <strong class="jxr_keyword">private</strong> EntryRetriever&lt;K, V&gt; entryRetriever;
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>    <strong class="jxr_keyword">private</strong> InternalEntryFactory entryFactory;
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>    <strong class="jxr_keyword">private</strong> ClusterEventManager&lt;K, V&gt; eventManager;
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>    <strong class="jxr_keyword">private</strong> ComponentRegistry componentRegistry;
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Map&lt;Object, UUID&gt; clusterListenerIDs = <strong class="jxr_keyword">new</strong> ConcurrentHashMap&lt;Object, UUID&gt;();
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>    <strong class="jxr_keyword">private</strong> Set&lt;FilterIndexingServiceProvider&gt; filterIndexingServiceProviders;
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> <em class="jxr_javadoccomment">    * This map is used to store the handler used when a listener is registered which has includeCurrentState and</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> <em class="jxr_javadoccomment">    * is only used for that listener during the initial state transfer</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_javadoccomment">    */</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ConcurrentMap&lt;UUID, QueueingSegmentListener&lt;K, V, ? <strong class="jxr_keyword">extends</strong> Event&lt;K, V&gt;&gt;&gt; segmentHandler;
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> <em class="jxr_javadoccomment">    * An optional converter, to be used for converting the key/value before sending the event to listeners.</em>
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> <em class="jxr_javadoccomment">    */</em>
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>    <strong class="jxr_keyword">private</strong> TypeConverter typeConverter;
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>    <strong class="jxr_keyword">public</strong> CacheNotifierImpl() {
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>       <strong class="jxr_keyword">this</strong>(<strong class="jxr_keyword">new</strong> ConcurrentHashMap&lt;UUID, QueueingSegmentListener&lt;K, V, ? <strong class="jxr_keyword">extends</strong> Event&lt;K, V&gt;&gt;&gt;());
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>    }
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>    CacheNotifierImpl(ConcurrentMap&lt;UUID, QueueingSegmentListener&lt;K, V, ? <strong class="jxr_keyword">extends</strong> Event&lt;K, V&gt;&gt;&gt; handler) {
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>       segmentHandler = handler;
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>       listenersMap.put(CacheEntryCreated.<strong class="jxr_keyword">class</strong>, cacheEntryCreatedListeners);
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>       listenersMap.put(CacheEntryRemoved.<strong class="jxr_keyword">class</strong>, cacheEntryRemovedListeners);
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>       listenersMap.put(CacheEntryVisited.<strong class="jxr_keyword">class</strong>, cacheEntryVisitedListeners);
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>       listenersMap.put(CacheEntryModified.<strong class="jxr_keyword">class</strong>, cacheEntryModifiedListeners);
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>       listenersMap.put(CacheEntryActivated.<strong class="jxr_keyword">class</strong>, cacheEntryActivatedListeners);
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>       listenersMap.put(CacheEntryPassivated.<strong class="jxr_keyword">class</strong>, cacheEntryPassivatedListeners);
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>       listenersMap.put(CacheEntryLoaded.<strong class="jxr_keyword">class</strong>, cacheEntryLoadedListeners);
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>       listenersMap.put(CacheEntriesEvicted.<strong class="jxr_keyword">class</strong>, cacheEntriesEvictedListeners);
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>       listenersMap.put(TransactionRegistered.<strong class="jxr_keyword">class</strong>, transactionRegisteredListeners);
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>       listenersMap.put(TransactionCompleted.<strong class="jxr_keyword">class</strong>, transactionCompletedListeners);
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>       listenersMap.put(CacheEntryInvalidated.<strong class="jxr_keyword">class</strong>, cacheEntryInvalidatedListeners);
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>       listenersMap.put(DataRehashed.<strong class="jxr_keyword">class</strong>, dataRehashedListeners);
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>       listenersMap.put(TopologyChanged.<strong class="jxr_keyword">class</strong>, topologyChangedListeners);
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>       listenersMap.put(PartitionStatusChanged.<strong class="jxr_keyword">class</strong>, partitionChangedListeners);
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>       <em class="jxr_comment">// For backward compat</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>       listenersMap.put(CacheEntryEvicted.<strong class="jxr_keyword">class</strong>, cacheEntryEvictedListeners);
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>    }
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>    @Inject
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>    <strong class="jxr_keyword">void</strong> injectDependencies(Cache&lt;K, V&gt; cache, ClusteringDependentLogic clusteringDependentLogic,
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>                            TransactionManager transactionManager, Configuration config,
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>                            DistributionManager distributionManager, EntryRetriever&lt;K ,V&gt; entryRetriever,
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>                            InternalEntryFactory entryFactory, ClusterEventManager&lt;K, V&gt; eventManager) {
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>       <strong class="jxr_keyword">this</strong>.cache = cache;
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>       <strong class="jxr_keyword">this</strong>.clusteringDependentLogic = clusteringDependentLogic;
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>       <strong class="jxr_keyword">this</strong>.transactionManager = transactionManager;
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>       <strong class="jxr_keyword">this</strong>.config = config;
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>       <strong class="jxr_keyword">this</strong>.distributionManager = distributionManager;
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>       <strong class="jxr_keyword">this</strong>.entryRetriever = entryRetriever;
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>       <strong class="jxr_keyword">this</strong>.entryFactory = entryFactory;
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>       <strong class="jxr_keyword">this</strong>.eventManager = eventManager;
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>    }
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>    @Override
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> start() {
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>       <strong class="jxr_keyword">super</strong>.start();
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>       <strong class="jxr_keyword">this</strong>.distExecutorService = SecurityActions.getDefaultExecutorService(cache);
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>       componentRegistry = cache.getAdvancedCache().getComponentRegistry();
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>       <em class="jxr_comment">//TODO This is executed twice because component CacheNotifier is also ClusterCacheNotifier (see https://issues.jboss.org/browse/ISPN-5353)</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>       <strong class="jxr_keyword">if</strong> (filterIndexingServiceProviders == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>          filterIndexingServiceProviders = ServiceFinder.load(FilterIndexingServiceProvider.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>          <strong class="jxr_keyword">for</strong> (FilterIndexingServiceProvider provider : filterIndexingServiceProviders) {
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>             componentRegistry.wireDependencies(provider);
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>             provider.start();
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>          }
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>       }
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>    }
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>    @Override
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> stop() {
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>       <strong class="jxr_keyword">super</strong>.stop();
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>       <em class="jxr_comment">//TODO This is executed twice because component CacheNotifier is also ClusterCacheNotifier (see https://issues.jboss.org/browse/ISPN-5353)</em>
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>       <strong class="jxr_keyword">if</strong> (filterIndexingServiceProviders != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>          <strong class="jxr_keyword">for</strong> (FilterIndexingServiceProvider provider : filterIndexingServiceProviders) {
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>             provider.stop();
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>          }
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>          filterIndexingServiceProviders = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>       }
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>    }
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> 
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>    @Override
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>    <strong class="jxr_keyword">protected</strong> Log getLog() {
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>       <strong class="jxr_keyword">return</strong> log;
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>    }
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>    @Override
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setTypeConverter(TypeConverter typeConverter) {
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>       <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.typeConverter != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>          <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalStateException(<span class="jxr_string">"The type converter can be set only once"</span>);
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>       }
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>       <strong class="jxr_keyword">this</strong>.typeConverter = typeConverter;
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>    }
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> 
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>    @Override
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>    <strong class="jxr_keyword">protected</strong> Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt;, Class&lt;?&gt;&gt; getAllowedMethodAnnotations(Listener l) {
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>       <strong class="jxr_keyword">if</strong> (l.clustered()) {
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>          <em class="jxr_comment">// Cluster listeners only allow a subset of types</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>          <strong class="jxr_keyword">return</strong> clusterAllowedListeners;
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>       }
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>       <strong class="jxr_keyword">return</strong> allowedListeners;
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>    }
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>    @Override
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>    <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> Transaction suspendIfNeeded() {
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>       <strong class="jxr_keyword">if</strong> (transactionManager == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>       }
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> 
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>          <strong class="jxr_keyword">switch</strong> (transactionManager.getStatus()) {
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>             <strong class="jxr_keyword">case</strong> Status.STATUS_ACTIVE:
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>             <strong class="jxr_keyword">case</strong> Status.STATUS_NO_TRANSACTION:
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>                <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>             <strong class="jxr_keyword">case</strong> Status.STATUS_MARKED_ROLLBACK:
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>             <strong class="jxr_keyword">case</strong> Status.STATUS_PREPARED:
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>             <strong class="jxr_keyword">case</strong> Status.STATUS_COMMITTED:
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>             <strong class="jxr_keyword">case</strong> Status.STATUS_ROLLEDBACK:
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>             <strong class="jxr_keyword">case</strong> Status.STATUS_UNKNOWN:
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>             <strong class="jxr_keyword">case</strong> Status.STATUS_PREPARING:
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>             <strong class="jxr_keyword">case</strong> Status.STATUS_COMMITTING:
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>             <strong class="jxr_keyword">case</strong> Status.STATUS_ROLLING_BACK:
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>             <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>                <em class="jxr_comment">//suspend in default and in unknown status to be safer</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>                <strong class="jxr_keyword">return</strong> transactionManager.suspend();
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>          }
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>       } <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>          <strong class="jxr_keyword">if</strong> (log.isTraceEnabled()) {
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>             log.trace(<span class="jxr_string">"An error occurred while trying to suspend a transaction."</span>, e);
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>          }
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>       }
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>    }
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> 
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>    @Override
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>    <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> resumeIfNeeded(Transaction transaction) {
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>       <strong class="jxr_keyword">if</strong> (transaction == <strong class="jxr_keyword">null</strong> || transactionManager == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>          <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>       }
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>          transactionManager.resume(transaction);
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>       } <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>          <strong class="jxr_keyword">if</strong> (log.isTraceEnabled()) {
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>             log.tracef(e, <span class="jxr_string">"An error occurred while trying to resume a suspended transaction. tx=%s"</span>, transaction);
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>          }
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>       }
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>    }
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>    @Override
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyCacheEntryCreated(K key, V value, <strong class="jxr_keyword">boolean</strong> pre,
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>          InvocationContext ctx, FlagAffectedCommand command) {
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>       <strong class="jxr_keyword">if</strong> (!cacheEntryCreatedListeners.isEmpty()) {
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_CREATED);
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>          configureEvent(e, key, value, pre, ctx, command, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>          <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner = clusteringDependentLogic.localNodeIsPrimaryOwner(key);
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>          <strong class="jxr_keyword">boolean</strong> sendEvents = !ctx.isInTxScope();
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>          <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>             <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryCreatedListeners) {
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>                listener.invoke(e, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>             }
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>             <strong class="jxr_keyword">if</strong> (sendEvents) {
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>                eventManager.sendEvents();
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>                sendEvents = false;
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>             }
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>          } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>             <strong class="jxr_keyword">if</strong> (sendEvents) {
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>                eventManager.dropEvents();
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>             }
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>          }
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>       }
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>    }
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>    @Override
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyCacheEntryModified(K key, V value, V previousValue, Metadata previousMetadata, <strong class="jxr_keyword">boolean</strong> pre, InvocationContext ctx,
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>          FlagAffectedCommand command) {
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>       <strong class="jxr_keyword">if</strong> (!cacheEntryModifiedListeners.isEmpty()) {
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_MODIFIED);
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>          configureEvent(e, key, value, pre, ctx, command, previousValue, previousMetadata);
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>          <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner = clusteringDependentLogic.localNodeIsPrimaryOwner(key);
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>          <strong class="jxr_keyword">boolean</strong> sendEvents = !ctx.isInTxScope();
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>          <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>             <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryModifiedListeners) {
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>                listener.invoke(e, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>             }
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>             <strong class="jxr_keyword">if</strong> (sendEvents) {
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>                eventManager.sendEvents();
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>                sendEvents = false;
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>             }
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>          } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>             <strong class="jxr_keyword">if</strong> (sendEvents) {
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>                eventManager.dropEvents();
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>             }
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>          }
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>       }
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>    }
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>    @Override
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyCacheEntryRemoved(K key, V previousValue, Metadata previousMetadata, <strong class="jxr_keyword">boolean</strong> pre,
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>                                        InvocationContext ctx, FlagAffectedCommand command) {
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>       <strong class="jxr_keyword">if</strong> (isNotificationAllowed(command, cacheEntryRemovedListeners)) {
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_REMOVED);
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>          configureEvent(e, key, <strong class="jxr_keyword">null</strong>, pre, ctx, command, previousValue, previousMetadata);
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>          setTx(ctx, e);
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>          <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner = clusteringDependentLogic.localNodeIsPrimaryOwner(key);
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>          <strong class="jxr_keyword">boolean</strong> sendEvents = !ctx.isInTxScope();
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>          <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>             <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryRemovedListeners) {
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>                listener.invoke(e, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>             }
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>             <strong class="jxr_keyword">if</strong> (sendEvents) {
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>                eventManager.sendEvents();
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>                sendEvents = false;
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>             }
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>          } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>             <strong class="jxr_keyword">if</strong> (sendEvents) {
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>                eventManager.dropEvents();
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>             }
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>          }
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>       }
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>    }
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> configureEvent(EventImpl&lt;K, V&gt; e, K key, V value, <strong class="jxr_keyword">boolean</strong> pre, InvocationContext ctx,
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>                                FlagAffectedCommand command, V previousValue, Metadata previousMetadata) {
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>       <strong class="jxr_keyword">if</strong> (typeConverter != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>          key = (K) typeConverter.unboxKey(key);
+<a class="jxr_linenumber" name="L374" href="#L374">374</a>          value = (V) typeConverter.unboxValue(value);
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>          previousValue = (V) typeConverter.unboxValue(previousValue);
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>       }
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> 
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>       e.setOriginLocal(ctx.isOriginLocal());
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>       e.setValue(pre ? previousValue : value);
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>       e.setPre(pre);
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>       e.setOldValue(previousValue);
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>       e.setOldMetadata(previousMetadata);
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>       CacheEntry entry = ctx.lookupEntry(key);
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>       <strong class="jxr_keyword">if</strong> (entry != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>          e.setMetadata(entry.getMetadata());
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>       } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (command instanceof ClearCommand) {
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>          e.setMetadata(previousMetadata);
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>       }
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>       Set&lt;Flag&gt; flags;
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>       <strong class="jxr_keyword">if</strong> (command != <strong class="jxr_keyword">null</strong> &amp;&amp; (flags = command.getFlags()) != <strong class="jxr_keyword">null</strong> &amp;&amp; flags.contains(Flag.COMMAND_RETRY)) {
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>          e.setCommandRetried(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>       }
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>       e.setKey(key);
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>       setTx(ctx, e);
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>    }
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> 
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>    @Override
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyCacheEntryVisited(K key, V value, <strong class="jxr_keyword">boolean</strong> pre, InvocationContext ctx, FlagAffectedCommand command) {
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>       <strong class="jxr_keyword">if</strong> (isNotificationAllowed(command, cacheEntryVisitedListeners)) {
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_VISITED);
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>          e.setPre(pre);
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>          e.setKey(key);
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>          e.setValue(value);
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>          setTx(ctx, e);
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>          <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner = clusteringDependentLogic.localNodeIsPrimaryOwner(key);
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryVisitedListeners) listener.invoke(e, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>       }
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>    }
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> 
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>    @Override
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyCacheEntriesEvicted(Collection&lt;InternalCacheEntry&lt;? <strong class="jxr_keyword">extends</strong> K, ? <strong class="jxr_keyword">extends</strong> V&gt;&gt; entries, InvocationContext ctx, FlagAffectedCommand command) {
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>       <strong class="jxr_keyword">if</strong> (!entries.isEmpty()) {
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>          <strong class="jxr_keyword">if</strong> (isNotificationAllowed(command, cacheEntriesEvictedListeners)) {
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>             EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_EVICTED);
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>             Map&lt;K, V&gt; evictedKeysAndValues = transformCollectionToMap(entries,
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>                <strong class="jxr_keyword">new</strong> InfinispanCollections.MapMakerFunction&lt;K, V, InternalCacheEntry&lt;? <strong class="jxr_keyword">extends</strong> K, ? <strong class="jxr_keyword">extends</strong> V&gt;&gt;() {
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>                   @Override
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>                   <strong class="jxr_keyword">public</strong> Map.Entry&lt;K, V&gt; transform(<strong class="jxr_keyword">final</strong> InternalCacheEntry&lt;? <strong class="jxr_keyword">extends</strong> K, ? <strong class="jxr_keyword">extends</strong> V&gt; input) {
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>                      <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Map.Entry&lt;K, V&gt;() {
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>                         @Override
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>                         <strong class="jxr_keyword">public</strong> K getKey() {
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>                           <strong class="jxr_keyword">return</strong> input.getKey();
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>                         }
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>                         @Override
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>                         <strong class="jxr_keyword">public</strong> V getValue() {
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>                           <strong class="jxr_keyword">return</strong> input.getValue();
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>                         }
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> 
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>                         @Override
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>                         <strong class="jxr_keyword">public</strong> V setValue(V value) {
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>                           <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnsupportedOperationException();
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>                         }
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>                      };
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>                   }
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>                }
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>             );
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> 
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>             e.setEntries(evictedKeysAndValues);
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>             <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntriesEvictedListeners) listener.invoke(e);
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>          }
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>          <em class="jxr_comment">// For backward compat</em>
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>          <strong class="jxr_keyword">if</strong> (isNotificationAllowed(command, cacheEntryEvictedListeners)) {
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>             <strong class="jxr_keyword">for</strong> (InternalCacheEntry&lt;? <strong class="jxr_keyword">extends</strong> K, ? <strong class="jxr_keyword">extends</strong> V&gt; ice : entries) {
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>                EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_EVICTED);
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>                e.setKey(ice.getKey());
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>                e.setValue(ice.getValue());
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>                <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner = clusteringDependentLogic.localNodeIsPrimaryOwner(ice.getKey());
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>                <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryEvictedListeners) listener.invoke(e, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>             }
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>          }
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>       }
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>    }
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> 
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>    @Override
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyCacheEntryEvicted(K key, V value,
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>          InvocationContext ctx, FlagAffectedCommand command) {
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>       <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner = clusteringDependentLogic.localNodeIsPrimaryOwner(key);
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>       <strong class="jxr_keyword">if</strong> (isNotificationAllowed(command, cacheEntriesEvictedListeners)) {
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_EVICTED);
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>          Map&lt;K, V&gt; map = Collections.singletonMap(key, value);
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>          e.setEntries(map);
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntriesEvictedListeners) listener.invoke(e, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>       }
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> 
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>       <em class="jxr_comment">// For backward compat</em>
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>       <strong class="jxr_keyword">if</strong> (isNotificationAllowed(command, cacheEntryEvictedListeners)) {
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_EVICTED);
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>          e.setKey(key);
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>          e.setValue(value);
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryEvictedListeners) listener.invoke(e, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>       }
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>    }
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> 
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>    @Override
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyCacheEntryInvalidated(<strong class="jxr_keyword">final</strong> K key, V value,
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>          <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> pre, InvocationContext ctx, FlagAffectedCommand command) {
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>       <strong class="jxr_keyword">if</strong> (isNotificationAllowed(command, cacheEntryInvalidatedListeners)) {
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_INVALIDATED);
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>          configureEvent(e, key, value, pre, ctx, command, value, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>          setTx(ctx, e);
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>          <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner = clusteringDependentLogic.localNodeIsPrimaryOwner(key);
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryInvalidatedListeners) listener.invoke(e, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>       }
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>    }
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> 
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>    @Override
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyCacheEntryLoaded(K key, V value, <strong class="jxr_keyword">boolean</strong> pre,
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>          InvocationContext ctx, FlagAffectedCommand command) {
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>       <strong class="jxr_keyword">if</strong> (isNotificationAllowed(command, cacheEntryLoadedListeners)) {
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>          <strong class="jxr_keyword">boolean</strong> originLocal = ctx.isOriginLocal();
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_LOADED);
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>          e.setOriginLocal(originLocal);
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>          e.setPre(pre);
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>          e.setKey(key);
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>          e.setValue(value);
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>          setTx(ctx, e);
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>          <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner = clusteringDependentLogic.localNodeIsPrimaryOwner(key);
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryLoadedListeners) listener.invoke(e, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>       }
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>    }
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>    @Override
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyCacheEntryActivated(K key, V value, <strong class="jxr_keyword">boolean</strong> pre, InvocationContext ctx, FlagAffectedCommand command) {
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>       <strong class="jxr_keyword">if</strong> (isNotificationAllowed(command, cacheEntryActivatedListeners)) {
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>          <strong class="jxr_keyword">boolean</strong> originLocal = ctx.isOriginLocal();
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_ACTIVATED);
+<a class="jxr_linenumber" name="L509" href="#L509">509</a>          e.setOriginLocal(originLocal);
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>          e.setPre(pre);
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>          e.setKey(key);
+<a class="jxr_linenumber" name="L512" href="#L512">512</a>          e.setValue(value);
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>          setTx(ctx, e);
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>          <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner = clusteringDependentLogic.localNodeIsPrimaryOwner(key);
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryActivatedListeners) listener.invoke(e, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>       }
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>    }
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> 
+<a class="jxr_linenumber" name="L519" href="#L519">519</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> setTx(InvocationContext ctx, EventImpl&lt;K, V&gt; e) {
+<a class="jxr_linenumber" name="L520" href="#L520">520</a>       <strong class="jxr_keyword">if</strong> (ctx != <strong class="jxr_keyword">null</strong> &amp;&amp; ctx.isInTxScope()) {
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>          GlobalTransaction tx = ((TxInvocationContext) ctx).getGlobalTransaction();
+<a class="jxr_linenumber" name="L522" href="#L522">522</a>          e.setTransactionId(tx);
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>       }
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>    }
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> 
+<a class="jxr_linenumber" name="L526" href="#L526">526</a>    @Override
+<a class="jxr_linenumber" name="L527" href="#L527">527</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyCacheEntryPassivated(K key, V value, <strong class="jxr_keyword">boolean</strong> pre, InvocationContext ctx, FlagAffectedCommand command) {
+<a class="jxr_linenumber" name="L528" href="#L528">528</a>       <strong class="jxr_keyword">if</strong> (isNotificationAllowed(command, cacheEntryPassivatedListeners)) {
+<a class="jxr_linenumber" name="L529" href="#L529">529</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, CACHE_ENTRY_PASSIVATED);
+<a class="jxr_linenumber" name="L530" href="#L530">530</a>          e.setPre(pre);
+<a class="jxr_linenumber" name="L531" href="#L531">531</a>          e.setKey(key);
+<a class="jxr_linenumber" name="L532" href="#L532">532</a>          e.setValue(value);
+<a class="jxr_linenumber" name="L533" href="#L533">533</a>          <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner = clusteringDependentLogic.localNodeIsPrimaryOwner(key);
+<a class="jxr_linenumber" name="L534" href="#L534">534</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryPassivatedListeners) listener.invoke(e, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L535" href="#L535">535</a>       }
+<a class="jxr_linenumber" name="L536" href="#L536">536</a>    }
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> 
+<a class="jxr_linenumber" name="L538" href="#L538">538</a>    @Override
+<a class="jxr_linenumber" name="L539" href="#L539">539</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyTransactionCompleted(GlobalTransaction transaction, <strong class="jxr_keyword">boolean</strong> successful, InvocationContext ctx) {
+<a class="jxr_linenumber" name="L540" href="#L540">540</a>       <strong class="jxr_keyword">if</strong> (!transactionCompletedListeners.isEmpty()) {
+<a class="jxr_linenumber" name="L541" href="#L541">541</a>          <strong class="jxr_keyword">boolean</strong> isOriginLocal = ctx.isOriginLocal();
+<a class="jxr_linenumber" name="L542" href="#L542">542</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, TRANSACTION_COMPLETED);
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>          e.setOriginLocal(isOriginLocal);
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>          e.setTransactionId(transaction);
+<a class="jxr_linenumber" name="L545" href="#L545">545</a>          e.setTransactionSuccessful(successful);
+<a class="jxr_linenumber" name="L546" href="#L546">546</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : transactionCompletedListeners) listener.invoke(e);
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>          <strong class="jxr_keyword">if</strong> (ctx.isInTxScope()) {
+<a class="jxr_linenumber" name="L548" href="#L548">548</a>             <strong class="jxr_keyword">if</strong> (successful) {
+<a class="jxr_linenumber" name="L549" href="#L549">549</a>                eventManager.sendEvents();
+<a class="jxr_linenumber" name="L550" href="#L550">550</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L551" href="#L551">551</a>                eventManager.dropEvents();
+<a class="jxr_linenumber" name="L552" href="#L552">552</a>             }
+<a class="jxr_linenumber" name="L553" href="#L553">553</a>          }
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>       }
+<a class="jxr_linenumber" name="L555" href="#L555">555</a>    }
+<a class="jxr_linenumber" name="L556" href="#L556">556</a> 
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>    @Override
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyTransactionRegistered(GlobalTransaction globalTransaction, <strong class="jxr_keyword">boolean</strong> isOriginLocal) {
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>       <strong class="jxr_keyword">if</strong> (!transactionRegisteredListeners.isEmpty()) {
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, TRANSACTION_REGISTERED);
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>          e.setOriginLocal(isOriginLocal);
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>          e.setTransactionId(globalTransaction);
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : transactionRegisteredListeners) listener.invoke(e);
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>       }
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>    }
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> 
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>    @Override
+<a class="jxr_linenumber" name="L568" href="#L568">568</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyDataRehashed(ConsistentHash readCH, ConsistentHash writeCH, ConsistentHash unionCH, <strong class="jxr_keyword">int</strong> newTopologyId, <strong class="jxr_keyword">boolean</strong> pre) {
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>       <strong class="jxr_keyword">if</strong> (!dataRehashedListeners.isEmpty()) {
+<a class="jxr_linenumber" name="L570" href="#L570">570</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, DATA_REHASHED);
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>          e.setPre(pre);
+<a class="jxr_linenumber" name="L572" href="#L572">572</a>          e.setConsistentHashAtStart(readCH);
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>          e.setConsistentHashAtEnd(writeCH);
+<a class="jxr_linenumber" name="L574" href="#L574">574</a>          e.setUnionConsistentHash(unionCH);
+<a class="jxr_linenumber" name="L575" href="#L575">575</a>          e.setNewTopologyId(newTopologyId);
+<a class="jxr_linenumber" name="L576" href="#L576">576</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : dataRehashedListeners) listener.invoke(e);
+<a class="jxr_linenumber" name="L577" href="#L577">577</a>       }
+<a class="jxr_linenumber" name="L578" href="#L578">578</a>    }
+<a class="jxr_linenumber" name="L579" href="#L579">579</a> 
+<a class="jxr_linenumber" name="L580" href="#L580">580</a>    @Override
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyTopologyChanged(CacheTopology oldTopology, CacheTopology newTopology, <strong class="jxr_keyword">int</strong> newTopologyId, <strong class="jxr_keyword">boolean</strong> pre) {
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>       <strong class="jxr_keyword">if</strong> (!topologyChangedListeners.isEmpty()) {
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, TOPOLOGY_CHANGED);
+<a class="jxr_linenumber" name="L584" href="#L584">584</a>          e.setPre(pre);
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>          <strong class="jxr_keyword">if</strong> (oldTopology != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L586" href="#L586">586</a>             e.setConsistentHashAtStart(oldTopology.getReadConsistentHash());
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>          }
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>          e.setConsistentHashAtEnd(newTopology.getWriteConsistentHash());
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>          e.setNewTopologyId(newTopologyId);
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : topologyChangedListeners) listener.invoke(e);
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>       }
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>    }
+<a class="jxr_linenumber" name="L593" href="#L593">593</a> 
+<a class="jxr_linenumber" name="L594" href="#L594">594</a>    @Override
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyPartitionStatusChanged(AvailabilityMode mode, <strong class="jxr_keyword">boolean</strong> pre) {
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>       <strong class="jxr_keyword">if</strong> (!partitionChangedListeners.isEmpty()) {
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>          EventImpl&lt;K, V&gt; e = EventImpl.createEvent(cache, PARTITION_STATUS_CHANGED);
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>          e.setPre(pre);
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>          e.setAvailabilityMode(mode);
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>          <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : partitionChangedListeners) listener.invoke(e);
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>       }
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>    }
+<a class="jxr_linenumber" name="L603" href="#L603">603</a> 
+<a class="jxr_linenumber" name="L604" href="#L604">604</a>    @Override
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> notifyClusterListeners(Collection&lt;? <strong class="jxr_keyword">extends</strong> CacheEntryEvent&lt;K, V&gt;&gt; events, UUID uuid) {
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>       <strong class="jxr_keyword">for</strong> (CacheEntryEvent&lt;K, V&gt; event : events) {
+<a class="jxr_linenumber" name="L607" href="#L607">607</a>          <strong class="jxr_keyword">if</strong> (event.isPre()) {
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Events for cluster listener should never be pre change"</span>);
+<a class="jxr_linenumber" name="L609" href="#L609">609</a>          }
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>          <strong class="jxr_keyword">switch</strong> (event.getType()) {
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>             <strong class="jxr_keyword">case</strong> CACHE_ENTRY_MODIFIED:
+<a class="jxr_linenumber" name="L612" href="#L612">612</a>                <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryModifiedListeners) {
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>                   <strong class="jxr_keyword">if</strong> (listener.isClustered() &amp;&amp; uuid.equals(listener.getIdentifier())) {
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>                      <em class="jxr_comment">// We force invocation, since it means the owning node passed filters already and they</em>
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>                      <em class="jxr_comment">// already converted so don't run converter either</em>
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>                      listener.invokeNoChecks(event, false, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>                   }
+<a class="jxr_linenumber" name="L618" href="#L618">618</a>                }
+<a class="jxr_linenumber" name="L619" href="#L619">619</a>                <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>             <strong class="jxr_keyword">case</strong> CACHE_ENTRY_CREATED:
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>                <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryCreatedListeners) {
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>                   <strong class="jxr_keyword">if</strong> (listener.isClustered() &amp;&amp; uuid.equals(listener.getIdentifier())) {
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>                      <em class="jxr_comment">// We force invocation, since it means the owning node passed filters already and they</em>
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>                      <em class="jxr_comment">// already converted so don't run converter either</em>
+<a class="jxr_linenumber" name="L625" href="#L625">625</a>                      listener.invokeNoChecks(event, false, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>                   }
+<a class="jxr_linenumber" name="L627" href="#L627">627</a>                }
+<a class="jxr_linenumber" name="L628" href="#L628">628</a>                <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L629" href="#L629">629</a>             <strong class="jxr_keyword">case</strong> CACHE_ENTRY_REMOVED:
+<a class="jxr_linenumber" name="L630" href="#L630">630</a>                <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : cacheEntryRemovedListeners) {
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>                   <strong class="jxr_keyword">if</strong> (listener.isClustered() &amp;&amp; uuid.equals(listener.getIdentifier())) {
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>                      <em class="jxr_comment">// We force invocation, since it means the owning node passed filters already and they</em>
+<a class="jxr_linenumber" name="L633" href="#L633">633</a>                      <em class="jxr_comment">// already converted so don't run converter either</em>
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>                      listener.invokeNoChecks(event, false, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>                   }
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>                }
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>                <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>             <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L639" href="#L639">639</a>                <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Unexpected event type encountered!"</span>);
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>          }
+<a class="jxr_linenumber" name="L641" href="#L641">641</a>       }
+<a class="jxr_linenumber" name="L642" href="#L642">642</a>    }
+<a class="jxr_linenumber" name="L643" href="#L643">643</a> 
+<a class="jxr_linenumber" name="L644" href="#L644">644</a>    @Override
+<a class="jxr_linenumber" name="L645" href="#L645">645</a>    <strong class="jxr_keyword">public</strong> Collection&lt;DistributedCallable&gt; retrieveClusterListenerCallablesToInstall() {
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>       Set&lt;Object&gt; enlistedAlready = <strong class="jxr_keyword">new</strong> HashSet&lt;&gt;();
+<a class="jxr_linenumber" name="L647" href="#L647">647</a>       Set&lt;DistributedCallable&gt; callables = <strong class="jxr_keyword">new</strong> HashSet&lt;&gt;();
+<a class="jxr_linenumber" name="L648" href="#L648">648</a> 
+<a class="jxr_linenumber" name="L649" href="#L649">649</a>       <strong class="jxr_keyword">if</strong> (log.isTraceEnabled()) {
+<a class="jxr_linenumber" name="L650" href="#L650">650</a>          log.tracef(<span class="jxr_string">"Request received to get cluster listeners currently registered"</span>);
+<a class="jxr_linenumber" name="L651" href="#L651">651</a>       }
+<a class="jxr_linenumber" name="L652" href="#L652">652</a> 
+<a class="jxr_linenumber" name="L653" href="#L653">653</a>       registerClusterListenerCallablesToInstall(enlistedAlready, callables, cacheEntryModifiedListeners);
+<a class="jxr_linenumber" name="L654" href="#L654">654</a>       registerClusterListenerCallablesToInstall(enlistedAlready, callables, cacheEntryCreatedListeners);
+<a class="jxr_linenumber" name="L655" href="#L655">655</a>       registerClusterListenerCallablesToInstall(enlistedAlready, callables, cacheEntryRemovedListeners);
+<a class="jxr_linenumber" name="L656" href="#L656">656</a> 
+<a class="jxr_linenumber" name="L657" href="#L657">657</a>       <strong class="jxr_keyword">if</strong> (log.isTraceEnabled()) {
+<a class="jxr_linenumber" name="L658" href="#L658">658</a>          log.tracef(<span class="jxr_string">"Cluster listeners found %s"</span>, callables);
+<a class="jxr_linenumber" name="L659" href="#L659">659</a>       }
+<a class="jxr_linenumber" name="L660" href="#L660">660</a> 
+<a class="jxr_linenumber" name="L661" href="#L661">661</a>       <strong class="jxr_keyword">return</strong> callables;
+<a class="jxr_linenumber" name="L662" href="#L662">662</a>    }
+<a class="jxr_linenumber" name="L663" href="#L663">663</a> 
+<a class="jxr_linenumber" name="L664" href="#L664">664</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> registerClusterListenerCallablesToInstall(Set&lt;Object&gt; enlistedAlready,
+<a class="jxr_linenumber" name="L665" href="#L665">665</a>                                                           Set&lt;DistributedCallable&gt; callables,
+<a class="jxr_linenumber" name="L666" href="#L666">666</a>                                                           List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; listenerInvocations) {
+<a class="jxr_linenumber" name="L667" href="#L667">667</a>       <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; listener : listenerInvocations) {
+<a class="jxr_linenumber" name="L668" href="#L668">668</a>          <strong class="jxr_keyword">if</strong> (!enlistedAlready.contains(listener.getTarget())) {
+<a class="jxr_linenumber" name="L669" href="#L669">669</a>             <em class="jxr_comment">// If clustered means it is local - so use our address</em>
+<a class="jxr_linenumber" name="L670" href="#L670">670</a>             <strong class="jxr_keyword">if</strong> (listener.isClustered()) {
+<a class="jxr_linenumber" name="L671" href="#L671">671</a>                callables.add(<strong class="jxr_keyword">new</strong> ClusterListenerReplicateCallable(listener.getIdentifier(),
+<a class="jxr_linenumber" name="L672" href="#L672">672</a>                                                                   cache.getCacheManager().getAddress(), listener.getFilter(),
+<a class="jxr_linenumber" name="L673" href="#L673">673</a>                                                                   listener.getConverter(), listener.isSync()));
+<a class="jxr_linenumber" name="L674" href="#L674">674</a>                enlistedAlready.add(listener.getTarget());
+<a class="jxr_linenumber" name="L675" href="#L675">675</a>             }
+<a class="jxr_linenumber" name="L676" href="#L676">676</a>             <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (listener.getTarget() instanceof RemoteClusterListener) {
+<a class="jxr_linenumber" name="L677" href="#L677">677</a>                RemoteClusterListener lcl = (RemoteClusterListener)listener.getTarget();
+<a class="jxr_linenumber" name="L678" href="#L678">678</a>                callables.add(<strong class="jxr_keyword">new</strong> ClusterListenerReplicateCallable(lcl.getId(), lcl.getOwnerAddress(), listener.getFilter(),
+<a class="jxr_linenumber" name="L679" href="#L679">679</a>                                                                   listener.getConverter(), listener.isSync()));
+<a class="jxr_linenumber" name="L680" href="#L680">680</a>                enlistedAlready.add(listener.getTarget());
+<a class="jxr_linenumber" name="L681" href="#L681">681</a>             }
+<a class="jxr_linenumber" name="L682" href="#L682">682</a>          }
+<a class="jxr_linenumber" name="L683" href="#L683">683</a>       }
+<a class="jxr_linenumber" name="L684" href="#L684">684</a>    }
+<a class="jxr_linenumber" name="L685" href="#L685">685</a> 
+<a class="jxr_linenumber" name="L686" href="#L686">686</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isNotificationAllowed(FlagAffectedCommand cmd, List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; listeners) {
+<a class="jxr_linenumber" name="L687" href="#L687">687</a>       <strong class="jxr_keyword">return</strong> (cmd == <strong class="jxr_keyword">null</strong> || !cmd.hasFlag(Flag.SKIP_LISTENER_NOTIFICATION)) &amp;&amp; !listeners.isEmpty();
+<a class="jxr_linenumber" name="L688" href="#L688">688</a>    }
+<a class="jxr_linenumber" name="L689" href="#L689">689</a> 
+<a class="jxr_linenumber" name="L690" href="#L690">690</a>    @Override
+<a class="jxr_linenumber" name="L691" href="#L691">691</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addListener(Object listener) {
+<a class="jxr_linenumber" name="L692" href="#L692">692</a>       addListener(listener, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L693" href="#L693">693</a>    }
+<a class="jxr_linenumber" name="L694" href="#L694">694</a> 
+<a class="jxr_linenumber" name="L695" href="#L695">695</a>    @Override
+<a class="jxr_linenumber" name="L696" href="#L696">696</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addListener(Object listener, ClassLoader classLoader) {
+<a class="jxr_linenumber" name="L697" href="#L697">697</a>       addListener(listener, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, classLoader);
+<a class="jxr_linenumber" name="L698" href="#L698">698</a>    }
+<a class="jxr_linenumber" name="L699" href="#L699">699</a> 
+<a class="jxr_linenumber" name="L700" href="#L700">700</a>    @Override
+<a class="jxr_linenumber" name="L701" href="#L701">701</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addListener(Object listener, KeyFilter&lt;? <strong class="jxr_keyword">super</strong> K&gt; filter, ClassLoader classLoader) {
+<a class="jxr_linenumber" name="L702" href="#L702">702</a>       addListener(listener, <strong class="jxr_keyword">new</strong> KeyFilterAsCacheEventFilter&lt;K&gt;(filter), <strong class="jxr_keyword">null</strong>, classLoader);
+<a class="jxr_linenumber" name="L703" href="#L703">703</a>    }
+<a class="jxr_linenumber" name="L704" href="#L704">704</a> 
+<a class="jxr_linenumber" name="L705" href="#L705">705</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L706" href="#L706">706</a> <em class="jxr_javadoccomment">    * Adds the listener using the provided filter converter and class loader.  The provided builder is used to add</em>
+<a class="jxr_linenumber" name="L707" href="#L707">707</a> <em class="jxr_javadoccomment">    * additional configuration including (clustered, onlyPrimary &amp; identifier) which can be used after this method</em>
+<a class="jxr_linenumber" name="L708" href="#L708">708</a> <em class="jxr_javadoccomment">    * is completed to see what values were used in the addition of this listener</em>
+<a class="jxr_linenumber" name="L709" href="#L709">709</a> <em class="jxr_javadoccomment">    * @param listener</em>
+<a class="jxr_linenumber" name="L710" href="#L710">710</a> <em class="jxr_javadoccomment">    * @param filter</em>
+<a class="jxr_linenumber" name="L711" href="#L711">711</a> <em class="jxr_javadoccomment">    * @param converter</em>
+<a class="jxr_linenumber" name="L712" href="#L712">712</a> <em class="jxr_javadoccomment">    * @param classLoader</em>
+<a class="jxr_linenumber" name="L713" href="#L713">713</a> <em class="jxr_javadoccomment">    * @param &lt;C&gt;</em>
+<a class="jxr_linenumber" name="L714" href="#L714">714</a> <em class="jxr_javadoccomment">    * @return</em>
+<a class="jxr_linenumber" name="L715" href="#L715">715</a> <em class="jxr_javadoccomment">    */</em>
+<a class="jxr_linenumber" name="L716" href="#L716">716</a>    <strong class="jxr_keyword">public</strong> &lt;C&gt; <strong class="jxr_keyword">void</strong> addListener(Object listener, CacheEventFilter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V&gt; filter,
+<a class="jxr_linenumber" name="L717" href="#L717">717</a>                                            CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, C&gt; converter, ClassLoader classLoader) {
+<a class="jxr_linenumber" name="L718" href="#L718">718</a>       <strong class="jxr_keyword">final</strong> Listener l = testListenerClassValidity(listener.getClass());
+<a class="jxr_linenumber" name="L719" href="#L719">719</a>       <strong class="jxr_keyword">final</strong> UUID generatedId = UUID.randomUUID();
+<a class="jxr_linenumber" name="L720" href="#L720">720</a>       <strong class="jxr_keyword">final</strong> CacheMode cacheMode = config.clustering().cacheMode();
+<a class="jxr_linenumber" name="L721" href="#L721">721</a> 
+<a class="jxr_linenumber" name="L722" href="#L722">722</a>       FilterIndexingServiceProvider indexingProvider = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L723" href="#L723">723</a>       <strong class="jxr_keyword">boolean</strong> foundMethods = false;
+<a class="jxr_linenumber" name="L724" href="#L724">724</a>       <strong class="jxr_keyword">if</strong> (filter instanceof IndexedFilter) {
+<a class="jxr_linenumber" name="L725" href="#L725">725</a>          IndexedFilter indexedFilter = (IndexedFilter) filter;
+<a class="jxr_linenumber" name="L726" href="#L726">726</a>          indexingProvider = findIndexingServiceProvider(indexedFilter);
+<a class="jxr_linenumber" name="L727" href="#L727">727</a>          <strong class="jxr_keyword">if</strong> (indexingProvider != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L728" href="#L728">728</a>             DelegatingCacheInvocationBuilder builder = <strong class="jxr_keyword">new</strong> DelegatingCacheInvocationBuilder(indexingProvider);
+<a class="jxr_linenumber" name="L729" href="#L729">729</a>             builder
+<a class="jxr_linenumber" name="L730" href="#L730">730</a>                   .setIncludeCurrentState(l.includeCurrentState())
+<a class="jxr_linenumber" name="L731" href="#L731">731</a>                   .setClustered(l.clustered())
+<a class="jxr_linenumber" name="L732" href="#L732">732</a>                   .setOnlyPrimary(l.clustered() ? cacheMode.isDistributed() : l.primaryOnly())
+<a class="jxr_linenumber" name="L733" href="#L733">733</a>                   .setObservation(l.clustered() ? Listener.Observation.POST : l.observation())
+<a class="jxr_linenumber" name="L734" href="#L734">734</a>                   .setFilter(filter)
+<a class="jxr_linenumber" name="L735" href="#L735">735</a>                   .setConverter(converter)
+<a class="jxr_linenumber" name="L736" href="#L736">736</a>                   .setIdentifier(generatedId)
+<a class="jxr_linenumber" name="L737" href="#L737">737</a>                   .setClassLoader(classLoader);
+<a class="jxr_linenumber" name="L738" href="#L738">738</a>             foundMethods = validateAndAddListenerInvocations(listener, builder);
+<a class="jxr_linenumber" name="L739" href="#L739">739</a>             builder.registerListenerInvocations();
+<a class="jxr_linenumber" name="L740" href="#L740">740</a>          }
+<a class="jxr_linenumber" name="L741" href="#L741">741</a>       }
+<a class="jxr_linenumber" name="L742" href="#L742">742</a>       <strong class="jxr_keyword">if</strong> (indexingProvider == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L743" href="#L743">743</a>          CacheInvocationBuilder builder = <strong class="jxr_keyword">new</strong> CacheInvocationBuilder();
+<a class="jxr_linenumber" name="L744" href="#L744">744</a>          builder
+<a class="jxr_linenumber" name="L745" href="#L745">745</a>                .setIncludeCurrentState(l.includeCurrentState())
+<a class="jxr_linenumber" name="L746" href="#L746">746</a>                .setClustered(l.clustered())
+<a class="jxr_linenumber" name="L747" href="#L747">747</a>                .setOnlyPrimary(l.clustered() ? cacheMode.isDistributed() : l.primaryOnly())
+<a class="jxr_linenumber" name="L748" href="#L748">748</a>                .setObservation(l.clustered() ? Listener.Observation.POST : l.observation())
+<a class="jxr_linenumber" name="L749" href="#L749">749</a>                .setFilter(filter)
+<a class="jxr_linenumber" name="L750" href="#L750">750</a>                .setConverter(converter)
+<a class="jxr_linenumber" name="L751" href="#L751">751</a>                .setIdentifier(generatedId)
+<a class="jxr_linenumber" name="L752" href="#L752">752</a>                .setClassLoader(classLoader);
+<a class="jxr_linenumber" name="L753" href="#L753">753</a>          foundMethods = validateAndAddListenerInvocations(listener, builder);
+<a class="jxr_linenumber" name="L754" href="#L754">754</a>       }
+<a class="jxr_linenumber" name="L755" href="#L755">755</a> 
+<a class="jxr_linenumber" name="L756" href="#L756">756</a>       <strong class="jxr_keyword">if</strong> (foundMethods &amp;&amp; l.clustered()) {
+<a class="jxr_linenumber" name="L757" href="#L757">757</a>          <strong class="jxr_keyword">if</strong> (l.observation() == Listener.Observation.PRE) {
+<a class="jxr_linenumber" name="L758" href="#L758">758</a>             <strong class="jxr_keyword">throw</strong> log.clusterListenerRegisteredWithOnlyPreEvents(listener.getClass());
+<a class="jxr_linenumber" name="L759" href="#L759">759</a>          } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (cacheMode.isInvalidation()) {
+<a class="jxr_linenumber" name="L760" href="#L760">760</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnsupportedOperationException(<span class="jxr_string">"Cluster listeners cannot be used with Invalidation Caches!"</span>);
+<a class="jxr_linenumber" name="L761" href="#L761">761</a>          } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (cacheMode.isDistributed()) {
+<a class="jxr_linenumber" name="L762" href="#L762">762</a>             clusterListenerIDs.put(listener, generatedId);
+<a class="jxr_linenumber" name="L763" href="#L763">763</a>             EmbeddedCacheManager manager = cache.getCacheManager();
+<a class="jxr_linenumber" name="L764" href="#L764">764</a>             Address ourAddress = manager.getAddress();
+<a class="jxr_linenumber" name="L765" href="#L765">765</a> 
+<a class="jxr_linenumber" name="L766" href="#L766">766</a>             List&lt;Address&gt; members = manager.getMembers();
+<a class="jxr_linenumber" name="L767" href="#L767">767</a>             <em class="jxr_comment">// If we are the only member don't even worry about sending listeners</em>
+<a class="jxr_linenumber" name="L768" href="#L768">768</a>             <strong class="jxr_keyword">if</strong> (members != <strong class="jxr_keyword">null</strong> &amp;&amp; members.size() &gt; 1) {
+<a class="jxr_linenumber" name="L769" href="#L769">769</a>                DistributedExecutionCompletionService decs = <strong class="jxr_keyword">new</strong> DistributedExecutionCompletionService(distExecutorService);
+<a class="jxr_linenumber" name="L770" href="#L770">770</a> 
+<a class="jxr_linenumber" name="L771" href="#L771">771</a>                <strong class="jxr_keyword">if</strong> (log.isTraceEnabled()) {
+<a class="jxr_linenumber" name="L772" href="#L772">772</a>                   log.tracef(<span class="jxr_string">"Replicating cluster listener to other nodes %s for cluster listener with id %s"</span>,
+<a class="jxr_linenumber" name="L773" href="#L773">773</a>                              members, generatedId);
+<a class="jxr_linenumber" name="L774" href="#L774">774</a>                }
+<a class="jxr_linenumber" name="L775" href="#L775">775</a>                Callable callable = <strong class="jxr_keyword">new</strong> ClusterListenerReplicateCallable(generatedId, ourAddress, filter, converter, l.sync());
+<a class="jxr_linenumber" name="L776" href="#L776">776</a>                <strong class="jxr_keyword">for</strong> (Address member : members) {
+<a class="jxr_linenumber" name="L777" href="#L777">777</a>                   <strong class="jxr_keyword">if</strong> (!member.equals(ourAddress)) {
+<a class="jxr_linenumber" name="L778" href="#L778">778</a>                      decs.submit(member, callable);
+<a class="jxr_linenumber" name="L779" href="#L779">779</a>                   }
+<a class="jxr_linenumber" name="L780" href="#L780">780</a>                }
+<a class="jxr_linenumber" name="L781" href="#L781">781</a> 
+<a class="jxr_linenumber" name="L782" href="#L782">782</a>                <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; members.size() - 1; ++i) {
+<a class="jxr_linenumber" name="L783" href="#L783">783</a>                   <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L784" href="#L784">784</a>                      decs.take().get();
+<a class="jxr_linenumber" name="L785" href="#L785">785</a>                   } <strong class="jxr_keyword">catch</strong> (InterruptedException e) {
+<a class="jxr_linenumber" name="L786" href="#L786">786</a>                      <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> CacheListenerException(e);
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>                   } <strong class="jxr_keyword">catch</strong> (ExecutionException e) {
+<a class="jxr_linenumber" name="L788" href="#L788">788</a>                      <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> CacheListenerException(e);
+<a class="jxr_linenumber" name="L789" href="#L789">789</a>                   }
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>                }
+<a class="jxr_linenumber" name="L791" href="#L791">791</a> 
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>                <strong class="jxr_keyword">int</strong> extraCount = 0;
+<a class="jxr_linenumber" name="L793" href="#L793">793</a>                <em class="jxr_comment">// If anyone else joined since we sent these we have to send the listeners again, since they may have queried</em>
+<a class="jxr_linenumber" name="L794" href="#L794">794</a>                <em class="jxr_comment">// before the other nodes got the new listener</em>
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>                List&lt;Address&gt; membersAfter = manager.getMembers();
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>                <strong class="jxr_keyword">for</strong> (Address member : membersAfter) {
+<a class="jxr_linenumber" name="L797" href="#L797">797</a>                   <strong class="jxr_keyword">if</strong> (!members.contains(member) &amp;&amp; !member.equals(ourAddress)) {
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>                      <strong class="jxr_keyword">if</strong> (log.isTraceEnabled()) {
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>                         log.tracef(<span class="jxr_string">"Found additional node %s that joined during replication of cluster listener with id %s"</span>,
+<a class="jxr_linenumber" name="L800" href="#L800">800</a>                                    member, generatedId);
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>                      }
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>                      extraCount++;
+<a class="jxr_linenumber" name="L803" href="#L803">803</a>                      decs.submit(member, callable);
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>                   }
+<a class="jxr_linenumber" name="L805" href="#L805">805</a>                }
+<a class="jxr_linenumber" name="L806" href="#L806">806</a> 
+<a class="jxr_linenumber" name="L807" href="#L807">807</a>                <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; extraCount; ++i) {
+<a class="jxr_linenumber" name="L808" href="#L808">808</a>                   <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L809" href="#L809">809</a>                      decs.take().get();
+<a class="jxr_linenumber" name="L810" href="#L810">810</a>                   } <strong class="jxr_keyword">catch</strong> (InterruptedException e) {
+<a class="jxr_linenumber" name="L811" href="#L811">811</a>                      <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> CacheListenerException(e);
+<a class="jxr_linenumber" name="L812" href="#L812">812</a>                   } <strong class="jxr_keyword">catch</strong> (ExecutionException e) {
+<a class="jxr_linenumber" name="L813" href="#L813">813</a>                      <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> CacheListenerException(e);
+<a class="jxr_linenumber" name="L814" href="#L814">814</a>                   }
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>                }
+<a class="jxr_linenumber" name="L816" href="#L816">816</a>             }
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>          }
+<a class="jxr_linenumber" name="L818" href="#L818">818</a>       }
+<a class="jxr_linenumber" name="L819" href="#L819">819</a> 
+<a class="jxr_linenumber" name="L820" href="#L820">820</a>       <em class="jxr_comment">// If we have a segment listener handler, it means we have to do initial state</em>
+<a class="jxr_linenumber" name="L821" href="#L821">821</a>       QueueingSegmentListener handler = segmentHandler.remove(generatedId);
+<a class="jxr_linenumber" name="L822" href="#L822">822</a>       <strong class="jxr_keyword">if</strong> (handler != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L823" href="#L823">823</a>          <strong class="jxr_keyword">if</strong> (log.isTraceEnabled()) {
+<a class="jxr_linenumber" name="L824" href="#L824">824</a>             log.tracef(<span class="jxr_string">"Listener %s requests initial state for cache"</span>, generatedId);
+<a class="jxr_linenumber" name="L825" href="#L825">825</a>          }
+<a class="jxr_linenumber" name="L826" href="#L826">826</a>          <strong class="jxr_keyword">final</strong> KeyValueFilter usedFilter;
+<a class="jxr_linenumber" name="L827" href="#L827">827</a>          <strong class="jxr_keyword">final</strong> Converter usedConverter;
+<a class="jxr_linenumber" name="L828" href="#L828">828</a>          <strong class="jxr_keyword">if</strong> (filter instanceof CacheEventFilterConverter &amp;&amp; (filter == converter || converter == <strong class="jxr_keyword">null</strong>)) {
+<a class="jxr_linenumber" name="L829" href="#L829">829</a>             usedFilter = <strong class="jxr_keyword">new</strong> CacheEventFilterConverterAsKeyValueFilterConverter((CacheEventFilterConverter) filter);
+<a class="jxr_linenumber" name="L830" href="#L830">830</a>             usedConverter = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L831" href="#L831">831</a>          } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L832" href="#L832">832</a>             usedFilter = filter == <strong class="jxr_keyword">null</strong> ? <strong class="jxr_keyword">null</strong> : <strong class="jxr_keyword">new</strong> CacheEventFilterAsKeyValueFilter(filter);
+<a class="jxr_linenumber" name="L833" href="#L833">833</a>             usedConverter = converter == <strong class="jxr_keyword">null</strong> ? <strong class="jxr_keyword">null</strong> : <strong class="jxr_keyword">new</strong> CacheEventConverterAsConverter(converter);
+<a class="jxr_linenumber" name="L834" href="#L834">834</a>          }
+<a class="jxr_linenumber" name="L835" href="#L835">835</a>          <strong class="jxr_keyword">try</strong> (CloseableIterator&lt;CacheEntry&lt;K, C&gt;&gt; iterator = entryRetriever.retrieveEntries(usedFilter, usedConverter, <strong class="jxr_keyword">null</strong>, handler)) {
+<a class="jxr_linenumber" name="L836" href="#L836">836</a>             <strong class="jxr_keyword">while</strong> (iterator.hasNext()) {
+<a class="jxr_linenumber" name="L837" href="#L837">837</a>                CacheEntry&lt;K, C&gt; entry = iterator.next();
+<a class="jxr_linenumber" name="L838" href="#L838">838</a>                <em class="jxr_comment">// Mark the key as processed and see if we had a concurrent update</em>
+<a class="jxr_linenumber" name="L839" href="#L839">839</a>                Object value = handler.markKeyAsProcessing(entry.getKey());
+<a class="jxr_linenumber" name="L840" href="#L840">840</a>                <strong class="jxr_keyword">if</strong> (value == BaseQueueingSegmentListener.REMOVED) {
+<a class="jxr_linenumber" name="L841" href="#L841">841</a>                   <em class="jxr_comment">// Don't process this value if we had a concurrent remove</em>
+<a class="jxr_linenumber" name="L842" href="#L842">842</a>                   <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L843" href="#L843">843</a>                }
+<a class="jxr_linenumber" name="L844" href="#L844">844</a>                raiseEventForInitialTransfer(generatedId, entry, l.clustered());
+<a class="jxr_linenumber" name="L845" href="#L845">845</a> 
+<a class="jxr_linenumber" name="L846" href="#L846">846</a>                handler.notifiedKey(entry.getKey());
+<a class="jxr_linenumber" name="L847" href="#L847">847</a>             }
+<a class="jxr_linenumber" name="L848" href="#L848">848</a>          }
+<a class="jxr_linenumber" name="L849" href="#L849">849</a> 
+<a class="jxr_linenumber" name="L850" href="#L850">850</a>          Set&lt;CacheEntry&gt; entries = handler.findCreatedEntries();
+<a class="jxr_linenumber" name="L851" href="#L851">851</a> 
+<a class="jxr_linenumber" name="L852" href="#L852">852</a>          <strong class="jxr_keyword">for</strong> (CacheEntry entry : entries) {
+<a class="jxr_linenumber" name="L853" href="#L853">853</a>             raiseEventForInitialTransfer(generatedId, entry, l.clustered());
+<a class="jxr_linenumber" name="L854" href="#L854">854</a>          }
+<a class="jxr_linenumber" name="L855" href="#L855">855</a> 
+<a class="jxr_linenumber" name="L856" href="#L856">856</a>          <strong class="jxr_keyword">if</strong> (log.isTraceEnabled()) {
+<a class="jxr_linenumber" name="L857" href="#L857">857</a>             log.tracef(<span class="jxr_string">"Listener %s initial state for cache completed"</span>, generatedId);
+<a class="jxr_linenumber" name="L858" href="#L858">858</a>          }
+<a class="jxr_linenumber" name="L859" href="#L859">859</a> 
+<a class="jxr_linenumber" name="L860" href="#L860">860</a>          handler.transferComplete();
+<a class="jxr_linenumber" name="L861" href="#L861">861</a>       }
+<a class="jxr_linenumber" name="L862" href="#L862">862</a>    }
+<a class="jxr_linenumber" name="L863" href="#L863">863</a> 
+<a class="jxr_linenumber" name="L864" href="#L864">864</a>    <strong class="jxr_keyword">private</strong> FilterIndexingServiceProvider findIndexingServiceProvider(IndexedFilter indexedFilter) {
+<a class="jxr_linenumber" name="L865" href="#L865">865</a>       <strong class="jxr_keyword">for</strong> (FilterIndexingServiceProvider provider : filterIndexingServiceProviders) {
+<a class="jxr_linenumber" name="L866" href="#L866">866</a>          <strong class="jxr_keyword">if</strong> (provider.supportsFilter(indexedFilter)) {
+<a class="jxr_linenumber" name="L867" href="#L867">867</a>             <strong class="jxr_keyword">return</strong> provider;
+<a class="jxr_linenumber" name="L868" href="#L868">868</a>          }
+<a class="jxr_linenumber" name="L869" href="#L869">869</a>       }
+<a class="jxr_linenumber" name="L870" href="#L870">870</a>       log.noFilterIndexingServiceProviderFound(indexedFilter.getClass().getName());
+<a class="jxr_linenumber" name="L871" href="#L871">871</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L872" href="#L872">872</a>    }
+<a class="jxr_linenumber" name="L873" href="#L873">873</a> 
+<a class="jxr_linenumber" name="L874" href="#L874">874</a>    @Override
+<a class="jxr_linenumber" name="L875" href="#L875">875</a>    <strong class="jxr_keyword">public</strong> List&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; getListenerCollectionForAnnotation(Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt; annotation) {
+<a class="jxr_linenumber" name="L876" href="#L876">876</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.getListenerCollectionForAnnotation(annotation);
+<a class="jxr_linenumber" name="L877" href="#L877">877</a>    }
+<a class="jxr_linenumber" name="L878" href="#L878">878</a> 
+<a class="jxr_linenumber" name="L879" href="#L879">879</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> raiseEventForInitialTransfer(UUID identifier, CacheEntry entry, <strong class="jxr_keyword">boolean</strong> clustered) {
+<a class="jxr_linenumber" name="L880" href="#L880">880</a>       EventImpl preEvent;
+<a class="jxr_linenumber" name="L881" href="#L881">881</a>       <strong class="jxr_keyword">if</strong> (clustered) {
+<a class="jxr_linenumber" name="L882" href="#L882">882</a>          <em class="jxr_comment">// In clustered mode we only send post event</em>
+<a class="jxr_linenumber" name="L883" href="#L883">883</a>          preEvent = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L884" href="#L884">884</a>       } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L885" href="#L885">885</a>          preEvent = EventImpl.createEvent(cache, CACHE_ENTRY_CREATED);
+<a class="jxr_linenumber" name="L886" href="#L886">886</a>          preEvent.setKey(entry.getKey());
+<a class="jxr_linenumber" name="L887" href="#L887">887</a>          preEvent.setPre(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L888" href="#L888">888</a>       }
+<a class="jxr_linenumber" name="L889" href="#L889">889</a> 
+<a class="jxr_linenumber" name="L890" href="#L890">890</a>       EventImpl postEvent = EventImpl.createEvent(cache, CACHE_ENTRY_CREATED);
+<a class="jxr_linenumber" name="L891" href="#L891">891</a>       postEvent.setKey(entry.getKey());
+<a class="jxr_linenumber" name="L892" href="#L892">892</a>       postEvent.setValue(entry.getValue());
+<a class="jxr_linenumber" name="L893" href="#L893">893</a>       postEvent.setMetadata(entry.getMetadata());
+<a class="jxr_linenumber" name="L894" href="#L894">894</a>       postEvent.setPre(false);
+<a class="jxr_linenumber" name="L895" href="#L895">895</a> 
+<a class="jxr_linenumber" name="L896" href="#L896">896</a>       <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; invocation : cacheEntryCreatedListeners) {
+<a class="jxr_linenumber" name="L897" href="#L897">897</a>          <em class="jxr_comment">// Now notify all our methods of the creates</em>
+<a class="jxr_linenumber" name="L898" href="#L898">898</a>          <strong class="jxr_keyword">if</strong> (invocation.getIdentifier() == identifier) {
+<a class="jxr_linenumber" name="L899" href="#L899">899</a>             <strong class="jxr_keyword">if</strong> (preEvent != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L900" href="#L900">900</a>                <em class="jxr_comment">// Non clustered notifications are done twice</em>
+<a class="jxr_linenumber" name="L901" href="#L901">901</a>                invocation.invokeNoChecks(preEvent, <strong class="jxr_keyword">true</strong>, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L902" href="#L902">902</a>             }
+<a class="jxr_linenumber" name="L903" href="#L903">903</a>             invocation.invokeNoChecks(postEvent, <strong class="jxr_keyword">true</strong>, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L904" href="#L904">904</a>          }
+<a class="jxr_linenumber" name="L905" href="#L905">905</a>       }
+<a class="jxr_linenumber" name="L906" href="#L906">906</a>    }
+<a class="jxr_linenumber" name="L907" href="#L907">907</a> 
+<a class="jxr_linenumber" name="L908" href="#L908">908</a>    @Override
+<a class="jxr_linenumber" name="L909" href="#L909">909</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addListener(Object listener, KeyFilter&lt;? <strong class="jxr_keyword">super</strong> K&gt; filter) {
+<a class="jxr_linenumber" name="L910" href="#L910">910</a>       addListener(listener, filter, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L911" href="#L911">911</a>    }
+<a class="jxr_linenumber" name="L912" href="#L912">912</a> 
+<a class="jxr_linenumber" name="L913" href="#L913">913</a>    @Override
+<a class="jxr_linenumber" name="L914" href="#L914">914</a>    <strong class="jxr_keyword">public</strong> &lt;C&gt; <strong class="jxr_keyword">void</strong> addListener(Object listener, CacheEventFilter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V&gt; filter, CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, C&gt; converter) {
+<a class="jxr_linenumber" name="L915" href="#L915">915</a>       addListener(listener, filter, converter, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L916" href="#L916">916</a>    }
+<a class="jxr_linenumber" name="L917" href="#L917">917</a> 
+<a class="jxr_linenumber" name="L918" href="#L918">918</a>    <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">class</strong> CacheInvocationBuilder <strong class="jxr_keyword">extends</strong> AbstractInvocationBuilder {
+<a class="jxr_linenumber" name="L919" href="#L919">919</a>       CacheEventFilter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V&gt; filter;
+<a class="jxr_linenumber" name="L920" href="#L920">920</a>       CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, ?&gt; converter;
+<a class="jxr_linenumber" name="L921" href="#L921">921</a>       <strong class="jxr_keyword">boolean</strong> onlyPrimary;
+<a class="jxr_linenumber" name="L922" href="#L922">922</a>       <strong class="jxr_keyword">boolean</strong> clustered;
+<a class="jxr_linenumber" name="L923" href="#L923">923</a>       <strong class="jxr_keyword">boolean</strong> includeCurrentState;
+<a class="jxr_linenumber" name="L924" href="#L924">924</a>       UUID identifier;
+<a class="jxr_linenumber" name="L925" href="#L925">925</a>       Listener.Observation observation;
+<a class="jxr_linenumber" name="L926" href="#L926">926</a> 
+<a class="jxr_linenumber" name="L927" href="#L927">927</a>       <strong class="jxr_keyword">public</strong> CacheEventFilter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V&gt; getFilter() {
+<a class="jxr_linenumber" name="L928" href="#L928">928</a>          <strong class="jxr_keyword">return</strong> filter;
+<a class="jxr_linenumber" name="L929" href="#L929">929</a>       }
+<a class="jxr_linenumber" name="L930" href="#L930">930</a> 
+<a class="jxr_linenumber" name="L931" href="#L931">931</a>       <strong class="jxr_keyword">public</strong> CacheInvocationBuilder setFilter(CacheEventFilter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V&gt; filter) {
+<a class="jxr_linenumber" name="L932" href="#L932">932</a>          <strong class="jxr_keyword">this</strong>.filter = filter;
+<a class="jxr_linenumber" name="L933" href="#L933">933</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L934" href="#L934">934</a>       }
+<a class="jxr_linenumber" name="L935" href="#L935">935</a> 
+<a class="jxr_linenumber" name="L936" href="#L936">936</a>       <strong class="jxr_keyword">public</strong> CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, ?&gt; getConverter() {
+<a class="jxr_linenumber" name="L937" href="#L937">937</a>          <strong class="jxr_keyword">return</strong> converter;
+<a class="jxr_linenumber" name="L938" href="#L938">938</a>       }
+<a class="jxr_linenumber" name="L939" href="#L939">939</a> 
+<a class="jxr_linenumber" name="L940" href="#L940">940</a>       <strong class="jxr_keyword">public</strong> CacheInvocationBuilder setConverter(CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, ?&gt; converter) {
+<a class="jxr_linenumber" name="L941" href="#L941">941</a>          <strong class="jxr_keyword">this</strong>.converter = converter;
+<a class="jxr_linenumber" name="L942" href="#L942">942</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L943" href="#L943">943</a>       }
+<a class="jxr_linenumber" name="L944" href="#L944">944</a> 
+<a class="jxr_linenumber" name="L945" href="#L945">945</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isOnlyPrimary() {
+<a class="jxr_linenumber" name="L946" href="#L946">946</a>          <strong class="jxr_keyword">return</strong> onlyPrimary;
+<a class="jxr_linenumber" name="L947" href="#L947">947</a>       }
+<a class="jxr_linenumber" name="L948" href="#L948">948</a> 
+<a class="jxr_linenumber" name="L949" href="#L949">949</a>       <strong class="jxr_keyword">public</strong> CacheInvocationBuilder setOnlyPrimary(<strong class="jxr_keyword">boolean</strong> onlyPrimary) {
+<a class="jxr_linenumber" name="L950" href="#L950">950</a>          <strong class="jxr_keyword">this</strong>.onlyPrimary = onlyPrimary;
+<a class="jxr_linenumber" name="L951" href="#L951">951</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L952" href="#L952">952</a>       }
+<a class="jxr_linenumber" name="L953" href="#L953">953</a> 
+<a class="jxr_linenumber" name="L954" href="#L954">954</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isClustered() {
+<a class="jxr_linenumber" name="L955" href="#L955">955</a>          <strong class="jxr_keyword">return</strong> clustered;
+<a class="jxr_linenumber" name="L956" href="#L956">956</a>       }
+<a class="jxr_linenumber" name="L957" href="#L957">957</a> 
+<a class="jxr_linenumber" name="L958" href="#L958">958</a>       <strong class="jxr_keyword">public</strong> CacheInvocationBuilder setClustered(<strong class="jxr_keyword">boolean</strong> clustered) {
+<a class="jxr_linenumber" name="L959" href="#L959">959</a>          <strong class="jxr_keyword">this</strong>.clustered = clustered;
+<a class="jxr_linenumber" name="L960" href="#L960">960</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L961" href="#L961">961</a>       }
+<a class="jxr_linenumber" name="L962" href="#L962">962</a> 
+<a class="jxr_linenumber" name="L963" href="#L963">963</a>       <strong class="jxr_keyword">public</strong> UUID getIdentifier() {
+<a class="jxr_linenumber" name="L964" href="#L964">964</a>          <strong class="jxr_keyword">return</strong> identifier;
+<a class="jxr_linenumber" name="L965" href="#L965">965</a>       }
+<a class="jxr_linenumber" name="L966" href="#L966">966</a> 
+<a class="jxr_linenumber" name="L967" href="#L967">967</a>       <strong class="jxr_keyword">public</strong> CacheInvocationBuilder setIdentifier(UUID identifier) {
+<a class="jxr_linenumber" name="L968" href="#L968">968</a>          <strong class="jxr_keyword">this</strong>.identifier = identifier;
+<a class="jxr_linenumber" name="L969" href="#L969">969</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L970" href="#L970">970</a>       }
+<a class="jxr_linenumber" name="L971" href="#L971">971</a> 
+<a class="jxr_linenumber" name="L972" href="#L972">972</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isIncludeCurrentState() {
+<a class="jxr_linenumber" name="L973" href="#L973">973</a>          <strong class="jxr_keyword">return</strong> includeCurrentState;
+<a class="jxr_linenumber" name="L974" href="#L974">974</a>       }
+<a class="jxr_linenumber" name="L975" href="#L975">975</a> 
+<a class="jxr_linenumber" name="L976" href="#L976">976</a>       <strong class="jxr_keyword">public</strong> CacheInvocationBuilder setIncludeCurrentState(<strong class="jxr_keyword">boolean</strong> includeCurrentState) {
+<a class="jxr_linenumber" name="L977" href="#L977">977</a>          <strong class="jxr_keyword">this</strong>.includeCurrentState = includeCurrentState;
+<a class="jxr_linenumber" name="L978" href="#L978">978</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L979" href="#L979">979</a>       }
+<a class="jxr_linenumber" name="L980" href="#L980">980</a> 
+<a class="jxr_linenumber" name="L981" href="#L981">981</a>       <strong class="jxr_keyword">public</strong> Listener.Observation getObservation() {
+<a class="jxr_linenumber" name="L982" href="#L982">982</a>          <strong class="jxr_keyword">return</strong> observation;
+<a class="jxr_linenumber" name="L983" href="#L983">983</a>       }
+<a class="jxr_linenumber" name="L984" href="#L984">984</a> 
+<a class="jxr_linenumber" name="L985" href="#L985">985</a>       <strong class="jxr_keyword">public</strong> CacheInvocationBuilder setObservation(Listener.Observation observation) {
+<a class="jxr_linenumber" name="L986" href="#L986">986</a>          <strong class="jxr_keyword">this</strong>.observation = observation;
+<a class="jxr_linenumber" name="L987" href="#L987">987</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L988" href="#L988">988</a>       }
+<a class="jxr_linenumber" name="L989" href="#L989">989</a> 
+<a class="jxr_linenumber" name="L990" href="#L990">990</a>       @Override
+<a class="jxr_linenumber" name="L991" href="#L991">991</a>       <strong class="jxr_keyword">public</strong> CacheEntryListenerInvocation&lt;K, V&gt; build() {
+<a class="jxr_linenumber" name="L992" href="#L992">992</a>          ListenerInvocation&lt;Event&lt;K, V&gt;&gt; invocation = <strong class="jxr_keyword">new</strong> ListenerInvocationImpl(target, method, sync, classLoader,
+<a class="jxr_linenumber" name="L993" href="#L993">993</a>                                                                                  subject);
+<a class="jxr_linenumber" name="L994" href="#L994">994</a> 
+<a class="jxr_linenumber" name="L995" href="#L995">995</a>          wireFilterAndConverterDependencies(filter, converter);
+<a class="jxr_linenumber" name="L996" href="#L996">996</a> 
+<a class="jxr_linenumber" name="L997" href="#L997">997</a>          <em class="jxr_comment">// If we are dealing with clustered events that forces the cluster listener to only use primary only else we would</em>
+<a class="jxr_linenumber" name="L998" href="#L998">998</a>          <em class="jxr_comment">// have duplicate events</em>
+<a class="jxr_linenumber" name="L999" href="#L999">999</a>          CacheEntryListenerInvocation&lt;K, V&gt; returnValue;
+<a class="jxr_linenumber" name="L1000" href="#L1000">1000</a> 
+<a class="jxr_linenumber" name="L1001" href="#L1001">1001</a>          <strong class="jxr_keyword">if</strong> (includeCurrentState) {
+<a class="jxr_linenumber" name="L1002" href="#L1002">1002</a>             <em class="jxr_comment">// If it is a clustered listener and distributed cache we can do some extra optimizations</em>
+<a class="jxr_linenumber" name="L1003" href="#L1003">1003</a>             <strong class="jxr_keyword">if</strong> (clustered) {
+<a class="jxr_linenumber" name="L1004" href="#L1004">1004</a>                QueueingSegmentListener handler = segmentHandler.get(identifier);
+<a class="jxr_linenumber" name="L1005" href="#L1005">1005</a>                <strong class="jxr_keyword">if</strong> (handler == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1006" href="#L1006">1006</a>                   <strong class="jxr_keyword">if</strong> (config.clustering().cacheMode().isDistributed()) {
+<a class="jxr_linenumber" name="L1007" href="#L1007">1007</a>                      handler = <strong class="jxr_keyword">new</strong> DistributedQueueingSegmentListener(entryFactory, distributionManager);
+<a class="jxr_linenumber" name="L1008" href="#L1008">1008</a>                   } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1009" href="#L1009">1009</a>                      handler = <strong class="jxr_keyword">new</strong> QueueingAllSegmentListener(entryFactory);
+<a class="jxr_linenumber" name="L1010" href="#L1010">1010</a>                   }
+<a class="jxr_linenumber" name="L1011" href="#L1011">1011</a>                   QueueingSegmentListener currentQueue = segmentHandler.putIfAbsent(identifier, handler);
+<a class="jxr_linenumber" name="L1012" href="#L1012">1012</a>                   <strong class="jxr_keyword">if</strong> (currentQueue != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1013" href="#L1013">1013</a>                      handler = currentQueue;
+<a class="jxr_linenumber" name="L1014" href="#L1014">1014</a>                   }
+<a class="jxr_linenumber" name="L1015" href="#L1015">1015</a>                }
+<a class="jxr_linenumber" name="L1016" href="#L1016">1016</a>                returnValue = <strong class="jxr_keyword">new</strong> ClusteredListenerInvocation&lt;K, V&gt;(invocation, handler, filter, converter, annotation,
+<a class="jxr_linenumber" name="L1017" href="#L1017">1017</a>                                                                    onlyPrimary, identifier, sync, observation);
+<a class="jxr_linenumber" name="L1018" href="#L1018">1018</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1019" href="#L1019">1019</a> <em class="jxr_comment">//               TODO: this is removed until non cluster listeners are supported</em>
+<a class="jxr_linenumber" name="L1020" href="#L1020">1020</a> <em class="jxr_comment">//               QueueingSegmentListener handler = segmentHandler.get(identifier);</em>
+<a class="jxr_linenumber" name="L1021" href="#L1021">1021</a> <em class="jxr_comment">//               if (handler == null) {</em>
+<a class="jxr_linenumber" name="L1022" href="#L1022">1022</a> <em class="jxr_comment">//                  handler = new QueueingAllSegmentListener();</em>
+<a class="jxr_linenumber" name="L1023" href="#L1023">1023</a> <em class="jxr_comment">//                  QueueingSegmentListener currentQueue = segmentHandler.putIfAbsent(identifier, handler);</em>
+<a class="jxr_linenumber" name="L1024" href="#L1024">1024</a> <em class="jxr_comment">//                  if (currentQueue != null) {</em>
+<a class="jxr_linenumber" name="L1025" href="#L1025">1025</a> <em class="jxr_comment">//                     handler = currentQueue;</em>
+<a class="jxr_linenumber" name="L1026" href="#L1026">1026</a> <em class="jxr_comment">//                  }</em>
+<a class="jxr_linenumber" name="L1027" href="#L1027">1027</a> <em class="jxr_comment">//               }</em>
+<a class="jxr_linenumber" name="L1028" href="#L1028">1028</a> <em class="jxr_comment">//               returnValue = new NonClusteredListenerInvocation(invocation, handler, filter, converter, annotation,</em>
+<a class="jxr_linenumber" name="L1029" href="#L1029">1029</a> <em class="jxr_comment">//                                                                onlyPrimary, identifier, sync);</em>
+<a class="jxr_linenumber" name="L1030" href="#L1030">1030</a>                returnValue = <strong class="jxr_keyword">new</strong> BaseCacheEntryListenerInvocation(invocation, filter, converter, annotation,
+<a class="jxr_linenumber" name="L1031" href="#L1031">1031</a>                                                                   onlyPrimary, clustered, identifier, sync, observation);
+<a class="jxr_linenumber" name="L1032" href="#L1032">1032</a>             }
+<a class="jxr_linenumber" name="L1033" href="#L1033">1033</a>          } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1034" href="#L1034">1034</a>             <em class="jxr_comment">// If no includeCurrentState just use the base listener invocation which immediately passes all notifications</em>
+<a class="jxr_linenumber" name="L1035" href="#L1035">1035</a>             <em class="jxr_comment">// off</em>
+<a class="jxr_linenumber" name="L1036" href="#L1036">1036</a>             returnValue = <strong class="jxr_keyword">new</strong> BaseCacheEntryListenerInvocation(invocation, filter, converter, annotation, onlyPrimary,
+<a class="jxr_linenumber" name="L1037" href="#L1037">1037</a>                                                                clustered, identifier, sync, observation);
+<a class="jxr_linenumber" name="L1038" href="#L1038">1038</a>          }
+<a class="jxr_linenumber" name="L1039" href="#L1039">1039</a>          <strong class="jxr_keyword">return</strong> returnValue;
+<a class="jxr_linenumber" name="L1040" href="#L1040">1040</a>       }
+<a class="jxr_linenumber" name="L1041" href="#L1041">1041</a> 
+<a class="jxr_linenumber" name="L1042" href="#L1042">1042</a>       <strong class="jxr_keyword">private</strong> &lt;C&gt; <strong class="jxr_keyword">void</strong> wireFilterAndConverterDependencies(CacheEventFilter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V&gt; filter, CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, C&gt; converter) {
+<a class="jxr_linenumber" name="L1043" href="#L1043">1043</a>          <strong class="jxr_keyword">if</strong> (filter != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1044" href="#L1044">1044</a>             componentRegistry.wireDependencies(filter);
+<a class="jxr_linenumber" name="L1045" href="#L1045">1045</a>          }
+<a class="jxr_linenumber" name="L1046" href="#L1046">1046</a>          <strong class="jxr_keyword">if</strong> (converter != <strong class="jxr_keyword">null</strong> &amp;&amp; converter != filter) {
+<a class="jxr_linenumber" name="L1047" href="#L1047">1047</a>             componentRegistry.wireDependencies(converter);
+<a class="jxr_linenumber" name="L1048" href="#L1048">1048</a>          }
+<a class="jxr_linenumber" name="L1049" href="#L1049">1049</a>       }
+<a class="jxr_linenumber" name="L1050" href="#L1050">1050</a>    }
+<a class="jxr_linenumber" name="L1051" href="#L1051">1051</a> 
+<a class="jxr_linenumber" name="L1052" href="#L1052">1052</a>    <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">class</strong> DelegatingCacheInvocationBuilder <strong class="jxr_keyword">extends</strong> CacheInvocationBuilder {
+<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a> 
+<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a>       <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> FilterIndexingServiceProvider provider;
+<a class="jxr_linenumber" name="L1055" href="#L1055">1055</a> 
+<a class="jxr_linenumber" name="L1056" href="#L1056">1056</a>       <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt;, List&lt;DelegatingCacheEntryListenerInvocation&lt;K, V&gt;&gt;&gt; listeners = <strong class="jxr_keyword">new</strong> HashMap&lt;&gt;(3);
+<a class="jxr_linenumber" name="L1057" href="#L1057">1057</a> 
+<a class="jxr_linenumber" name="L1058" href="#L1058">1058</a>       DelegatingCacheInvocationBuilder(FilterIndexingServiceProvider provider) {
+<a class="jxr_linenumber" name="L1059" href="#L1059">1059</a>          <strong class="jxr_keyword">this</strong>.provider = provider;
+<a class="jxr_linenumber" name="L1060" href="#L1060">1060</a>       }
+<a class="jxr_linenumber" name="L1061" href="#L1061">1061</a> 
+<a class="jxr_linenumber" name="L1062" href="#L1062">1062</a>       @Override
+<a class="jxr_linenumber" name="L1063" href="#L1063">1063</a>       <strong class="jxr_keyword">public</strong> DelegatingCacheEntryListenerInvocation&lt;K, V&gt; build() {
+<a class="jxr_linenumber" name="L1064" href="#L1064">1064</a>          DelegatingCacheEntryListenerInvocation&lt;K, V&gt; invocation = provider.interceptListenerInvocation(<strong class="jxr_keyword">super</strong>.build());
+<a class="jxr_linenumber" name="L1065" href="#L1065">1065</a>          List&lt;DelegatingCacheEntryListenerInvocation&lt;K, V&gt;&gt; invocations = listeners.get(invocation.getAnnotation());
+<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a>          <strong class="jxr_keyword">if</strong> (invocations == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a>             invocations = <strong class="jxr_keyword">new</strong> ArrayList&lt;DelegatingCacheEntryListenerInvocation&lt;K, V&gt;&gt;(2);
+<a class="jxr_linenumber" name="L1068" href="#L1068">1068</a>             listeners.put(invocation.getAnnotation(), invocations);
+<a class="jxr_linenumber" name="L1069" href="#L1069">1069</a>          }
+<a class="jxr_linenumber" name="L1070" href="#L1070">1070</a>          invocations.add(invocation);
+<a class="jxr_linenumber" name="L1071" href="#L1071">1071</a>          <strong class="jxr_keyword">return</strong> invocation;
+<a class="jxr_linenumber" name="L1072" href="#L1072">1072</a>       }
+<a class="jxr_linenumber" name="L1073" href="#L1073">1073</a> 
+<a class="jxr_linenumber" name="L1074" href="#L1074">1074</a>       <strong class="jxr_keyword">void</strong> registerListenerInvocations() {
+<a class="jxr_linenumber" name="L1075" href="#L1075">1075</a>          <strong class="jxr_keyword">if</strong> (!listeners.isEmpty()) {
+<a class="jxr_linenumber" name="L1076" href="#L1076">1076</a>             <strong class="jxr_keyword">boolean</strong> filterAndConvert = filter == converter || converter == <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1077" href="#L1077">1077</a>             provider.registerListenerInvocations(clustered, onlyPrimary, filterAndConvert, (IndexedFilter&lt;?, ?, ?&gt;) filter, listeners);
+<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a>          }
+<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a>       }
+<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a>    }
+<a class="jxr_linenumber" name="L1081" href="#L1081">1081</a> 
+<a class="jxr_linenumber" name="L1082" href="#L1082">1082</a>    <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">class</strong> NonClusteredListenerInvocation <strong class="jxr_keyword">extends</strong> BaseCacheEntryListenerInvocation&lt;K, V&gt; {
+<a class="jxr_linenumber" name="L1083" href="#L1083">1083</a> 
+<a class="jxr_linenumber" name="L1084" href="#L1084">1084</a>       <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> QueueingSegmentListener&lt;K, V, Event&lt;K, V&gt;&gt; handler;
+<a class="jxr_linenumber" name="L1085" href="#L1085">1085</a> 
+<a class="jxr_linenumber" name="L1086" href="#L1086">1086</a>       <strong class="jxr_keyword">protected</strong> NonClusteredListenerInvocation(ListenerInvocation&lt;Event&lt;K, V&gt;&gt; invocation,
+<a class="jxr_linenumber" name="L1087" href="#L1087">1087</a>                                                QueueingSegmentListener&lt;K, V, Event&lt;K, V&gt;&gt; handler,
+<a class="jxr_linenumber" name="L1088" href="#L1088">1088</a>                                                CacheEventFilter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V&gt; filter,
+<a class="jxr_linenumber" name="L1089" href="#L1089">1089</a>                                                CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, ?&gt; converter,
+<a class="jxr_linenumber" name="L1090" href="#L1090">1090</a>                                                Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt; annotation, <strong class="jxr_keyword">boolean</strong> onlyPrimary,
+<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a>                                                UUID identifier, <strong class="jxr_keyword">boolean</strong> sync, Listener.Observation observation) {
+<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a>          <strong class="jxr_keyword">super</strong>(invocation, filter, converter, annotation, onlyPrimary, false, identifier, sync, observation);
+<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a>          <strong class="jxr_keyword">this</strong>.handler = handler;
+<a class="jxr_linenumber" name="L1094" href="#L1094">1094</a>       }
+<a class="jxr_linenumber" name="L1095" href="#L1095">1095</a> 
+<a class="jxr_linenumber" name="L1096" href="#L1096">1096</a>       @Override
+<a class="jxr_linenumber" name="L1097" href="#L1097">1097</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> doRealInvocation(Event&lt;K, V&gt; event) {
+<a class="jxr_linenumber" name="L1098" href="#L1098">1098</a>          <strong class="jxr_keyword">if</strong> (!handler.handleEvent(event, invocation)) {
+<a class="jxr_linenumber" name="L1099" href="#L1099">1099</a>             <strong class="jxr_keyword">super</strong>.doRealInvocation(event);
+<a class="jxr_linenumber" name="L1100" href="#L1100">1100</a>          }
+<a class="jxr_linenumber" name="L1101" href="#L1101">1101</a>       }
+<a class="jxr_linenumber" name="L1102" href="#L1102">1102</a>    }
+<a class="jxr_linenumber" name="L1103" href="#L1103">1103</a> 
+<a class="jxr_linenumber" name="L1104" href="#L1104">1104</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1105" href="#L1105">1105</a> <em class="jxr_javadoccomment">    * This class is to be used with cluster listener invocations only when they have included current state.  Thus</em>
+<a class="jxr_linenumber" name="L1106" href="#L1106">1106</a> <em class="jxr_javadoccomment">    * we can assume all types are CacheEntryEvent, since it doesn't allow other types.</em>
+<a class="jxr_linenumber" name="L1107" href="#L1107">1107</a> <em class="jxr_javadoccomment">    */</em>
+<a class="jxr_linenumber" name="L1108" href="#L1108">1108</a>    <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> ClusteredListenerInvocation&lt;K, V&gt; <strong class="jxr_keyword">extends</strong> BaseCacheEntryListenerInvocation&lt;K, V&gt; {
+<a class="jxr_linenumber" name="L1109" href="#L1109">1109</a> 
+<a class="jxr_linenumber" name="L1110" href="#L1110">1110</a>       <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> QueueingSegmentListener&lt;K, V, CacheEntryEvent&lt;K, V&gt;&gt; handler;
+<a class="jxr_linenumber" name="L1111" href="#L1111">1111</a> 
+<a class="jxr_linenumber" name="L1112" href="#L1112">1112</a>       <strong class="jxr_keyword">public</strong> ClusteredListenerInvocation(ListenerInvocation&lt;Event&lt;K, V&gt;&gt; invocation, QueueingSegmentListener&lt;K, V, CacheEntryEvent&lt;K, V&gt;&gt; handler,
+<a class="jxr_linenumber" name="L1113" href="#L1113">1113</a>                                          CacheEventFilter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V&gt; filter,
+<a class="jxr_linenumber" name="L1114" href="#L1114">1114</a>                                          CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, ?&gt; converter,
+<a class="jxr_linenumber" name="L1115" href="#L1115">1115</a>                                          Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt; annotation, <strong class="jxr_keyword">boolean</strong> onlyPrimary,
+<a class="jxr_linenumber" name="L1116" href="#L1116">1116</a>                                          UUID identifier, <strong class="jxr_keyword">boolean</strong> sync, Listener.Observation observation) {
+<a class="jxr_linenumber" name="L1117" href="#L1117">1117</a>          <strong class="jxr_keyword">super</strong>(invocation, filter, converter, annotation, onlyPrimary, <strong class="jxr_keyword">true</strong>, identifier, sync, observation);
+<a class="jxr_linenumber" name="L1118" href="#L1118">1118</a>          <strong class="jxr_keyword">this</strong>.handler = handler;
+<a class="jxr_linenumber" name="L1119" href="#L1119">1119</a>       }
+<a class="jxr_linenumber" name="L1120" href="#L1120">1120</a> 
+<a class="jxr_linenumber" name="L1121" href="#L1121">1121</a>       @Override
+<a class="jxr_linenumber" name="L1122" href="#L1122">1122</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> invoke(Event&lt;K, V&gt; event) {
+<a class="jxr_linenumber" name="L1123" href="#L1123">1123</a>          <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnsupportedOperationException(<span class="jxr_string">"Clustered initial transfer don't support regular events!"</span>);
+<a class="jxr_linenumber" name="L1124" href="#L1124">1124</a>       }
+<a class="jxr_linenumber" name="L1125" href="#L1125">1125</a> 
+<a class="jxr_linenumber" name="L1126" href="#L1126">1126</a>       @Override
+<a class="jxr_linenumber" name="L1127" href="#L1127">1127</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> doRealInvocation(Event&lt;K, V&gt; event) {
+<a class="jxr_linenumber" name="L1128" href="#L1128">1128</a>          <em class="jxr_comment">// This is only used with clusters and such we can safely cast this here</em>
+<a class="jxr_linenumber" name="L1129" href="#L1129">1129</a>          <strong class="jxr_keyword">if</strong> (!handler.handleEvent((CacheEntryEvent&lt;K,V&gt;)event, invocation)) {
+<a class="jxr_linenumber" name="L1130" href="#L1130">1130</a>             <strong class="jxr_keyword">super</strong>.doRealInvocation(event);
+<a class="jxr_linenumber" name="L1131" href="#L1131">1131</a>          }
+<a class="jxr_linenumber" name="L1132" href="#L1132">1132</a>       }
+<a class="jxr_linenumber" name="L1133" href="#L1133">1133</a>    }
+<a class="jxr_linenumber" name="L1134" href="#L1134">1134</a> 
+<a class="jxr_linenumber" name="L1135" href="#L1135">1135</a>    <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> BaseCacheEntryListenerInvocation&lt;K, V&gt; <strong class="jxr_keyword">implements</strong> CacheEntryListenerInvocation&lt;K, V&gt; {
+<a class="jxr_linenumber" name="L1136" href="#L1136">1136</a> 
+<a class="jxr_linenumber" name="L1137" href="#L1137">1137</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> ListenerInvocation&lt;Event&lt;K, V&gt;&gt; invocation;
+<a class="jxr_linenumber" name="L1138" href="#L1138">1138</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> CacheEventFilter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V&gt; filter;
+<a class="jxr_linenumber" name="L1139" href="#L1139">1139</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, ?&gt; converter;
+<a class="jxr_linenumber" name="L1140" href="#L1140">1140</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> onlyPrimary;
+<a class="jxr_linenumber" name="L1141" href="#L1141">1141</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> clustered;
+<a class="jxr_linenumber" name="L1142" href="#L1142">1142</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> UUID identifier;
+<a class="jxr_linenumber" name="L1143" href="#L1143">1143</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt; annotation;
+<a class="jxr_linenumber" name="L1144" href="#L1144">1144</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> sync;
+<a class="jxr_linenumber" name="L1145" href="#L1145">1145</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> filterAndConvert;
+<a class="jxr_linenumber" name="L1146" href="#L1146">1146</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> Listener.Observation observation;
+<a class="jxr_linenumber" name="L1147" href="#L1147">1147</a> 
+<a class="jxr_linenumber" name="L1148" href="#L1148">1148</a> 
+<a class="jxr_linenumber" name="L1149" href="#L1149">1149</a>       <strong class="jxr_keyword">protected</strong> BaseCacheEntryListenerInvocation(ListenerInvocation&lt;Event&lt;K, V&gt;&gt; invocation,
+<a class="jxr_linenumber" name="L1150" href="#L1150">1150</a>                                                  CacheEventFilter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V&gt; filter,
+<a class="jxr_linenumber" name="L1151" href="#L1151">1151</a>                                                  CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, ?&gt; converter,
+<a class="jxr_linenumber" name="L1152" href="#L1152">1152</a>                                                  Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt; annotation, <strong class="jxr_keyword">boolean</strong> onlyPrimary,
+<a class="jxr_linenumber" name="L1153" href="#L1153">1153</a>                                                  <strong class="jxr_keyword">boolean</strong> clustered, UUID identifier, <strong class="jxr_keyword">boolean</strong> sync,
+<a class="jxr_linenumber" name="L1154" href="#L1154">1154</a>                                                  Listener.Observation observation)  {
+<a class="jxr_linenumber" name="L1155" href="#L1155">1155</a>          <strong class="jxr_keyword">this</strong>.invocation = invocation;
+<a class="jxr_linenumber" name="L1156" href="#L1156">1156</a>          <strong class="jxr_keyword">this</strong>.filter = filter;
+<a class="jxr_linenumber" name="L1157" href="#L1157">1157</a>          <strong class="jxr_keyword">this</strong>.converter = converter;
+<a class="jxr_linenumber" name="L1158" href="#L1158">1158</a>          <strong class="jxr_keyword">this</strong>.filterAndConvert = filter instanceof CacheEventFilterConverter &amp;&amp; (filter == converter || converter == <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L1159" href="#L1159">1159</a>          <strong class="jxr_keyword">this</strong>.onlyPrimary = onlyPrimary;
+<a class="jxr_linenumber" name="L1160" href="#L1160">1160</a>          <strong class="jxr_keyword">this</strong>.clustered = clustered;
+<a class="jxr_linenumber" name="L1161" href="#L1161">1161</a>          <strong class="jxr_keyword">this</strong>.identifier = identifier;
+<a class="jxr_linenumber" name="L1162" href="#L1162">1162</a>          <strong class="jxr_keyword">this</strong>.annotation = annotation;
+<a class="jxr_linenumber" name="L1163" href="#L1163">1163</a>          <strong class="jxr_keyword">this</strong>.sync = sync;
+<a class="jxr_linenumber" name="L1164" href="#L1164">1164</a>          <strong class="jxr_keyword">this</strong>.observation = observation;
+<a class="jxr_linenumber" name="L1165" href="#L1165">1165</a>       }
+<a class="jxr_linenumber" name="L1166" href="#L1166">1166</a> 
+<a class="jxr_linenumber" name="L1167" href="#L1167">1167</a>       @Override
+<a class="jxr_linenumber" name="L1168" href="#L1168">1168</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> invoke(Event&lt;K, V&gt; event) {
+<a class="jxr_linenumber" name="L1169" href="#L1169">1169</a>          <strong class="jxr_keyword">if</strong> (shouldInvoke(event)) {
+<a class="jxr_linenumber" name="L1170" href="#L1170">1170</a>             doRealInvocation(event);
+<a class="jxr_linenumber" name="L1171" href="#L1171">1171</a>          }
+<a class="jxr_linenumber" name="L1172" href="#L1172">1172</a>       }
+<a class="jxr_linenumber" name="L1173" href="#L1173">1173</a> 
+<a class="jxr_linenumber" name="L1174" href="#L1174">1174</a>       <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1175" href="#L1175">1175</a> <em class="jxr_javadoccomment">       * This is the entry point for local listeners firing events</em>
+<a class="jxr_linenumber" name="L1176" href="#L1176">1176</a> <em class="jxr_javadoccomment">       * @param event</em>
+<a class="jxr_linenumber" name="L1177" href="#L1177">1177</a> <em class="jxr_javadoccomment">       * @param isLocalNodePrimaryOwner</em>
+<a class="jxr_linenumber" name="L1178" href="#L1178">1178</a> <em class="jxr_javadoccomment">       */</em>
+<a class="jxr_linenumber" name="L1179" href="#L1179">1179</a>       @Override
+<a class="jxr_linenumber" name="L1180" href="#L1180">1180</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> invoke(CacheEntryEvent&lt;K, V&gt; event, <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner) {
+<a class="jxr_linenumber" name="L1181" href="#L1181">1181</a>          <em class="jxr_comment">// See if this should be filtered first before evaluating</em>
+<a class="jxr_linenumber" name="L1182" href="#L1182">1182</a>          CacheEntryEvent&lt;K, V&gt; resultingEvent = shouldInvoke(event, isLocalNodePrimaryOwner);
+<a class="jxr_linenumber" name="L1183" href="#L1183">1183</a>          <strong class="jxr_keyword">if</strong> (resultingEvent != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1184" href="#L1184">1184</a>             invokeNoChecks(resultingEvent, false, filterAndConvert);
+<a class="jxr_linenumber" name="L1185" href="#L1185">1185</a>          }
+<a class="jxr_linenumber" name="L1186" href="#L1186">1186</a>       }
+<a class="jxr_linenumber" name="L1187" href="#L1187">1187</a> 
+<a class="jxr_linenumber" name="L1188" href="#L1188">1188</a>       <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1189" href="#L1189">1189</a> <em class="jxr_javadoccomment">       * This is the entry point for remote listener events being fired</em>
+<a class="jxr_linenumber" name="L1190" href="#L1190">1190</a> <em class="jxr_javadoccomment">       * @param event</em>
+<a class="jxr_linenumber" name="L1191" href="#L1191">1191</a> <em class="jxr_javadoccomment">       * @param skipQueue</em>
+<a class="jxr_linenumber" name="L1192" href="#L1192">1192</a> <em class="jxr_javadoccomment">       */</em>
+<a class="jxr_linenumber" name="L1193" href="#L1193">1193</a>       @Override
+<a class="jxr_linenumber" name="L1194" href="#L1194">1194</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> invokeNoChecks(CacheEntryEvent&lt;K, V&gt; event, <strong class="jxr_keyword">boolean</strong> skipQueue, <strong class="jxr_keyword">boolean</strong> skipConverter) {
+<a class="jxr_linenumber" name="L1195" href="#L1195">1195</a>          <em class="jxr_comment">// We run the converter first, this way the converter doesn't have to run serialized when enqueued and also</em>
+<a class="jxr_linenumber" name="L1196" href="#L1196">1196</a>          <em class="jxr_comment">// the handler doesn't have to worry about it</em>
+<a class="jxr_linenumber" name="L1197" href="#L1197">1197</a>          CacheEntryEvent&lt;K, V&gt; eventToUse;
+<a class="jxr_linenumber" name="L1198" href="#L1198">1198</a>          <strong class="jxr_keyword">if</strong> (!skipConverter) {
+<a class="jxr_linenumber" name="L1199" href="#L1199">1199</a>             eventToUse = convertValue(converter, event);
+<a class="jxr_linenumber" name="L1200" href="#L1200">1200</a>          } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1201" href="#L1201">1201</a>             eventToUse = event;
+<a class="jxr_linenumber" name="L1202" href="#L1202">1202</a>          }
+<a class="jxr_linenumber" name="L1203" href="#L1203">1203</a> 
+<a class="jxr_linenumber" name="L1204" href="#L1204">1204</a>          <strong class="jxr_keyword">if</strong> (skipQueue) {
+<a class="jxr_linenumber" name="L1205" href="#L1205">1205</a>             invocation.invoke(eventToUse);
+<a class="jxr_linenumber" name="L1206" href="#L1206">1206</a>          } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1207" href="#L1207">1207</a>             doRealInvocation(eventToUse);
+<a class="jxr_linenumber" name="L1208" href="#L1208">1208</a>          }
+<a class="jxr_linenumber" name="L1209" href="#L1209">1209</a>       }
+<a class="jxr_linenumber" name="L1210" href="#L1210">1210</a> 
+<a class="jxr_linenumber" name="L1211" href="#L1211">1211</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> doRealInvocation(Event&lt;K, V&gt; event) {
+<a class="jxr_linenumber" name="L1212" href="#L1212">1212</a>          invocation.invoke(event);
+<a class="jxr_linenumber" name="L1213" href="#L1213">1213</a>       }
+<a class="jxr_linenumber" name="L1214" href="#L1214">1214</a> 
+<a class="jxr_linenumber" name="L1215" href="#L1215">1215</a>       <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> shouldInvoke(Event&lt;K, V&gt; event) {
+<a class="jxr_linenumber" name="L1216" href="#L1216">1216</a>          <strong class="jxr_keyword">return</strong> observation.shouldInvoke(event.isPre());
+<a class="jxr_linenumber" name="L1217" href="#L1217">1217</a>       }
+<a class="jxr_linenumber" name="L1218" href="#L1218">1218</a> 
+<a class="jxr_linenumber" name="L1219" href="#L1219">1219</a>       <strong class="jxr_keyword">protected</strong> CacheEntryEvent&lt;K, V&gt; shouldInvoke(CacheEntryEvent&lt;K, V&gt; event, <strong class="jxr_keyword">boolean</strong> isLocalNodePrimaryOwner) {
+<a class="jxr_linenumber" name="L1220" href="#L1220">1220</a>          <strong class="jxr_keyword">if</strong> (onlyPrimary &amp;&amp; !isLocalNodePrimaryOwner) <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1221" href="#L1221">1221</a>          <strong class="jxr_keyword">if</strong> (event instanceof EventImpl) {
+<a class="jxr_linenumber" name="L1222" href="#L1222">1222</a>             EventImpl&lt;K, V&gt; eventImpl = (EventImpl&lt;K, V&gt;)event;
+<a class="jxr_linenumber" name="L1223" href="#L1223">1223</a>             <strong class="jxr_keyword">if</strong> (!shouldInvoke(event)) <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1224" href="#L1224">1224</a>             EventType eventType;
+<a class="jxr_linenumber" name="L1225" href="#L1225">1225</a>             <em class="jxr_comment">// Only use the filter if it was provided and we have an event that we can filter properly</em>
+<a class="jxr_linenumber" name="L1226" href="#L1226">1226</a>             <strong class="jxr_keyword">if</strong> (filter != <strong class="jxr_keyword">null</strong> &amp;&amp; (eventType = getEvent(eventImpl)) != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1227" href="#L1227">1227</a>                <strong class="jxr_keyword">if</strong> (filterAndConvert) {
+<a class="jxr_linenumber" name="L1228" href="#L1228">1228</a>                   Object newValue = ((CacheEventFilterConverter)filter).filterAndConvert(eventImpl.getKey(),
+<a class="jxr_linenumber" name="L1229" href="#L1229">1229</a>                         eventImpl.getOldValue(), eventImpl.getOldMetadata(), eventImpl.getValue(),
+<a class="jxr_linenumber" name="L1230" href="#L1230">1230</a>                         eventImpl.getMetadata(), eventType);
+<a class="jxr_linenumber" name="L1231" href="#L1231">1231</a>                   <strong class="jxr_keyword">if</strong> (newValue != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1232" href="#L1232">1232</a>                      EventImpl&lt;K, V&gt; clone = eventImpl.clone();
+<a class="jxr_linenumber" name="L1233" href="#L1233">1233</a>                      clone.setValue((V) newValue);
+<a class="jxr_linenumber" name="L1234" href="#L1234">1234</a>                      <strong class="jxr_keyword">return</strong> clone;
+<a class="jxr_linenumber" name="L1235" href="#L1235">1235</a>                   } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1236" href="#L1236">1236</a>                      <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1237" href="#L1237">1237</a>                   }
+<a class="jxr_linenumber" name="L1238" href="#L1238">1238</a>                } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (!filter.accept(eventImpl.getKey(), eventImpl.getOldValue(), eventImpl.getOldMetadata(),
+<a class="jxr_linenumber" name="L1239" href="#L1239">1239</a>                                  eventImpl.getValue(), eventImpl.getMetadata(), eventType)) {
+<a class="jxr_linenumber" name="L1240" href="#L1240">1240</a>                   <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1241" href="#L1241">1241</a>                }
+<a class="jxr_linenumber" name="L1242" href="#L1242">1242</a>             }
+<a class="jxr_linenumber" name="L1243" href="#L1243">1243</a>          }
+<a class="jxr_linenumber" name="L1244" href="#L1244">1244</a>          <strong class="jxr_keyword">return</strong> event;
+<a class="jxr_linenumber" name="L1245" href="#L1245">1245</a>       }
+<a class="jxr_linenumber" name="L1246" href="#L1246">1246</a> 
+<a class="jxr_linenumber" name="L1247" href="#L1247">1247</a>       <em class="jxr_comment">// We can't currently filter events that don't implement CacheEntryEvent or CACHE_ENTRY_EVICTED events.  Basically</em>
+<a class="jxr_linenumber" name="L1248" href="#L1248">1248</a>       <em class="jxr_comment">// events that have a single key value pair only</em>
+<a class="jxr_linenumber" name="L1249" href="#L1249">1249</a>       <strong class="jxr_keyword">private</strong> EventType getEvent(EventImpl&lt;K, V&gt; event) {
+<a class="jxr_linenumber" name="L1250" href="#L1250">1250</a>          <strong class="jxr_keyword">switch</strong> (event.getType()) {
+<a class="jxr_linenumber" name="L1251" href="#L1251">1251</a>             <strong class="jxr_keyword">case</strong> CACHE_ENTRY_ACTIVATED:
+<a class="jxr_linenumber" name="L1252" href="#L1252">1252</a>             <strong class="jxr_keyword">case</strong> CACHE_ENTRY_CREATED:
+<a class="jxr_linenumber" name="L1253" href="#L1253">1253</a>             <strong class="jxr_keyword">case</strong> CACHE_ENTRY_INVALIDATED:
+<a class="jxr_linenumber" name="L1254" href="#L1254">1254</a>             <strong class="jxr_keyword">case</strong> CACHE_ENTRY_LOADED:
+<a class="jxr_linenumber" name="L1255" href="#L1255">1255</a>             <strong class="jxr_keyword">case</strong> CACHE_ENTRY_MODIFIED:
+<a class="jxr_linenumber" name="L1256" href="#L1256">1256</a>             <strong class="jxr_keyword">case</strong> CACHE_ENTRY_PASSIVATED:
+<a class="jxr_linenumber" name="L1257" href="#L1257">1257</a>             <strong class="jxr_keyword">case</strong> CACHE_ENTRY_REMOVED:
+<a class="jxr_linenumber" name="L1258" href="#L1258">1258</a>             <strong class="jxr_keyword">case</strong> CACHE_ENTRY_VISITED:
+<a class="jxr_linenumber" name="L1259" href="#L1259">1259</a>                <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> EventType(event.isCommandRetried(), event.isPre(), event.getType());
+<a class="jxr_linenumber" name="L1260" href="#L1260">1260</a>             <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L1261" href="#L1261">1261</a>                <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1262" href="#L1262">1262</a>          }
+<a class="jxr_linenumber" name="L1263" href="#L1263">1263</a>       }
+<a class="jxr_linenumber" name="L1264" href="#L1264">1264</a> 
+<a class="jxr_linenumber" name="L1265" href="#L1265">1265</a>       @Override
+<a class="jxr_linenumber" name="L1266" href="#L1266">1266</a>       <strong class="jxr_keyword">public</strong> Object getTarget() {
+<a class="jxr_linenumber" name="L1267" href="#L1267">1267</a>          <strong class="jxr_keyword">return</strong> invocation.getTarget();
+<a class="jxr_linenumber" name="L1268" href="#L1268">1268</a>       }
+<a class="jxr_linenumber" name="L1269" href="#L1269">1269</a> 
+<a class="jxr_linenumber" name="L1270" href="#L1270">1270</a>       @Override
+<a class="jxr_linenumber" name="L1271" href="#L1271">1271</a>       <strong class="jxr_keyword">public</strong> CacheEventFilter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V&gt; getFilter() {
+<a class="jxr_linenumber" name="L1272" href="#L1272">1272</a>          <strong class="jxr_keyword">return</strong> filter;
+<a class="jxr_linenumber" name="L1273" href="#L1273">1273</a>       }
+<a class="jxr_linenumber" name="L1274" href="#L1274">1274</a> 
+<a class="jxr_linenumber" name="L1275" href="#L1275">1275</a>       @Override
+<a class="jxr_linenumber" name="L1276" href="#L1276">1276</a>       <strong class="jxr_keyword">public</strong> CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, ?&gt; getConverter() {
+<a class="jxr_linenumber" name="L1277" href="#L1277">1277</a>          <strong class="jxr_keyword">return</strong> converter;
+<a class="jxr_linenumber" name="L1278" href="#L1278">1278</a>       }
+<a class="jxr_linenumber" name="L1279" href="#L1279">1279</a> 
+<a class="jxr_linenumber" name="L1280" href="#L1280">1280</a>       @Override
+<a class="jxr_linenumber" name="L1281" href="#L1281">1281</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isClustered() {
+<a class="jxr_linenumber" name="L1282" href="#L1282">1282</a>          <strong class="jxr_keyword">return</strong> clustered;
+<a class="jxr_linenumber" name="L1283" href="#L1283">1283</a>       }
+<a class="jxr_linenumber" name="L1284" href="#L1284">1284</a> 
+<a class="jxr_linenumber" name="L1285" href="#L1285">1285</a>       @Override
+<a class="jxr_linenumber" name="L1286" href="#L1286">1286</a>       <strong class="jxr_keyword">public</strong> UUID getIdentifier() {
+<a class="jxr_linenumber" name="L1287" href="#L1287">1287</a>          <strong class="jxr_keyword">return</strong> identifier;
+<a class="jxr_linenumber" name="L1288" href="#L1288">1288</a>       }
+<a class="jxr_linenumber" name="L1289" href="#L1289">1289</a> 
+<a class="jxr_linenumber" name="L1290" href="#L1290">1290</a>       @Override
+<a class="jxr_linenumber" name="L1291" href="#L1291">1291</a>       <strong class="jxr_keyword">public</strong> Listener.Observation getObservation() {
+<a class="jxr_linenumber" name="L1292" href="#L1292">1292</a>          <strong class="jxr_keyword">return</strong> observation;
+<a class="jxr_linenumber" name="L1293" href="#L1293">1293</a>       }
+<a class="jxr_linenumber" name="L1294" href="#L1294">1294</a> 
+<a class="jxr_linenumber" name="L1295" href="#L1295">1295</a>       @Override
+<a class="jxr_linenumber" name="L1296" href="#L1296">1296</a>       <strong class="jxr_keyword">public</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt; getAnnotation() {
+<a class="jxr_linenumber" name="L1297" href="#L1297">1297</a>          <strong class="jxr_keyword">return</strong> annotation;
+<a class="jxr_linenumber" name="L1298" href="#L1298">1298</a>       }
+<a class="jxr_linenumber" name="L1299" href="#L1299">1299</a> 
+<a class="jxr_linenumber" name="L1300" href="#L1300">1300</a>       <strong class="jxr_keyword">protected</strong> CacheEntryEvent&lt;K, V&gt; convertValue(CacheEventConverter&lt;? <strong class="jxr_keyword">super</strong> K, ? <strong class="jxr_keyword">super</strong> V, ?&gt; converter, CacheEntryEvent&lt;K, V&gt; event) {
+<a class="jxr_linenumber" name="L1301" href="#L1301">1301</a>          CacheEntryEvent&lt;K, V&gt; returnedEvent;
+<a class="jxr_linenumber" name="L1302" href="#L1302">1302</a>          <strong class="jxr_keyword">if</strong> (converter != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1303" href="#L1303">1303</a>             <strong class="jxr_keyword">if</strong> (event instanceof EventImpl) {
+<a class="jxr_linenumber" name="L1304" href="#L1304">1304</a>                <em class="jxr_comment">// This is a bit hacky to let the C type be passed in for the V type</em>
+<a class="jxr_linenumber" name="L1305" href="#L1305">1305</a>                EventImpl&lt;K, V&gt; eventImpl = (EventImpl&lt;K, V&gt;)event;
+<a class="jxr_linenumber" name="L1306" href="#L1306">1306</a>                Object newValue = converter.convert(eventImpl.getKey(), (V) eventImpl.getOldValue(),
+<a class="jxr_linenumber" name="L1307" href="#L1307">1307</a>                                  eventImpl.getOldMetadata(), (V) eventImpl.getValue(),
+<a class="jxr_linenumber" name="L1308" href="#L1308">1308</a>                                  eventImpl.getMetadata(), <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L1309" href="#L1309">1309</a>                <strong class="jxr_keyword">if</strong> (newValue != eventImpl.getValue()) {
+<a class="jxr_linenumber" name="L1310" href="#L1310">1310</a>                   EventImpl&lt;K, V&gt; clone = eventImpl.clone();
+<a class="jxr_linenumber" name="L1311" href="#L1311">1311</a>                   clone.setValue((V) newValue);
+<a class="jxr_linenumber" name="L1312" href="#L1312">1312</a>                   returnedEvent = clone;
+<a class="jxr_linenumber" name="L1313" href="#L1313">1313</a>                } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1314" href="#L1314">1314</a>                   returnedEvent = eventImpl;
+<a class="jxr_linenumber" name="L1315" href="#L1315">1315</a>                }
+<a class="jxr_linenumber" name="L1316" href="#L1316">1316</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1317" href="#L1317">1317</a>                <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"Provided event should be org.infinispan.notifications.cachelistener.event.impl.EventImpl "</span> +
+<a class="jxr_linenumber" name="L1318" href="#L1318">1318</a>                                                         <span class="jxr_string">"when a converter is being used!"</span>);
+<a class="jxr_linenumber" name="L1319" href="#L1319">1319</a>             }
+<a class="jxr_linenumber" name="L1320" href="#L1320">1320</a>          } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1321" href="#L1321">1321</a>             returnedEvent = event;
+<a class="jxr_linenumber" name="L1322" href="#L1322">1322</a>          }
+<a class="jxr_linenumber" name="L1323" href="#L1323">1323</a>          <strong class="jxr_keyword">return</strong> returnedEvent;
+<a class="jxr_linenumber" name="L1324" href="#L1324">1324</a>       }
+<a class="jxr_linenumber" name="L1325" href="#L1325">1325</a> 
+<a class="jxr_linenumber" name="L1326" href="#L1326">1326</a>       @Override
+<a class="jxr_linenumber" name="L1327" href="#L1327">1327</a>       <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isSync() {
+<a class="jxr_linenumber" name="L1328" href="#L1328">1328</a>          <strong class="jxr_keyword">return</strong> sync;
+<a class="jxr_linenumber" name="L1329" href="#L1329">1329</a>       }
+<a class="jxr_linenumber" name="L1330" href="#L1330">1330</a>    }
+<a class="jxr_linenumber" name="L1331" href="#L1331">1331</a> 
+<a class="jxr_linenumber" name="L1332" href="#L1332">1332</a>    @Override
+<a class="jxr_linenumber" name="L1333" href="#L1333">1333</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> removeListener(Object listener) {
+<a class="jxr_linenumber" name="L1334" href="#L1334">1334</a>       <strong class="jxr_keyword">super</strong>.removeListener(listener);
+<a class="jxr_linenumber" name="L1335" href="#L1335">1335</a>       UUID id = clusterListenerIDs.remove(listener);
+<a class="jxr_linenumber" name="L1336" href="#L1336">1336</a>       <strong class="jxr_keyword">if</strong> (id != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1337" href="#L1337">1337</a>          List&lt;Future&lt;?&gt;&gt; futures = distExecutorService.submitEverywhere(<strong class="jxr_keyword">new</strong> ClusterListenerRemoveCallable(id));
+<a class="jxr_linenumber" name="L1338" href="#L1338">1338</a>          <strong class="jxr_keyword">for</strong> (Future&lt;?&gt; future : futures) {
+<a class="jxr_linenumber" name="L1339" href="#L1339">1339</a>             <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1340" href="#L1340">1340</a>                future.get();
+<a class="jxr_linenumber" name="L1341" href="#L1341">1341</a>             } <strong class="jxr_keyword">catch</strong> (InterruptedException e) {
+<a class="jxr_linenumber" name="L1342" href="#L1342">1342</a>                <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> CacheListenerException(e);
+<a class="jxr_linenumber" name="L1343" href="#L1343">1343</a>             } <strong class="jxr_keyword">catch</strong> (ExecutionException e) {
+<a class="jxr_linenumber" name="L1344" href="#L1344">1344</a>                <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> CacheListenerException(e);
+<a class="jxr_linenumber" name="L1345" href="#L1345">1345</a>             }
+<a class="jxr_linenumber" name="L1346" href="#L1346">1346</a>          }
+<a class="jxr_linenumber" name="L1347" href="#L1347">1347</a>       }
+<a class="jxr_linenumber" name="L1348" href="#L1348">1348</a>    }
+<a class="jxr_linenumber" name="L1349" href="#L1349">1349</a> 
+<a class="jxr_linenumber" name="L1350" href="#L1350">1350</a>    @Override
+<a class="jxr_linenumber" name="L1351" href="#L1351">1351</a>    <strong class="jxr_keyword">protected</strong> Set&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; removeListenerInvocation(Class&lt;? <strong class="jxr_keyword">extends</strong> Annotation&gt; annotation, Object listener) {
+<a class="jxr_linenumber" name="L1352" href="#L1352">1352</a>       Set&lt;CacheEntryListenerInvocation&lt;K, V&gt;&gt; markedForRemoval = <strong class="jxr_keyword">super</strong>.removeListenerInvocation(annotation, listener);
+<a class="jxr_linenumber" name="L1353" href="#L1353">1353</a>       <strong class="jxr_keyword">for</strong> (CacheEntryListenerInvocation&lt;K, V&gt; li : markedForRemoval) {
+<a class="jxr_linenumber" name="L1354" href="#L1354">1354</a>          <strong class="jxr_keyword">if</strong> (li instanceof DelegatingCacheEntryListenerInvocation) {
+<a class="jxr_linenumber" name="L1355" href="#L1355">1355</a>             ((DelegatingCacheEntryListenerInvocation&lt;K, V&gt;) li).unregister();
+<a class="jxr_linenumber" name="L1356" href="#L1356">1356</a>          }
+<a class="jxr_linenumber" name="L1357" href="#L1357">1357</a>       }
+<a class="jxr_linenumber" name="L1358" href="#L1358">1358</a>       <strong class="jxr_keyword">return</strong> markedForRemoval;
+<a class="jxr_linenumber" name="L1359" href="#L1359">1359</a>    }
+<a class="jxr_linenumber" name="L1360" href="#L1360">1360</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

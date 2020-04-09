@@ -1,0 +1,1393 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>AbstractFuture xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (C) 2007 The Guava Authors</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * in compliance with the License. You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software distributed under the License</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * or implied. See the License for the specific language governing permissions and limitations under</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * the License.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">package</strong> com.google.common.util.concurrent;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkNotNull;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Throwables.throwIfUnchecked;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.Beta;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.GwtCompatible;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Strings;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> com.google.common.util.concurrent.internal.InternalFutureFailureAccess;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> com.google.common.util.concurrent.internal.InternalFutures;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> com.google.errorprone.annotations.CanIgnoreReturnValue;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> com.google.errorprone.annotations.ForOverride;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> com.google.j2objc.annotations.ReflectionSupport;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.security.AccessController;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> java.security.PrivilegedActionException;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> java.security.PrivilegedExceptionAction;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> java.util.Locale;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.CancellationException;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.ExecutionException;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.Executor;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.Future;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.ScheduledFuture;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.TimeUnit;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.TimeoutException;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.locks.LockSupport;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> java.util.logging.Level;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> java.util.logging.Logger;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.checkerframework.checker.nullness.qual.Nullable;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment"> * An abstract implementation of {@link ListenableFuture}, intended for advanced users only. More</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment"> * common ways to create a {@code ListenableFuture} include instantiating a {@link SettableFuture},</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment"> * submitting a task to a {@link ListeningExecutorService}, and deriving a {@code Future} from an</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment"> * existing one, typically using methods like {@link Futures#transform(ListenableFuture,</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment"> * com.google.common.base.Function, java.util.concurrent.Executor) Futures.transform} and {@link</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> * Futures#catching(ListenableFuture, Class, com.google.common.base.Function,</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> * java.util.concurrent.Executor) Futures.catching}.</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;This class implements all methods in {@code ListenableFuture}. Subclasses should provide a way</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment"> * to set the result of the computation through the protected methods {@link #set(Object)}, {@link</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment"> * #setFuture(ListenableFuture)} and {@link #setException(Throwable)}. Subclasses may also override</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment"> * {@link #afterDone()}, which will be invoked automatically when the future completes. Subclasses</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment"> * should rarely override other methods.</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> * @author Sven Mawson</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> * @author Luke Sandberg</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> * @since 1.0</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  @SuppressWarnings(<span class="jxr_string">"ShortCircuitBoolean"</span>) <em class="jxr_comment">// we use non-short circuiting comparisons intentionally</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  @GwtCompatible(emulated = <strong class="jxr_keyword">true</strong>)
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  @ReflectionSupport(value = ReflectionSupport.Level.FULL)
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> AbstractFuture&lt;V&gt; <strong class="jxr_keyword">extends</strong> InternalFutureFailureAccess
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>      <strong class="jxr_keyword">implements</strong> ListenableFuture&lt;V&gt; {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>    <em class="jxr_comment">// NOTE: Whenever both tests are cheap and functional, it's faster to use &amp;, | instead of &amp;&amp;, ||</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> GENERATE_CANCELLATION_CAUSES =
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>        Boolean.parseBoolean(
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>            System.getProperty(<span class="jxr_string">"guava.concurrent.generate_cancellation_cause"</span>, <span class="jxr_string">"false"</span>));
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment">   * Tag interface marking trusted subclasses. This enables some optimizations. The implementation</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment">   * of this interface must also be an AbstractFuture and must not override or expose for overriding</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment">   * any of the public methods of ListenableFuture.</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>    <strong class="jxr_keyword">interface</strong> Trusted&lt;V&gt; <strong class="jxr_keyword">extends</strong> ListenableFuture&lt;V&gt; {}
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment">   * A less abstract subclass of AbstractFuture. This can be used to optimize setFuture by ensuring</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment">   * that {@link #get} calls exactly the implementation of {@link AbstractFuture#get}.</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>    <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> TrustedFuture&lt;V&gt; <strong class="jxr_keyword">extends</strong> AbstractFuture&lt;V&gt; <strong class="jxr_keyword">implements</strong> Trusted&lt;V&gt; {
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>      @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>      @Override
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> V get() <strong class="jxr_keyword">throws</strong> InterruptedException, ExecutionException {
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>        <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.get();
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>      }
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>      @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>      @Override
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> V get(<strong class="jxr_keyword">long</strong> timeout, TimeUnit unit)
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>          <strong class="jxr_keyword">throws</strong> InterruptedException, ExecutionException, TimeoutException {
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>        <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.get(timeout, unit);
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>      }
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>     @Override
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> isDone() {
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.isDone();
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>     }
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>     @Override
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> isCancelled() {
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.isCancelled();
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>     }
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>     @Override
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> addListener(Runnable listener, Executor executor) {
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>       <strong class="jxr_keyword">super</strong>.addListener(listener, executor);
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>     }
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>     @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>     @Override
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> cancel(<strong class="jxr_keyword">boolean</strong> mayInterruptIfRunning) {
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.cancel(mayInterruptIfRunning);
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>     }
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>   }
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>   <em class="jxr_comment">// Logger to log exceptions caught when running listeners.</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Logger log = Logger.getLogger(AbstractFuture.<strong class="jxr_keyword">class</strong>.getName());
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>   <em class="jxr_comment">// A heuristic for timed gets. If the remaining timeout is less than this, spin instead of</em>
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>   <em class="jxr_comment">// blocking. This value is what AbstractQueuedSynchronizer uses.</em>
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> SPIN_THRESHOLD_NANOS = 1000L;
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> AtomicHelper ATOMIC_HELPER;
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>   <strong class="jxr_keyword">static</strong> {
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>     AtomicHelper helper;
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>     Throwable thrownUnsafeFailure = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>     Throwable thrownAtomicReferenceFieldUpdaterFailure = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>       helper = <strong class="jxr_keyword">new</strong> UnsafeAtomicHelper();
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>     } <strong class="jxr_keyword">catch</strong> (Throwable unsafeFailure) {
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>       thrownUnsafeFailure = unsafeFailure;
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>       <em class="jxr_comment">// catch absolutely everything and fall through to our 'SafeAtomicHelper'</em>
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>       <em class="jxr_comment">// The access control checks that ARFU does means the caller class has to be AbstractFuture</em>
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>       <em class="jxr_comment">// instead of SafeAtomicHelper, so we annoyingly define these here</em>
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>         helper =
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>             <strong class="jxr_keyword">new</strong> SafeAtomicHelper(
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>                 newUpdater(Waiter.<strong class="jxr_keyword">class</strong>, Thread.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"thread"</span>),
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>                 newUpdater(Waiter.<strong class="jxr_keyword">class</strong>, Waiter.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"next"</span>),
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>                 newUpdater(AbstractFuture.<strong class="jxr_keyword">class</strong>, Waiter.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"waiters"</span>),
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>                 newUpdater(AbstractFuture.<strong class="jxr_keyword">class</strong>, Listener.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"listeners"</span>),
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>                 newUpdater(AbstractFuture.<strong class="jxr_keyword">class</strong>, Object.<strong class="jxr_keyword">class</strong>, <span class="jxr_string">"value"</span>));
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>       } <strong class="jxr_keyword">catch</strong> (Throwable atomicReferenceFieldUpdaterFailure) {
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>         <em class="jxr_comment">// Some Android 5.0.x Samsung devices have bugs in JDK reflection APIs that cause</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>         <em class="jxr_comment">// getDeclaredField to throw a NoSuchFieldException when the field is definitely there.</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>         <em class="jxr_comment">// For these users fallback to a suboptimal implementation, based on synchronized. This will</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>         <em class="jxr_comment">// be a definite performance hit to those users.</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>         thrownAtomicReferenceFieldUpdaterFailure = atomicReferenceFieldUpdaterFailure;
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>         helper = <strong class="jxr_keyword">new</strong> SynchronizedHelper();
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>       }
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>     }
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>     ATOMIC_HELPER = helper;
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>     <em class="jxr_comment">// Prevent rare disastrous classloading in first call to LockSupport.park.</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>     <em class="jxr_comment">// See: https://bugs.openjdk.java.net/browse/JDK-8074773</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>     @SuppressWarnings(<span class="jxr_string">"unused"</span>)
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>     Class&lt;?&gt; ensureLoaded = LockSupport.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>     <em class="jxr_comment">// Log after all static init is finished; if an installed logger uses any Futures methods, it</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>     <em class="jxr_comment">// shouldn't break in cases where reflection is missing/broken.</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>     <strong class="jxr_keyword">if</strong> (thrownAtomicReferenceFieldUpdaterFailure != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>       log.log(Level.SEVERE, <span class="jxr_string">"UnsafeAtomicHelper is broken!"</span>, thrownUnsafeFailure);
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>       log.log(
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>           Level.SEVERE, <span class="jxr_string">"SafeAtomicHelper is broken!"</span>, thrownAtomicReferenceFieldUpdaterFailure);
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>     }
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>   }
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>   <em class="jxr_javadoccomment">/** Waiter links form a Treiber stack, in the {@link #waiters} field. */</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> Waiter {
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Waiter TOMBSTONE = <strong class="jxr_keyword">new</strong> Waiter(false <em class="jxr_comment">/* ignored param */</em>);
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>     <strong class="jxr_keyword">volatile</strong> @Nullable Thread thread;
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>     <strong class="jxr_keyword">volatile</strong> @Nullable Waiter next;
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">     * Constructor for the TOMBSTONE, avoids use of ATOMIC_HELPER in case this class is loaded</em>
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> <em class="jxr_javadoccomment">     * before the ATOMIC_HELPER. Apparently this is possible on some android platforms.</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>     Waiter(<strong class="jxr_keyword">boolean</strong> unused) {}
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>     Waiter() {
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>       <em class="jxr_comment">// avoid volatile write, write is made visible by subsequent CAS on waiters field</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>       ATOMIC_HELPER.putThread(<strong class="jxr_keyword">this</strong>, Thread.currentThread());
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>     }
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> 
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>     <em class="jxr_comment">// non-volatile write to the next field. Should be made visible by subsequent CAS on waiters</em>
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>     <em class="jxr_comment">// field.</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>     <strong class="jxr_keyword">void</strong> setNext(Waiter next) {
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>       ATOMIC_HELPER.putNext(<strong class="jxr_keyword">this</strong>, next);
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>     }
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> 
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>     <strong class="jxr_keyword">void</strong> unpark() {
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>       <em class="jxr_comment">// This is racy with removeWaiter. The consequence of the race is that we may spuriously call</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>       <em class="jxr_comment">// unpark even though the thread has already removed itself from the list. But even if we did</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>       <em class="jxr_comment">// use a CAS, that race would still exist (it would just be ever so slightly smaller).</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>       Thread w = thread;
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>       <strong class="jxr_keyword">if</strong> (w != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>         thread = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>         LockSupport.unpark(w);
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>       }
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>     }
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>   }
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> <em class="jxr_javadoccomment">   * Marks the given node as 'deleted' (null waiter) and then scans the list to unlink all deleted</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> <em class="jxr_javadoccomment">   * nodes. This is an O(n) operation in the common case (and O(n^2) in the worst), but we are saved</em>
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> <em class="jxr_javadoccomment">   * by two things.</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> <em class="jxr_javadoccomment">   * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;This is only called when a waiting thread times out or is interrupted. Both of which</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> <em class="jxr_javadoccomment">   *       should be rare.</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;The waiters list should be very short.</em>
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> <em class="jxr_javadoccomment">   * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> removeWaiter(Waiter node) {
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>     node.thread = <strong class="jxr_keyword">null</strong>; <em class="jxr_comment">// mark as 'deleted'</em>
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>     restart:
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>     <strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>       Waiter pred = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>       Waiter curr = waiters;
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>       <strong class="jxr_keyword">if</strong> (curr == Waiter.TOMBSTONE) {
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>         <strong class="jxr_keyword">return</strong>; <em class="jxr_comment">// give up if someone is calling complete</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>       }
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>       Waiter succ;
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>       <strong class="jxr_keyword">while</strong> (curr != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>         succ = curr.next;
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>         <strong class="jxr_keyword">if</strong> (curr.thread != <strong class="jxr_keyword">null</strong>) { <em class="jxr_comment">// we aren't unlinking this node, update pred.</em>
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>           pred = curr;
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (pred != <strong class="jxr_keyword">null</strong>) { <em class="jxr_comment">// We are unlinking this node and it has a predecessor.</em>
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>           pred.next = succ;
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>           <strong class="jxr_keyword">if</strong> (pred.thread == <strong class="jxr_keyword">null</strong>) { <em class="jxr_comment">// We raced with another node that unlinked pred. Restart.</em>
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>             <strong class="jxr_keyword">continue</strong> restart;
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>           }
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (!ATOMIC_HELPER.casWaiters(<strong class="jxr_keyword">this</strong>, curr, succ)) { <em class="jxr_comment">// We are unlinking head</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>           <strong class="jxr_keyword">continue</strong> restart; <em class="jxr_comment">// We raced with an add or complete</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>         }
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>         curr = succ;
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>       }
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>       <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>     }
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>   }
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>   <em class="jxr_javadoccomment">/** Listeners also form a stack through the {@link #listeners} field. */</em>
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> Listener {
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Listener TOMBSTONE = <strong class="jxr_keyword">new</strong> Listener(<strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>     <strong class="jxr_keyword">final</strong> Runnable task;
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>     <strong class="jxr_keyword">final</strong> Executor executor;
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> 
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>     <em class="jxr_comment">// writes to next are made visible by subsequent CAS's on the listeners field</em>
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>     @Nullable Listener next;
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> 
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>     Listener(Runnable task, Executor executor) {
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>       <strong class="jxr_keyword">this</strong>.task = task;
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>       <strong class="jxr_keyword">this</strong>.executor = executor;
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>     }
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>   }
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> 
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>   <em class="jxr_javadoccomment">/** A special value to represent {@code null}. */</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Object NULL = <strong class="jxr_keyword">new</strong> Object();
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>   <em class="jxr_javadoccomment">/** A special value to represent failure, when {@link #setException} is called successfully. */</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> Failure {
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Failure FALLBACK_INSTANCE =
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>         <strong class="jxr_keyword">new</strong> Failure(
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>             <strong class="jxr_keyword">new</strong> Throwable(<span class="jxr_string">"Failure occurred while trying to finish a future."</span>) {
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>               @Override
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>               <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> Throwable fillInStackTrace() {
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>                 <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; <em class="jxr_comment">// no stack trace</em>
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>               }
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>             });
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>     <strong class="jxr_keyword">final</strong> Throwable exception;
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> 
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>     Failure(Throwable exception) {
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>       <strong class="jxr_keyword">this</strong>.exception = checkNotNull(exception);
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>     }
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>   }
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>   <em class="jxr_javadoccomment">/** A special value to represent cancellation and the 'wasInterrupted' bit. */</em>
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> Cancellation {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>     <em class="jxr_comment">// constants to use when GENERATE_CANCELLATION_CAUSES = false</em>
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Cancellation CAUSELESS_INTERRUPTED;
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Cancellation CAUSELESS_CANCELLED;
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> 
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>     <strong class="jxr_keyword">static</strong> {
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>       <strong class="jxr_keyword">if</strong> (GENERATE_CANCELLATION_CAUSES) {
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>         CAUSELESS_CANCELLED = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>         CAUSELESS_INTERRUPTED = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>       } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>         CAUSELESS_CANCELLED = <strong class="jxr_keyword">new</strong> Cancellation(false, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>         CAUSELESS_INTERRUPTED = <strong class="jxr_keyword">new</strong> Cancellation(<strong class="jxr_keyword">true</strong>, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>       }
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>     }
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> 
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> wasInterrupted;
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>     <strong class="jxr_keyword">final</strong> @Nullable Throwable cause;
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>     Cancellation(<strong class="jxr_keyword">boolean</strong> wasInterrupted, @Nullable Throwable cause) {
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>       <strong class="jxr_keyword">this</strong>.wasInterrupted = wasInterrupted;
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>       <strong class="jxr_keyword">this</strong>.cause = cause;
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>     }
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>   }
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> 
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>   <em class="jxr_javadoccomment">/** A special value that encodes the 'setFuture' state. */</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> SetFuture&lt;V&gt; <strong class="jxr_keyword">implements</strong> Runnable {
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>     <strong class="jxr_keyword">final</strong> AbstractFuture&lt;V&gt; owner;
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>     <strong class="jxr_keyword">final</strong> ListenableFuture&lt;? <strong class="jxr_keyword">extends</strong> V&gt; future;
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> 
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>     SetFuture(AbstractFuture&lt;V&gt; owner, ListenableFuture&lt;? <strong class="jxr_keyword">extends</strong> V&gt; future) {
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>       <strong class="jxr_keyword">this</strong>.owner = owner;
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>       <strong class="jxr_keyword">this</strong>.future = future;
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>     }
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>     @Override
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> run() {
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>       <strong class="jxr_keyword">if</strong> (owner.value != <strong class="jxr_keyword">this</strong>) {
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>         <em class="jxr_comment">// nothing to do, we must have been cancelled, don't bother inspecting the future.</em>
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>         <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>       }
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>       Object valueToSet = getFutureValue(future);
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>       <strong class="jxr_keyword">if</strong> (ATOMIC_HELPER.casValue(owner, <strong class="jxr_keyword">this</strong>, valueToSet)) {
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>         complete(owner);
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>       }
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>     }
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>   }
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>   <em class="jxr_comment">// TODO(lukes): investigate using the @Contended annotation on these fields when jdk8 is</em>
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>   <em class="jxr_comment">// available.</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> <em class="jxr_javadoccomment">   * This field encodes the current state of the future.</em>
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The valid values are:</em>
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> <em class="jxr_javadoccomment">   * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code null} initial state, nothing has happened.</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@link Cancellation} terminal state, {@code cancel} was called.</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@link Failure} terminal state, {@code setException} was called.</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@link SetFuture} intermediate state, {@code setFuture} was called.</em>
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@link #NULL} terminal state, {@code set(null)} was called.</em>
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;Any other non-null value, terminal state, {@code set} was called with a non-null</em>
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> <em class="jxr_javadoccomment">   *       argument.</em>
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> <em class="jxr_javadoccomment">   * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">volatile</strong> @Nullable Object value;
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>   <em class="jxr_javadoccomment">/** All listeners. */</em>
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">volatile</strong> @Nullable Listener listeners;
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> 
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>   <em class="jxr_javadoccomment">/** All waiting threads. */</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">volatile</strong> @Nullable Waiter waiters;
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> 
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>   <em class="jxr_javadoccomment">/** Constructor for use by subclasses. */</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>   <strong class="jxr_keyword">protected</strong> AbstractFuture() {}
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> 
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>   <em class="jxr_comment">// Gets and Timed Gets</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>   <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>   <em class="jxr_comment">// * Be responsive to interruption</em>
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>   <em class="jxr_comment">// * Don't create Waiter nodes if you aren't going to park, this helps reduce contention on the</em>
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>   <em class="jxr_comment">//   waiters field.</em>
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>   <em class="jxr_comment">// * Future completion is defined by when #value becomes non-null/non SetFuture</em>
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>   <em class="jxr_comment">// * Future completion can be observed if the waiters field contains a TOMBSTONE</em>
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> 
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>   <em class="jxr_comment">// Timed Get</em>
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>   <em class="jxr_comment">// There are a few design constraints to consider</em>
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>   <em class="jxr_comment">// * We want to be responsive to small timeouts, unpark() has non trivial latency overheads (I</em>
+<a class="jxr_linenumber" name="L374" href="#L374">374</a>   <em class="jxr_comment">//   have observed 12 micros on 64 bit linux systems to wake up a parked thread). So if the</em>
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>   <em class="jxr_comment">//   timeout is small we shouldn't park(). This needs to be traded off with the cpu overhead of</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>   <em class="jxr_comment">//   spinning, so we use SPIN_THRESHOLD_NANOS which is what AbstractQueuedSynchronizer uses for</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a>   <em class="jxr_comment">//   similar purposes.</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>   <em class="jxr_comment">// * We want to behave reasonably for timeouts of 0</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>   <em class="jxr_comment">// * We are more responsive to completion than timeouts. This is because parkNanos depends on</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>   <em class="jxr_comment">//   system scheduling and as such we could either miss our deadline, or unpark() could be delayed</em>
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>   <em class="jxr_comment">//   so that it looks like we timed out even though we didn't. For comparison FutureTask respects</em>
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>   <em class="jxr_comment">//   completion preferably and AQS is non-deterministic (depends on where in the queue the waiter</em>
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>   <em class="jxr_comment">//   is). If we wanted to be strict about it, we could store the unpark() time in the Waiter node</em>
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>   <em class="jxr_comment">//   and we could use that to make a decision about whether or not we timed out prior to being</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>   <em class="jxr_comment">//   unparked.</em>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> 
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> <em class="jxr_javadoccomment">   * {@inheritDoc}</em>
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The default {@link AbstractFuture} implementation throws {@code InterruptedException} if the</em>
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> <em class="jxr_javadoccomment">   * current thread is interrupted during the call, even if the value is already available.</em>
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> <em class="jxr_javadoccomment">   * @throws CancellationException {@inheritDoc}</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>   @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>   @Override
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>   <strong class="jxr_keyword">public</strong> V get(<strong class="jxr_keyword">long</strong> timeout, TimeUnit unit)
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>       <strong class="jxr_keyword">throws</strong> InterruptedException, TimeoutException, ExecutionException {
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>     <em class="jxr_comment">// NOTE: if timeout &lt; 0, remainingNanos will be &lt; 0 and we will fall into the while(true) loop</em>
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>     <em class="jxr_comment">// at the bottom and throw a timeoutexception.</em>
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> timeoutNanos = unit.toNanos(timeout); <em class="jxr_comment">// we rely on the implicit null check on unit.</em>
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>     <strong class="jxr_keyword">long</strong> remainingNanos = timeoutNanos;
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>     <strong class="jxr_keyword">if</strong> (Thread.interrupted()) {
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>       <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InterruptedException();
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>     }
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>     Object localValue = value;
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>     <strong class="jxr_keyword">if</strong> (localValue != <strong class="jxr_keyword">null</strong> &amp; !(localValue instanceof SetFuture)) {
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>       <strong class="jxr_keyword">return</strong> getDoneValue(localValue);
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>     }
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>     <em class="jxr_comment">// we delay calling nanoTime until we know we will need to either park or spin</em>
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> endNanos = remainingNanos &gt; 0 ? System.nanoTime() + remainingNanos : 0;
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>     <strong class="jxr_keyword">long</strong>_wait_loop:
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>     <strong class="jxr_keyword">if</strong> (remainingNanos &gt;= SPIN_THRESHOLD_NANOS) {
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>       Waiter oldHead = waiters;
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>       <strong class="jxr_keyword">if</strong> (oldHead != Waiter.TOMBSTONE) {
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>         Waiter node = <strong class="jxr_keyword">new</strong> Waiter();
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>         <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>           node.setNext(oldHead);
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>           <strong class="jxr_keyword">if</strong> (ATOMIC_HELPER.casWaiters(<strong class="jxr_keyword">this</strong>, oldHead, node)) {
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>             <strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>               LockSupport.parkNanos(<strong class="jxr_keyword">this</strong>, remainingNanos);
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>               <em class="jxr_comment">// Check interruption first, if we woke up due to interruption we need to honor that.</em>
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>               <strong class="jxr_keyword">if</strong> (Thread.interrupted()) {
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>                 removeWaiter(node);
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>                 <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InterruptedException();
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>               }
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> 
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>               <em class="jxr_comment">// Otherwise re-read and check doneness. If we loop then it must have been a spurious</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>               <em class="jxr_comment">// wakeup</em>
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>               localValue = value;
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>               <strong class="jxr_keyword">if</strong> (localValue != <strong class="jxr_keyword">null</strong> &amp; !(localValue instanceof SetFuture)) {
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>                 <strong class="jxr_keyword">return</strong> getDoneValue(localValue);
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>               }
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> 
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>               <em class="jxr_comment">// timed out?</em>
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>               remainingNanos = endNanos - System.nanoTime();
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>               <strong class="jxr_keyword">if</strong> (remainingNanos &lt; SPIN_THRESHOLD_NANOS) {
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>                 <em class="jxr_comment">// Remove the waiter, one way or another we are done parking this thread.</em>
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>                 removeWaiter(node);
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>                 <strong class="jxr_keyword">break</strong> <strong class="jxr_keyword">long</strong>_wait_loop; <em class="jxr_comment">// jump down to the busy wait loop</em>
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>               }
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>             }
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>           }
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>           oldHead = waiters; <em class="jxr_comment">// re-read and loop.</em>
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>         } <strong class="jxr_keyword">while</strong> (oldHead != Waiter.TOMBSTONE);
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>       }
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>       <em class="jxr_comment">// re-read value, if we get here then we must have observed a TOMBSTONE while trying to add a</em>
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>       <em class="jxr_comment">// waiter.</em>
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>       <strong class="jxr_keyword">return</strong> getDoneValue(value);
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>     }
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>     <em class="jxr_comment">// If we get here then we have remainingNanos &lt; SPIN_THRESHOLD_NANOS and there is no node on the</em>
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>     <em class="jxr_comment">// waiters list</em>
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>     <strong class="jxr_keyword">while</strong> (remainingNanos &gt; 0) {
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>       localValue = value;
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>       <strong class="jxr_keyword">if</strong> (localValue != <strong class="jxr_keyword">null</strong> &amp; !(localValue instanceof SetFuture)) {
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>         <strong class="jxr_keyword">return</strong> getDoneValue(localValue);
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>       }
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>       <strong class="jxr_keyword">if</strong> (Thread.interrupted()) {
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>         <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InterruptedException();
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>       }
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>       remainingNanos = endNanos - System.nanoTime();
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>     }
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> 
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>     String futureToString = toString();
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>     <strong class="jxr_keyword">final</strong> String unitString = unit.toString().toLowerCase(Locale.ROOT);
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>     String message = <span class="jxr_string">"Waited "</span> + timeout + <span class="jxr_string">" "</span> + unit.toString().toLowerCase(Locale.ROOT);
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>     <em class="jxr_comment">// Only report scheduling delay if larger than our spin threshold - otherwise it's just noise</em>
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>     <strong class="jxr_keyword">if</strong> (remainingNanos + SPIN_THRESHOLD_NANOS &lt; 0) {
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>       <em class="jxr_comment">// We over-waited for our timeout.</em>
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>       message += <span class="jxr_string">" (plus "</span>;
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>       <strong class="jxr_keyword">long</strong> overWaitNanos = -remainingNanos;
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>       <strong class="jxr_keyword">long</strong> overWaitUnits = unit.convert(overWaitNanos, TimeUnit.NANOSECONDS);
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>       <strong class="jxr_keyword">long</strong> overWaitLeftoverNanos = overWaitNanos - unit.toNanos(overWaitUnits);
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>       <strong class="jxr_keyword">boolean</strong> shouldShowExtraNanos =
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>           overWaitUnits == 0 || overWaitLeftoverNanos &gt; SPIN_THRESHOLD_NANOS;
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>       <strong class="jxr_keyword">if</strong> (overWaitUnits &gt; 0) {
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>         message += overWaitUnits + <span class="jxr_string">" "</span> + unitString;
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>         <strong class="jxr_keyword">if</strong> (shouldShowExtraNanos) {
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>           message += <span class="jxr_string">","</span>;
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>         }
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>         message += <span class="jxr_string">" "</span>;
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>       }
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>       <strong class="jxr_keyword">if</strong> (shouldShowExtraNanos) {
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>         message += overWaitLeftoverNanos + <span class="jxr_string">" nanoseconds "</span>;
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>       }
+<a class="jxr_linenumber" name="L486" href="#L486">486</a> 
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>       message += <span class="jxr_string">"delay)"</span>;
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>     }
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>     <em class="jxr_comment">// It's confusing to see a completed future in a timeout message; if isDone() returns false,</em>
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>     <em class="jxr_comment">// then we know it must have given a pending toString value earlier. If not, then the future</em>
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>     <em class="jxr_comment">// completed after the timeout expired, and the message might be success.</em>
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>     <strong class="jxr_keyword">if</strong> (isDone()) {
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>       <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> TimeoutException(message + <span class="jxr_string">" but future completed as timeout expired"</span>);
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>     }
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>     <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> TimeoutException(message + <span class="jxr_string">" for "</span> + futureToString);
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>   }
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> 
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> <em class="jxr_javadoccomment">   * {@inheritDoc}</em>
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L501" href="#L501">501</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The default {@link AbstractFuture} implementation throws {@code InterruptedException} if the</em>
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> <em class="jxr_javadoccomment">   * current thread is interrupted during the call, even if the value is already available.</em>
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> <em class="jxr_javadoccomment">   * @throws CancellationException {@inheritDoc}</em>
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>   @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>   @Override
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>   <strong class="jxr_keyword">public</strong> V get() <strong class="jxr_keyword">throws</strong> InterruptedException, ExecutionException {
+<a class="jxr_linenumber" name="L509" href="#L509">509</a>     <strong class="jxr_keyword">if</strong> (Thread.interrupted()) {
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>       <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InterruptedException();
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>     }
+<a class="jxr_linenumber" name="L512" href="#L512">512</a>     Object localValue = value;
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>     <strong class="jxr_keyword">if</strong> (localValue != <strong class="jxr_keyword">null</strong> &amp; !(localValue instanceof SetFuture)) {
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>       <strong class="jxr_keyword">return</strong> getDoneValue(localValue);
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>     }
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>     Waiter oldHead = waiters;
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>     <strong class="jxr_keyword">if</strong> (oldHead != Waiter.TOMBSTONE) {
+<a class="jxr_linenumber" name="L518" href="#L518">518</a>       Waiter node = <strong class="jxr_keyword">new</strong> Waiter();
+<a class="jxr_linenumber" name="L519" href="#L519">519</a>       <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L520" href="#L520">520</a>         node.setNext(oldHead);
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>         <strong class="jxr_keyword">if</strong> (ATOMIC_HELPER.casWaiters(<strong class="jxr_keyword">this</strong>, oldHead, node)) {
+<a class="jxr_linenumber" name="L522" href="#L522">522</a>           <em class="jxr_comment">// we are on the stack, now wait for completion.</em>
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>           <strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>             LockSupport.park(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L525" href="#L525">525</a>             <em class="jxr_comment">// Check interruption first, if we woke up due to interruption we need to honor that.</em>
+<a class="jxr_linenumber" name="L526" href="#L526">526</a>             <strong class="jxr_keyword">if</strong> (Thread.interrupted()) {
+<a class="jxr_linenumber" name="L527" href="#L527">527</a>               removeWaiter(node);
+<a class="jxr_linenumber" name="L528" href="#L528">528</a>               <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InterruptedException();
+<a class="jxr_linenumber" name="L529" href="#L529">529</a>             }
+<a class="jxr_linenumber" name="L530" href="#L530">530</a>             <em class="jxr_comment">// Otherwise re-read and check doneness. If we loop then it must have been a spurious</em>
+<a class="jxr_linenumber" name="L531" href="#L531">531</a>             <em class="jxr_comment">// wakeup</em>
+<a class="jxr_linenumber" name="L532" href="#L532">532</a>             localValue = value;
+<a class="jxr_linenumber" name="L533" href="#L533">533</a>             <strong class="jxr_keyword">if</strong> (localValue != <strong class="jxr_keyword">null</strong> &amp; !(localValue instanceof SetFuture)) {
+<a class="jxr_linenumber" name="L534" href="#L534">534</a>               <strong class="jxr_keyword">return</strong> getDoneValue(localValue);
+<a class="jxr_linenumber" name="L535" href="#L535">535</a>             }
+<a class="jxr_linenumber" name="L536" href="#L536">536</a>           }
+<a class="jxr_linenumber" name="L537" href="#L537">537</a>         }
+<a class="jxr_linenumber" name="L538" href="#L538">538</a>         oldHead = waiters; <em class="jxr_comment">// re-read and loop.</em>
+<a class="jxr_linenumber" name="L539" href="#L539">539</a>       } <strong class="jxr_keyword">while</strong> (oldHead != Waiter.TOMBSTONE);
+<a class="jxr_linenumber" name="L540" href="#L540">540</a>     }
+<a class="jxr_linenumber" name="L541" href="#L541">541</a>     <em class="jxr_comment">// re-read value, if we get here then we must have observed a TOMBSTONE while trying to add a</em>
+<a class="jxr_linenumber" name="L542" href="#L542">542</a>     <em class="jxr_comment">// waiter.</em>
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>     <strong class="jxr_keyword">return</strong> getDoneValue(value);
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>   }
+<a class="jxr_linenumber" name="L545" href="#L545">545</a> 
+<a class="jxr_linenumber" name="L546" href="#L546">546</a>   <em class="jxr_javadoccomment">/** Unboxes {@code obj}. Assumes that obj is not {@code null} or a {@link SetFuture}. */</em>
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>   <strong class="jxr_keyword">private</strong> V getDoneValue(Object obj) <strong class="jxr_keyword">throws</strong> ExecutionException {
+<a class="jxr_linenumber" name="L548" href="#L548">548</a>     <em class="jxr_comment">// While this seems like it might be too branch-y, simple benchmarking proves it to be</em>
+<a class="jxr_linenumber" name="L549" href="#L549">549</a>     <em class="jxr_comment">// unmeasurable (comparing done AbstractFutures with immediateFuture)</em>
+<a class="jxr_linenumber" name="L550" href="#L550">550</a>     <strong class="jxr_keyword">if</strong> (obj instanceof Cancellation) {
+<a class="jxr_linenumber" name="L551" href="#L551">551</a>       <strong class="jxr_keyword">throw</strong> cancellationExceptionWithCause(<span class="jxr_string">"Task was cancelled."</span>, ((Cancellation) obj).cause);
+<a class="jxr_linenumber" name="L552" href="#L552">552</a>     } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (obj instanceof Failure) {
+<a class="jxr_linenumber" name="L553" href="#L553">553</a>       <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ExecutionException(((Failure) obj).exception);
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>     } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (obj == NULL) {
+<a class="jxr_linenumber" name="L555" href="#L555">555</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>       @SuppressWarnings(<span class="jxr_string">"unchecked"</span>) <em class="jxr_comment">// this is the only other option</em>
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>       V asV = (V) obj;
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>       <strong class="jxr_keyword">return</strong> asV;
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>     }
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>   }
+<a class="jxr_linenumber" name="L562" href="#L562">562</a> 
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>   @Override
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isDone() {
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>     <strong class="jxr_keyword">final</strong> Object localValue = value;
+<a class="jxr_linenumber" name="L566" href="#L566">566</a>     <strong class="jxr_keyword">return</strong> localValue != <strong class="jxr_keyword">null</strong> &amp; !(localValue instanceof SetFuture);
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>   }
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> 
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>   @Override
+<a class="jxr_linenumber" name="L570" href="#L570">570</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isCancelled() {
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>     <strong class="jxr_keyword">final</strong> Object localValue = value;
+<a class="jxr_linenumber" name="L572" href="#L572">572</a>     <strong class="jxr_keyword">return</strong> localValue instanceof Cancellation;
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>   }
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> 
+<a class="jxr_linenumber" name="L575" href="#L575">575</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> <em class="jxr_javadoccomment">   * {@inheritDoc}</em>
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> <em class="jxr_javadoccomment">   * &lt;p&gt;If a cancellation attempt succeeds on a {@code Future} that had previously been {@linkplain</em>
+<a class="jxr_linenumber" name="L579" href="#L579">579</a> <em class="jxr_javadoccomment">   * #setFuture set asynchronously}, then the cancellation will also be propagated to the delegate</em>
+<a class="jxr_linenumber" name="L580" href="#L580">580</a> <em class="jxr_javadoccomment">   * {@code Future} that was supplied in the {@code setFuture} call.</em>
+<a class="jxr_linenumber" name="L581" href="#L581">581</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L582" href="#L582">582</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Rather than override this method to perform additional cancellation work or cleanup,</em>
+<a class="jxr_linenumber" name="L583" href="#L583">583</a> <em class="jxr_javadoccomment">   * subclasses should override {@link #afterDone}, consulting {@link #isCancelled} and {@link</em>
+<a class="jxr_linenumber" name="L584" href="#L584">584</a> <em class="jxr_javadoccomment">   * #wasInterrupted} as necessary. This ensures that the work is done even if the future is</em>
+<a class="jxr_linenumber" name="L585" href="#L585">585</a> <em class="jxr_javadoccomment">   * cancelled without a call to {@code cancel}, such as by calling {@code</em>
+<a class="jxr_linenumber" name="L586" href="#L586">586</a> <em class="jxr_javadoccomment">   * setFuture(cancelledFuture)}.</em>
+<a class="jxr_linenumber" name="L587" href="#L587">587</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>   @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>   @Override
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> cancel(<strong class="jxr_keyword">boolean</strong> mayInterruptIfRunning) {
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>     Object localValue = value;
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>     <strong class="jxr_keyword">boolean</strong> rValue = false;
+<a class="jxr_linenumber" name="L593" href="#L593">593</a>     <strong class="jxr_keyword">if</strong> (localValue == <strong class="jxr_keyword">null</strong> | localValue instanceof SetFuture) {
+<a class="jxr_linenumber" name="L594" href="#L594">594</a>       <em class="jxr_comment">// Try to delay allocating the exception. At this point we may still lose the CAS, but it is</em>
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>       <em class="jxr_comment">// certainly less likely.</em>
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>       Object valueToSet =
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>           GENERATE_CANCELLATION_CAUSES
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>               ? <strong class="jxr_keyword">new</strong> Cancellation(
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>                   mayInterruptIfRunning, <strong class="jxr_keyword">new</strong> CancellationException(<span class="jxr_string">"Future.cancel() was called."</span>))
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>               : (mayInterruptIfRunning
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>                   ? Cancellation.CAUSELESS_INTERRUPTED
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>                   : Cancellation.CAUSELESS_CANCELLED);
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>       AbstractFuture&lt;?&gt; abstractFuture = <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L604" href="#L604">604</a>       <strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>         <strong class="jxr_keyword">if</strong> (ATOMIC_HELPER.casValue(abstractFuture, localValue, valueToSet)) {
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>           rValue = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L607" href="#L607">607</a>           <em class="jxr_comment">// We call interuptTask before calling complete(), which is consistent with</em>
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>           <em class="jxr_comment">// FutureTask</em>
+<a class="jxr_linenumber" name="L609" href="#L609">609</a>           <strong class="jxr_keyword">if</strong> (mayInterruptIfRunning) {
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>             abstractFuture.interruptTask();
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>           }
+<a class="jxr_linenumber" name="L612" href="#L612">612</a>           complete(abstractFuture);
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>           <strong class="jxr_keyword">if</strong> (localValue instanceof SetFuture) {
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>             <em class="jxr_comment">// propagate cancellation to the future set in setfuture, this is racy, and we don't</em>
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>             <em class="jxr_comment">// care if we are successful or not.</em>
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>             ListenableFuture&lt;?&gt; futureToPropagateTo = ((SetFuture) localValue).future;
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>             <strong class="jxr_keyword">if</strong> (futureToPropagateTo instanceof Trusted) {
+<a class="jxr_linenumber" name="L618" href="#L618">618</a>               <em class="jxr_comment">// If the future is a TrustedFuture then we specifically avoid calling cancel()</em>
+<a class="jxr_linenumber" name="L619" href="#L619">619</a>               <em class="jxr_comment">// this has 2 benefits</em>
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>               <em class="jxr_comment">// 1. for long chains of futures strung together with setFuture we consume less stack</em>
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>               <em class="jxr_comment">// 2. we avoid allocating Cancellation objects at every level of the cancellation</em>
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>               <em class="jxr_comment">//    chain</em>
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>               <em class="jxr_comment">// We can only do this for TrustedFuture, because TrustedFuture.cancel is final and</em>
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>               <em class="jxr_comment">// does nothing but delegate to this method.</em>
+<a class="jxr_linenumber" name="L625" href="#L625">625</a>               AbstractFuture&lt;?&gt; trusted = (AbstractFuture&lt;?&gt;) futureToPropagateTo;
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>               localValue = trusted.value;
+<a class="jxr_linenumber" name="L627" href="#L627">627</a>               <strong class="jxr_keyword">if</strong> (localValue == <strong class="jxr_keyword">null</strong> | localValue instanceof SetFuture) {
+<a class="jxr_linenumber" name="L628" href="#L628">628</a>                 abstractFuture = trusted;
+<a class="jxr_linenumber" name="L629" href="#L629">629</a>                 <strong class="jxr_keyword">continue</strong>; <em class="jxr_comment">// loop back up and try to complete the new future</em>
+<a class="jxr_linenumber" name="L630" href="#L630">630</a>               }
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>               <em class="jxr_comment">// not a TrustedFuture, call cancel directly.</em>
+<a class="jxr_linenumber" name="L633" href="#L633">633</a>               futureToPropagateTo.cancel(mayInterruptIfRunning);
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>             }
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>           }
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>           <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>         }
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>         <em class="jxr_comment">// obj changed, reread</em>
+<a class="jxr_linenumber" name="L639" href="#L639">639</a>         localValue = abstractFuture.value;
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>         <strong class="jxr_keyword">if</strong> (!(localValue instanceof SetFuture)) {
+<a class="jxr_linenumber" name="L641" href="#L641">641</a>           <em class="jxr_comment">// obj cannot be null at this point, because value can only change from null to non-null.</em>
+<a class="jxr_linenumber" name="L642" href="#L642">642</a>           <em class="jxr_comment">// So if value changed (and it did since we lost the CAS), then it cannot be null and</em>
+<a class="jxr_linenumber" name="L643" href="#L643">643</a>           <em class="jxr_comment">// since it isn't a SetFuture, then the future must be done and we should exit the loop</em>
+<a class="jxr_linenumber" name="L644" href="#L644">644</a>           <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L645" href="#L645">645</a>         }
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>       }
+<a class="jxr_linenumber" name="L647" href="#L647">647</a>     }
+<a class="jxr_linenumber" name="L648" href="#L648">648</a>     <strong class="jxr_keyword">return</strong> rValue;
+<a class="jxr_linenumber" name="L649" href="#L649">649</a>   }
+<a class="jxr_linenumber" name="L650" href="#L650">650</a> 
+<a class="jxr_linenumber" name="L651" href="#L651">651</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L652" href="#L652">652</a> <em class="jxr_javadoccomment">   * Subclasses can override this method to implement interruption of the future's computation. The</em>
+<a class="jxr_linenumber" name="L653" href="#L653">653</a> <em class="jxr_javadoccomment">   * method is invoked automatically by a successful call to {@link #cancel(boolean) cancel(true)}.</em>
+<a class="jxr_linenumber" name="L654" href="#L654">654</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L655" href="#L655">655</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The default implementation does nothing.</em>
+<a class="jxr_linenumber" name="L656" href="#L656">656</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L657" href="#L657">657</a> <em class="jxr_javadoccomment">   * &lt;p&gt;This method is likely to be deprecated. Prefer to override {@link #afterDone}, checking</em>
+<a class="jxr_linenumber" name="L658" href="#L658">658</a> <em class="jxr_javadoccomment">   * {@link #wasInterrupted} to decide whether to interrupt your task.</em>
+<a class="jxr_linenumber" name="L659" href="#L659">659</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L660" href="#L660">660</a> <em class="jxr_javadoccomment">   * @since 10.0</em>
+<a class="jxr_linenumber" name="L661" href="#L661">661</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L662" href="#L662">662</a>   <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> interruptTask() {}
+<a class="jxr_linenumber" name="L663" href="#L663">663</a> 
+<a class="jxr_linenumber" name="L664" href="#L664">664</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L665" href="#L665">665</a> <em class="jxr_javadoccomment">   * Returns true if this future was cancelled with {@code mayInterruptIfRunning} set to {@code</em>
+<a class="jxr_linenumber" name="L666" href="#L666">666</a> <em class="jxr_javadoccomment">   * true}.</em>
+<a class="jxr_linenumber" name="L667" href="#L667">667</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L668" href="#L668">668</a> <em class="jxr_javadoccomment">   * @since 14.0</em>
+<a class="jxr_linenumber" name="L669" href="#L669">669</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L670" href="#L670">670</a>   <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> wasInterrupted() {
+<a class="jxr_linenumber" name="L671" href="#L671">671</a>     <strong class="jxr_keyword">final</strong> Object localValue = value;
+<a class="jxr_linenumber" name="L672" href="#L672">672</a>     <strong class="jxr_keyword">return</strong> (localValue instanceof Cancellation) &amp;&amp; ((Cancellation) localValue).wasInterrupted;
+<a class="jxr_linenumber" name="L673" href="#L673">673</a>   }
+<a class="jxr_linenumber" name="L674" href="#L674">674</a> 
+<a class="jxr_linenumber" name="L675" href="#L675">675</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L676" href="#L676">676</a> <em class="jxr_javadoccomment">   * {@inheritDoc}</em>
+<a class="jxr_linenumber" name="L677" href="#L677">677</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L678" href="#L678">678</a> <em class="jxr_javadoccomment">   * @since 10.0</em>
+<a class="jxr_linenumber" name="L679" href="#L679">679</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L680" href="#L680">680</a>   @Override
+<a class="jxr_linenumber" name="L681" href="#L681">681</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addListener(Runnable listener, Executor executor) {
+<a class="jxr_linenumber" name="L682" href="#L682">682</a>     checkNotNull(listener, <span class="jxr_string">"Runnable was null."</span>);
+<a class="jxr_linenumber" name="L683" href="#L683">683</a>     checkNotNull(executor, <span class="jxr_string">"Executor was null."</span>);
+<a class="jxr_linenumber" name="L684" href="#L684">684</a>     <em class="jxr_comment">// Checking isDone and listeners != TOMBSTONE may seem redundant, but our contract for</em>
+<a class="jxr_linenumber" name="L685" href="#L685">685</a>     <em class="jxr_comment">// addListener says that listeners execute 'immediate' if the future isDone(). However, our</em>
+<a class="jxr_linenumber" name="L686" href="#L686">686</a>     <em class="jxr_comment">// protocol for completing a future is to assign the value field (which sets isDone to true) and</em>
+<a class="jxr_linenumber" name="L687" href="#L687">687</a>     <em class="jxr_comment">// then to release waiters, followed by executing afterDone(), followed by releasing listeners.</em>
+<a class="jxr_linenumber" name="L688" href="#L688">688</a>     <em class="jxr_comment">// That means that it is possible to observe that the future isDone and that your listeners</em>
+<a class="jxr_linenumber" name="L689" href="#L689">689</a>     <em class="jxr_comment">// don't execute 'immediately'.  By checking isDone here we avoid that.</em>
+<a class="jxr_linenumber" name="L690" href="#L690">690</a>     <em class="jxr_comment">// A corollary to all that is that we don't need to check isDone inside the loop because if we</em>
+<a class="jxr_linenumber" name="L691" href="#L691">691</a>     <em class="jxr_comment">// get into the loop we know that we weren't done when we entered and therefore we aren't under</em>
+<a class="jxr_linenumber" name="L692" href="#L692">692</a>     <em class="jxr_comment">// an obligation to execute 'immediately'.</em>
+<a class="jxr_linenumber" name="L693" href="#L693">693</a>     <strong class="jxr_keyword">if</strong> (!isDone()) {
+<a class="jxr_linenumber" name="L694" href="#L694">694</a>       Listener oldHead = listeners;
+<a class="jxr_linenumber" name="L695" href="#L695">695</a>       <strong class="jxr_keyword">if</strong> (oldHead != Listener.TOMBSTONE) {
+<a class="jxr_linenumber" name="L696" href="#L696">696</a>         Listener newNode = <strong class="jxr_keyword">new</strong> Listener(listener, executor);
+<a class="jxr_linenumber" name="L697" href="#L697">697</a>         <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L698" href="#L698">698</a>           newNode.next = oldHead;
+<a class="jxr_linenumber" name="L699" href="#L699">699</a>           <strong class="jxr_keyword">if</strong> (ATOMIC_HELPER.casListeners(<strong class="jxr_keyword">this</strong>, oldHead, newNode)) {
+<a class="jxr_linenumber" name="L700" href="#L700">700</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L701" href="#L701">701</a>           }
+<a class="jxr_linenumber" name="L702" href="#L702">702</a>           oldHead = listeners; <em class="jxr_comment">// re-read</em>
+<a class="jxr_linenumber" name="L703" href="#L703">703</a>         } <strong class="jxr_keyword">while</strong> (oldHead != Listener.TOMBSTONE);
+<a class="jxr_linenumber" name="L704" href="#L704">704</a>       }
+<a class="jxr_linenumber" name="L705" href="#L705">705</a>     }
+<a class="jxr_linenumber" name="L706" href="#L706">706</a>     <em class="jxr_comment">// If we get here then the Listener TOMBSTONE was set, which means the future is done, call</em>
+<a class="jxr_linenumber" name="L707" href="#L707">707</a>     <em class="jxr_comment">// the listener.</em>
+<a class="jxr_linenumber" name="L708" href="#L708">708</a>     executeListener(listener, executor);
+<a class="jxr_linenumber" name="L709" href="#L709">709</a>   }
+<a class="jxr_linenumber" name="L710" href="#L710">710</a> 
+<a class="jxr_linenumber" name="L711" href="#L711">711</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L712" href="#L712">712</a> <em class="jxr_javadoccomment">   * Sets the result of this {@code Future} unless this {@code Future} has already been cancelled or</em>
+<a class="jxr_linenumber" name="L713" href="#L713">713</a> <em class="jxr_javadoccomment">   * set (including {@linkplain #setFuture set asynchronously}). When a call to this method returns,</em>
+<a class="jxr_linenumber" name="L714" href="#L714">714</a> <em class="jxr_javadoccomment">   * the {@code Future} is guaranteed to be {@linkplain #isDone done} &lt;b&gt;only if&lt;/b&gt; the call was</em>
+<a class="jxr_linenumber" name="L715" href="#L715">715</a> <em class="jxr_javadoccomment">   * accepted (in which case it returns {@code true}). If it returns {@code false}, the {@code</em>
+<a class="jxr_linenumber" name="L716" href="#L716">716</a> <em class="jxr_javadoccomment">   * Future} may have previously been set asynchronously, in which case its result may not be known</em>
+<a class="jxr_linenumber" name="L717" href="#L717">717</a> <em class="jxr_javadoccomment">   * yet. That result, though not yet known, cannot be overridden by a call to a {@code set*}</em>
+<a class="jxr_linenumber" name="L718" href="#L718">718</a> <em class="jxr_javadoccomment">   * method, only by a call to {@link #cancel}.</em>
+<a class="jxr_linenumber" name="L719" href="#L719">719</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L720" href="#L720">720</a> <em class="jxr_javadoccomment">   * @param value the value to be used as the result</em>
+<a class="jxr_linenumber" name="L721" href="#L721">721</a> <em class="jxr_javadoccomment">   * @return true if the attempt was accepted, completing the {@code Future}</em>
+<a class="jxr_linenumber" name="L722" href="#L722">722</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L723" href="#L723">723</a>   @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L724" href="#L724">724</a>   <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> set(@Nullable V value) {
+<a class="jxr_linenumber" name="L725" href="#L725">725</a>     Object valueToSet = value == <strong class="jxr_keyword">null</strong> ? NULL : value;
+<a class="jxr_linenumber" name="L726" href="#L726">726</a>     <strong class="jxr_keyword">if</strong> (ATOMIC_HELPER.casValue(<strong class="jxr_keyword">this</strong>, <strong class="jxr_keyword">null</strong>, valueToSet)) {
+<a class="jxr_linenumber" name="L727" href="#L727">727</a>       complete(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L728" href="#L728">728</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L729" href="#L729">729</a>     }
+<a class="jxr_linenumber" name="L730" href="#L730">730</a>     <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L731" href="#L731">731</a>   }
+<a class="jxr_linenumber" name="L732" href="#L732">732</a> 
+<a class="jxr_linenumber" name="L733" href="#L733">733</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L734" href="#L734">734</a> <em class="jxr_javadoccomment">   * Sets the failed result of this {@code Future} unless this {@code Future} has already been</em>
+<a class="jxr_linenumber" name="L735" href="#L735">735</a> <em class="jxr_javadoccomment">   * cancelled or set (including {@linkplain #setFuture set asynchronously}). When a call to this</em>
+<a class="jxr_linenumber" name="L736" href="#L736">736</a> <em class="jxr_javadoccomment">   * method returns, the {@code Future} is guaranteed to be {@linkplain #isDone done} &lt;b&gt;only if&lt;/b&gt;</em>
+<a class="jxr_linenumber" name="L737" href="#L737">737</a> <em class="jxr_javadoccomment">   * the call was accepted (in which case it returns {@code true}). If it returns {@code false}, the</em>
+<a class="jxr_linenumber" name="L738" href="#L738">738</a> <em class="jxr_javadoccomment">   * {@code Future} may have previously been set asynchronously, in which case its result may not be</em>
+<a class="jxr_linenumber" name="L739" href="#L739">739</a> <em class="jxr_javadoccomment">   * known yet. That result, though not yet known, cannot be overridden by a call to a {@code set*}</em>
+<a class="jxr_linenumber" name="L740" href="#L740">740</a> <em class="jxr_javadoccomment">   * method, only by a call to {@link #cancel}.</em>
+<a class="jxr_linenumber" name="L741" href="#L741">741</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L742" href="#L742">742</a> <em class="jxr_javadoccomment">   * @param throwable the exception to be used as the failed result</em>
+<a class="jxr_linenumber" name="L743" href="#L743">743</a> <em class="jxr_javadoccomment">   * @return true if the attempt was accepted, completing the {@code Future}</em>
+<a class="jxr_linenumber" name="L744" href="#L744">744</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L745" href="#L745">745</a>   @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L746" href="#L746">746</a>   <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> setException(Throwable throwable) {
+<a class="jxr_linenumber" name="L747" href="#L747">747</a>     Object valueToSet = <strong class="jxr_keyword">new</strong> Failure(checkNotNull(throwable));
+<a class="jxr_linenumber" name="L748" href="#L748">748</a>     <strong class="jxr_keyword">if</strong> (ATOMIC_HELPER.casValue(<strong class="jxr_keyword">this</strong>, <strong class="jxr_keyword">null</strong>, valueToSet)) {
+<a class="jxr_linenumber" name="L749" href="#L749">749</a>       complete(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L750" href="#L750">750</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L751" href="#L751">751</a>     }
+<a class="jxr_linenumber" name="L752" href="#L752">752</a>     <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L753" href="#L753">753</a>   }
+<a class="jxr_linenumber" name="L754" href="#L754">754</a> 
+<a class="jxr_linenumber" name="L755" href="#L755">755</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L756" href="#L756">756</a> <em class="jxr_javadoccomment">   * Sets the result of this {@code Future} to match the supplied input {@code Future} once the</em>
+<a class="jxr_linenumber" name="L757" href="#L757">757</a> <em class="jxr_javadoccomment">   * supplied {@code Future} is done, unless this {@code Future} has already been cancelled or set</em>
+<a class="jxr_linenumber" name="L758" href="#L758">758</a> <em class="jxr_javadoccomment">   * (including "set asynchronously," defined below).</em>
+<a class="jxr_linenumber" name="L759" href="#L759">759</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L760" href="#L760">760</a> <em class="jxr_javadoccomment">   * &lt;p&gt;If the supplied future is {@linkplain #isDone done} when this method is called and the call</em>
+<a class="jxr_linenumber" name="L761" href="#L761">761</a> <em class="jxr_javadoccomment">   * is accepted, then this future is guaranteed to have been completed with the supplied future by</em>
+<a class="jxr_linenumber" name="L762" href="#L762">762</a> <em class="jxr_javadoccomment">   * the time this method returns. If the supplied future is not done and the call is accepted, then</em>
+<a class="jxr_linenumber" name="L763" href="#L763">763</a> <em class="jxr_javadoccomment">   * the future will be &lt;i&gt;set asynchronously&lt;/i&gt;. Note that such a result, though not yet known,</em>
+<a class="jxr_linenumber" name="L764" href="#L764">764</a> <em class="jxr_javadoccomment">   * cannot be overridden by a call to a {@code set*} method, only by a call to {@link #cancel}.</em>
+<a class="jxr_linenumber" name="L765" href="#L765">765</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L766" href="#L766">766</a> <em class="jxr_javadoccomment">   * &lt;p&gt;If the call {@code setFuture(delegate)} is accepted and this {@code Future} is later</em>
+<a class="jxr_linenumber" name="L767" href="#L767">767</a> <em class="jxr_javadoccomment">   * cancelled, cancellation will be propagated to {@code delegate}. Additionally, any call to</em>
+<a class="jxr_linenumber" name="L768" href="#L768">768</a> <em class="jxr_javadoccomment">   * {@code setFuture} after any cancellation will propagate cancellation to the supplied {@code</em>
+<a class="jxr_linenumber" name="L769" href="#L769">769</a> <em class="jxr_javadoccomment">   * Future}.</em>
+<a class="jxr_linenumber" name="L770" href="#L770">770</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L771" href="#L771">771</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Note that, even if the supplied future is cancelled and it causes this future to complete,</em>
+<a class="jxr_linenumber" name="L772" href="#L772">772</a> <em class="jxr_javadoccomment">   * it will never trigger interruption behavior. In particular, it will not cause this future to</em>
+<a class="jxr_linenumber" name="L773" href="#L773">773</a> <em class="jxr_javadoccomment">   * invoke the {@link #interruptTask} method, and the {@link #wasInterrupted} method will not</em>
+<a class="jxr_linenumber" name="L774" href="#L774">774</a> <em class="jxr_javadoccomment">   * return {@code true}.</em>
+<a class="jxr_linenumber" name="L775" href="#L775">775</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L776" href="#L776">776</a> <em class="jxr_javadoccomment">   * @param future the future to delegate to</em>
+<a class="jxr_linenumber" name="L777" href="#L777">777</a> <em class="jxr_javadoccomment">   * @return true if the attempt was accepted, indicating that the {@code Future} was not previously</em>
+<a class="jxr_linenumber" name="L778" href="#L778">778</a> <em class="jxr_javadoccomment">   *     cancelled or set.</em>
+<a class="jxr_linenumber" name="L779" href="#L779">779</a> <em class="jxr_javadoccomment">   * @since 19.0</em>
+<a class="jxr_linenumber" name="L780" href="#L780">780</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L781" href="#L781">781</a>   @CanIgnoreReturnValue
+<a class="jxr_linenumber" name="L782" href="#L782">782</a>   <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> setFuture(ListenableFuture&lt;? <strong class="jxr_keyword">extends</strong> V&gt; future) {
+<a class="jxr_linenumber" name="L783" href="#L783">783</a>     checkNotNull(future);
+<a class="jxr_linenumber" name="L784" href="#L784">784</a>     Object localValue = value;
+<a class="jxr_linenumber" name="L785" href="#L785">785</a>     <strong class="jxr_keyword">if</strong> (localValue == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L786" href="#L786">786</a>       <strong class="jxr_keyword">if</strong> (future.isDone()) {
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>         Object value = getFutureValue(future);
+<a class="jxr_linenumber" name="L788" href="#L788">788</a>         <strong class="jxr_keyword">if</strong> (ATOMIC_HELPER.casValue(<strong class="jxr_keyword">this</strong>, <strong class="jxr_keyword">null</strong>, value)) {
+<a class="jxr_linenumber" name="L789" href="#L789">789</a>           complete(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>           <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L791" href="#L791">791</a>         }
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L793" href="#L793">793</a>       }
+<a class="jxr_linenumber" name="L794" href="#L794">794</a>       SetFuture valueToSet = <strong class="jxr_keyword">new</strong> SetFuture&lt;V&gt;(<strong class="jxr_keyword">this</strong>, future);
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>       <strong class="jxr_keyword">if</strong> (ATOMIC_HELPER.casValue(<strong class="jxr_keyword">this</strong>, <strong class="jxr_keyword">null</strong>, valueToSet)) {
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>         <em class="jxr_comment">// the listener is responsible for calling completeWithFuture, directExecutor is appropriate</em>
+<a class="jxr_linenumber" name="L797" href="#L797">797</a>         <em class="jxr_comment">// since all we are doing is unpacking a completed future which should be fast.</em>
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>           future.addListener(valueToSet, DirectExecutor.INSTANCE);
+<a class="jxr_linenumber" name="L800" href="#L800">800</a>         } <strong class="jxr_keyword">catch</strong> (Throwable t) {
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>           <em class="jxr_comment">// addListener has thrown an exception! SetFuture.run can't throw any exceptions so this</em>
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>           <em class="jxr_comment">// must have been caused by addListener itself. The most likely explanation is a</em>
+<a class="jxr_linenumber" name="L803" href="#L803">803</a>           <em class="jxr_comment">// misconfigured mock. Try to switch to Failure.</em>
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>           Failure failure;
+<a class="jxr_linenumber" name="L805" href="#L805">805</a>           <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L806" href="#L806">806</a>             failure = <strong class="jxr_keyword">new</strong> Failure(t);
+<a class="jxr_linenumber" name="L807" href="#L807">807</a>           } <strong class="jxr_keyword">catch</strong> (Throwable oomMostLikely) {
+<a class="jxr_linenumber" name="L808" href="#L808">808</a>             failure = Failure.FALLBACK_INSTANCE;
+<a class="jxr_linenumber" name="L809" href="#L809">809</a>           }
+<a class="jxr_linenumber" name="L810" href="#L810">810</a>           <em class="jxr_comment">// Note: The only way this CAS could fail is if cancel() has raced with us. That is ok.</em>
+<a class="jxr_linenumber" name="L811" href="#L811">811</a>           <strong class="jxr_keyword">boolean</strong> unused = ATOMIC_HELPER.casValue(<strong class="jxr_keyword">this</strong>, valueToSet, failure);
+<a class="jxr_linenumber" name="L812" href="#L812">812</a>         }
+<a class="jxr_linenumber" name="L813" href="#L813">813</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L814" href="#L814">814</a>       }
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>       localValue = value; <em class="jxr_comment">// we lost the cas, fall through and maybe cancel</em>
+<a class="jxr_linenumber" name="L816" href="#L816">816</a>     }
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>     <em class="jxr_comment">// The future has already been set to something. If it is cancellation we should cancel the</em>
+<a class="jxr_linenumber" name="L818" href="#L818">818</a>     <em class="jxr_comment">// incoming future.</em>
+<a class="jxr_linenumber" name="L819" href="#L819">819</a>     <strong class="jxr_keyword">if</strong> (localValue instanceof Cancellation) {
+<a class="jxr_linenumber" name="L820" href="#L820">820</a>       <em class="jxr_comment">// we don't care if it fails, this is best-effort.</em>
+<a class="jxr_linenumber" name="L821" href="#L821">821</a>       future.cancel(((Cancellation) localValue).wasInterrupted);
+<a class="jxr_linenumber" name="L822" href="#L822">822</a>     }
+<a class="jxr_linenumber" name="L823" href="#L823">823</a>     <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L824" href="#L824">824</a>   }
+<a class="jxr_linenumber" name="L825" href="#L825">825</a> 
+<a class="jxr_linenumber" name="L826" href="#L826">826</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L827" href="#L827">827</a> <em class="jxr_javadoccomment">   * Returns a value that satisfies the contract of the {@link #value} field based on the state of</em>
+<a class="jxr_linenumber" name="L828" href="#L828">828</a> <em class="jxr_javadoccomment">   * given future.</em>
+<a class="jxr_linenumber" name="L829" href="#L829">829</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L830" href="#L830">830</a> <em class="jxr_javadoccomment">   * &lt;p&gt;This is approximately the inverse of {@link #getDoneValue(Object)}</em>
+<a class="jxr_linenumber" name="L831" href="#L831">831</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L832" href="#L832">832</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Object getFutureValue(ListenableFuture&lt;?&gt; future) {
+<a class="jxr_linenumber" name="L833" href="#L833">833</a>     <strong class="jxr_keyword">if</strong> (future instanceof Trusted) {
+<a class="jxr_linenumber" name="L834" href="#L834">834</a>       <em class="jxr_comment">// Break encapsulation for TrustedFuture instances since we know that subclasses cannot</em>
+<a class="jxr_linenumber" name="L835" href="#L835">835</a>       <em class="jxr_comment">// override .get() (since it is final) and therefore this is equivalent to calling .get()</em>
+<a class="jxr_linenumber" name="L836" href="#L836">836</a>       <em class="jxr_comment">// and unpacking the exceptions like we do below (just much faster because it is a single</em>
+<a class="jxr_linenumber" name="L837" href="#L837">837</a>       <em class="jxr_comment">// field read instead of a read, several branches and possibly creating exceptions).</em>
+<a class="jxr_linenumber" name="L838" href="#L838">838</a>       Object v = ((AbstractFuture&lt;?&gt;) future).value;
+<a class="jxr_linenumber" name="L839" href="#L839">839</a>       <strong class="jxr_keyword">if</strong> (v instanceof Cancellation) {
+<a class="jxr_linenumber" name="L840" href="#L840">840</a>         <em class="jxr_comment">// If the other future was interrupted, clear the interrupted bit while preserving the cause</em>
+<a class="jxr_linenumber" name="L841" href="#L841">841</a>         <em class="jxr_comment">// this will make it consistent with how non-trustedfutures work which cannot propagate the</em>
+<a class="jxr_linenumber" name="L842" href="#L842">842</a>         <em class="jxr_comment">// wasInterrupted bit</em>
+<a class="jxr_linenumber" name="L843" href="#L843">843</a>         Cancellation c = (Cancellation) v;
+<a class="jxr_linenumber" name="L844" href="#L844">844</a>         <strong class="jxr_keyword">if</strong> (c.wasInterrupted) {
+<a class="jxr_linenumber" name="L845" href="#L845">845</a>           v =
+<a class="jxr_linenumber" name="L846" href="#L846">846</a>               c.cause != <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L847" href="#L847">847</a>                   ? <strong class="jxr_keyword">new</strong> Cancellation(<em class="jxr_comment">/* wasInterrupted= */</em> false, c.cause)
+<a class="jxr_linenumber" name="L848" href="#L848">848</a>                   : Cancellation.CAUSELESS_CANCELLED;
+<a class="jxr_linenumber" name="L849" href="#L849">849</a>         }
+<a class="jxr_linenumber" name="L850" href="#L850">850</a>       }
+<a class="jxr_linenumber" name="L851" href="#L851">851</a>       <strong class="jxr_keyword">return</strong> v;
+<a class="jxr_linenumber" name="L852" href="#L852">852</a>     }
+<a class="jxr_linenumber" name="L853" href="#L853">853</a>     <strong class="jxr_keyword">if</strong> (future instanceof InternalFutureFailureAccess) {
+<a class="jxr_linenumber" name="L854" href="#L854">854</a>       Throwable throwable =
+<a class="jxr_linenumber" name="L855" href="#L855">855</a>           InternalFutures.tryInternalFastPathGetFailure((InternalFutureFailureAccess) future);
+<a class="jxr_linenumber" name="L856" href="#L856">856</a>       <strong class="jxr_keyword">if</strong> (throwable != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L857" href="#L857">857</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Failure(throwable);
+<a class="jxr_linenumber" name="L858" href="#L858">858</a>       }
+<a class="jxr_linenumber" name="L859" href="#L859">859</a>     }
+<a class="jxr_linenumber" name="L860" href="#L860">860</a>     <strong class="jxr_keyword">boolean</strong> wasCancelled = future.isCancelled();
+<a class="jxr_linenumber" name="L861" href="#L861">861</a>     <em class="jxr_comment">// Don't allocate a CancellationException if it's not necessary</em>
+<a class="jxr_linenumber" name="L862" href="#L862">862</a>     <strong class="jxr_keyword">if</strong> (!GENERATE_CANCELLATION_CAUSES &amp; wasCancelled) {
+<a class="jxr_linenumber" name="L863" href="#L863">863</a>       <strong class="jxr_keyword">return</strong> Cancellation.CAUSELESS_CANCELLED;
+<a class="jxr_linenumber" name="L864" href="#L864">864</a>     }
+<a class="jxr_linenumber" name="L865" href="#L865">865</a>     <em class="jxr_comment">// Otherwise calculate the value by calling .get()</em>
+<a class="jxr_linenumber" name="L866" href="#L866">866</a>     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L867" href="#L867">867</a>       Object v = getUninterruptibly(future);
+<a class="jxr_linenumber" name="L868" href="#L868">868</a>       <strong class="jxr_keyword">if</strong> (wasCancelled) {
+<a class="jxr_linenumber" name="L869" href="#L869">869</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Cancellation(
+<a class="jxr_linenumber" name="L870" href="#L870">870</a>             false,
+<a class="jxr_linenumber" name="L871" href="#L871">871</a>             <strong class="jxr_keyword">new</strong> IllegalArgumentException(
+<a class="jxr_linenumber" name="L872" href="#L872">872</a>                 <span class="jxr_string">"get() did not throw CancellationException, despite reporting "</span>
+<a class="jxr_linenumber" name="L873" href="#L873">873</a>                     + <span class="jxr_string">"isCancelled() == true: "</span>
+<a class="jxr_linenumber" name="L874" href="#L874">874</a>                     + future));
+<a class="jxr_linenumber" name="L875" href="#L875">875</a>       }
+<a class="jxr_linenumber" name="L876" href="#L876">876</a>       <strong class="jxr_keyword">return</strong> v == <strong class="jxr_keyword">null</strong> ? NULL : v;
+<a class="jxr_linenumber" name="L877" href="#L877">877</a>     } <strong class="jxr_keyword">catch</strong> (ExecutionException exception) {
+<a class="jxr_linenumber" name="L878" href="#L878">878</a>       <strong class="jxr_keyword">if</strong> (wasCancelled) {
+<a class="jxr_linenumber" name="L879" href="#L879">879</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Cancellation(
+<a class="jxr_linenumber" name="L880" href="#L880">880</a>             false,
+<a class="jxr_linenumber" name="L881" href="#L881">881</a>             <strong class="jxr_keyword">new</strong> IllegalArgumentException(
+<a class="jxr_linenumber" name="L882" href="#L882">882</a>                 <span class="jxr_string">"get() did not throw CancellationException, despite reporting "</span>
+<a class="jxr_linenumber" name="L883" href="#L883">883</a>                     + <span class="jxr_string">"isCancelled() == true: "</span>
+<a class="jxr_linenumber" name="L884" href="#L884">884</a>                     + future,
+<a class="jxr_linenumber" name="L885" href="#L885">885</a>                 exception));
+<a class="jxr_linenumber" name="L886" href="#L886">886</a>       }
+<a class="jxr_linenumber" name="L887" href="#L887">887</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Failure(exception.getCause());
+<a class="jxr_linenumber" name="L888" href="#L888">888</a>     } <strong class="jxr_keyword">catch</strong> (CancellationException cancellation) {
+<a class="jxr_linenumber" name="L889" href="#L889">889</a>       <strong class="jxr_keyword">if</strong> (!wasCancelled) {
+<a class="jxr_linenumber" name="L890" href="#L890">890</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Failure(
+<a class="jxr_linenumber" name="L891" href="#L891">891</a>             <strong class="jxr_keyword">new</strong> IllegalArgumentException(
+<a class="jxr_linenumber" name="L892" href="#L892">892</a>                 <span class="jxr_string">"get() threw CancellationException, despite reporting isCancelled() == false: "</span>
+<a class="jxr_linenumber" name="L893" href="#L893">893</a>                     + future,
+<a class="jxr_linenumber" name="L894" href="#L894">894</a>                 cancellation));
+<a class="jxr_linenumber" name="L895" href="#L895">895</a>       }
+<a class="jxr_linenumber" name="L896" href="#L896">896</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Cancellation(false, cancellation);
+<a class="jxr_linenumber" name="L897" href="#L897">897</a>     } <strong class="jxr_keyword">catch</strong> (Throwable t) {
+<a class="jxr_linenumber" name="L898" href="#L898">898</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Failure(t);
+<a class="jxr_linenumber" name="L899" href="#L899">899</a>     }
+<a class="jxr_linenumber" name="L900" href="#L900">900</a>   }
+<a class="jxr_linenumber" name="L901" href="#L901">901</a> 
+<a class="jxr_linenumber" name="L902" href="#L902">902</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L903" href="#L903">903</a> <em class="jxr_javadoccomment">   * An inlined private copy of {@link Uninterruptibles#getUninterruptibly} used to break an</em>
+<a class="jxr_linenumber" name="L904" href="#L904">904</a> <em class="jxr_javadoccomment">   * internal dependency on other /util/concurrent classes.</em>
+<a class="jxr_linenumber" name="L905" href="#L905">905</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L906" href="#L906">906</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> &lt;V&gt; V getUninterruptibly(Future&lt;V&gt; future) <strong class="jxr_keyword">throws</strong> ExecutionException {
+<a class="jxr_linenumber" name="L907" href="#L907">907</a>     <strong class="jxr_keyword">boolean</strong> interrupted = false;
+<a class="jxr_linenumber" name="L908" href="#L908">908</a>     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L909" href="#L909">909</a>       <strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
+<a class="jxr_linenumber" name="L910" href="#L910">910</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L911" href="#L911">911</a>           <strong class="jxr_keyword">return</strong> future.get();
+<a class="jxr_linenumber" name="L912" href="#L912">912</a>         } <strong class="jxr_keyword">catch</strong> (InterruptedException e) {
+<a class="jxr_linenumber" name="L913" href="#L913">913</a>           interrupted = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L914" href="#L914">914</a>         }
+<a class="jxr_linenumber" name="L915" href="#L915">915</a>       }
+<a class="jxr_linenumber" name="L916" href="#L916">916</a>     } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L917" href="#L917">917</a>       <strong class="jxr_keyword">if</strong> (interrupted) {
+<a class="jxr_linenumber" name="L918" href="#L918">918</a>         Thread.currentThread().interrupt();
+<a class="jxr_linenumber" name="L919" href="#L919">919</a>       }
+<a class="jxr_linenumber" name="L920" href="#L920">920</a>     }
+<a class="jxr_linenumber" name="L921" href="#L921">921</a>   }
+<a class="jxr_linenumber" name="L922" href="#L922">922</a> 
+<a class="jxr_linenumber" name="L923" href="#L923">923</a>   <em class="jxr_javadoccomment">/** Unblocks all threads and runs all listeners. */</em>
+<a class="jxr_linenumber" name="L924" href="#L924">924</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> complete(AbstractFuture&lt;?&gt; future) {
+<a class="jxr_linenumber" name="L925" href="#L925">925</a>     Listener next = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L926" href="#L926">926</a>     <strong class="jxr_keyword">outer</strong>:
+<a class="jxr_linenumber" name="L927" href="#L927">927</a>     <strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
+<a class="jxr_linenumber" name="L928" href="#L928">928</a>       future.releaseWaiters();
+<a class="jxr_linenumber" name="L929" href="#L929">929</a>       <em class="jxr_comment">// We call this before the listeners in order to avoid needing to manage a separate stack data</em>
+<a class="jxr_linenumber" name="L930" href="#L930">930</a>       <em class="jxr_comment">// structure for them.  Also, some implementations rely on this running prior to listeners</em>
+<a class="jxr_linenumber" name="L931" href="#L931">931</a>       <em class="jxr_comment">// so that the cleanup work is visible to listeners.</em>
+<a class="jxr_linenumber" name="L932" href="#L932">932</a>       <em class="jxr_comment">// afterDone() should be generally fast and only used for cleanup work... but in theory can</em>
+<a class="jxr_linenumber" name="L933" href="#L933">933</a>       <em class="jxr_comment">// also be recursive and create StackOverflowErrors</em>
+<a class="jxr_linenumber" name="L934" href="#L934">934</a>       future.afterDone();
+<a class="jxr_linenumber" name="L935" href="#L935">935</a>       <em class="jxr_comment">// push the current set of listeners onto next</em>
+<a class="jxr_linenumber" name="L936" href="#L936">936</a>       next = future.clearListeners(next);
+<a class="jxr_linenumber" name="L937" href="#L937">937</a>       future = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L938" href="#L938">938</a>       <strong class="jxr_keyword">while</strong> (next != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L939" href="#L939">939</a>         Listener curr = next;
+<a class="jxr_linenumber" name="L940" href="#L940">940</a>         next = next.next;
+<a class="jxr_linenumber" name="L941" href="#L941">941</a>         Runnable task = curr.task;
+<a class="jxr_linenumber" name="L942" href="#L942">942</a>         <strong class="jxr_keyword">if</strong> (task instanceof SetFuture) {
+<a class="jxr_linenumber" name="L943" href="#L943">943</a>           SetFuture&lt;?&gt; setFuture = (SetFuture&lt;?&gt;) task;
+<a class="jxr_linenumber" name="L944" href="#L944">944</a>           <em class="jxr_comment">// We unwind setFuture specifically to avoid StackOverflowErrors in the case of long</em>
+<a class="jxr_linenumber" name="L945" href="#L945">945</a>           <em class="jxr_comment">// chains of SetFutures</em>
+<a class="jxr_linenumber" name="L946" href="#L946">946</a>           <em class="jxr_comment">// Handling this special case is important because there is no way to pass an executor to</em>
+<a class="jxr_linenumber" name="L947" href="#L947">947</a>           <em class="jxr_comment">// setFuture, so a user couldn't break the chain by doing this themselves.  It is also</em>
+<a class="jxr_linenumber" name="L948" href="#L948">948</a>           <em class="jxr_comment">// potentially common if someone writes a recursive Futures.transformAsync transformer.</em>
+<a class="jxr_linenumber" name="L949" href="#L949">949</a>           future = setFuture.owner;
+<a class="jxr_linenumber" name="L950" href="#L950">950</a>           <strong class="jxr_keyword">if</strong> (future.value == setFuture) {
+<a class="jxr_linenumber" name="L951" href="#L951">951</a>             Object valueToSet = getFutureValue(setFuture.future);
+<a class="jxr_linenumber" name="L952" href="#L952">952</a>             <strong class="jxr_keyword">if</strong> (ATOMIC_HELPER.casValue(future, setFuture, valueToSet)) {
+<a class="jxr_linenumber" name="L953" href="#L953">953</a>               <strong class="jxr_keyword">continue</strong> <strong class="jxr_keyword">outer</strong>;
+<a class="jxr_linenumber" name="L954" href="#L954">954</a>             }
+<a class="jxr_linenumber" name="L955" href="#L955">955</a>           }
+<a class="jxr_linenumber" name="L956" href="#L956">956</a>           <em class="jxr_comment">// other wise the future we were trying to set is already done.</em>
+<a class="jxr_linenumber" name="L957" href="#L957">957</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L958" href="#L958">958</a>           executeListener(task, curr.executor);
+<a class="jxr_linenumber" name="L959" href="#L959">959</a>         }
+<a class="jxr_linenumber" name="L960" href="#L960">960</a>       }
+<a class="jxr_linenumber" name="L961" href="#L961">961</a>       <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L962" href="#L962">962</a>     }
+<a class="jxr_linenumber" name="L963" href="#L963">963</a>   }
+<a class="jxr_linenumber" name="L964" href="#L964">964</a> 
+<a class="jxr_linenumber" name="L965" href="#L965">965</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L966" href="#L966">966</a> <em class="jxr_javadoccomment">   * Callback method that is called exactly once after the future is completed.</em>
+<a class="jxr_linenumber" name="L967" href="#L967">967</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L968" href="#L968">968</a> <em class="jxr_javadoccomment">   * &lt;p&gt;If {@link #interruptTask} is also run during completion, {@link #afterDone} runs after it.</em>
+<a class="jxr_linenumber" name="L969" href="#L969">969</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L970" href="#L970">970</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The default implementation of this method in {@code AbstractFuture} does nothing. This is</em>
+<a class="jxr_linenumber" name="L971" href="#L971">971</a> <em class="jxr_javadoccomment">   * intended for very lightweight cleanup work, for example, timing statistics or clearing fields.</em>
+<a class="jxr_linenumber" name="L972" href="#L972">972</a> <em class="jxr_javadoccomment">   * If your task does anything heavier consider, just using a listener with an executor.</em>
+<a class="jxr_linenumber" name="L973" href="#L973">973</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L974" href="#L974">974</a> <em class="jxr_javadoccomment">   * @since 20.0</em>
+<a class="jxr_linenumber" name="L975" href="#L975">975</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L976" href="#L976">976</a>   @Beta
+<a class="jxr_linenumber" name="L977" href="#L977">977</a>   @ForOverride
+<a class="jxr_linenumber" name="L978" href="#L978">978</a>   <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> afterDone() {}
+<a class="jxr_linenumber" name="L979" href="#L979">979</a> 
+<a class="jxr_linenumber" name="L980" href="#L980">980</a>   <em class="jxr_comment">// TODO(b/114236866): Inherit doc from InternalFutureFailureAccess. Also, -link to its URL.</em>
+<a class="jxr_linenumber" name="L981" href="#L981">981</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L982" href="#L982">982</a> <em class="jxr_javadoccomment">   * Usually returns {@code null} but, if this {@code Future} has failed, may &lt;i&gt;optionally&lt;/i&gt;</em>
+<a class="jxr_linenumber" name="L983" href="#L983">983</a> <em class="jxr_javadoccomment">   * return the cause of the failure. "Failure" means specifically "completed with an exception"; it</em>
+<a class="jxr_linenumber" name="L984" href="#L984">984</a> <em class="jxr_javadoccomment">   * does not include "was cancelled." To be explicit: If this method returns a non-null value,</em>
+<a class="jxr_linenumber" name="L985" href="#L985">985</a> <em class="jxr_javadoccomment">   * then:</em>
+<a class="jxr_linenumber" name="L986" href="#L986">986</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L987" href="#L987">987</a> <em class="jxr_javadoccomment">   * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L988" href="#L988">988</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code isDone()} must return {@code true}</em>
+<a class="jxr_linenumber" name="L989" href="#L989">989</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code isCancelled()} must return {@code false}</em>
+<a class="jxr_linenumber" name="L990" href="#L990">990</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;{@code get()} must not block, and it must throw an {@code ExecutionException} with the</em>
+<a class="jxr_linenumber" name="L991" href="#L991">991</a> <em class="jxr_javadoccomment">   *       return value of this method as its cause</em>
+<a class="jxr_linenumber" name="L992" href="#L992">992</a> <em class="jxr_javadoccomment">   * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L993" href="#L993">993</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L994" href="#L994">994</a> <em class="jxr_javadoccomment">   * &lt;p&gt;This method is {@code protected} so that classes like {@code</em>
+<a class="jxr_linenumber" name="L995" href="#L995">995</a> <em class="jxr_javadoccomment">   * com.google.common.util.concurrent.SettableFuture} do not expose it to their users as an</em>
+<a class="jxr_linenumber" name="L996" href="#L996">996</a> <em class="jxr_javadoccomment">   * instance method. In the unlikely event that you need to call this method, call {@link</em>
+<a class="jxr_linenumber" name="L997" href="#L997">997</a> <em class="jxr_javadoccomment">   * InternalFutures#tryInternalFastPathGetFailure(InternalFutureFailureAccess)}.</em>
+<a class="jxr_linenumber" name="L998" href="#L998">998</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L999" href="#L999">999</a> <em class="jxr_javadoccomment">   * @since 27.0</em>
+<a class="jxr_linenumber" name="L1000" href="#L1000">1000</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L1001" href="#L1001">1001</a>   @Override
+<a class="jxr_linenumber" name="L1002" href="#L1002">1002</a>   @Nullable
+<a class="jxr_linenumber" name="L1003" href="#L1003">1003</a>   <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> Throwable tryInternalFastPathGetFailure() {
+<a class="jxr_linenumber" name="L1004" href="#L1004">1004</a>     <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong> instanceof Trusted) {
+<a class="jxr_linenumber" name="L1005" href="#L1005">1005</a>       Object obj = value;
+<a class="jxr_linenumber" name="L1006" href="#L1006">1006</a>       <strong class="jxr_keyword">if</strong> (obj instanceof Failure) {
+<a class="jxr_linenumber" name="L1007" href="#L1007">1007</a>         <strong class="jxr_keyword">return</strong> ((Failure) obj).exception;
+<a class="jxr_linenumber" name="L1008" href="#L1008">1008</a>       }
+<a class="jxr_linenumber" name="L1009" href="#L1009">1009</a>     }
+<a class="jxr_linenumber" name="L1010" href="#L1010">1010</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1011" href="#L1011">1011</a>   }
+<a class="jxr_linenumber" name="L1012" href="#L1012">1012</a> 
+<a class="jxr_linenumber" name="L1013" href="#L1013">1013</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1014" href="#L1014">1014</a> <em class="jxr_javadoccomment">   * If this future has been cancelled (and possibly interrupted), cancels (and possibly interrupts)</em>
+<a class="jxr_linenumber" name="L1015" href="#L1015">1015</a> <em class="jxr_javadoccomment">   * the given future (if available).</em>
+<a class="jxr_linenumber" name="L1016" href="#L1016">1016</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L1017" href="#L1017">1017</a>   <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> maybePropagateCancellationTo(@Nullable Future&lt;?&gt; related) {
+<a class="jxr_linenumber" name="L1018" href="#L1018">1018</a>     <strong class="jxr_keyword">if</strong> (related != <strong class="jxr_keyword">null</strong> &amp; isCancelled()) {
+<a class="jxr_linenumber" name="L1019" href="#L1019">1019</a>       related.cancel(wasInterrupted());
+<a class="jxr_linenumber" name="L1020" href="#L1020">1020</a>     }
+<a class="jxr_linenumber" name="L1021" href="#L1021">1021</a>   }
+<a class="jxr_linenumber" name="L1022" href="#L1022">1022</a> 
+<a class="jxr_linenumber" name="L1023" href="#L1023">1023</a>   <em class="jxr_javadoccomment">/** Releases all threads in the {@link #waiters} list, and clears the list. */</em>
+<a class="jxr_linenumber" name="L1024" href="#L1024">1024</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> releaseWaiters() {
+<a class="jxr_linenumber" name="L1025" href="#L1025">1025</a>     Waiter head;
+<a class="jxr_linenumber" name="L1026" href="#L1026">1026</a>     <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L1027" href="#L1027">1027</a>       head = waiters;
+<a class="jxr_linenumber" name="L1028" href="#L1028">1028</a>     } <strong class="jxr_keyword">while</strong> (!ATOMIC_HELPER.casWaiters(<strong class="jxr_keyword">this</strong>, head, Waiter.TOMBSTONE));
+<a class="jxr_linenumber" name="L1029" href="#L1029">1029</a>     <strong class="jxr_keyword">for</strong> (Waiter currentWaiter = head; currentWaiter != <strong class="jxr_keyword">null</strong>; currentWaiter = currentWaiter.next) {
+<a class="jxr_linenumber" name="L1030" href="#L1030">1030</a>       currentWaiter.unpark();
+<a class="jxr_linenumber" name="L1031" href="#L1031">1031</a>     }
+<a class="jxr_linenumber" name="L1032" href="#L1032">1032</a>   }
+<a class="jxr_linenumber" name="L1033" href="#L1033">1033</a> 
+<a class="jxr_linenumber" name="L1034" href="#L1034">1034</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1035" href="#L1035">1035</a> <em class="jxr_javadoccomment">   * Clears the {@link #listeners} list and prepends its contents to {@code onto}, least recently</em>
+<a class="jxr_linenumber" name="L1036" href="#L1036">1036</a> <em class="jxr_javadoccomment">   * added first.</em>
+<a class="jxr_linenumber" name="L1037" href="#L1037">1037</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L1038" href="#L1038">1038</a>   <strong class="jxr_keyword">private</strong> Listener clearListeners(Listener onto) {
+<a class="jxr_linenumber" name="L1039" href="#L1039">1039</a>     <em class="jxr_comment">// We need to</em>
+<a class="jxr_linenumber" name="L1040" href="#L1040">1040</a>     <em class="jxr_comment">// 1. atomically swap the listeners with TOMBSTONE, this is because addListener uses that to</em>
+<a class="jxr_linenumber" name="L1041" href="#L1041">1041</a>     <em class="jxr_comment">//    to synchronize with us</em>
+<a class="jxr_linenumber" name="L1042" href="#L1042">1042</a>     <em class="jxr_comment">// 2. reverse the linked list, because despite our rather clear contract, people depend on us</em>
+<a class="jxr_linenumber" name="L1043" href="#L1043">1043</a>     <em class="jxr_comment">//    executing listeners in the order they were added</em>
+<a class="jxr_linenumber" name="L1044" href="#L1044">1044</a>     <em class="jxr_comment">// 3. push all the items onto 'onto' and return the new head of the stack</em>
+<a class="jxr_linenumber" name="L1045" href="#L1045">1045</a>     Listener head;
+<a class="jxr_linenumber" name="L1046" href="#L1046">1046</a>     <strong class="jxr_keyword">do</strong> {
+<a class="jxr_linenumber" name="L1047" href="#L1047">1047</a>       head = listeners;
+<a class="jxr_linenumber" name="L1048" href="#L1048">1048</a>     } <strong class="jxr_keyword">while</strong> (!ATOMIC_HELPER.casListeners(<strong class="jxr_keyword">this</strong>, head, Listener.TOMBSTONE));
+<a class="jxr_linenumber" name="L1049" href="#L1049">1049</a>     Listener reversedList = onto;
+<a class="jxr_linenumber" name="L1050" href="#L1050">1050</a>     <strong class="jxr_keyword">while</strong> (head != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1051" href="#L1051">1051</a>       Listener tmp = head;
+<a class="jxr_linenumber" name="L1052" href="#L1052">1052</a>       head = head.next;
+<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a>       tmp.next = reversedList;
+<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a>       reversedList = tmp;
+<a class="jxr_linenumber" name="L1055" href="#L1055">1055</a>     }
+<a class="jxr_linenumber" name="L1056" href="#L1056">1056</a>     <strong class="jxr_keyword">return</strong> reversedList;
+<a class="jxr_linenumber" name="L1057" href="#L1057">1057</a>   }
+<a class="jxr_linenumber" name="L1058" href="#L1058">1058</a> 
+<a class="jxr_linenumber" name="L1059" href="#L1059">1059</a>   <em class="jxr_comment">// TODO(user): move parts into a default method on ListenableFuture?</em>
+<a class="jxr_linenumber" name="L1060" href="#L1060">1060</a>   @Override
+<a class="jxr_linenumber" name="L1061" href="#L1061">1061</a>   <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L1062" href="#L1062">1062</a>     StringBuilder builder = <strong class="jxr_keyword">new</strong> StringBuilder().append(<strong class="jxr_keyword">super</strong>.toString()).append(<span class="jxr_string">"[status="</span>);
+<a class="jxr_linenumber" name="L1063" href="#L1063">1063</a>     <strong class="jxr_keyword">if</strong> (isCancelled()) {
+<a class="jxr_linenumber" name="L1064" href="#L1064">1064</a>       builder.append(<span class="jxr_string">"CANCELLED"</span>);
+<a class="jxr_linenumber" name="L1065" href="#L1065">1065</a>     } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (isDone()) {
+<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a>       addDoneString(builder);
+<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a>     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1068" href="#L1068">1068</a>       addPendingString(builder); <em class="jxr_comment">// delegates to addDoneString if future completes mid-way</em>
+<a class="jxr_linenumber" name="L1069" href="#L1069">1069</a>     }
+<a class="jxr_linenumber" name="L1070" href="#L1070">1070</a>     <strong class="jxr_keyword">return</strong> builder.append(<span class="jxr_string">"]"</span>).toString();
+<a class="jxr_linenumber" name="L1071" href="#L1071">1071</a>   }
+<a class="jxr_linenumber" name="L1072" href="#L1072">1072</a> 
+<a class="jxr_linenumber" name="L1073" href="#L1073">1073</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1074" href="#L1074">1074</a> <em class="jxr_javadoccomment">   * Provide a human-readable explanation of why this future has not yet completed.</em>
+<a class="jxr_linenumber" name="L1075" href="#L1075">1075</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L1076" href="#L1076">1076</a> <em class="jxr_javadoccomment">   * @return null if an explanation cannot be provided (e.g. because the future is done).</em>
+<a class="jxr_linenumber" name="L1077" href="#L1077">1077</a> <em class="jxr_javadoccomment">   * @since 23.0</em>
+<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a>   <strong class="jxr_keyword">protected</strong> @Nullable String pendingToString() {
+<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a>     <em class="jxr_comment">// TODO(diamondm) consider moving this into addPendingString so it's always in the output</em>
+<a class="jxr_linenumber" name="L1081" href="#L1081">1081</a>     <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong> instanceof ScheduledFuture) {
+<a class="jxr_linenumber" name="L1082" href="#L1082">1082</a>       <strong class="jxr_keyword">return</strong> <span class="jxr_string">"remaining delay=["</span>
+<a class="jxr_linenumber" name="L1083" href="#L1083">1083</a>           + ((ScheduledFuture) <strong class="jxr_keyword">this</strong>).getDelay(TimeUnit.MILLISECONDS)
+<a class="jxr_linenumber" name="L1084" href="#L1084">1084</a>           + <span class="jxr_string">" ms]"</span>;
+<a class="jxr_linenumber" name="L1085" href="#L1085">1085</a>     }
+<a class="jxr_linenumber" name="L1086" href="#L1086">1086</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1087" href="#L1087">1087</a>   }
+<a class="jxr_linenumber" name="L1088" href="#L1088">1088</a> 
+<a class="jxr_linenumber" name="L1089" href="#L1089">1089</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addPendingString(StringBuilder builder) {
+<a class="jxr_linenumber" name="L1090" href="#L1090">1090</a>     <em class="jxr_comment">// Capture current builder length so it can be truncated if this future ends up completing while</em>
+<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a>     <em class="jxr_comment">// the toString is being calculated</em>
+<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a>     <strong class="jxr_keyword">int</strong> truncateLength = builder.length();
+<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a> 
+<a class="jxr_linenumber" name="L1094" href="#L1094">1094</a>     builder.append(<span class="jxr_string">"PENDING"</span>);
+<a class="jxr_linenumber" name="L1095" href="#L1095">1095</a> 
+<a class="jxr_linenumber" name="L1096" href="#L1096">1096</a>     Object localValue = value;
+<a class="jxr_linenumber" name="L1097" href="#L1097">1097</a>     <strong class="jxr_keyword">if</strong> (localValue instanceof SetFuture) {
+<a class="jxr_linenumber" name="L1098" href="#L1098">1098</a>       builder.append(<span class="jxr_string">", setFuture=["</span>);
+<a class="jxr_linenumber" name="L1099" href="#L1099">1099</a>       appendUserObject(builder, ((SetFuture) localValue).future);
+<a class="jxr_linenumber" name="L1100" href="#L1100">1100</a>       builder.append(<span class="jxr_string">"]"</span>);
+<a class="jxr_linenumber" name="L1101" href="#L1101">1101</a>     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1102" href="#L1102">1102</a>       String pendingDescription;
+<a class="jxr_linenumber" name="L1103" href="#L1103">1103</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1104" href="#L1104">1104</a>         pendingDescription = Strings.emptyToNull(pendingToString());
+<a class="jxr_linenumber" name="L1105" href="#L1105">1105</a>       } <strong class="jxr_keyword">catch</strong> (RuntimeException | StackOverflowError e) {
+<a class="jxr_linenumber" name="L1106" href="#L1106">1106</a>         <em class="jxr_comment">// Don't call getMessage or toString() on the exception, in case the exception thrown by the</em>
+<a class="jxr_linenumber" name="L1107" href="#L1107">1107</a>         <em class="jxr_comment">// subclass is implemented with bugs similar to the subclass.</em>
+<a class="jxr_linenumber" name="L1108" href="#L1108">1108</a>         pendingDescription = <span class="jxr_string">"Exception thrown from implementation: "</span> + e.getClass();
+<a class="jxr_linenumber" name="L1109" href="#L1109">1109</a>       }
+<a class="jxr_linenumber" name="L1110" href="#L1110">1110</a>       <strong class="jxr_keyword">if</strong> (pendingDescription != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1111" href="#L1111">1111</a>         builder.append(<span class="jxr_string">", info=["</span>).append(pendingDescription).append(<span class="jxr_string">"]"</span>);
+<a class="jxr_linenumber" name="L1112" href="#L1112">1112</a>       }
+<a class="jxr_linenumber" name="L1113" href="#L1113">1113</a>     }
+<a class="jxr_linenumber" name="L1114" href="#L1114">1114</a> 
+<a class="jxr_linenumber" name="L1115" href="#L1115">1115</a>     <em class="jxr_comment">// The future may complete while calculating the toString, so we check once more to see if the</em>
+<a class="jxr_linenumber" name="L1116" href="#L1116">1116</a>     <em class="jxr_comment">// future is done</em>
+<a class="jxr_linenumber" name="L1117" href="#L1117">1117</a>     <strong class="jxr_keyword">if</strong> (isDone()) {
+<a class="jxr_linenumber" name="L1118" href="#L1118">1118</a>       <em class="jxr_comment">// Truncate anything that was appended before realizing this future is done</em>
+<a class="jxr_linenumber" name="L1119" href="#L1119">1119</a>       builder.delete(truncateLength, builder.length());
+<a class="jxr_linenumber" name="L1120" href="#L1120">1120</a>       addDoneString(builder);
+<a class="jxr_linenumber" name="L1121" href="#L1121">1121</a>     }
+<a class="jxr_linenumber" name="L1122" href="#L1122">1122</a>   }
+<a class="jxr_linenumber" name="L1123" href="#L1123">1123</a> 
+<a class="jxr_linenumber" name="L1124" href="#L1124">1124</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addDoneString(StringBuilder builder) {
+<a class="jxr_linenumber" name="L1125" href="#L1125">1125</a>     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1126" href="#L1126">1126</a>       V value = getUninterruptibly(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L1127" href="#L1127">1127</a>       builder.append(<span class="jxr_string">"SUCCESS, result=["</span>);
+<a class="jxr_linenumber" name="L1128" href="#L1128">1128</a>       appendUserObject(builder, value);
+<a class="jxr_linenumber" name="L1129" href="#L1129">1129</a>       builder.append(<span class="jxr_string">"]"</span>);
+<a class="jxr_linenumber" name="L1130" href="#L1130">1130</a>     } <strong class="jxr_keyword">catch</strong> (ExecutionException e) {
+<a class="jxr_linenumber" name="L1131" href="#L1131">1131</a>       builder.append(<span class="jxr_string">"FAILURE, cause=["</span>).append(e.getCause()).append(<span class="jxr_string">"]"</span>);
+<a class="jxr_linenumber" name="L1132" href="#L1132">1132</a>     } <strong class="jxr_keyword">catch</strong> (CancellationException e) {
+<a class="jxr_linenumber" name="L1133" href="#L1133">1133</a>       builder.append(<span class="jxr_string">"CANCELLED"</span>); <em class="jxr_comment">// shouldn't be reachable</em>
+<a class="jxr_linenumber" name="L1134" href="#L1134">1134</a>     } <strong class="jxr_keyword">catch</strong> (RuntimeException e) {
+<a class="jxr_linenumber" name="L1135" href="#L1135">1135</a>       builder.append(<span class="jxr_string">"UNKNOWN, cause=["</span>).append(e.getClass()).append(<span class="jxr_string">" thrown from get()]"</span>);
+<a class="jxr_linenumber" name="L1136" href="#L1136">1136</a>     }
+<a class="jxr_linenumber" name="L1137" href="#L1137">1137</a>   }
+<a class="jxr_linenumber" name="L1138" href="#L1138">1138</a> 
+<a class="jxr_linenumber" name="L1139" href="#L1139">1139</a>   <em class="jxr_javadoccomment">/** Helper for printing user supplied objects into our toString method. */</em>
+<a class="jxr_linenumber" name="L1140" href="#L1140">1140</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> appendUserObject(StringBuilder builder, Object o) {
+<a class="jxr_linenumber" name="L1141" href="#L1141">1141</a>     <em class="jxr_comment">// This is some basic recursion detection for when people create cycles via set/setFuture or</em>
+<a class="jxr_linenumber" name="L1142" href="#L1142">1142</a>     <em class="jxr_comment">// when deep chains of futures exist resulting in a StackOverflowException. We could detect</em>
+<a class="jxr_linenumber" name="L1143" href="#L1143">1143</a>     <em class="jxr_comment">// arbitrary cycles using a thread local but this should be a good enough solution (it is also</em>
+<a class="jxr_linenumber" name="L1144" href="#L1144">1144</a>     <em class="jxr_comment">// what jdk collections do in these cases)</em>
+<a class="jxr_linenumber" name="L1145" href="#L1145">1145</a>     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1146" href="#L1146">1146</a>       <strong class="jxr_keyword">if</strong> (o == <strong class="jxr_keyword">this</strong>) {
+<a class="jxr_linenumber" name="L1147" href="#L1147">1147</a>         builder.append(<span class="jxr_string">"this future"</span>);
+<a class="jxr_linenumber" name="L1148" href="#L1148">1148</a>       } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1149" href="#L1149">1149</a>         builder.append(o);
+<a class="jxr_linenumber" name="L1150" href="#L1150">1150</a>       }
+<a class="jxr_linenumber" name="L1151" href="#L1151">1151</a>     } <strong class="jxr_keyword">catch</strong> (RuntimeException | StackOverflowError e) {
+<a class="jxr_linenumber" name="L1152" href="#L1152">1152</a>       <em class="jxr_comment">// Don't call getMessage or toString() on the exception, in case the exception thrown by the</em>
+<a class="jxr_linenumber" name="L1153" href="#L1153">1153</a>       <em class="jxr_comment">// user object is implemented with bugs similar to the user object.</em>
+<a class="jxr_linenumber" name="L1154" href="#L1154">1154</a>       builder.append(<span class="jxr_string">"Exception thrown from implementation: "</span>).append(e.getClass());
+<a class="jxr_linenumber" name="L1155" href="#L1155">1155</a>     }
+<a class="jxr_linenumber" name="L1156" href="#L1156">1156</a>   }
+<a class="jxr_linenumber" name="L1157" href="#L1157">1157</a> 
+<a class="jxr_linenumber" name="L1158" href="#L1158">1158</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1159" href="#L1159">1159</a> <em class="jxr_javadoccomment">   * Submits the given runnable to the given {@link Executor} catching and logging all {@linkplain</em>
+<a class="jxr_linenumber" name="L1160" href="#L1160">1160</a> <em class="jxr_javadoccomment">   * RuntimeException runtime exceptions} thrown by the executor.</em>
+<a class="jxr_linenumber" name="L1161" href="#L1161">1161</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L1162" href="#L1162">1162</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> executeListener(Runnable runnable, Executor executor) {
+<a class="jxr_linenumber" name="L1163" href="#L1163">1163</a>     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1164" href="#L1164">1164</a>       executor.execute(runnable);
+<a class="jxr_linenumber" name="L1165" href="#L1165">1165</a>     } <strong class="jxr_keyword">catch</strong> (RuntimeException e) {
+<a class="jxr_linenumber" name="L1166" href="#L1166">1166</a>       <em class="jxr_comment">// Log it and keep going -- bad runnable and/or executor. Don't punish the other runnables if</em>
+<a class="jxr_linenumber" name="L1167" href="#L1167">1167</a>       <em class="jxr_comment">// we're given a bad one. We only catch RuntimeException because we want Errors to propagate</em>
+<a class="jxr_linenumber" name="L1168" href="#L1168">1168</a>       <em class="jxr_comment">// up.</em>
+<a class="jxr_linenumber" name="L1169" href="#L1169">1169</a>       log.log(
+<a class="jxr_linenumber" name="L1170" href="#L1170">1170</a>           Level.SEVERE,
+<a class="jxr_linenumber" name="L1171" href="#L1171">1171</a>           <span class="jxr_string">"RuntimeException while executing runnable "</span> + runnable + <span class="jxr_string">" with executor "</span> + executor,
+<a class="jxr_linenumber" name="L1172" href="#L1172">1172</a>           e);
+<a class="jxr_linenumber" name="L1173" href="#L1173">1173</a>     }
+<a class="jxr_linenumber" name="L1174" href="#L1174">1174</a>   }
+<a class="jxr_linenumber" name="L1175" href="#L1175">1175</a> 
+<a class="jxr_linenumber" name="L1176" href="#L1176">1176</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> AtomicHelper {
+<a class="jxr_linenumber" name="L1177" href="#L1177">1177</a>     <em class="jxr_javadoccomment">/** Non volatile write of the thread to the {@link Waiter#thread} field. */</em>
+<a class="jxr_linenumber" name="L1178" href="#L1178">1178</a>     <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> putThread(Waiter waiter, Thread newValue);
+<a class="jxr_linenumber" name="L1179" href="#L1179">1179</a> 
+<a class="jxr_linenumber" name="L1180" href="#L1180">1180</a>     <em class="jxr_javadoccomment">/** Non volatile write of the waiter to the {@link Waiter#next} field. */</em>
+<a class="jxr_linenumber" name="L1181" href="#L1181">1181</a>     <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> putNext(Waiter waiter, Waiter newValue);
+<a class="jxr_linenumber" name="L1182" href="#L1182">1182</a> 
+<a class="jxr_linenumber" name="L1183" href="#L1183">1183</a>     <em class="jxr_javadoccomment">/** Performs a CAS operation on the {@link #waiters} field. */</em>
+<a class="jxr_linenumber" name="L1184" href="#L1184">1184</a>     <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">boolean</strong> casWaiters(AbstractFuture&lt;?&gt; future, Waiter expect, Waiter update);
+<a class="jxr_linenumber" name="L1185" href="#L1185">1185</a> 
+<a class="jxr_linenumber" name="L1186" href="#L1186">1186</a>     <em class="jxr_javadoccomment">/** Performs a CAS operation on the {@link #listeners} field. */</em>
+<a class="jxr_linenumber" name="L1187" href="#L1187">1187</a>     <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">boolean</strong> casListeners(AbstractFuture&lt;?&gt; future, Listener expect, Listener update);
+<a class="jxr_linenumber" name="L1188" href="#L1188">1188</a> 
+<a class="jxr_linenumber" name="L1189" href="#L1189">1189</a>     <em class="jxr_javadoccomment">/** Performs a CAS operation on the {@link #value} field. */</em>
+<a class="jxr_linenumber" name="L1190" href="#L1190">1190</a>     <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">boolean</strong> casValue(AbstractFuture&lt;?&gt; future, Object expect, Object update);
+<a class="jxr_linenumber" name="L1191" href="#L1191">1191</a>   }
+<a class="jxr_linenumber" name="L1192" href="#L1192">1192</a> 
+<a class="jxr_linenumber" name="L1193" href="#L1193">1193</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1194" href="#L1194">1194</a> <em class="jxr_javadoccomment">   * {@link AtomicHelper} based on {@link sun.misc.Unsafe}.</em>
+<a class="jxr_linenumber" name="L1195" href="#L1195">1195</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L1196" href="#L1196">1196</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Static initialization of this class will fail if the {@link sun.misc.Unsafe} object cannot</em>
+<a class="jxr_linenumber" name="L1197" href="#L1197">1197</a> <em class="jxr_javadoccomment">   * be accessed.</em>
+<a class="jxr_linenumber" name="L1198" href="#L1198">1198</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L1199" href="#L1199">1199</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> UnsafeAtomicHelper <strong class="jxr_keyword">extends</strong> AtomicHelper {
+<a class="jxr_linenumber" name="L1200" href="#L1200">1200</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> sun.misc.Unsafe UNSAFE;
+<a class="jxr_linenumber" name="L1201" href="#L1201">1201</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> LISTENERS_OFFSET;
+<a class="jxr_linenumber" name="L1202" href="#L1202">1202</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> WAITERS_OFFSET;
+<a class="jxr_linenumber" name="L1203" href="#L1203">1203</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> VALUE_OFFSET;
+<a class="jxr_linenumber" name="L1204" href="#L1204">1204</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> WAITER_THREAD_OFFSET;
+<a class="jxr_linenumber" name="L1205" href="#L1205">1205</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> WAITER_NEXT_OFFSET;
+<a class="jxr_linenumber" name="L1206" href="#L1206">1206</a> 
+<a class="jxr_linenumber" name="L1207" href="#L1207">1207</a>     <strong class="jxr_keyword">static</strong> {
+<a class="jxr_linenumber" name="L1208" href="#L1208">1208</a>       sun.misc.Unsafe unsafe = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1209" href="#L1209">1209</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1210" href="#L1210">1210</a>         unsafe = sun.misc.Unsafe.getUnsafe();
+<a class="jxr_linenumber" name="L1211" href="#L1211">1211</a>       } <strong class="jxr_keyword">catch</strong> (SecurityException tryReflectionInstead) {
+<a class="jxr_linenumber" name="L1212" href="#L1212">1212</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1213" href="#L1213">1213</a>           unsafe =
+<a class="jxr_linenumber" name="L1214" href="#L1214">1214</a>               AccessController.doPrivileged(
+<a class="jxr_linenumber" name="L1215" href="#L1215">1215</a>                   <strong class="jxr_keyword">new</strong> PrivilegedExceptionAction&lt;sun.misc.Unsafe&gt;() {
+<a class="jxr_linenumber" name="L1216" href="#L1216">1216</a>                     @Override
+<a class="jxr_linenumber" name="L1217" href="#L1217">1217</a>                     <strong class="jxr_keyword">public</strong> sun.misc.Unsafe run() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L1218" href="#L1218">1218</a>                       Class&lt;sun.misc.Unsafe&gt; k = sun.misc.Unsafe.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="L1219" href="#L1219">1219</a>                       <strong class="jxr_keyword">for</strong> (java.lang.reflect.Field f : k.getDeclaredFields()) {
+<a class="jxr_linenumber" name="L1220" href="#L1220">1220</a>                         f.setAccessible(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L1221" href="#L1221">1221</a>                         Object x = f.get(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L1222" href="#L1222">1222</a>                         <strong class="jxr_keyword">if</strong> (k.isInstance(x)) {
+<a class="jxr_linenumber" name="L1223" href="#L1223">1223</a>                           <strong class="jxr_keyword">return</strong> k.<strong class="jxr_keyword">cast</strong>(x);
+<a class="jxr_linenumber" name="L1224" href="#L1224">1224</a>                         }
+<a class="jxr_linenumber" name="L1225" href="#L1225">1225</a>                       }
+<a class="jxr_linenumber" name="L1226" href="#L1226">1226</a>                       <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NoSuchFieldError(<span class="jxr_string">"the Unsafe"</span>);
+<a class="jxr_linenumber" name="L1227" href="#L1227">1227</a>                     }
+<a class="jxr_linenumber" name="L1228" href="#L1228">1228</a>                   });
+<a class="jxr_linenumber" name="L1229" href="#L1229">1229</a>         } <strong class="jxr_keyword">catch</strong> (PrivilegedActionException e) {
+<a class="jxr_linenumber" name="L1230" href="#L1230">1230</a>           <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(<span class="jxr_string">"Could not initialize intrinsics"</span>, e.getCause());
+<a class="jxr_linenumber" name="L1231" href="#L1231">1231</a>         }
+<a class="jxr_linenumber" name="L1232" href="#L1232">1232</a>       }
+<a class="jxr_linenumber" name="L1233" href="#L1233">1233</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1234" href="#L1234">1234</a>         Class&lt;?&gt; abstractFuture = AbstractFuture.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="L1235" href="#L1235">1235</a>         WAITERS_OFFSET = unsafe.objectFieldOffset(abstractFuture.getDeclaredField(<span class="jxr_string">"waiters"</span>));
+<a class="jxr_linenumber" name="L1236" href="#L1236">1236</a>         LISTENERS_OFFSET = unsafe.objectFieldOffset(abstractFuture.getDeclaredField(<span class="jxr_string">"listeners"</span>));
+<a class="jxr_linenumber" name="L1237" href="#L1237">1237</a>         VALUE_OFFSET = unsafe.objectFieldOffset(abstractFuture.getDeclaredField(<span class="jxr_string">"value"</span>));
+<a class="jxr_linenumber" name="L1238" href="#L1238">1238</a>         WAITER_THREAD_OFFSET = unsafe.objectFieldOffset(Waiter.<strong class="jxr_keyword">class</strong>.getDeclaredField(<span class="jxr_string">"thread"</span>));
+<a class="jxr_linenumber" name="L1239" href="#L1239">1239</a>         WAITER_NEXT_OFFSET = unsafe.objectFieldOffset(Waiter.<strong class="jxr_keyword">class</strong>.getDeclaredField(<span class="jxr_string">"next"</span>));
+<a class="jxr_linenumber" name="L1240" href="#L1240">1240</a>         UNSAFE = unsafe;
+<a class="jxr_linenumber" name="L1241" href="#L1241">1241</a>       } <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L1242" href="#L1242">1242</a>         throwIfUnchecked(e);
+<a class="jxr_linenumber" name="L1243" href="#L1243">1243</a>         <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(e);
+<a class="jxr_linenumber" name="L1244" href="#L1244">1244</a>       }
+<a class="jxr_linenumber" name="L1245" href="#L1245">1245</a>     }
+<a class="jxr_linenumber" name="L1246" href="#L1246">1246</a> 
+<a class="jxr_linenumber" name="L1247" href="#L1247">1247</a>     @Override
+<a class="jxr_linenumber" name="L1248" href="#L1248">1248</a>     <strong class="jxr_keyword">void</strong> putThread(Waiter waiter, Thread newValue) {
+<a class="jxr_linenumber" name="L1249" href="#L1249">1249</a>       UNSAFE.putObject(waiter, WAITER_THREAD_OFFSET, newValue);
+<a class="jxr_linenumber" name="L1250" href="#L1250">1250</a>     }
+<a class="jxr_linenumber" name="L1251" href="#L1251">1251</a> 
+<a class="jxr_linenumber" name="L1252" href="#L1252">1252</a>     @Override
+<a class="jxr_linenumber" name="L1253" href="#L1253">1253</a>     <strong class="jxr_keyword">void</strong> putNext(Waiter waiter, Waiter newValue) {
+<a class="jxr_linenumber" name="L1254" href="#L1254">1254</a>       UNSAFE.putObject(waiter, WAITER_NEXT_OFFSET, newValue);
+<a class="jxr_linenumber" name="L1255" href="#L1255">1255</a>     }
+<a class="jxr_linenumber" name="L1256" href="#L1256">1256</a> 
+<a class="jxr_linenumber" name="L1257" href="#L1257">1257</a>     <em class="jxr_javadoccomment">/** Performs a CAS operation on the {@link #waiters} field. */</em>
+<a class="jxr_linenumber" name="L1258" href="#L1258">1258</a>     @Override
+<a class="jxr_linenumber" name="L1259" href="#L1259">1259</a>     <strong class="jxr_keyword">boolean</strong> casWaiters(AbstractFuture&lt;?&gt; future, Waiter expect, Waiter update) {
+<a class="jxr_linenumber" name="L1260" href="#L1260">1260</a>       <strong class="jxr_keyword">return</strong> UNSAFE.compareAndSwapObject(future, WAITERS_OFFSET, expect, update);
+<a class="jxr_linenumber" name="L1261" href="#L1261">1261</a>     }
+<a class="jxr_linenumber" name="L1262" href="#L1262">1262</a> 
+<a class="jxr_linenumber" name="L1263" href="#L1263">1263</a>     <em class="jxr_javadoccomment">/** Performs a CAS operation on the {@link #listeners} field. */</em>
+<a class="jxr_linenumber" name="L1264" href="#L1264">1264</a>     @Override
+<a class="jxr_linenumber" name="L1265" href="#L1265">1265</a>     <strong class="jxr_keyword">boolean</strong> casListeners(AbstractFuture&lt;?&gt; future, Listener expect, Listener update) {
+<a class="jxr_linenumber" name="L1266" href="#L1266">1266</a>       <strong class="jxr_keyword">return</strong> UNSAFE.compareAndSwapObject(future, LISTENERS_OFFSET, expect, update);
+<a class="jxr_linenumber" name="L1267" href="#L1267">1267</a>     }
+<a class="jxr_linenumber" name="L1268" href="#L1268">1268</a> 
+<a class="jxr_linenumber" name="L1269" href="#L1269">1269</a>     <em class="jxr_javadoccomment">/** Performs a CAS operation on the {@link #value} field. */</em>
+<a class="jxr_linenumber" name="L1270" href="#L1270">1270</a>     @Override
+<a class="jxr_linenumber" name="L1271" href="#L1271">1271</a>     <strong class="jxr_keyword">boolean</strong> casValue(AbstractFuture&lt;?&gt; future, Object expect, Object update) {
+<a class="jxr_linenumber" name="L1272" href="#L1272">1272</a>       <strong class="jxr_keyword">return</strong> UNSAFE.compareAndSwapObject(future, VALUE_OFFSET, expect, update);
+<a class="jxr_linenumber" name="L1273" href="#L1273">1273</a>     }
+<a class="jxr_linenumber" name="L1274" href="#L1274">1274</a>   }
+<a class="jxr_linenumber" name="L1275" href="#L1275">1275</a> 
+<a class="jxr_linenumber" name="L1276" href="#L1276">1276</a>   <em class="jxr_javadoccomment">/** {@link AtomicHelper} based on {@link AtomicReferenceFieldUpdater}. */</em>
+<a class="jxr_linenumber" name="L1277" href="#L1277">1277</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> SafeAtomicHelper <strong class="jxr_keyword">extends</strong> AtomicHelper {
+<a class="jxr_linenumber" name="L1278" href="#L1278">1278</a>     <strong class="jxr_keyword">final</strong> AtomicReferenceFieldUpdater&lt;Waiter, Thread&gt; waiterThreadUpdater;
+<a class="jxr_linenumber" name="L1279" href="#L1279">1279</a>     <strong class="jxr_keyword">final</strong> AtomicReferenceFieldUpdater&lt;Waiter, Waiter&gt; waiterNextUpdater;
+<a class="jxr_linenumber" name="L1280" href="#L1280">1280</a>     <strong class="jxr_keyword">final</strong> AtomicReferenceFieldUpdater&lt;AbstractFuture, Waiter&gt; waitersUpdater;
+<a class="jxr_linenumber" name="L1281" href="#L1281">1281</a>     <strong class="jxr_keyword">final</strong> AtomicReferenceFieldUpdater&lt;AbstractFuture, Listener&gt; listenersUpdater;
+<a class="jxr_linenumber" name="L1282" href="#L1282">1282</a>     <strong class="jxr_keyword">final</strong> AtomicReferenceFieldUpdater&lt;AbstractFuture, Object&gt; valueUpdater;
+<a class="jxr_linenumber" name="L1283" href="#L1283">1283</a> 
+<a class="jxr_linenumber" name="L1284" href="#L1284">1284</a>     SafeAtomicHelper(
+<a class="jxr_linenumber" name="L1285" href="#L1285">1285</a>         AtomicReferenceFieldUpdater&lt;Waiter, Thread&gt; waiterThreadUpdater,
+<a class="jxr_linenumber" name="L1286" href="#L1286">1286</a>         AtomicReferenceFieldUpdater&lt;Waiter, Waiter&gt; waiterNextUpdater,
+<a class="jxr_linenumber" name="L1287" href="#L1287">1287</a>         AtomicReferenceFieldUpdater&lt;AbstractFuture, Waiter&gt; waitersUpdater,
+<a class="jxr_linenumber" name="L1288" href="#L1288">1288</a>         AtomicReferenceFieldUpdater&lt;AbstractFuture, Listener&gt; listenersUpdater,
+<a class="jxr_linenumber" name="L1289" href="#L1289">1289</a>         AtomicReferenceFieldUpdater&lt;AbstractFuture, Object&gt; valueUpdater) {
+<a class="jxr_linenumber" name="L1290" href="#L1290">1290</a>       <strong class="jxr_keyword">this</strong>.waiterThreadUpdater = waiterThreadUpdater;
+<a class="jxr_linenumber" name="L1291" href="#L1291">1291</a>       <strong class="jxr_keyword">this</strong>.waiterNextUpdater = waiterNextUpdater;
+<a class="jxr_linenumber" name="L1292" href="#L1292">1292</a>       <strong class="jxr_keyword">this</strong>.waitersUpdater = waitersUpdater;
+<a class="jxr_linenumber" name="L1293" href="#L1293">1293</a>       <strong class="jxr_keyword">this</strong>.listenersUpdater = listenersUpdater;
+<a class="jxr_linenumber" name="L1294" href="#L1294">1294</a>       <strong class="jxr_keyword">this</strong>.valueUpdater = valueUpdater;
+<a class="jxr_linenumber" name="L1295" href="#L1295">1295</a>     }
+<a class="jxr_linenumber" name="L1296" href="#L1296">1296</a> 
+<a class="jxr_linenumber" name="L1297" href="#L1297">1297</a>     @Override
+<a class="jxr_linenumber" name="L1298" href="#L1298">1298</a>     <strong class="jxr_keyword">void</strong> putThread(Waiter waiter, Thread newValue) {
+<a class="jxr_linenumber" name="L1299" href="#L1299">1299</a>       waiterThreadUpdater.lazySet(waiter, newValue);
+<a class="jxr_linenumber" name="L1300" href="#L1300">1300</a>     }
+<a class="jxr_linenumber" name="L1301" href="#L1301">1301</a> 
+<a class="jxr_linenumber" name="L1302" href="#L1302">1302</a>     @Override
+<a class="jxr_linenumber" name="L1303" href="#L1303">1303</a>     <strong class="jxr_keyword">void</strong> putNext(Waiter waiter, Waiter newValue) {
+<a class="jxr_linenumber" name="L1304" href="#L1304">1304</a>       waiterNextUpdater.lazySet(waiter, newValue);
+<a class="jxr_linenumber" name="L1305" href="#L1305">1305</a>     }
+<a class="jxr_linenumber" name="L1306" href="#L1306">1306</a> 
+<a class="jxr_linenumber" name="L1307" href="#L1307">1307</a>     @Override
+<a class="jxr_linenumber" name="L1308" href="#L1308">1308</a>     <strong class="jxr_keyword">boolean</strong> casWaiters(AbstractFuture&lt;?&gt; future, Waiter expect, Waiter update) {
+<a class="jxr_linenumber" name="L1309" href="#L1309">1309</a>       <strong class="jxr_keyword">return</strong> waitersUpdater.compareAndSet(future, expect, update);
+<a class="jxr_linenumber" name="L1310" href="#L1310">1310</a>     }
+<a class="jxr_linenumber" name="L1311" href="#L1311">1311</a> 
+<a class="jxr_linenumber" name="L1312" href="#L1312">1312</a>     @Override
+<a class="jxr_linenumber" name="L1313" href="#L1313">1313</a>     <strong class="jxr_keyword">boolean</strong> casListeners(AbstractFuture&lt;?&gt; future, Listener expect, Listener update) {
+<a class="jxr_linenumber" name="L1314" href="#L1314">1314</a>       <strong class="jxr_keyword">return</strong> listenersUpdater.compareAndSet(future, expect, update);
+<a class="jxr_linenumber" name="L1315" href="#L1315">1315</a>     }
+<a class="jxr_linenumber" name="L1316" href="#L1316">1316</a> 
+<a class="jxr_linenumber" name="L1317" href="#L1317">1317</a>     @Override
+<a class="jxr_linenumber" name="L1318" href="#L1318">1318</a>     <strong class="jxr_keyword">boolean</strong> casValue(AbstractFuture&lt;?&gt; future, Object expect, Object update) {
+<a class="jxr_linenumber" name="L1319" href="#L1319">1319</a>       <strong class="jxr_keyword">return</strong> valueUpdater.compareAndSet(future, expect, update);
+<a class="jxr_linenumber" name="L1320" href="#L1320">1320</a>     }
+<a class="jxr_linenumber" name="L1321" href="#L1321">1321</a>   }
+<a class="jxr_linenumber" name="L1322" href="#L1322">1322</a> 
+<a class="jxr_linenumber" name="L1323" href="#L1323">1323</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1324" href="#L1324">1324</a> <em class="jxr_javadoccomment">   * {@link AtomicHelper} based on {@code synchronized} and volatile writes.</em>
+<a class="jxr_linenumber" name="L1325" href="#L1325">1325</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L1326" href="#L1326">1326</a> <em class="jxr_javadoccomment">   * &lt;p&gt;This is an implementation of last resort for when certain basic VM features are broken (like</em>
+<a class="jxr_linenumber" name="L1327" href="#L1327">1327</a> <em class="jxr_javadoccomment">   * AtomicReferenceFieldUpdater).</em>
+<a class="jxr_linenumber" name="L1328" href="#L1328">1328</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L1329" href="#L1329">1329</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> SynchronizedHelper <strong class="jxr_keyword">extends</strong> AtomicHelper {
+<a class="jxr_linenumber" name="L1330" href="#L1330">1330</a>     @Override
+<a class="jxr_linenumber" name="L1331" href="#L1331">1331</a>     <strong class="jxr_keyword">void</strong> putThread(Waiter waiter, Thread newValue) {
+<a class="jxr_linenumber" name="L1332" href="#L1332">1332</a>       waiter.thread = newValue;
+<a class="jxr_linenumber" name="L1333" href="#L1333">1333</a>     }
+<a class="jxr_linenumber" name="L1334" href="#L1334">1334</a> 
+<a class="jxr_linenumber" name="L1335" href="#L1335">1335</a>     @Override
+<a class="jxr_linenumber" name="L1336" href="#L1336">1336</a>     <strong class="jxr_keyword">void</strong> putNext(Waiter waiter, Waiter newValue) {
+<a class="jxr_linenumber" name="L1337" href="#L1337">1337</a>       waiter.next = newValue;
+<a class="jxr_linenumber" name="L1338" href="#L1338">1338</a>     }
+<a class="jxr_linenumber" name="L1339" href="#L1339">1339</a> 
+<a class="jxr_linenumber" name="L1340" href="#L1340">1340</a>     @Override
+<a class="jxr_linenumber" name="L1341" href="#L1341">1341</a>     <strong class="jxr_keyword">boolean</strong> casWaiters(AbstractFuture&lt;?&gt; future, Waiter expect, Waiter update) {
+<a class="jxr_linenumber" name="L1342" href="#L1342">1342</a>       <strong class="jxr_keyword">synchronized</strong> (future) {
+<a class="jxr_linenumber" name="L1343" href="#L1343">1343</a>         <strong class="jxr_keyword">if</strong> (future.waiters == expect) {
+<a class="jxr_linenumber" name="L1344" href="#L1344">1344</a>           future.waiters = update;
+<a class="jxr_linenumber" name="L1345" href="#L1345">1345</a>           <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1346" href="#L1346">1346</a>         }
+<a class="jxr_linenumber" name="L1347" href="#L1347">1347</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1348" href="#L1348">1348</a>       }
+<a class="jxr_linenumber" name="L1349" href="#L1349">1349</a>     }
+<a class="jxr_linenumber" name="L1350" href="#L1350">1350</a> 
+<a class="jxr_linenumber" name="L1351" href="#L1351">1351</a>     @Override
+<a class="jxr_linenumber" name="L1352" href="#L1352">1352</a>     <strong class="jxr_keyword">boolean</strong> casListeners(AbstractFuture&lt;?&gt; future, Listener expect, Listener update) {
+<a class="jxr_linenumber" name="L1353" href="#L1353">1353</a>       <strong class="jxr_keyword">synchronized</strong> (future) {
+<a class="jxr_linenumber" name="L1354" href="#L1354">1354</a>         <strong class="jxr_keyword">if</strong> (future.listeners == expect) {
+<a class="jxr_linenumber" name="L1355" href="#L1355">1355</a>           future.listeners = update;
+<a class="jxr_linenumber" name="L1356" href="#L1356">1356</a>           <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1357" href="#L1357">1357</a>         }
+<a class="jxr_linenumber" name="L1358" href="#L1358">1358</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1359" href="#L1359">1359</a>       }
+<a class="jxr_linenumber" name="L1360" href="#L1360">1360</a>     }
+<a class="jxr_linenumber" name="L1361" href="#L1361">1361</a> 
+<a class="jxr_linenumber" name="L1362" href="#L1362">1362</a>     @Override
+<a class="jxr_linenumber" name="L1363" href="#L1363">1363</a>     <strong class="jxr_keyword">boolean</strong> casValue(AbstractFuture&lt;?&gt; future, Object expect, Object update) {
+<a class="jxr_linenumber" name="L1364" href="#L1364">1364</a>       <strong class="jxr_keyword">synchronized</strong> (future) {
+<a class="jxr_linenumber" name="L1365" href="#L1365">1365</a>         <strong class="jxr_keyword">if</strong> (future.value == expect) {
+<a class="jxr_linenumber" name="L1366" href="#L1366">1366</a>           future.value = update;
+<a class="jxr_linenumber" name="L1367" href="#L1367">1367</a>           <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1368" href="#L1368">1368</a>         }
+<a class="jxr_linenumber" name="L1369" href="#L1369">1369</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1370" href="#L1370">1370</a>       }
+<a class="jxr_linenumber" name="L1371" href="#L1371">1371</a>     }
+<a class="jxr_linenumber" name="L1372" href="#L1372">1372</a>   }
+<a class="jxr_linenumber" name="L1373" href="#L1373">1373</a> 
+<a class="jxr_linenumber" name="L1374" href="#L1374">1374</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> CancellationException cancellationExceptionWithCause(
+<a class="jxr_linenumber" name="L1375" href="#L1375">1375</a>       @Nullable String message, @Nullable Throwable cause) {
+<a class="jxr_linenumber" name="L1376" href="#L1376">1376</a>     CancellationException exception = <strong class="jxr_keyword">new</strong> CancellationException(message);
+<a class="jxr_linenumber" name="L1377" href="#L1377">1377</a>     exception.initCause(cause);
+<a class="jxr_linenumber" name="L1378" href="#L1378">1378</a>     <strong class="jxr_keyword">return</strong> exception;
+<a class="jxr_linenumber" name="L1379" href="#L1379">1379</a>   }
+<a class="jxr_linenumber" name="L1380" href="#L1380">1380</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

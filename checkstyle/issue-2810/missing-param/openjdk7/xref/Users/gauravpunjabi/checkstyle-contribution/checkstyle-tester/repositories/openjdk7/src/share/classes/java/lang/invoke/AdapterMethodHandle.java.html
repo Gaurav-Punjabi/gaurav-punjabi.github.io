@@ -1,0 +1,1217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>AdapterMethodHandle xref</title>
+<link type="text/css" rel="stylesheet" href="../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 2008, 2011, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.  Oracle designates this</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * particular file as subject to the "Classpath" exception as provided</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * by Oracle in the LICENSE file that accompanied this code.</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">package</strong> java.lang.invoke;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> sun.invoke.util.VerifyType;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> sun.invoke.util.Wrapper;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> sun.invoke.util.ValueConversions;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> java.util.Arrays;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> java.lang.invoke.MethodHandleNatives.Constants.*;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> java.lang.invoke.MethodHandleStatics.*;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> * This method handle performs simple conversion or checking of a single argument.</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment"> * @author jrose</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">class</strong> AdapterMethodHandle <strong class="jxr_keyword">extends</strong> BoundMethodHandle {
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>      <em class="jxr_comment">//MethodHandle vmtarget;   // next AMH or BMH in chain or final DMH</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>      <em class="jxr_comment">//Object       argument;   // parameter to the conversion if needed</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>      <em class="jxr_comment">//int          vmargslot;  // which argument slot is affected</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> conversion;  <em class="jxr_comment">// the type of conversion: RETYPE_ONLY, etc.</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>      <em class="jxr_comment">// Constructors in this class *must* be package scoped or private.</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>      <strong class="jxr_keyword">private</strong> AdapterMethodHandle(MethodHandle target, MethodType newType,
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>                  <strong class="jxr_keyword">long</strong> conv, Object convArg) {
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>          <strong class="jxr_keyword">super</strong>(newType, convArg, newType.parameterSlotDepth(1+convArgPos(conv)));
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>          <strong class="jxr_keyword">this</strong>.conversion = convCode(conv);
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>          <em class="jxr_comment">// JVM might update VM-specific bits of conversion (ignore)</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>          MethodHandleNatives.init(<strong class="jxr_keyword">this</strong>, target, convArgPos(conv));
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>      }
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>      <strong class="jxr_keyword">private</strong> AdapterMethodHandle(MethodHandle target, MethodType newType,
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>                  <strong class="jxr_keyword">long</strong> conv) {
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>          <strong class="jxr_keyword">this</strong>(target, newType, conv, <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>      }
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>      <strong class="jxr_keyword">int</strong> getConversion() { <strong class="jxr_keyword">return</strong> conversion; }
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>      <em class="jxr_comment">// TO DO:  When adapting another MH with a null conversion, clone</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>      <em class="jxr_comment">// the target and change its type, instead of adding another layer.</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>      <em class="jxr_javadoccomment">/** Can a JVM-level adapter directly implement the proposed</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment">     *  argument conversions, as if by fixed-arity MethodHandle.asType?</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canPairwiseConvert(MethodType newType, MethodType oldType, <strong class="jxr_keyword">int</strong> level) {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>          <em class="jxr_comment">// same number of args, of course</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>          <strong class="jxr_keyword">int</strong> len = newType.parameterCount();
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>          <strong class="jxr_keyword">if</strong> (len != oldType.parameterCount())
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>              <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>          <em class="jxr_comment">// Check return type.</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>          Class&lt;?&gt; exp = newType.returnType();
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>          Class&lt;?&gt; ret = oldType.returnType();
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>          <strong class="jxr_keyword">if</strong> (!VerifyType.isNullConversion(ret, exp)) {
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>              <strong class="jxr_keyword">if</strong> (!convOpSupported(OP_COLLECT_ARGS))
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>                  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>              <strong class="jxr_keyword">if</strong> (!canConvertArgument(ret, exp, level))
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>                  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>          }
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>          <em class="jxr_comment">// Check args pairwise.</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>          <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; len; i++) {
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>              Class&lt;?&gt; src = newType.parameterType(i); <em class="jxr_comment">// source type</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>              Class&lt;?&gt; dst = oldType.parameterType(i); <em class="jxr_comment">// destination type</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>              <strong class="jxr_keyword">if</strong> (!canConvertArgument(src, dst, level))
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>                  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>          }
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>      }
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>      <em class="jxr_javadoccomment">/** Can a JVM-level adapter directly implement the proposed</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment">     *  argument conversion, as if by fixed-arity MethodHandle.asType?</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canConvertArgument(Class&lt;?&gt; src, Class&lt;?&gt; dst, <strong class="jxr_keyword">int</strong> level) {
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>         <em class="jxr_comment">// ? Retool this logic to use RETYPE_ONLY, CHECK_CAST, etc., as opcodes,</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>         <em class="jxr_comment">// so we don't need to repeat so much decision making.</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>         <strong class="jxr_keyword">if</strong> (VerifyType.isNullConversion(src, dst)) {
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (convOpSupported(OP_COLLECT_ARGS)) {
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>             <em class="jxr_comment">// If we can build filters, we can convert anything to anything.</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (src.isPrimitive()) {
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>             <strong class="jxr_keyword">if</strong> (dst.isPrimitive())
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>                 <strong class="jxr_keyword">return</strong> canPrimCast(src, dst);
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>             <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>                 <strong class="jxr_keyword">return</strong> canBoxArgument(src, dst);
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>             <strong class="jxr_keyword">if</strong> (dst.isPrimitive())
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>                 <strong class="jxr_keyword">return</strong> canUnboxArgument(src, dst, level);
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>             <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>                 <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;  <em class="jxr_comment">// any two refs can be interconverted</em>
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>         }
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>     }
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment">     * Create a JVM-level adapter method handle to conform the given method</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">     * handle to the similar newType, using only pairwise argument conversions.</em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">     * For each argument, convert incoming argument to the exact type needed.</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">     * The argument conversions allowed are casting, boxing and unboxing,</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_javadoccomment">     * integral widening or narrowing, and floating point widening or narrowing.</em>
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> <em class="jxr_javadoccomment">     * @param newType required call type</em>
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> <em class="jxr_javadoccomment">     * @param target original method handle</em>
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> <em class="jxr_javadoccomment">     * @param level which strength of conversion is allowed</em>
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> <em class="jxr_javadoccomment">     * @return an adapter to the original handle with the desired new type,</em>
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> <em class="jxr_javadoccomment">     *          or the original target if the types are already identical</em>
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> <em class="jxr_javadoccomment">     *          or null if the adaptation cannot be made</em>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>     <strong class="jxr_keyword">static</strong> MethodHandle makePairwiseConvert(MethodType newType, MethodHandle target, <strong class="jxr_keyword">int</strong> level) {
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>         MethodType oldType = target.type();
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>         <strong class="jxr_keyword">if</strong> (newType == oldType)  <strong class="jxr_keyword">return</strong> target;
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>         <strong class="jxr_keyword">if</strong> (!canPairwiseConvert(newType, oldType, level))
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>         <em class="jxr_comment">// (after this point, it is an assertion error to fail to convert)</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>         <em class="jxr_comment">// Find last non-trivial conversion (if any).</em>
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>         <strong class="jxr_keyword">int</strong> lastConv = newType.parameterCount()-1;
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>         <strong class="jxr_keyword">while</strong> (lastConv &gt;= 0) {
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>             Class&lt;?&gt; src = newType.parameterType(lastConv); <em class="jxr_comment">// source type</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>             Class&lt;?&gt; dst = oldType.parameterType(lastConv); <em class="jxr_comment">// destination type</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>             <strong class="jxr_keyword">if</strong> (isTrivialConversion(src, dst, level)) {
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>                 --lastConv;
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>                 <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>             }
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>         }
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>         Class&lt;?&gt; needReturn = newType.returnType();
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>         Class&lt;?&gt; haveReturn = oldType.returnType();
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>         <strong class="jxr_keyword">boolean</strong> retConv = !isTrivialConversion(haveReturn, needReturn, level);
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>         <em class="jxr_comment">// Now build a chain of one or more adapters.</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>         MethodHandle adapter = target, adapter2;
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>         MethodType midType = oldType;
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt;= lastConv; i++) {
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>             Class&lt;?&gt; src = newType.parameterType(i); <em class="jxr_comment">// source type</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>             Class&lt;?&gt; dst = midType.parameterType(i); <em class="jxr_comment">// destination type</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>             <strong class="jxr_keyword">if</strong> (isTrivialConversion(src, dst, level)) {
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>                 <em class="jxr_comment">// do nothing: difference is trivial</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>                 <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>             }
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>             <em class="jxr_comment">// Work the current type backward toward the desired caller type:</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>             midType = midType.changeParameterType(i, src);
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>             <strong class="jxr_keyword">if</strong> (i == lastConv) {
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>                 <em class="jxr_comment">// When doing the last (or only) real conversion,</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>                 <em class="jxr_comment">// force all remaining null conversions to happen also.</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>                 MethodType lastMidType = newType;
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>                 <strong class="jxr_keyword">if</strong> (retConv)  lastMidType = lastMidType.changeReturnType(haveReturn);
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>                 assert(VerifyType.isNullConversion(lastMidType, midType));
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>                 midType = lastMidType;
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>             }
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>             <em class="jxr_comment">// Tricky case analysis follows.</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>             <em class="jxr_comment">// It parallels canConvertArgument() above.</em>
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>             <strong class="jxr_keyword">if</strong> (src.isPrimitive()) {
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>                 <strong class="jxr_keyword">if</strong> (dst.isPrimitive()) {
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>                     adapter2 = makePrimCast(midType, adapter, i, dst);
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>                     adapter2 = makeBoxArgument(midType, adapter, i, src);
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>                 }
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>                 <strong class="jxr_keyword">if</strong> (dst.isPrimitive()) {
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>                     <em class="jxr_comment">// Caller has boxed a primitive.  Unbox it for the target.</em>
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>                     <em class="jxr_comment">// The box type must correspond exactly to the primitive type.</em>
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>                     <em class="jxr_comment">// This is simpler than the powerful set of widening</em>
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>                     <em class="jxr_comment">// conversions supported by reflect.Method.invoke.</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>                     <em class="jxr_comment">// Those conversions require a big nest of if/then/else logic,</em>
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>                     <em class="jxr_comment">// which we prefer to make a user responsibility.</em>
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>                     adapter2 = makeUnboxArgument(midType, adapter, i, dst, level);
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>                     <em class="jxr_comment">// Simple reference conversion.</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>                     <em class="jxr_comment">// Note:  Do not check for a class hierarchy relation</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>                     <em class="jxr_comment">// between src and dst.  In all cases a 'null' argument</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>                     <em class="jxr_comment">// will pass the cast conversion.</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>                     adapter2 = makeCheckCast(midType, adapter, i, dst);
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>                 }
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>             }
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>             assert(adapter2 != <strong class="jxr_keyword">null</strong>) : Arrays.asList(src, dst, midType, adapter, i, target, newType);
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>             assert(adapter2.type() == midType);
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>             adapter = adapter2;
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>         }
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>         <strong class="jxr_keyword">if</strong> (retConv) {
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>             adapter2 = makeReturnConversion(adapter, haveReturn, needReturn);
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>             assert(adapter2 != <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>             adapter = adapter2;
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>         }
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>         <strong class="jxr_keyword">if</strong> (adapter.type() != newType) {
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>             <em class="jxr_comment">// Only trivial conversions remain.</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>             adapter2 = makeRetypeOnly(newType, adapter);
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>             assert(adapter2 != <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>             adapter = adapter2;
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>             <em class="jxr_comment">// Actually, that's because there were no non-trivial ones:</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>             assert(lastConv == -1 || retConv);
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>         }
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>         assert(adapter.type() == newType);
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>         <strong class="jxr_keyword">return</strong> adapter;
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>     }
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isTrivialConversion(Class&lt;?&gt; src, Class&lt;?&gt; dst, <strong class="jxr_keyword">int</strong> level) {
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>         <strong class="jxr_keyword">if</strong> (src == dst || dst == <strong class="jxr_keyword">void</strong>.<strong class="jxr_keyword">class</strong>)  <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>         <strong class="jxr_keyword">if</strong> (!VerifyType.isNullConversion(src, dst))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>         <strong class="jxr_keyword">if</strong> (level &gt; 1)  <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;  <em class="jxr_comment">// explicitCastArguments</em>
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>         <strong class="jxr_keyword">boolean</strong> sp = src.isPrimitive();
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>         <strong class="jxr_keyword">boolean</strong> dp = dst.isPrimitive();
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>         <strong class="jxr_keyword">if</strong> (sp != dp)  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>         <strong class="jxr_keyword">if</strong> (sp) {
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>             <em class="jxr_comment">// in addition to being a null conversion, forbid boolean-&gt;int etc.</em>
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>             <strong class="jxr_keyword">return</strong> Wrapper.forPrimitiveType(dst)
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>                     .isConvertibleFrom(Wrapper.forPrimitiveType(src));
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>             <strong class="jxr_keyword">return</strong> dst.isAssignableFrom(src);
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>         }
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>     }
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> 
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> MethodHandle makeReturnConversion(MethodHandle target, Class&lt;?&gt; haveReturn, Class&lt;?&gt; needReturn) {
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>         MethodHandle adjustReturn;
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>         <strong class="jxr_keyword">if</strong> (haveReturn == <strong class="jxr_keyword">void</strong>.<strong class="jxr_keyword">class</strong>) {
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>             <em class="jxr_comment">// synthesize a zero value for the given void</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>             Object zero = Wrapper.forBasicType(needReturn).zero();
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>             adjustReturn = MethodHandles.constant(needReturn, zero);
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>             MethodType needConversion = MethodType.methodType(needReturn, haveReturn);
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>             adjustReturn = MethodHandles.identity(needReturn).asType(needConversion);
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>         }
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>         <strong class="jxr_keyword">if</strong> (!canCollectArguments(adjustReturn.type(), target.type(), 0, false)) {
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>             assert(MethodHandleNatives.workaroundWithoutRicochetFrames());  <em class="jxr_comment">// this code is deprecated</em>
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InternalError(<span class="jxr_string">"NYI"</span>);
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>         }
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>         <strong class="jxr_keyword">return</strong> makeCollectArguments(adjustReturn, target, 0, false);
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>     }
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> 
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> <em class="jxr_javadoccomment">     * Create a JVM-level adapter method handle to permute the arguments</em>
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> <em class="jxr_javadoccomment">     * of the given method.</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> <em class="jxr_javadoccomment">     * @param newType required call type</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> <em class="jxr_javadoccomment">     * @param target original method handle</em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">     * @param argumentMap for each target argument, position of its source in newType</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> <em class="jxr_javadoccomment">     * @return an adapter to the original handle with the desired new type,</em>
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">     *          or the original target if the types are already identical</em>
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_javadoccomment">     *          and the permutation is null</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_javadoccomment">     * @throws IllegalArgumentException if the adaptation cannot be made</em>
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_javadoccomment">     *          directly by a JVM-level adapter, without help from Java code</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>     <strong class="jxr_keyword">static</strong> MethodHandle makePermutation(MethodType newType, MethodHandle target,
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>                 <strong class="jxr_keyword">int</strong>[] argumentMap) {
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>         MethodType oldType = target.type();
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>         <strong class="jxr_keyword">boolean</strong> nullPermutation = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; argumentMap.length; i++) {
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>             <strong class="jxr_keyword">int</strong> pos = argumentMap[i];
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>             <strong class="jxr_keyword">if</strong> (pos != i)
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>                 nullPermutation = false;
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>             <strong class="jxr_keyword">if</strong> (pos &lt; 0 || pos &gt;= newType.parameterCount()) {
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>                 argumentMap = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">int</strong>[0]; <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>             }
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>         }
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>         <strong class="jxr_keyword">if</strong> (argumentMap.length != oldType.parameterCount())
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>             <strong class="jxr_keyword">throw</strong> newIllegalArgumentException(<span class="jxr_string">"bad permutation: "</span>+Arrays.toString(argumentMap));
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>         <strong class="jxr_keyword">if</strong> (nullPermutation) {
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>             MethodHandle res = makePairwiseConvert(newType, target, 0);
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>             <em class="jxr_comment">// well, that was easy</em>
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>             <strong class="jxr_keyword">if</strong> (res == <strong class="jxr_keyword">null</strong>)
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>                 <strong class="jxr_keyword">throw</strong> newIllegalArgumentException(<span class="jxr_string">"cannot convert pairwise: "</span>+newType);
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>             <strong class="jxr_keyword">return</strong> res;
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>         }
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> 
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>         <em class="jxr_comment">// Check return type.  (Not much can be done with it.)</em>
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>         Class&lt;?&gt; exp = newType.returnType();
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>         Class&lt;?&gt; ret = oldType.returnType();
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>         <strong class="jxr_keyword">if</strong> (!VerifyType.isNullConversion(ret, exp))
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>             <strong class="jxr_keyword">throw</strong> newIllegalArgumentException(<span class="jxr_string">"bad return conversion for "</span>+newType);
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> 
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>         <em class="jxr_comment">// See if the argument types match up.</em>
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; argumentMap.length; i++) {
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>             <strong class="jxr_keyword">int</strong> j = argumentMap[i];
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>             Class&lt;?&gt; src = newType.parameterType(j);
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>             Class&lt;?&gt; dst = oldType.parameterType(i);
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>             <strong class="jxr_keyword">if</strong> (!VerifyType.isNullConversion(src, dst))
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>                 <strong class="jxr_keyword">throw</strong> newIllegalArgumentException(<span class="jxr_string">"bad argument #"</span>+j+<span class="jxr_string">" conversion for "</span>+newType);
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>         }
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>         <em class="jxr_comment">// Now figure out a nice mix of SWAP, ROT, DUP, and DROP adapters.</em>
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>         <em class="jxr_comment">// A workable greedy algorithm is as follows:</em>
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>         <em class="jxr_comment">// Drop unused outgoing arguments (right to left: shallowest first).</em>
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>         <em class="jxr_comment">// Duplicate doubly-used outgoing arguments (left to right: deepest first).</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>         <em class="jxr_comment">// Then the remaining problem is a true argument permutation.</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>         <em class="jxr_comment">// Marshal the outgoing arguments as required from left to right.</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>         <em class="jxr_comment">// That is, find the deepest outgoing stack position that does not yet</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>         <em class="jxr_comment">// have the correct argument value, and correct at least that position</em>
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>         <em class="jxr_comment">// by swapping or rotating in the misplaced value (from a shallower place).</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>         <em class="jxr_comment">// If the misplaced value is followed by one or more consecutive values</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>         <em class="jxr_comment">// (also misplaced)  issue a rotation which brings as many as possible</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>         <em class="jxr_comment">// into position.  Otherwise make progress with either a swap or a</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>         <em class="jxr_comment">// rotation.  Prefer the swap as cheaper, but do not use it if it</em>
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>         <em class="jxr_comment">// breaks a slot pair.  Prefer the rotation over the swap if it would</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>         <em class="jxr_comment">// preserve more consecutive values shallower than the target position.</em>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>         <em class="jxr_comment">// When more than one rotation will work (because the required value</em>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>         <em class="jxr_comment">// is already adjacent to the target position), then use a rotation</em>
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>         <em class="jxr_comment">// which moves the old value in the target position adjacent to</em>
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>         <em class="jxr_comment">// one of its consecutive values.  Also, prefer shorter rotation</em>
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>         <em class="jxr_comment">// spans, since they use fewer memory cycles for shuffling.</em>
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>         <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnsupportedOperationException(<span class="jxr_string">"NYI"</span>);
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>     }
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> byte basicType(Class&lt;?&gt; type) {
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>         <strong class="jxr_keyword">if</strong> (type == <strong class="jxr_keyword">null</strong>)  <strong class="jxr_keyword">return</strong> T_VOID;
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>         <strong class="jxr_keyword">switch</strong> (Wrapper.forBasicType(type)) {
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>             <strong class="jxr_keyword">case</strong> BOOLEAN:  <strong class="jxr_keyword">return</strong> T_BOOLEAN;
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>             <strong class="jxr_keyword">case</strong> CHAR:     <strong class="jxr_keyword">return</strong> T_CHAR;
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>             <strong class="jxr_keyword">case</strong> FLOAT:    <strong class="jxr_keyword">return</strong> T_FLOAT;
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>             <strong class="jxr_keyword">case</strong> DOUBLE:   <strong class="jxr_keyword">return</strong> T_DOUBLE;
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>             <strong class="jxr_keyword">case</strong> BYTE:     <strong class="jxr_keyword">return</strong> T_BYTE;
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>             <strong class="jxr_keyword">case</strong> SHORT:    <strong class="jxr_keyword">return</strong> T_SHORT;
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>             <strong class="jxr_keyword">case</strong> INT:      <strong class="jxr_keyword">return</strong> T_INT;
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>             <strong class="jxr_keyword">case</strong> LONG:     <strong class="jxr_keyword">return</strong> T_LONG;
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>             <strong class="jxr_keyword">case</strong> OBJECT:   <strong class="jxr_keyword">return</strong> T_OBJECT;
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>             <strong class="jxr_keyword">case</strong> VOID:     <strong class="jxr_keyword">return</strong> T_VOID;
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>         }
+<a class="jxr_linenumber" name="L344" href="#L344">344</a>         <strong class="jxr_keyword">return</strong> 99; <em class="jxr_comment">// T_ILLEGAL or some such</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>     }
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>     <em class="jxr_javadoccomment">/** Number of stack slots for the given type.</em>
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> <em class="jxr_javadoccomment">     *  Two for T_DOUBLE and T_FLOAT, one for the rest.</em>
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> type2size(<strong class="jxr_keyword">int</strong> type) {
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>         assert(type &gt;= T_BOOLEAN &amp;&amp; type &lt;= T_OBJECT);
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>         <strong class="jxr_keyword">return</strong> (type == T_LONG || type == T_DOUBLE) ? 2 : 1;
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>     }
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> type2size(Class&lt;?&gt; type) {
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>         <strong class="jxr_keyword">return</strong> type2size(basicType(type));
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>     }
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> 
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>     <em class="jxr_javadoccomment">/** The given stackMove is the number of slots pushed.</em>
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> <em class="jxr_javadoccomment">     * It might be negative.  Scale it (multiply) by the</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> <em class="jxr_javadoccomment">     * VM's notion of how an address changes with a push,</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> <em class="jxr_javadoccomment">     * to get the raw SP change for stackMove.</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> <em class="jxr_javadoccomment">     * Then shift and mask it into the correct field.</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> insertStackMove(<strong class="jxr_keyword">int</strong> stackMove) {
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>         <em class="jxr_comment">// following variable must be long to avoid sign extension after '&lt;&lt;'</em>
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>         <strong class="jxr_keyword">long</strong> spChange = stackMove * MethodHandleNatives.JVM_STACK_MOVE_UNIT;
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>         <strong class="jxr_keyword">return</strong> (spChange &amp; CONV_STACK_MOVE_MASK) &lt;&lt; CONV_STACK_MOVE_SHIFT;
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>     }
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> extractStackMove(<strong class="jxr_keyword">int</strong> convOp) {
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>         <strong class="jxr_keyword">int</strong> spChange = convOp &gt;&gt; CONV_STACK_MOVE_SHIFT;
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>         <strong class="jxr_keyword">return</strong> spChange / MethodHandleNatives.JVM_STACK_MOVE_UNIT;
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>     }
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> extractStackMove(MethodHandle target) {
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>         <strong class="jxr_keyword">if</strong> (target instanceof AdapterMethodHandle) {
+<a class="jxr_linenumber" name="L377" href="#L377">377</a>             AdapterMethodHandle amh = (AdapterMethodHandle) target;
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>             <strong class="jxr_keyword">return</strong> extractStackMove(amh.getConversion());
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>             <strong class="jxr_keyword">return</strong> 0;
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>         }
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>     }
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> 
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>     <em class="jxr_javadoccomment">/** Construct an adapter conversion descriptor for a single-argument conversion. */</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> makeConv(<strong class="jxr_keyword">int</strong> convOp, <strong class="jxr_keyword">int</strong> argnum, <strong class="jxr_keyword">int</strong> src, <strong class="jxr_keyword">int</strong> dest) {
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>         assert(src  == (src  &amp; CONV_TYPE_MASK));
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>         assert(dest == (dest &amp; CONV_TYPE_MASK));
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>         assert(convOp &gt;= OP_CHECK_CAST &amp;&amp; convOp &lt;= OP_PRIM_TO_REF || convOp == OP_COLLECT_ARGS);
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>         <strong class="jxr_keyword">int</strong> stackMove = type2size(dest) - type2size(src);
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>         <strong class="jxr_keyword">return</strong> ((<strong class="jxr_keyword">long</strong>) argnum &lt;&lt; 32 |
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>                 (<strong class="jxr_keyword">long</strong>) convOp &lt;&lt; CONV_OP_SHIFT |
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>                 (<strong class="jxr_keyword">int</strong>)  src    &lt;&lt; CONV_SRC_TYPE_SHIFT |
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>                 (<strong class="jxr_keyword">int</strong>)  dest   &lt;&lt; CONV_DEST_TYPE_SHIFT |
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>                 insertStackMove(stackMove)
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>                 );
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>     }
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> makeDupConv(<strong class="jxr_keyword">int</strong> convOp, <strong class="jxr_keyword">int</strong> argnum, <strong class="jxr_keyword">int</strong> stackMove) {
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>         <em class="jxr_comment">// simple argument motion, requiring one slot to specify</em>
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>         assert(convOp == OP_DUP_ARGS || convOp == OP_DROP_ARGS);
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>         byte src = 0, dest = 0;
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>         <strong class="jxr_keyword">return</strong> ((<strong class="jxr_keyword">long</strong>) argnum &lt;&lt; 32 |
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>                 (<strong class="jxr_keyword">long</strong>) convOp &lt;&lt; CONV_OP_SHIFT |
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>                 (<strong class="jxr_keyword">int</strong>)  src    &lt;&lt; CONV_SRC_TYPE_SHIFT |
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>                 (<strong class="jxr_keyword">int</strong>)  dest   &lt;&lt; CONV_DEST_TYPE_SHIFT |
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>                 insertStackMove(stackMove)
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>                 );
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>     }
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> makeSwapConv(<strong class="jxr_keyword">int</strong> convOp, <strong class="jxr_keyword">int</strong> srcArg, byte srcType, <strong class="jxr_keyword">int</strong> destSlot, byte destType) {
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>         <em class="jxr_comment">// more complex argument motion, requiring two slots to specify</em>
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>         assert(convOp == OP_SWAP_ARGS || convOp == OP_ROT_ARGS);
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>         <strong class="jxr_keyword">return</strong> ((<strong class="jxr_keyword">long</strong>) srcArg &lt;&lt; 32 |
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>                 (<strong class="jxr_keyword">long</strong>) convOp &lt;&lt; CONV_OP_SHIFT |
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>                 (<strong class="jxr_keyword">int</strong>)  srcType &lt;&lt; CONV_SRC_TYPE_SHIFT |
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>                 (<strong class="jxr_keyword">int</strong>)  destType &lt;&lt; CONV_DEST_TYPE_SHIFT |
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>                 (<strong class="jxr_keyword">int</strong>)  destSlot &lt;&lt; CONV_VMINFO_SHIFT
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>                 );
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>     }
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> makeSpreadConv(<strong class="jxr_keyword">int</strong> convOp, <strong class="jxr_keyword">int</strong> argnum, <strong class="jxr_keyword">int</strong> src, <strong class="jxr_keyword">int</strong> dest, <strong class="jxr_keyword">int</strong> stackMove) {
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>         <em class="jxr_comment">// spreading or collecting, at a particular slot location</em>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>         assert(convOp == OP_SPREAD_ARGS || convOp == OP_COLLECT_ARGS || convOp == OP_FOLD_ARGS);
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>         <em class="jxr_comment">// src  = spread ? T_OBJECT (for array)  : common type of collected args (else void)</em>
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>         <em class="jxr_comment">// dest = spread ? element type of array : result type of collector (can be void)</em>
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>         <strong class="jxr_keyword">return</strong> ((<strong class="jxr_keyword">long</strong>) argnum &lt;&lt; 32 |
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>                 (<strong class="jxr_keyword">long</strong>) convOp &lt;&lt; CONV_OP_SHIFT |
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>                 (<strong class="jxr_keyword">int</strong>)  src    &lt;&lt; CONV_SRC_TYPE_SHIFT |
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>                 (<strong class="jxr_keyword">int</strong>)  dest   &lt;&lt; CONV_DEST_TYPE_SHIFT |
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>                 insertStackMove(stackMove)
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>                 );
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>     }
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> makeConv(<strong class="jxr_keyword">int</strong> convOp) {
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>         assert(convOp == OP_RETYPE_ONLY || convOp == OP_RETYPE_RAW);
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>         <strong class="jxr_keyword">return</strong> ((<strong class="jxr_keyword">long</strong>)-1 &lt;&lt; 32) | (convOp &lt;&lt; CONV_OP_SHIFT);   <em class="jxr_comment">// stackMove, src, dst all zero</em>
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>     }
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> convCode(<strong class="jxr_keyword">long</strong> conv) {
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>         <strong class="jxr_keyword">return</strong> (<strong class="jxr_keyword">int</strong>)conv;
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>     }
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> convArgPos(<strong class="jxr_keyword">long</strong> conv) {
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>         <strong class="jxr_keyword">return</strong> (<strong class="jxr_keyword">int</strong>)(conv &gt;&gt;&gt; 32);
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>     }
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> convOpSupported(<strong class="jxr_keyword">int</strong> convOp) {
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>         assert(convOp &gt;= 0 &amp;&amp; convOp &lt;= CONV_OP_LIMIT);
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>         <strong class="jxr_keyword">return</strong> ((1&lt;&lt;convOp) &amp; MethodHandleNatives.CONV_OP_IMPLEMENTED_MASK) != 0;
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>     }
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>     <em class="jxr_javadoccomment">/** One of OP_RETYPE_ONLY, etc. */</em>
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>     <strong class="jxr_keyword">int</strong> conversionOp() { <strong class="jxr_keyword">return</strong> (conversion &amp; CONV_OP_MASK) &gt;&gt; CONV_OP_SHIFT; }
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>     <em class="jxr_comment">/* Return one plus the position of the first non-trivial difference</em>
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> <em class="jxr_comment">     * between the given types.  This is not a symmetric operation;</em>
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> <em class="jxr_comment">     * we are considering adapting the targetType to adapterType.</em>
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> <em class="jxr_comment">     * Trivial differences are those which could be ignored by the JVM</em>
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> <em class="jxr_comment">     * without subverting the verifier.  Otherwise, adaptable differences</em>
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> <em class="jxr_comment">     * are ones for which we could create an adapter to make the type change.</em>
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> <em class="jxr_comment">     * Return zero if there are no differences (other than trivial ones).</em>
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> <em class="jxr_comment">     * Return 1+N if N is the only adaptable argument difference.</em>
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> <em class="jxr_comment">     * Return the -2-N where N is the first of several adaptable</em>
+<a class="jxr_linenumber" name="L457" href="#L457">457</a> <em class="jxr_comment">     * argument differences.</em>
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> <em class="jxr_comment">     * Return -1 if there there are differences which are not adaptable.</em>
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> diffTypes(MethodType adapterType,
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>                                  MethodType targetType,
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>                                  <strong class="jxr_keyword">boolean</strong> raw) {
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>         <strong class="jxr_keyword">int</strong> diff;
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>         diff = diffReturnTypes(adapterType, targetType, raw);
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>         <strong class="jxr_keyword">if</strong> (diff != 0)  <strong class="jxr_keyword">return</strong> diff;
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>         <strong class="jxr_keyword">int</strong> nargs = adapterType.parameterCount();
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>         <strong class="jxr_keyword">if</strong> (nargs != targetType.parameterCount())
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>             <strong class="jxr_keyword">return</strong> -1;
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>         diff = diffParamTypes(adapterType, 0, targetType, 0, nargs, raw);
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>         <em class="jxr_comment">//System.out.println("diff "+adapterType);</em>
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>         <em class="jxr_comment">//System.out.println("  "+diff+" "+targetType);</em>
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>         <strong class="jxr_keyword">return</strong> diff;
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>     }
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> diffReturnTypes(MethodType adapterType,
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>                                        MethodType targetType,
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>                                        <strong class="jxr_keyword">boolean</strong> raw) {
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>         Class&lt;?&gt; src = targetType.returnType();
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>         Class&lt;?&gt; dst = adapterType.returnType();
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>         <strong class="jxr_keyword">if</strong> ((!raw
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>              ? VerifyType.canPassUnchecked(src, dst)
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>              : VerifyType.canPassRaw(src, dst)
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>              ) &gt; 0)
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>             <strong class="jxr_keyword">return</strong> 0;  <em class="jxr_comment">// no significant difference</em>
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>         <strong class="jxr_keyword">if</strong> (raw &amp;&amp; !src.isPrimitive() &amp;&amp; !dst.isPrimitive())
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>             <strong class="jxr_keyword">return</strong> 0;  <em class="jxr_comment">// can force a reference return (very carefully!)</em>
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>         <em class="jxr_comment">//if (false)  return 1;  // never adaptable!</em>
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>         <strong class="jxr_keyword">return</strong> -1;  <em class="jxr_comment">// some significant difference</em>
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>     }
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> diffParamTypes(MethodType adapterType, <strong class="jxr_keyword">int</strong> astart,
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>                                       MethodType targetType, <strong class="jxr_keyword">int</strong> tstart,
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>                                       <strong class="jxr_keyword">int</strong> nargs, <strong class="jxr_keyword">boolean</strong> raw) {
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>         assert(nargs &gt;= 0);
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>         <strong class="jxr_keyword">int</strong> res = 0;
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; nargs; i++) {
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>             Class&lt;?&gt; src  = adapterType.parameterType(astart+i);
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>             Class&lt;?&gt; dest = targetType.parameterType(tstart+i);
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>             <strong class="jxr_keyword">if</strong> ((!raw
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>                  ? VerifyType.canPassUnchecked(src, dest)
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>                  : VerifyType.canPassRaw(src, dest)
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>                 ) &lt;= 0) {
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>                 <em class="jxr_comment">// found a difference; is it the only one so far?</em>
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>                 <strong class="jxr_keyword">if</strong> (res != 0)
+<a class="jxr_linenumber" name="L503" href="#L503">503</a>                     <strong class="jxr_keyword">return</strong> -1-res; <em class="jxr_comment">// return -2-i for prev. i</em>
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>                 res = 1+i;
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>             }
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>         }
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>         <strong class="jxr_keyword">return</strong> res;
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>     }
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> 
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>     <em class="jxr_javadoccomment">/** Can a retyping adapter (alone) validly convert the target to newType? */</em>
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canRetypeOnly(MethodType newType, MethodType targetType) {
+<a class="jxr_linenumber" name="L512" href="#L512">512</a>         <strong class="jxr_keyword">return</strong> canRetype(newType, targetType, false);
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>     }
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>     <em class="jxr_javadoccomment">/** Can a retyping adapter (alone) convert the target to newType?</em>
+<a class="jxr_linenumber" name="L515" href="#L515">515</a> <em class="jxr_javadoccomment">     *  It is allowed to widen subword types and void to int, to make bitwise</em>
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> <em class="jxr_javadoccomment">     *  conversions between float/int and double/long, and to perform unchecked</em>
+<a class="jxr_linenumber" name="L517" href="#L517">517</a> <em class="jxr_javadoccomment">     *  reference conversions on return.  This last feature requires that the</em>
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> <em class="jxr_javadoccomment">     *  caller be trusted, and perform explicit cast conversions on return values.</em>
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L520" href="#L520">520</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canRetypeRaw(MethodType newType, MethodType targetType) {
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>         <strong class="jxr_keyword">return</strong> canRetype(newType, targetType, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L522" href="#L522">522</a>     }
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canRetype(MethodType newType, MethodType targetType, <strong class="jxr_keyword">boolean</strong> raw) {
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(raw ? OP_RETYPE_RAW : OP_RETYPE_ONLY))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L525" href="#L525">525</a>         <strong class="jxr_keyword">int</strong> diff = diffTypes(newType, targetType, raw);
+<a class="jxr_linenumber" name="L526" href="#L526">526</a>         <em class="jxr_comment">// %%% This assert is too strong.  Factor diff into VerifyType and reconcile.</em>
+<a class="jxr_linenumber" name="L527" href="#L527">527</a>         assert(raw || (diff == 0) == VerifyType.isNullConversion(newType, targetType));
+<a class="jxr_linenumber" name="L528" href="#L528">528</a>         <strong class="jxr_keyword">return</strong> diff == 0;
+<a class="jxr_linenumber" name="L529" href="#L529">529</a>     }
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> 
+<a class="jxr_linenumber" name="L531" href="#L531">531</a>     <em class="jxr_javadoccomment">/** Factory method:  Performs no conversions; simply retypes the adapter.</em>
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> <em class="jxr_javadoccomment">     *  Allows unchecked argument conversions pairwise, if they are safe.</em>
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> <em class="jxr_javadoccomment">     *  Returns null if not possible.</em>
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L535" href="#L535">535</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeRetypeOnly(MethodType newType, MethodHandle target) {
+<a class="jxr_linenumber" name="L536" href="#L536">536</a>         <strong class="jxr_keyword">return</strong> makeRetype(newType, target, false);
+<a class="jxr_linenumber" name="L537" href="#L537">537</a>     }
+<a class="jxr_linenumber" name="L538" href="#L538">538</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeRetypeRaw(MethodType newType, MethodHandle target) {
+<a class="jxr_linenumber" name="L539" href="#L539">539</a>         <strong class="jxr_keyword">return</strong> makeRetype(newType, target, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L540" href="#L540">540</a>     }
+<a class="jxr_linenumber" name="L541" href="#L541">541</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeRetype(MethodType newType, MethodHandle target, <strong class="jxr_keyword">boolean</strong> raw) {
+<a class="jxr_linenumber" name="L542" href="#L542">542</a>         MethodType oldType = target.type();
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>         <strong class="jxr_keyword">if</strong> (oldType == newType)  <strong class="jxr_keyword">return</strong> target;
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>         <strong class="jxr_keyword">if</strong> (!canRetype(newType, oldType, raw))
+<a class="jxr_linenumber" name="L545" href="#L545">545</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L546" href="#L546">546</a>         <em class="jxr_comment">// TO DO:  clone the target guy, whatever he is, with new type.</em>
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, makeConv(raw ? OP_RETYPE_RAW : OP_RETYPE_ONLY));
+<a class="jxr_linenumber" name="L548" href="#L548">548</a>     }
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> 
+<a class="jxr_linenumber" name="L550" href="#L550">550</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeVarargsCollector(MethodHandle target, Class&lt;?&gt; arrayType) {
+<a class="jxr_linenumber" name="L551" href="#L551">551</a>         MethodType type = target.type();
+<a class="jxr_linenumber" name="L552" href="#L552">552</a>         <strong class="jxr_keyword">int</strong> last = type.parameterCount() - 1;
+<a class="jxr_linenumber" name="L553" href="#L553">553</a>         <strong class="jxr_keyword">if</strong> (type.parameterType(last) != arrayType)
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>             target = target.asType(type.changeParameterType(last, arrayType));
+<a class="jxr_linenumber" name="L555" href="#L555">555</a>         target = target.asFixedArity();  <em class="jxr_comment">// make sure this attribute is turned off</em>
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> AsVarargsCollector(target, arrayType);
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>     }
+<a class="jxr_linenumber" name="L558" href="#L558">558</a> 
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> AsVarargsCollector <strong class="jxr_keyword">extends</strong> AdapterMethodHandle {
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>         <strong class="jxr_keyword">final</strong> MethodHandle target;
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>         <strong class="jxr_keyword">final</strong> Class&lt;?&gt; arrayType;
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>         MethodHandle cache;
+<a class="jxr_linenumber" name="L563" href="#L563">563</a> 
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>         AsVarargsCollector(MethodHandle target, Class&lt;?&gt; arrayType) {
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>             <strong class="jxr_keyword">super</strong>(target, target.type(), makeConv(OP_RETYPE_ONLY));
+<a class="jxr_linenumber" name="L566" href="#L566">566</a>             <strong class="jxr_keyword">this</strong>.target = target;
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>             <strong class="jxr_keyword">this</strong>.arrayType = arrayType;
+<a class="jxr_linenumber" name="L568" href="#L568">568</a>             <strong class="jxr_keyword">this</strong>.cache = target.asCollector(arrayType, 0);
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>         }
+<a class="jxr_linenumber" name="L570" href="#L570">570</a> 
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>         @Override
+<a class="jxr_linenumber" name="L572" href="#L572">572</a>         <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isVarargsCollector() {
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L574" href="#L574">574</a>         }
+<a class="jxr_linenumber" name="L575" href="#L575">575</a> 
+<a class="jxr_linenumber" name="L576" href="#L576">576</a>         @Override
+<a class="jxr_linenumber" name="L577" href="#L577">577</a>         <strong class="jxr_keyword">public</strong> MethodHandle asFixedArity() {
+<a class="jxr_linenumber" name="L578" href="#L578">578</a>             <strong class="jxr_keyword">return</strong> target;
+<a class="jxr_linenumber" name="L579" href="#L579">579</a>         }
+<a class="jxr_linenumber" name="L580" href="#L580">580</a> 
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>         @Override
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>         <strong class="jxr_keyword">public</strong> MethodHandle asType(MethodType newType) {
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>             MethodType type = <strong class="jxr_keyword">this</strong>.type();
+<a class="jxr_linenumber" name="L584" href="#L584">584</a>             <strong class="jxr_keyword">int</strong> collectArg = type.parameterCount() - 1;
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>             <strong class="jxr_keyword">int</strong> newArity = newType.parameterCount();
+<a class="jxr_linenumber" name="L586" href="#L586">586</a>             <strong class="jxr_keyword">if</strong> (newArity == collectArg+1 &amp;&amp;
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>                 type.parameterType(collectArg).isAssignableFrom(newType.parameterType(collectArg))) {
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>                 <em class="jxr_comment">// if arity and trailing parameter are compatible, do normal thing</em>
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>                 <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.asType(newType);
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>             }
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>             <em class="jxr_comment">// check cache</em>
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>             <strong class="jxr_keyword">if</strong> (cache.type().parameterCount() == newArity)
+<a class="jxr_linenumber" name="L593" href="#L593">593</a>                 <strong class="jxr_keyword">return</strong> cache.asType(newType);
+<a class="jxr_linenumber" name="L594" href="#L594">594</a>             <em class="jxr_comment">// build and cache a collector</em>
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>             <strong class="jxr_keyword">int</strong> arrayLength = newArity - collectArg;
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>             MethodHandle collector;
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>             <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>                 collector = target.asCollector(arrayType, arrayLength);
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>             } <strong class="jxr_keyword">catch</strong> (IllegalArgumentException ex) {
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>                 <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> WrongMethodTypeException(<span class="jxr_string">"cannot build collector"</span>);
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>             }
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>             cache = collector;
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>             <strong class="jxr_keyword">return</strong> collector.asType(newType);
+<a class="jxr_linenumber" name="L604" href="#L604">604</a>         }
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>     }
+<a class="jxr_linenumber" name="L606" href="#L606">606</a> 
+<a class="jxr_linenumber" name="L607" href="#L607">607</a>     <em class="jxr_javadoccomment">/** Can a checkcast adapter validly convert the target to newType?</em>
+<a class="jxr_linenumber" name="L608" href="#L608">608</a> <em class="jxr_javadoccomment">     *  The JVM supports all kind of reference casts, even silly ones.</em>
+<a class="jxr_linenumber" name="L609" href="#L609">609</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canCheckCast(MethodType newType, MethodType targetType,
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>                 <strong class="jxr_keyword">int</strong> arg, Class&lt;?&gt; castType) {
+<a class="jxr_linenumber" name="L612" href="#L612">612</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(OP_CHECK_CAST))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>         Class&lt;?&gt; src = newType.parameterType(arg);
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>         Class&lt;?&gt; dst = targetType.parameterType(arg);
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>         <strong class="jxr_keyword">if</strong> (!canCheckCast(src, castType)
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>                 || !VerifyType.isNullConversion(castType, dst))
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L618" href="#L618">618</a>         <strong class="jxr_keyword">int</strong> diff = diffTypes(newType, targetType, false);
+<a class="jxr_linenumber" name="L619" href="#L619">619</a>         <strong class="jxr_keyword">return</strong> (diff == arg+1) || (diff == 0);  <em class="jxr_comment">// arg is sole non-trivial diff</em>
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>     }
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>     <em class="jxr_javadoccomment">/** Can an primitive conversion adapter validly convert src to dst? */</em>
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canCheckCast(Class&lt;?&gt; src, Class&lt;?&gt; dst) {
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>         <strong class="jxr_keyword">return</strong> (!src.isPrimitive() &amp;&amp; !dst.isPrimitive());
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>     }
+<a class="jxr_linenumber" name="L625" href="#L625">625</a> 
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>     <em class="jxr_javadoccomment">/** Factory method:  Forces a cast at the given argument.</em>
+<a class="jxr_linenumber" name="L627" href="#L627">627</a> <em class="jxr_javadoccomment">     *  The castType is the target of the cast, and can be any type</em>
+<a class="jxr_linenumber" name="L628" href="#L628">628</a> <em class="jxr_javadoccomment">     *  with a null conversion to the corresponding target parameter.</em>
+<a class="jxr_linenumber" name="L629" href="#L629">629</a> <em class="jxr_javadoccomment">     *  Return null if this cannot be done.</em>
+<a class="jxr_linenumber" name="L630" href="#L630">630</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeCheckCast(MethodType newType, MethodHandle target,
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>                 <strong class="jxr_keyword">int</strong> arg, Class&lt;?&gt; castType) {
+<a class="jxr_linenumber" name="L633" href="#L633">633</a>         <strong class="jxr_keyword">if</strong> (!canCheckCast(newType, target.type(), arg, castType))
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>         <strong class="jxr_keyword">long</strong> conv = makeConv(OP_CHECK_CAST, arg, T_OBJECT, T_OBJECT);
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, conv, castType);
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>     }
+<a class="jxr_linenumber" name="L638" href="#L638">638</a> 
+<a class="jxr_linenumber" name="L639" href="#L639">639</a>     <em class="jxr_javadoccomment">/** Can an primitive conversion adapter validly convert the target to newType?</em>
+<a class="jxr_linenumber" name="L640" href="#L640">640</a> <em class="jxr_javadoccomment">     *  The JVM currently supports all conversions except those between</em>
+<a class="jxr_linenumber" name="L641" href="#L641">641</a> <em class="jxr_javadoccomment">     *  floating and integral types.</em>
+<a class="jxr_linenumber" name="L642" href="#L642">642</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L643" href="#L643">643</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canPrimCast(MethodType newType, MethodType targetType,
+<a class="jxr_linenumber" name="L644" href="#L644">644</a>                 <strong class="jxr_keyword">int</strong> arg, Class&lt;?&gt; convType) {
+<a class="jxr_linenumber" name="L645" href="#L645">645</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(OP_PRIM_TO_PRIM))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>         Class&lt;?&gt; src = newType.parameterType(arg);
+<a class="jxr_linenumber" name="L647" href="#L647">647</a>         Class&lt;?&gt; dst = targetType.parameterType(arg);
+<a class="jxr_linenumber" name="L648" href="#L648">648</a>         <strong class="jxr_keyword">if</strong> (!canPrimCast(src, convType)
+<a class="jxr_linenumber" name="L649" href="#L649">649</a>                 || !VerifyType.isNullConversion(convType, dst))
+<a class="jxr_linenumber" name="L650" href="#L650">650</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L651" href="#L651">651</a>         <strong class="jxr_keyword">int</strong> diff = diffTypes(newType, targetType, false);
+<a class="jxr_linenumber" name="L652" href="#L652">652</a>         <strong class="jxr_keyword">return</strong> (diff == arg+1);  <em class="jxr_comment">// arg is sole non-trivial diff</em>
+<a class="jxr_linenumber" name="L653" href="#L653">653</a>     }
+<a class="jxr_linenumber" name="L654" href="#L654">654</a>     <em class="jxr_javadoccomment">/** Can an primitive conversion adapter validly convert src to dst? */</em>
+<a class="jxr_linenumber" name="L655" href="#L655">655</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canPrimCast(Class&lt;?&gt; src, Class&lt;?&gt; dst) {
+<a class="jxr_linenumber" name="L656" href="#L656">656</a>         <strong class="jxr_keyword">if</strong> (src == dst || !src.isPrimitive() || !dst.isPrimitive()) {
+<a class="jxr_linenumber" name="L657" href="#L657">657</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L658" href="#L658">658</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L659" href="#L659">659</a>             <strong class="jxr_keyword">boolean</strong> sflt = Wrapper.forPrimitiveType(src).isFloating();
+<a class="jxr_linenumber" name="L660" href="#L660">660</a>             <strong class="jxr_keyword">boolean</strong> dflt = Wrapper.forPrimitiveType(dst).isFloating();
+<a class="jxr_linenumber" name="L661" href="#L661">661</a>             <strong class="jxr_keyword">return</strong> !(sflt | dflt);  <em class="jxr_comment">// no float support at present</em>
+<a class="jxr_linenumber" name="L662" href="#L662">662</a>         }
+<a class="jxr_linenumber" name="L663" href="#L663">663</a>     }
+<a class="jxr_linenumber" name="L664" href="#L664">664</a> 
+<a class="jxr_linenumber" name="L665" href="#L665">665</a>     <em class="jxr_javadoccomment">/** Factory method:  Truncate the given argument with zero or sign extension,</em>
+<a class="jxr_linenumber" name="L666" href="#L666">666</a> <em class="jxr_javadoccomment">     *  and/or convert between single and doubleword versions of integer or float.</em>
+<a class="jxr_linenumber" name="L667" href="#L667">667</a> <em class="jxr_javadoccomment">     *  The convType is the target of the conversion, and can be any type</em>
+<a class="jxr_linenumber" name="L668" href="#L668">668</a> <em class="jxr_javadoccomment">     *  with a null conversion to the corresponding target parameter.</em>
+<a class="jxr_linenumber" name="L669" href="#L669">669</a> <em class="jxr_javadoccomment">     *  Return null if this cannot be done.</em>
+<a class="jxr_linenumber" name="L670" href="#L670">670</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L671" href="#L671">671</a>     <strong class="jxr_keyword">static</strong> MethodHandle makePrimCast(MethodType newType, MethodHandle target,
+<a class="jxr_linenumber" name="L672" href="#L672">672</a>                 <strong class="jxr_keyword">int</strong> arg, Class&lt;?&gt; convType) {
+<a class="jxr_linenumber" name="L673" href="#L673">673</a>         Class&lt;?&gt; src = newType.parameterType(arg);
+<a class="jxr_linenumber" name="L674" href="#L674">674</a>         <strong class="jxr_keyword">if</strong> (canPrimCast(src, convType))
+<a class="jxr_linenumber" name="L675" href="#L675">675</a>             <strong class="jxr_keyword">return</strong> makePrimCastOnly(newType, target, arg, convType);
+<a class="jxr_linenumber" name="L676" href="#L676">676</a>         Class&lt;?&gt; dst = convType;
+<a class="jxr_linenumber" name="L677" href="#L677">677</a>         <strong class="jxr_keyword">boolean</strong> sflt = Wrapper.forPrimitiveType(src).isFloating();
+<a class="jxr_linenumber" name="L678" href="#L678">678</a>         <strong class="jxr_keyword">boolean</strong> dflt = Wrapper.forPrimitiveType(dst).isFloating();
+<a class="jxr_linenumber" name="L679" href="#L679">679</a>         <strong class="jxr_keyword">if</strong> (sflt | dflt) {
+<a class="jxr_linenumber" name="L680" href="#L680">680</a>             MethodHandle convMethod;
+<a class="jxr_linenumber" name="L681" href="#L681">681</a>             <strong class="jxr_keyword">if</strong> (sflt)
+<a class="jxr_linenumber" name="L682" href="#L682">682</a>                 convMethod = ((src == <strong class="jxr_keyword">double</strong>.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L683" href="#L683">683</a>                         ? ValueConversions.convertFromDouble(dst)
+<a class="jxr_linenumber" name="L684" href="#L684">684</a>                         : ValueConversions.convertFromFloat(dst));
+<a class="jxr_linenumber" name="L685" href="#L685">685</a>             <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L686" href="#L686">686</a>                 convMethod = ((dst == <strong class="jxr_keyword">double</strong>.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L687" href="#L687">687</a>                         ? ValueConversions.convertToDouble(src)
+<a class="jxr_linenumber" name="L688" href="#L688">688</a>                         : ValueConversions.convertToFloat(src));
+<a class="jxr_linenumber" name="L689" href="#L689">689</a>             <strong class="jxr_keyword">long</strong> conv = makeConv(OP_COLLECT_ARGS, arg, basicType(src), basicType(dst));
+<a class="jxr_linenumber" name="L690" href="#L690">690</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, conv, convMethod);
+<a class="jxr_linenumber" name="L691" href="#L691">691</a>         }
+<a class="jxr_linenumber" name="L692" href="#L692">692</a>         <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InternalError(<span class="jxr_string">"makePrimCast"</span>);
+<a class="jxr_linenumber" name="L693" href="#L693">693</a>     }
+<a class="jxr_linenumber" name="L694" href="#L694">694</a>     <strong class="jxr_keyword">static</strong> MethodHandle makePrimCastOnly(MethodType newType, MethodHandle target,
+<a class="jxr_linenumber" name="L695" href="#L695">695</a>                 <strong class="jxr_keyword">int</strong> arg, Class&lt;?&gt; convType) {
+<a class="jxr_linenumber" name="L696" href="#L696">696</a>         MethodType oldType = target.type();
+<a class="jxr_linenumber" name="L697" href="#L697">697</a>         <strong class="jxr_keyword">if</strong> (!canPrimCast(newType, oldType, arg, convType))
+<a class="jxr_linenumber" name="L698" href="#L698">698</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L699" href="#L699">699</a>         Class&lt;?&gt; src = newType.parameterType(arg);
+<a class="jxr_linenumber" name="L700" href="#L700">700</a>         <strong class="jxr_keyword">long</strong> conv = makeConv(OP_PRIM_TO_PRIM, arg, basicType(src), basicType(convType));
+<a class="jxr_linenumber" name="L701" href="#L701">701</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, conv);
+<a class="jxr_linenumber" name="L702" href="#L702">702</a>     }
+<a class="jxr_linenumber" name="L703" href="#L703">703</a> 
+<a class="jxr_linenumber" name="L704" href="#L704">704</a>     <em class="jxr_javadoccomment">/** Can an unboxing conversion validly convert src to dst?</em>
+<a class="jxr_linenumber" name="L705" href="#L705">705</a> <em class="jxr_javadoccomment">     *  The JVM currently supports all kinds of casting and unboxing.</em>
+<a class="jxr_linenumber" name="L706" href="#L706">706</a> <em class="jxr_javadoccomment">     *  The convType is the unboxed type; it can be either a primitive or wrapper.</em>
+<a class="jxr_linenumber" name="L707" href="#L707">707</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L708" href="#L708">708</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canUnboxArgument(MethodType newType, MethodType targetType,
+<a class="jxr_linenumber" name="L709" href="#L709">709</a>                 <strong class="jxr_keyword">int</strong> arg, Class&lt;?&gt; convType, <strong class="jxr_keyword">int</strong> level) {
+<a class="jxr_linenumber" name="L710" href="#L710">710</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(OP_REF_TO_PRIM))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L711" href="#L711">711</a>         Class&lt;?&gt; src = newType.parameterType(arg);
+<a class="jxr_linenumber" name="L712" href="#L712">712</a>         Class&lt;?&gt; dst = targetType.parameterType(arg);
+<a class="jxr_linenumber" name="L713" href="#L713">713</a>         Class&lt;?&gt; boxType = Wrapper.asWrapperType(convType);
+<a class="jxr_linenumber" name="L714" href="#L714">714</a>         convType = Wrapper.asPrimitiveType(convType);
+<a class="jxr_linenumber" name="L715" href="#L715">715</a>         <strong class="jxr_keyword">if</strong> (!canCheckCast(src, boxType)
+<a class="jxr_linenumber" name="L716" href="#L716">716</a>                 || boxType == convType
+<a class="jxr_linenumber" name="L717" href="#L717">717</a>                 || !VerifyType.isNullConversion(convType, dst))
+<a class="jxr_linenumber" name="L718" href="#L718">718</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L719" href="#L719">719</a>         <strong class="jxr_keyword">int</strong> diff = diffTypes(newType, targetType, false);
+<a class="jxr_linenumber" name="L720" href="#L720">720</a>         <strong class="jxr_keyword">return</strong> (diff == arg+1);  <em class="jxr_comment">// arg is sole non-trivial diff</em>
+<a class="jxr_linenumber" name="L721" href="#L721">721</a>     }
+<a class="jxr_linenumber" name="L722" href="#L722">722</a>     <em class="jxr_javadoccomment">/** Can an primitive unboxing adapter validly convert src to dst? */</em>
+<a class="jxr_linenumber" name="L723" href="#L723">723</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canUnboxArgument(Class&lt;?&gt; src, Class&lt;?&gt; dst, <strong class="jxr_keyword">int</strong> level) {
+<a class="jxr_linenumber" name="L724" href="#L724">724</a>         assert(dst.isPrimitive());
+<a class="jxr_linenumber" name="L725" href="#L725">725</a>         <em class="jxr_comment">// if we have JVM support for boxing, we can also do complex unboxing</em>
+<a class="jxr_linenumber" name="L726" href="#L726">726</a>         <strong class="jxr_keyword">if</strong> (convOpSupported(OP_PRIM_TO_REF))  <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L727" href="#L727">727</a>         Wrapper dw = Wrapper.forPrimitiveType(dst);
+<a class="jxr_linenumber" name="L728" href="#L728">728</a>         <em class="jxr_comment">// Level 0 means cast and unbox.  This works on any reference.</em>
+<a class="jxr_linenumber" name="L729" href="#L729">729</a>         <strong class="jxr_keyword">if</strong> (level == 0)  <strong class="jxr_keyword">return</strong> !src.isPrimitive();
+<a class="jxr_linenumber" name="L730" href="#L730">730</a>         assert(level &gt;= 0 &amp;&amp; level &lt;= 2);
+<a class="jxr_linenumber" name="L731" href="#L731">731</a>         <em class="jxr_comment">// Levels 1 and 2 allow widening and/or narrowing conversions.</em>
+<a class="jxr_linenumber" name="L732" href="#L732">732</a>         <em class="jxr_comment">// These are not supported directly by the JVM.</em>
+<a class="jxr_linenumber" name="L733" href="#L733">733</a>         <em class="jxr_comment">// But if the input reference is monomorphic, we can do it.</em>
+<a class="jxr_linenumber" name="L734" href="#L734">734</a>         <strong class="jxr_keyword">return</strong> dw.wrapperType() == src;
+<a class="jxr_linenumber" name="L735" href="#L735">735</a>     }
+<a class="jxr_linenumber" name="L736" href="#L736">736</a> 
+<a class="jxr_linenumber" name="L737" href="#L737">737</a>     <em class="jxr_javadoccomment">/** Factory method:  Unbox the given argument.</em>
+<a class="jxr_linenumber" name="L738" href="#L738">738</a> <em class="jxr_javadoccomment">     *  Return null if this cannot be done.</em>
+<a class="jxr_linenumber" name="L739" href="#L739">739</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L740" href="#L740">740</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeUnboxArgument(MethodType newType, MethodHandle target,
+<a class="jxr_linenumber" name="L741" href="#L741">741</a>                 <strong class="jxr_keyword">int</strong> arg, Class&lt;?&gt; convType, <strong class="jxr_keyword">int</strong> level) {
+<a class="jxr_linenumber" name="L742" href="#L742">742</a>         MethodType oldType = target.type();
+<a class="jxr_linenumber" name="L743" href="#L743">743</a>         Class&lt;?&gt; src = newType.parameterType(arg);
+<a class="jxr_linenumber" name="L744" href="#L744">744</a>         Class&lt;?&gt; dst = oldType.parameterType(arg);
+<a class="jxr_linenumber" name="L745" href="#L745">745</a>         Class&lt;?&gt; boxType = Wrapper.asWrapperType(convType);
+<a class="jxr_linenumber" name="L746" href="#L746">746</a>         Class&lt;?&gt; primType = Wrapper.asPrimitiveType(convType);
+<a class="jxr_linenumber" name="L747" href="#L747">747</a>         <strong class="jxr_keyword">if</strong> (!canUnboxArgument(newType, oldType, arg, convType, level))
+<a class="jxr_linenumber" name="L748" href="#L748">748</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L749" href="#L749">749</a>         MethodType castDone = newType;
+<a class="jxr_linenumber" name="L750" href="#L750">750</a>         <strong class="jxr_keyword">if</strong> (!VerifyType.isNullConversion(src, boxType)) {
+<a class="jxr_linenumber" name="L751" href="#L751">751</a>             <em class="jxr_comment">// Examples:  Object-&gt;int, Number-&gt;int, Comparable-&gt;int; Byte-&gt;int, Character-&gt;int</em>
+<a class="jxr_linenumber" name="L752" href="#L752">752</a>             <strong class="jxr_keyword">if</strong> (level != 0) {
+<a class="jxr_linenumber" name="L753" href="#L753">753</a>                 <em class="jxr_comment">// must include additional conversions</em>
+<a class="jxr_linenumber" name="L754" href="#L754">754</a>                 <strong class="jxr_keyword">if</strong> (src == Object.<strong class="jxr_keyword">class</strong> || !Wrapper.isWrapperType(src)) {
+<a class="jxr_linenumber" name="L755" href="#L755">755</a>                     <em class="jxr_comment">// src must be examined at runtime, to detect Byte, Character, etc.</em>
+<a class="jxr_linenumber" name="L756" href="#L756">756</a>                     MethodHandle unboxMethod = (level == 1
+<a class="jxr_linenumber" name="L757" href="#L757">757</a>                                                 ? ValueConversions.unbox(dst)
+<a class="jxr_linenumber" name="L758" href="#L758">758</a>                                                 : ValueConversions.unboxCast(dst));
+<a class="jxr_linenumber" name="L759" href="#L759">759</a>                     <strong class="jxr_keyword">long</strong> conv = makeConv(OP_COLLECT_ARGS, arg, basicType(src), basicType(dst));
+<a class="jxr_linenumber" name="L760" href="#L760">760</a>                     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, conv, unboxMethod);
+<a class="jxr_linenumber" name="L761" href="#L761">761</a>                 }
+<a class="jxr_linenumber" name="L762" href="#L762">762</a>                 <em class="jxr_comment">// Example: Byte-&gt;int</em>
+<a class="jxr_linenumber" name="L763" href="#L763">763</a>                 <em class="jxr_comment">// Do this by reformulating the problem to Byte-&gt;byte.</em>
+<a class="jxr_linenumber" name="L764" href="#L764">764</a>                 Class&lt;?&gt; srcPrim = Wrapper.forWrapperType(src).primitiveType();
+<a class="jxr_linenumber" name="L765" href="#L765">765</a>                 MethodType midType = newType.changeParameterType(arg, srcPrim);
+<a class="jxr_linenumber" name="L766" href="#L766">766</a>                 MethodHandle fixPrim; <em class="jxr_comment">// makePairwiseConvert(midType, target, 0);</em>
+<a class="jxr_linenumber" name="L767" href="#L767">767</a>                 <strong class="jxr_keyword">if</strong> (canPrimCast(midType, oldType, arg, dst))
+<a class="jxr_linenumber" name="L768" href="#L768">768</a>                     fixPrim = makePrimCast(midType, target, arg, dst);
+<a class="jxr_linenumber" name="L769" href="#L769">769</a>                 <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L770" href="#L770">770</a>                     fixPrim = target;
+<a class="jxr_linenumber" name="L771" href="#L771">771</a>                 <strong class="jxr_keyword">return</strong> makeUnboxArgument(newType, fixPrim, arg, srcPrim, 0);
+<a class="jxr_linenumber" name="L772" href="#L772">772</a>             }
+<a class="jxr_linenumber" name="L773" href="#L773">773</a>             castDone = newType.changeParameterType(arg, boxType);
+<a class="jxr_linenumber" name="L774" href="#L774">774</a>         }
+<a class="jxr_linenumber" name="L775" href="#L775">775</a>         <strong class="jxr_keyword">long</strong> conv = makeConv(OP_REF_TO_PRIM, arg, T_OBJECT, basicType(primType));
+<a class="jxr_linenumber" name="L776" href="#L776">776</a>         MethodHandle adapter = <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, castDone, conv, boxType);
+<a class="jxr_linenumber" name="L777" href="#L777">777</a>         <strong class="jxr_keyword">if</strong> (castDone == newType)
+<a class="jxr_linenumber" name="L778" href="#L778">778</a>             <strong class="jxr_keyword">return</strong> adapter;
+<a class="jxr_linenumber" name="L779" href="#L779">779</a>         <strong class="jxr_keyword">return</strong> makeCheckCast(newType, adapter, arg, boxType);
+<a class="jxr_linenumber" name="L780" href="#L780">780</a>     }
+<a class="jxr_linenumber" name="L781" href="#L781">781</a> 
+<a class="jxr_linenumber" name="L782" href="#L782">782</a>     <em class="jxr_javadoccomment">/** Can a boxing conversion validly convert src to dst? */</em>
+<a class="jxr_linenumber" name="L783" href="#L783">783</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canBoxArgument(MethodType newType, MethodType targetType,
+<a class="jxr_linenumber" name="L784" href="#L784">784</a>                 <strong class="jxr_keyword">int</strong> arg, Class&lt;?&gt; convType) {
+<a class="jxr_linenumber" name="L785" href="#L785">785</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(OP_PRIM_TO_REF))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L786" href="#L786">786</a>         Class&lt;?&gt; src = newType.parameterType(arg);
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>         Class&lt;?&gt; dst = targetType.parameterType(arg);
+<a class="jxr_linenumber" name="L788" href="#L788">788</a>         Class&lt;?&gt; boxType = Wrapper.asWrapperType(convType);
+<a class="jxr_linenumber" name="L789" href="#L789">789</a>         convType = Wrapper.asPrimitiveType(convType);
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>         <strong class="jxr_keyword">if</strong> (!canCheckCast(boxType, dst)
+<a class="jxr_linenumber" name="L791" href="#L791">791</a>                 || boxType == convType
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>                 || !VerifyType.isNullConversion(src, convType))
+<a class="jxr_linenumber" name="L793" href="#L793">793</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L794" href="#L794">794</a>         <strong class="jxr_keyword">int</strong> diff = diffTypes(newType, targetType, false);
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>         <strong class="jxr_keyword">return</strong> (diff == arg+1);  <em class="jxr_comment">// arg is sole non-trivial diff</em>
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>     }
+<a class="jxr_linenumber" name="L797" href="#L797">797</a> 
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>     <em class="jxr_javadoccomment">/** Can an primitive boxing adapter validly convert src to dst? */</em>
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canBoxArgument(Class&lt;?&gt; src, Class&lt;?&gt; dst) {
+<a class="jxr_linenumber" name="L800" href="#L800">800</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(OP_PRIM_TO_REF))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>         <strong class="jxr_keyword">return</strong> (src.isPrimitive() &amp;&amp; !dst.isPrimitive());
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>     }
+<a class="jxr_linenumber" name="L803" href="#L803">803</a> 
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>     <em class="jxr_javadoccomment">/** Factory method:  Box the given argument.</em>
+<a class="jxr_linenumber" name="L805" href="#L805">805</a> <em class="jxr_javadoccomment">     *  Return null if this cannot be done.</em>
+<a class="jxr_linenumber" name="L806" href="#L806">806</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L807" href="#L807">807</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeBoxArgument(MethodType newType, MethodHandle target,
+<a class="jxr_linenumber" name="L808" href="#L808">808</a>                 <strong class="jxr_keyword">int</strong> arg, Class&lt;?&gt; convType) {
+<a class="jxr_linenumber" name="L809" href="#L809">809</a>         MethodType oldType = target.type();
+<a class="jxr_linenumber" name="L810" href="#L810">810</a>         Class&lt;?&gt; src = newType.parameterType(arg);
+<a class="jxr_linenumber" name="L811" href="#L811">811</a>         Class&lt;?&gt; dst = oldType.parameterType(arg);
+<a class="jxr_linenumber" name="L812" href="#L812">812</a>         Class&lt;?&gt; boxType = Wrapper.asWrapperType(convType);
+<a class="jxr_linenumber" name="L813" href="#L813">813</a>         Class&lt;?&gt; primType = Wrapper.asPrimitiveType(convType);
+<a class="jxr_linenumber" name="L814" href="#L814">814</a>         <strong class="jxr_keyword">if</strong> (!canBoxArgument(newType, oldType, arg, convType)) {
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L816" href="#L816">816</a>         }
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>         <strong class="jxr_keyword">if</strong> (!VerifyType.isNullConversion(boxType, dst))
+<a class="jxr_linenumber" name="L818" href="#L818">818</a>             target = makeCheckCast(oldType.changeParameterType(arg, boxType), target, arg, dst);
+<a class="jxr_linenumber" name="L819" href="#L819">819</a>         MethodHandle boxerMethod = ValueConversions.box(Wrapper.forPrimitiveType(primType));
+<a class="jxr_linenumber" name="L820" href="#L820">820</a>         <strong class="jxr_keyword">long</strong> conv = makeConv(OP_PRIM_TO_REF, arg, basicType(primType), T_OBJECT);
+<a class="jxr_linenumber" name="L821" href="#L821">821</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, conv, boxerMethod);
+<a class="jxr_linenumber" name="L822" href="#L822">822</a>     }
+<a class="jxr_linenumber" name="L823" href="#L823">823</a> 
+<a class="jxr_linenumber" name="L824" href="#L824">824</a>     <em class="jxr_javadoccomment">/** Can an adapter simply drop arguments to convert the target to newType? */</em>
+<a class="jxr_linenumber" name="L825" href="#L825">825</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canDropArguments(MethodType newType, MethodType targetType,
+<a class="jxr_linenumber" name="L826" href="#L826">826</a>                 <strong class="jxr_keyword">int</strong> dropArgPos, <strong class="jxr_keyword">int</strong> dropArgCount) {
+<a class="jxr_linenumber" name="L827" href="#L827">827</a>         <strong class="jxr_keyword">if</strong> (dropArgCount == 0)
+<a class="jxr_linenumber" name="L828" href="#L828">828</a>             <strong class="jxr_keyword">return</strong> canRetypeOnly(newType, targetType);
+<a class="jxr_linenumber" name="L829" href="#L829">829</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(OP_DROP_ARGS))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L830" href="#L830">830</a>         <strong class="jxr_keyword">if</strong> (diffReturnTypes(newType, targetType, false) != 0)
+<a class="jxr_linenumber" name="L831" href="#L831">831</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L832" href="#L832">832</a>         <strong class="jxr_keyword">int</strong> nptypes = newType.parameterCount();
+<a class="jxr_linenumber" name="L833" href="#L833">833</a>         <em class="jxr_comment">// parameter types must be the same up to the drop point</em>
+<a class="jxr_linenumber" name="L834" href="#L834">834</a>         <strong class="jxr_keyword">if</strong> (dropArgPos != 0 &amp;&amp; diffParamTypes(newType, 0, targetType, 0, dropArgPos, false) != 0)
+<a class="jxr_linenumber" name="L835" href="#L835">835</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L836" href="#L836">836</a>         <strong class="jxr_keyword">int</strong> afterPos = dropArgPos + dropArgCount;
+<a class="jxr_linenumber" name="L837" href="#L837">837</a>         <strong class="jxr_keyword">int</strong> afterCount = nptypes - afterPos;
+<a class="jxr_linenumber" name="L838" href="#L838">838</a>         <strong class="jxr_keyword">if</strong> (dropArgPos &lt; 0 || dropArgPos &gt;= nptypes ||
+<a class="jxr_linenumber" name="L839" href="#L839">839</a>             dropArgCount &lt; 1 || afterPos &gt; nptypes ||
+<a class="jxr_linenumber" name="L840" href="#L840">840</a>             targetType.parameterCount() != nptypes - dropArgCount)
+<a class="jxr_linenumber" name="L841" href="#L841">841</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L842" href="#L842">842</a>         <em class="jxr_comment">// parameter types after the drop point must also be the same</em>
+<a class="jxr_linenumber" name="L843" href="#L843">843</a>         <strong class="jxr_keyword">if</strong> (afterCount != 0 &amp;&amp; diffParamTypes(newType, afterPos, targetType, dropArgPos, afterCount, false) != 0)
+<a class="jxr_linenumber" name="L844" href="#L844">844</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L845" href="#L845">845</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L846" href="#L846">846</a>     }
+<a class="jxr_linenumber" name="L847" href="#L847">847</a> 
+<a class="jxr_linenumber" name="L848" href="#L848">848</a>     <em class="jxr_javadoccomment">/** Factory method:  Drop selected arguments.</em>
+<a class="jxr_linenumber" name="L849" href="#L849">849</a> <em class="jxr_javadoccomment">     *  Allow unchecked retyping of remaining arguments, pairwise.</em>
+<a class="jxr_linenumber" name="L850" href="#L850">850</a> <em class="jxr_javadoccomment">     *  Return null if this is not possible.</em>
+<a class="jxr_linenumber" name="L851" href="#L851">851</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L852" href="#L852">852</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeDropArguments(MethodType newType, MethodHandle target,
+<a class="jxr_linenumber" name="L853" href="#L853">853</a>                 <strong class="jxr_keyword">int</strong> dropArgPos, <strong class="jxr_keyword">int</strong> dropArgCount) {
+<a class="jxr_linenumber" name="L854" href="#L854">854</a>         <strong class="jxr_keyword">if</strong> (dropArgCount == 0)
+<a class="jxr_linenumber" name="L855" href="#L855">855</a>             <strong class="jxr_keyword">return</strong> makeRetypeOnly(newType, target);
+<a class="jxr_linenumber" name="L856" href="#L856">856</a>         <strong class="jxr_keyword">if</strong> (!canDropArguments(newType, target.type(), dropArgPos, dropArgCount))
+<a class="jxr_linenumber" name="L857" href="#L857">857</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L858" href="#L858">858</a>         <em class="jxr_comment">// in  arglist: [0: ...keep1 | dpos: drop... | dpos+dcount: keep2... ]</em>
+<a class="jxr_linenumber" name="L859" href="#L859">859</a>         <em class="jxr_comment">// out arglist: [0: ...keep1 |                        dpos: keep2... ]</em>
+<a class="jxr_linenumber" name="L860" href="#L860">860</a>         <strong class="jxr_keyword">int</strong> keep2InPos  = dropArgPos + dropArgCount;
+<a class="jxr_linenumber" name="L861" href="#L861">861</a>         <strong class="jxr_keyword">int</strong> dropSlot    = newType.parameterSlotDepth(keep2InPos);
+<a class="jxr_linenumber" name="L862" href="#L862">862</a>         <strong class="jxr_keyword">int</strong> keep1InSlot = newType.parameterSlotDepth(dropArgPos);
+<a class="jxr_linenumber" name="L863" href="#L863">863</a>         <strong class="jxr_keyword">int</strong> slotCount   = keep1InSlot - dropSlot;
+<a class="jxr_linenumber" name="L864" href="#L864">864</a>         assert(slotCount &gt;= dropArgCount);
+<a class="jxr_linenumber" name="L865" href="#L865">865</a>         assert(target.type().parameterSlotCount() + slotCount == newType.parameterSlotCount());
+<a class="jxr_linenumber" name="L866" href="#L866">866</a>         <strong class="jxr_keyword">long</strong> conv = makeDupConv(OP_DROP_ARGS, dropArgPos + dropArgCount - 1, -slotCount);
+<a class="jxr_linenumber" name="L867" href="#L867">867</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, conv);
+<a class="jxr_linenumber" name="L868" href="#L868">868</a>     }
+<a class="jxr_linenumber" name="L869" href="#L869">869</a> 
+<a class="jxr_linenumber" name="L870" href="#L870">870</a>     <em class="jxr_javadoccomment">/** Can an adapter duplicate an argument to convert the target to newType? */</em>
+<a class="jxr_linenumber" name="L871" href="#L871">871</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canDupArguments(MethodType newType, MethodType targetType,
+<a class="jxr_linenumber" name="L872" href="#L872">872</a>                 <strong class="jxr_keyword">int</strong> dupArgPos, <strong class="jxr_keyword">int</strong> dupArgCount) {
+<a class="jxr_linenumber" name="L873" href="#L873">873</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(OP_DUP_ARGS))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L874" href="#L874">874</a>         <strong class="jxr_keyword">if</strong> (diffReturnTypes(newType, targetType, false) != 0)
+<a class="jxr_linenumber" name="L875" href="#L875">875</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L876" href="#L876">876</a>         <strong class="jxr_keyword">int</strong> nptypes = newType.parameterCount();
+<a class="jxr_linenumber" name="L877" href="#L877">877</a>         <strong class="jxr_keyword">if</strong> (dupArgCount &lt; 0 || dupArgPos + dupArgCount &gt; nptypes)
+<a class="jxr_linenumber" name="L878" href="#L878">878</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L879" href="#L879">879</a>         <strong class="jxr_keyword">if</strong> (targetType.parameterCount() != nptypes + dupArgCount)
+<a class="jxr_linenumber" name="L880" href="#L880">880</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L881" href="#L881">881</a>         <em class="jxr_comment">// parameter types must be the same up to the duplicated arguments</em>
+<a class="jxr_linenumber" name="L882" href="#L882">882</a>         <strong class="jxr_keyword">if</strong> (diffParamTypes(newType, 0, targetType, 0, nptypes, false) != 0)
+<a class="jxr_linenumber" name="L883" href="#L883">883</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L884" href="#L884">884</a>         <em class="jxr_comment">// duplicated types must be, well, duplicates</em>
+<a class="jxr_linenumber" name="L885" href="#L885">885</a>         <strong class="jxr_keyword">if</strong> (diffParamTypes(newType, dupArgPos, targetType, nptypes, dupArgCount, false) != 0)
+<a class="jxr_linenumber" name="L886" href="#L886">886</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L887" href="#L887">887</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L888" href="#L888">888</a>     }
+<a class="jxr_linenumber" name="L889" href="#L889">889</a> 
+<a class="jxr_linenumber" name="L890" href="#L890">890</a>     <em class="jxr_javadoccomment">/** Factory method:  Duplicate the selected argument.</em>
+<a class="jxr_linenumber" name="L891" href="#L891">891</a> <em class="jxr_javadoccomment">     *  Return null if this is not possible.</em>
+<a class="jxr_linenumber" name="L892" href="#L892">892</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L893" href="#L893">893</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeDupArguments(MethodType newType, MethodHandle target,
+<a class="jxr_linenumber" name="L894" href="#L894">894</a>                 <strong class="jxr_keyword">int</strong> dupArgPos, <strong class="jxr_keyword">int</strong> dupArgCount) {
+<a class="jxr_linenumber" name="L895" href="#L895">895</a>         <strong class="jxr_keyword">if</strong> (!canDupArguments(newType, target.type(), dupArgPos, dupArgCount))
+<a class="jxr_linenumber" name="L896" href="#L896">896</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L897" href="#L897">897</a>         <strong class="jxr_keyword">if</strong> (dupArgCount == 0)
+<a class="jxr_linenumber" name="L898" href="#L898">898</a>             <strong class="jxr_keyword">return</strong> target;
+<a class="jxr_linenumber" name="L899" href="#L899">899</a>         <em class="jxr_comment">// in  arglist: [0: ...keep1 | dpos: dup... | dpos+dcount: keep2... ]</em>
+<a class="jxr_linenumber" name="L900" href="#L900">900</a>         <em class="jxr_comment">// out arglist: [0: ...keep1 | dpos: dup... | dpos+dcount: keep2... | dup... ]</em>
+<a class="jxr_linenumber" name="L901" href="#L901">901</a>         <strong class="jxr_keyword">int</strong> keep2InPos  = dupArgPos + dupArgCount;
+<a class="jxr_linenumber" name="L902" href="#L902">902</a>         <strong class="jxr_keyword">int</strong> dupSlot     = newType.parameterSlotDepth(keep2InPos);
+<a class="jxr_linenumber" name="L903" href="#L903">903</a>         <strong class="jxr_keyword">int</strong> keep1InSlot = newType.parameterSlotDepth(dupArgPos);
+<a class="jxr_linenumber" name="L904" href="#L904">904</a>         <strong class="jxr_keyword">int</strong> slotCount   = keep1InSlot - dupSlot;
+<a class="jxr_linenumber" name="L905" href="#L905">905</a>         assert(target.type().parameterSlotCount() - slotCount == newType.parameterSlotCount());
+<a class="jxr_linenumber" name="L906" href="#L906">906</a>         <strong class="jxr_keyword">long</strong> conv = makeDupConv(OP_DUP_ARGS, dupArgPos + dupArgCount - 1, slotCount);
+<a class="jxr_linenumber" name="L907" href="#L907">907</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, conv);
+<a class="jxr_linenumber" name="L908" href="#L908">908</a>     }
+<a class="jxr_linenumber" name="L909" href="#L909">909</a> 
+<a class="jxr_linenumber" name="L910" href="#L910">910</a>     <em class="jxr_javadoccomment">/** Can an adapter swap two arguments to convert the target to newType? */</em>
+<a class="jxr_linenumber" name="L911" href="#L911">911</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canSwapArguments(MethodType newType, MethodType targetType,
+<a class="jxr_linenumber" name="L912" href="#L912">912</a>                 <strong class="jxr_keyword">int</strong> swapArg1, <strong class="jxr_keyword">int</strong> swapArg2) {
+<a class="jxr_linenumber" name="L913" href="#L913">913</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(OP_SWAP_ARGS))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L914" href="#L914">914</a>         <strong class="jxr_keyword">if</strong> (diffReturnTypes(newType, targetType, false) != 0)
+<a class="jxr_linenumber" name="L915" href="#L915">915</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L916" href="#L916">916</a>         <strong class="jxr_keyword">if</strong> (swapArg1 &gt;= swapArg2)  <strong class="jxr_keyword">return</strong> false;  <em class="jxr_comment">// caller resp</em>
+<a class="jxr_linenumber" name="L917" href="#L917">917</a>         <strong class="jxr_keyword">int</strong> nptypes = newType.parameterCount();
+<a class="jxr_linenumber" name="L918" href="#L918">918</a>         <strong class="jxr_keyword">if</strong> (targetType.parameterCount() != nptypes)
+<a class="jxr_linenumber" name="L919" href="#L919">919</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L920" href="#L920">920</a>         <strong class="jxr_keyword">if</strong> (swapArg1 &lt; 0 || swapArg2 &gt;= nptypes)
+<a class="jxr_linenumber" name="L921" href="#L921">921</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L922" href="#L922">922</a>         <strong class="jxr_keyword">if</strong> (diffParamTypes(newType, 0, targetType, 0, swapArg1, false) != 0)
+<a class="jxr_linenumber" name="L923" href="#L923">923</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L924" href="#L924">924</a>         <strong class="jxr_keyword">if</strong> (diffParamTypes(newType, swapArg1, targetType, swapArg2, 1, false) != 0)
+<a class="jxr_linenumber" name="L925" href="#L925">925</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L926" href="#L926">926</a>         <strong class="jxr_keyword">if</strong> (diffParamTypes(newType, swapArg1+1, targetType, swapArg1+1, swapArg2-swapArg1-1, false) != 0)
+<a class="jxr_linenumber" name="L927" href="#L927">927</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L928" href="#L928">928</a>         <strong class="jxr_keyword">if</strong> (diffParamTypes(newType, swapArg2, targetType, swapArg1, 1, false) != 0)
+<a class="jxr_linenumber" name="L929" href="#L929">929</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L930" href="#L930">930</a>         <strong class="jxr_keyword">if</strong> (diffParamTypes(newType, swapArg2+1, targetType, swapArg2+1, nptypes-swapArg2-1, false) != 0)
+<a class="jxr_linenumber" name="L931" href="#L931">931</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L932" href="#L932">932</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L933" href="#L933">933</a>     }
+<a class="jxr_linenumber" name="L934" href="#L934">934</a> 
+<a class="jxr_linenumber" name="L935" href="#L935">935</a>     <em class="jxr_javadoccomment">/** Factory method:  Swap the selected arguments.</em>
+<a class="jxr_linenumber" name="L936" href="#L936">936</a> <em class="jxr_javadoccomment">     *  Return null if this is not possible.</em>
+<a class="jxr_linenumber" name="L937" href="#L937">937</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L938" href="#L938">938</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeSwapArguments(MethodType newType, MethodHandle target,
+<a class="jxr_linenumber" name="L939" href="#L939">939</a>                 <strong class="jxr_keyword">int</strong> swapArg1, <strong class="jxr_keyword">int</strong> swapArg2) {
+<a class="jxr_linenumber" name="L940" href="#L940">940</a>         <strong class="jxr_keyword">if</strong> (swapArg1 == swapArg2)
+<a class="jxr_linenumber" name="L941" href="#L941">941</a>             <strong class="jxr_keyword">return</strong> target;
+<a class="jxr_linenumber" name="L942" href="#L942">942</a>         <strong class="jxr_keyword">if</strong> (swapArg1 &gt; swapArg2) { <strong class="jxr_keyword">int</strong> t = swapArg1; swapArg1 = swapArg2; swapArg2 = t; }
+<a class="jxr_linenumber" name="L943" href="#L943">943</a>         <strong class="jxr_keyword">if</strong> (type2size(newType.parameterType(swapArg1)) !=
+<a class="jxr_linenumber" name="L944" href="#L944">944</a>             type2size(newType.parameterType(swapArg2))) {
+<a class="jxr_linenumber" name="L945" href="#L945">945</a>             <em class="jxr_comment">// turn a swap into a pair of rotates:</em>
+<a class="jxr_linenumber" name="L946" href="#L946">946</a>             <em class="jxr_comment">// [x a b c y] rot2(-1,argc=5) =&gt; [a b c y x] rot1(+1,argc=4) =&gt; target[y a b c x]</em>
+<a class="jxr_linenumber" name="L947" href="#L947">947</a>             <strong class="jxr_keyword">int</strong> argc = swapArg2 - swapArg1 + 1;
+<a class="jxr_linenumber" name="L948" href="#L948">948</a>             <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> ROT = 1;
+<a class="jxr_linenumber" name="L949" href="#L949">949</a>             ArrayList&lt;Class&lt;?&gt;&gt; rot1Params = <strong class="jxr_keyword">new</strong> ArrayList&lt;Class&lt;?&gt;&gt;(target.type().parameterList());
+<a class="jxr_linenumber" name="L950" href="#L950">950</a>             Collections.rotate(rot1Params.subList(swapArg1, swapArg1 + argc), -ROT);
+<a class="jxr_linenumber" name="L951" href="#L951">951</a>             MethodType rot1Type = MethodType.methodType(target.type().returnType(), rot1Params);
+<a class="jxr_linenumber" name="L952" href="#L952">952</a>             MethodHandle rot1 = makeRotateArguments(rot1Type, target, swapArg1, argc, +ROT);
+<a class="jxr_linenumber" name="L953" href="#L953">953</a>             assert(rot1 != <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L954" href="#L954">954</a>             <strong class="jxr_keyword">if</strong> (argc == 2)  <strong class="jxr_keyword">return</strong> rot1;
+<a class="jxr_linenumber" name="L955" href="#L955">955</a>             MethodHandle rot2 = makeRotateArguments(newType, rot1, swapArg1, argc-1, -ROT);
+<a class="jxr_linenumber" name="L956" href="#L956">956</a>             assert(rot2 != <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L957" href="#L957">957</a>             <strong class="jxr_keyword">return</strong> rot2;
+<a class="jxr_linenumber" name="L958" href="#L958">958</a>         }
+<a class="jxr_linenumber" name="L959" href="#L959">959</a>         <strong class="jxr_keyword">if</strong> (!canSwapArguments(newType, target.type(), swapArg1, swapArg2))
+<a class="jxr_linenumber" name="L960" href="#L960">960</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L961" href="#L961">961</a>         Class&lt;?&gt; type1 = newType.parameterType(swapArg1);
+<a class="jxr_linenumber" name="L962" href="#L962">962</a>         Class&lt;?&gt; type2 = newType.parameterType(swapArg2);
+<a class="jxr_linenumber" name="L963" href="#L963">963</a>         <em class="jxr_comment">// in  arglist: [0: ...keep1 | pos1: a1 | pos1+1: keep2... | pos2: a2 | pos2+1: keep3... ]</em>
+<a class="jxr_linenumber" name="L964" href="#L964">964</a>         <em class="jxr_comment">// out arglist: [0: ...keep1 | pos1: a2 | pos1+1: keep2... | pos2: a1 | pos2+1: keep3... ]</em>
+<a class="jxr_linenumber" name="L965" href="#L965">965</a>         <strong class="jxr_keyword">int</strong> swapSlot2  = newType.parameterSlotDepth(swapArg2 + 1);
+<a class="jxr_linenumber" name="L966" href="#L966">966</a>         <strong class="jxr_keyword">long</strong> conv = makeSwapConv(OP_SWAP_ARGS, swapArg1, basicType(type1), swapSlot2, basicType(type2));
+<a class="jxr_linenumber" name="L967" href="#L967">967</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, conv);
+<a class="jxr_linenumber" name="L968" href="#L968">968</a>     }
+<a class="jxr_linenumber" name="L969" href="#L969">969</a> 
+<a class="jxr_linenumber" name="L970" href="#L970">970</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> positiveRotation(<strong class="jxr_keyword">int</strong> argCount, <strong class="jxr_keyword">int</strong> rotateBy) {
+<a class="jxr_linenumber" name="L971" href="#L971">971</a>         assert(argCount &gt; 0);
+<a class="jxr_linenumber" name="L972" href="#L972">972</a>         <strong class="jxr_keyword">if</strong> (rotateBy &gt;= 0) {
+<a class="jxr_linenumber" name="L973" href="#L973">973</a>             <strong class="jxr_keyword">if</strong> (rotateBy &lt; argCount)
+<a class="jxr_linenumber" name="L974" href="#L974">974</a>                 <strong class="jxr_keyword">return</strong> rotateBy;
+<a class="jxr_linenumber" name="L975" href="#L975">975</a>             <strong class="jxr_keyword">return</strong> rotateBy % argCount;
+<a class="jxr_linenumber" name="L976" href="#L976">976</a>         } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (rotateBy &gt;= -argCount) {
+<a class="jxr_linenumber" name="L977" href="#L977">977</a>             <strong class="jxr_keyword">return</strong> rotateBy + argCount;
+<a class="jxr_linenumber" name="L978" href="#L978">978</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L979" href="#L979">979</a>             <strong class="jxr_keyword">return</strong> (-1-((-1-rotateBy) % argCount)) + argCount;
+<a class="jxr_linenumber" name="L980" href="#L980">980</a>         }
+<a class="jxr_linenumber" name="L981" href="#L981">981</a>     }
+<a class="jxr_linenumber" name="L982" href="#L982">982</a> 
+<a class="jxr_linenumber" name="L983" href="#L983">983</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> MAX_ARG_ROTATION = 1;
+<a class="jxr_linenumber" name="L984" href="#L984">984</a> 
+<a class="jxr_linenumber" name="L985" href="#L985">985</a>     <em class="jxr_javadoccomment">/** Can an adapter rotate arguments to convert the target to newType? */</em>
+<a class="jxr_linenumber" name="L986" href="#L986">986</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canRotateArguments(MethodType newType, MethodType targetType,
+<a class="jxr_linenumber" name="L987" href="#L987">987</a>                 <strong class="jxr_keyword">int</strong> firstArg, <strong class="jxr_keyword">int</strong> argCount, <strong class="jxr_keyword">int</strong> rotateBy) {
+<a class="jxr_linenumber" name="L988" href="#L988">988</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(OP_ROT_ARGS))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L989" href="#L989">989</a>         rotateBy = positiveRotation(argCount, rotateBy);
+<a class="jxr_linenumber" name="L990" href="#L990">990</a>         <strong class="jxr_keyword">if</strong> (rotateBy == 0)  <strong class="jxr_keyword">return</strong> false;  <em class="jxr_comment">// no rotation</em>
+<a class="jxr_linenumber" name="L991" href="#L991">991</a>         <strong class="jxr_keyword">if</strong> (rotateBy &gt; MAX_ARG_ROTATION &amp;&amp; rotateBy &lt; argCount - MAX_ARG_ROTATION)
+<a class="jxr_linenumber" name="L992" href="#L992">992</a>             <strong class="jxr_keyword">return</strong> false;  <em class="jxr_comment">// too many argument positions</em>
+<a class="jxr_linenumber" name="L993" href="#L993">993</a>         <em class="jxr_comment">// Rotate incoming args right N to the out args, N in 1..(argCouunt-1).</em>
+<a class="jxr_linenumber" name="L994" href="#L994">994</a>         <strong class="jxr_keyword">if</strong> (diffReturnTypes(newType, targetType, false) != 0)
+<a class="jxr_linenumber" name="L995" href="#L995">995</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L996" href="#L996">996</a>         <strong class="jxr_keyword">int</strong> nptypes = newType.parameterCount();
+<a class="jxr_linenumber" name="L997" href="#L997">997</a>         <strong class="jxr_keyword">if</strong> (targetType.parameterCount() != nptypes)
+<a class="jxr_linenumber" name="L998" href="#L998">998</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L999" href="#L999">999</a>         <strong class="jxr_keyword">if</strong> (firstArg &lt; 0 || firstArg &gt;= nptypes)  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1000" href="#L1000">1000</a>         <strong class="jxr_keyword">int</strong> argLimit = firstArg + argCount;
+<a class="jxr_linenumber" name="L1001" href="#L1001">1001</a>         <strong class="jxr_keyword">if</strong> (argLimit &gt; nptypes)  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1002" href="#L1002">1002</a>         <strong class="jxr_keyword">if</strong> (diffParamTypes(newType, 0, targetType, 0, firstArg, false) != 0)
+<a class="jxr_linenumber" name="L1003" href="#L1003">1003</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1004" href="#L1004">1004</a>         <strong class="jxr_keyword">int</strong> newChunk1 = argCount - rotateBy, newChunk2 = rotateBy;
+<a class="jxr_linenumber" name="L1005" href="#L1005">1005</a>         <em class="jxr_comment">// swap new chunk1 with target chunk2</em>
+<a class="jxr_linenumber" name="L1006" href="#L1006">1006</a>         <strong class="jxr_keyword">if</strong> (diffParamTypes(newType, firstArg, targetType, argLimit-newChunk1, newChunk1, false) != 0)
+<a class="jxr_linenumber" name="L1007" href="#L1007">1007</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1008" href="#L1008">1008</a>         <em class="jxr_comment">// swap new chunk2 with target chunk1</em>
+<a class="jxr_linenumber" name="L1009" href="#L1009">1009</a>         <strong class="jxr_keyword">if</strong> (diffParamTypes(newType, firstArg+newChunk1, targetType, firstArg, newChunk2, false) != 0)
+<a class="jxr_linenumber" name="L1010" href="#L1010">1010</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1011" href="#L1011">1011</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1012" href="#L1012">1012</a>     }
+<a class="jxr_linenumber" name="L1013" href="#L1013">1013</a> 
+<a class="jxr_linenumber" name="L1014" href="#L1014">1014</a>     <em class="jxr_javadoccomment">/** Factory method:  Rotate the selected argument range.</em>
+<a class="jxr_linenumber" name="L1015" href="#L1015">1015</a> <em class="jxr_javadoccomment">     *  Return null if this is not possible.</em>
+<a class="jxr_linenumber" name="L1016" href="#L1016">1016</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1017" href="#L1017">1017</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeRotateArguments(MethodType newType, MethodHandle target,
+<a class="jxr_linenumber" name="L1018" href="#L1018">1018</a>                 <strong class="jxr_keyword">int</strong> firstArg, <strong class="jxr_keyword">int</strong> argCount, <strong class="jxr_keyword">int</strong> rotateBy) {
+<a class="jxr_linenumber" name="L1019" href="#L1019">1019</a>         rotateBy = positiveRotation(argCount, rotateBy);
+<a class="jxr_linenumber" name="L1020" href="#L1020">1020</a>         <strong class="jxr_keyword">if</strong> (!canRotateArguments(newType, target.type(), firstArg, argCount, rotateBy))
+<a class="jxr_linenumber" name="L1021" href="#L1021">1021</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1022" href="#L1022">1022</a>         <em class="jxr_comment">// Decide whether it should be done as a right or left rotation,</em>
+<a class="jxr_linenumber" name="L1023" href="#L1023">1023</a>         <em class="jxr_comment">// on the JVM stack.  Return the number of stack slots to rotate by,</em>
+<a class="jxr_linenumber" name="L1024" href="#L1024">1024</a>         <em class="jxr_comment">// positive if right, negative if left.</em>
+<a class="jxr_linenumber" name="L1025" href="#L1025">1025</a>         <strong class="jxr_keyword">int</strong> limit = firstArg + argCount;
+<a class="jxr_linenumber" name="L1026" href="#L1026">1026</a>         <strong class="jxr_keyword">int</strong> depth0 = newType.parameterSlotDepth(firstArg);
+<a class="jxr_linenumber" name="L1027" href="#L1027">1027</a>         <strong class="jxr_keyword">int</strong> depth1 = newType.parameterSlotDepth(limit-rotateBy);
+<a class="jxr_linenumber" name="L1028" href="#L1028">1028</a>         <strong class="jxr_keyword">int</strong> depth2 = newType.parameterSlotDepth(limit);
+<a class="jxr_linenumber" name="L1029" href="#L1029">1029</a>         <strong class="jxr_keyword">int</strong> chunk1Slots = depth0 - depth1; assert(chunk1Slots &gt; 0);
+<a class="jxr_linenumber" name="L1030" href="#L1030">1030</a>         <strong class="jxr_keyword">int</strong> chunk2Slots = depth1 - depth2; assert(chunk2Slots &gt; 0);
+<a class="jxr_linenumber" name="L1031" href="#L1031">1031</a>         <em class="jxr_comment">// From here on out, it assumes a single-argument shift.</em>
+<a class="jxr_linenumber" name="L1032" href="#L1032">1032</a>         assert(MAX_ARG_ROTATION == 1);
+<a class="jxr_linenumber" name="L1033" href="#L1033">1033</a>         <strong class="jxr_keyword">int</strong> srcArg, dstArg;
+<a class="jxr_linenumber" name="L1034" href="#L1034">1034</a>         <strong class="jxr_keyword">int</strong> dstSlot;
+<a class="jxr_linenumber" name="L1035" href="#L1035">1035</a>         <strong class="jxr_keyword">int</strong> moveChunk;
+<a class="jxr_linenumber" name="L1036" href="#L1036">1036</a>         <strong class="jxr_keyword">if</strong> (rotateBy == 1) {
+<a class="jxr_linenumber" name="L1037" href="#L1037">1037</a>             <em class="jxr_comment">// Rotate right/down N (rotateBy = +N, N small, c2 small):</em>
+<a class="jxr_linenumber" name="L1038" href="#L1038">1038</a>             <em class="jxr_comment">// in  arglist: [0: ...keep1 | arg1: c1...  | limit-N: c2 | limit: keep2... ]</em>
+<a class="jxr_linenumber" name="L1039" href="#L1039">1039</a>             <em class="jxr_comment">// out arglist: [0: ...keep1 | arg1: c2 | arg1+N: c1...   | limit: keep2... ]</em>
+<a class="jxr_linenumber" name="L1040" href="#L1040">1040</a>             srcArg = limit-1;
+<a class="jxr_linenumber" name="L1041" href="#L1041">1041</a>             dstArg = firstArg;
+<a class="jxr_linenumber" name="L1042" href="#L1042">1042</a>             <em class="jxr_comment">//dstSlot = depth0 - chunk2Slots;  //chunk2Slots is not relevant</em>
+<a class="jxr_linenumber" name="L1043" href="#L1043">1043</a>             dstSlot = depth0 + MethodHandleNatives.OP_ROT_ARGS_DOWN_LIMIT_BIAS;
+<a class="jxr_linenumber" name="L1044" href="#L1044">1044</a>             moveChunk = chunk2Slots;
+<a class="jxr_linenumber" name="L1045" href="#L1045">1045</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1046" href="#L1046">1046</a>             <em class="jxr_comment">// Rotate left/up N (rotateBy = -N, N small, c1 small):</em>
+<a class="jxr_linenumber" name="L1047" href="#L1047">1047</a>             <em class="jxr_comment">// in  arglist: [0: ...keep1 | arg1: c1 | arg1+N: c2...   | limit: keep2... ]</em>
+<a class="jxr_linenumber" name="L1048" href="#L1048">1048</a>             <em class="jxr_comment">// out arglist: [0: ...keep1 | arg1: c2 ... | limit-N: c1 | limit: keep2... ]</em>
+<a class="jxr_linenumber" name="L1049" href="#L1049">1049</a>             srcArg = firstArg;
+<a class="jxr_linenumber" name="L1050" href="#L1050">1050</a>             dstArg = limit-1;
+<a class="jxr_linenumber" name="L1051" href="#L1051">1051</a>             dstSlot = depth2;
+<a class="jxr_linenumber" name="L1052" href="#L1052">1052</a>             moveChunk = chunk1Slots;
+<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a>         }
+<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a>         byte srcType = basicType(newType.parameterType(srcArg));
+<a class="jxr_linenumber" name="L1055" href="#L1055">1055</a>         byte dstType = basicType(newType.parameterType(dstArg));
+<a class="jxr_linenumber" name="L1056" href="#L1056">1056</a>         assert(moveChunk == type2size(srcType));
+<a class="jxr_linenumber" name="L1057" href="#L1057">1057</a>         <strong class="jxr_keyword">long</strong> conv = makeSwapConv(OP_ROT_ARGS, srcArg, srcType, dstSlot, dstType);
+<a class="jxr_linenumber" name="L1058" href="#L1058">1058</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, conv);
+<a class="jxr_linenumber" name="L1059" href="#L1059">1059</a>     }
+<a class="jxr_linenumber" name="L1060" href="#L1060">1060</a> 
+<a class="jxr_linenumber" name="L1061" href="#L1061">1061</a>     <em class="jxr_javadoccomment">/** Can an adapter spread an argument to convert the target to newType? */</em>
+<a class="jxr_linenumber" name="L1062" href="#L1062">1062</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canSpreadArguments(MethodType newType, MethodType targetType,
+<a class="jxr_linenumber" name="L1063" href="#L1063">1063</a>                 Class&lt;?&gt; spreadArgType, <strong class="jxr_keyword">int</strong> spreadArgPos, <strong class="jxr_keyword">int</strong> spreadArgCount) {
+<a class="jxr_linenumber" name="L1064" href="#L1064">1064</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(OP_SPREAD_ARGS))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1065" href="#L1065">1065</a>         <strong class="jxr_keyword">if</strong> (diffReturnTypes(newType, targetType, false) != 0)
+<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a>         <strong class="jxr_keyword">int</strong> nptypes = newType.parameterCount();
+<a class="jxr_linenumber" name="L1068" href="#L1068">1068</a>         <em class="jxr_comment">// parameter types must be the same up to the spread point</em>
+<a class="jxr_linenumber" name="L1069" href="#L1069">1069</a>         <strong class="jxr_keyword">if</strong> (spreadArgPos != 0 &amp;&amp; diffParamTypes(newType, 0, targetType, 0, spreadArgPos, false) != 0)
+<a class="jxr_linenumber" name="L1070" href="#L1070">1070</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1071" href="#L1071">1071</a>         <strong class="jxr_keyword">int</strong> afterPos = spreadArgPos + spreadArgCount;
+<a class="jxr_linenumber" name="L1072" href="#L1072">1072</a>         <strong class="jxr_keyword">int</strong> afterCount = nptypes - (spreadArgPos + 1);
+<a class="jxr_linenumber" name="L1073" href="#L1073">1073</a>         <strong class="jxr_keyword">if</strong> (spreadArgPos &lt; 0 || spreadArgPos &gt;= nptypes ||
+<a class="jxr_linenumber" name="L1074" href="#L1074">1074</a>             spreadArgCount &lt; 0 ||
+<a class="jxr_linenumber" name="L1075" href="#L1075">1075</a>             targetType.parameterCount() != afterPos + afterCount)
+<a class="jxr_linenumber" name="L1076" href="#L1076">1076</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1077" href="#L1077">1077</a>         <em class="jxr_comment">// parameter types after the spread point must also be the same</em>
+<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a>         <strong class="jxr_keyword">if</strong> (afterCount != 0 &amp;&amp; diffParamTypes(newType, spreadArgPos+1, targetType, afterPos, afterCount, false) != 0)
+<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a>         <em class="jxr_comment">// match the array element type to the spread arg types</em>
+<a class="jxr_linenumber" name="L1081" href="#L1081">1081</a>         Class&lt;?&gt; rawSpreadArgType = newType.parameterType(spreadArgPos);
+<a class="jxr_linenumber" name="L1082" href="#L1082">1082</a>         <strong class="jxr_keyword">if</strong> (rawSpreadArgType != spreadArgType &amp;&amp; !canCheckCast(rawSpreadArgType, spreadArgType))
+<a class="jxr_linenumber" name="L1083" href="#L1083">1083</a>             <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1084" href="#L1084">1084</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; spreadArgCount; i++) {
+<a class="jxr_linenumber" name="L1085" href="#L1085">1085</a>             Class&lt;?&gt; src = VerifyType.spreadArgElementType(spreadArgType, i);
+<a class="jxr_linenumber" name="L1086" href="#L1086">1086</a>             Class&lt;?&gt; dst = targetType.parameterType(spreadArgPos + i);
+<a class="jxr_linenumber" name="L1087" href="#L1087">1087</a>             <strong class="jxr_keyword">if</strong> (src == <strong class="jxr_keyword">null</strong> || !canConvertArgument(src, dst, 1))
+<a class="jxr_linenumber" name="L1088" href="#L1088">1088</a>                 <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1089" href="#L1089">1089</a>         }
+<a class="jxr_linenumber" name="L1090" href="#L1090">1090</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a>     }
+<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a> 
+<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a> 
+<a class="jxr_linenumber" name="L1094" href="#L1094">1094</a>     <em class="jxr_javadoccomment">/** Factory method:  Spread selected argument. */</em>
+<a class="jxr_linenumber" name="L1095" href="#L1095">1095</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeSpreadArguments(MethodType newType, MethodHandle target,
+<a class="jxr_linenumber" name="L1096" href="#L1096">1096</a>                 Class&lt;?&gt; spreadArgType, <strong class="jxr_keyword">int</strong> spreadArgPos, <strong class="jxr_keyword">int</strong> spreadArgCount) {
+<a class="jxr_linenumber" name="L1097" href="#L1097">1097</a>         <em class="jxr_comment">// FIXME: Get rid of newType; derive new arguments from structure of spreadArgType</em>
+<a class="jxr_linenumber" name="L1098" href="#L1098">1098</a>         MethodType targetType = target.type();
+<a class="jxr_linenumber" name="L1099" href="#L1099">1099</a>         assert(canSpreadArguments(newType, targetType, spreadArgType, spreadArgPos, spreadArgCount))
+<a class="jxr_linenumber" name="L1100" href="#L1100">1100</a>             : <span class="jxr_string">"[newType, targetType, spreadArgType, spreadArgPos, spreadArgCount] = "</span>
+<a class="jxr_linenumber" name="L1101" href="#L1101">1101</a>               + Arrays.asList(newType, targetType, spreadArgType, spreadArgPos, spreadArgCount);
+<a class="jxr_linenumber" name="L1102" href="#L1102">1102</a>         <em class="jxr_comment">// dest is not significant; remove?</em>
+<a class="jxr_linenumber" name="L1103" href="#L1103">1103</a>         <strong class="jxr_keyword">int</strong> dest = T_VOID;
+<a class="jxr_linenumber" name="L1104" href="#L1104">1104</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; spreadArgCount; i++) {
+<a class="jxr_linenumber" name="L1105" href="#L1105">1105</a>             Class&lt;?&gt; arg = VerifyType.spreadArgElementType(spreadArgType, i);
+<a class="jxr_linenumber" name="L1106" href="#L1106">1106</a>             <strong class="jxr_keyword">if</strong> (arg == <strong class="jxr_keyword">null</strong>)  arg = Object.<strong class="jxr_keyword">class</strong>;
+<a class="jxr_linenumber" name="L1107" href="#L1107">1107</a>             <strong class="jxr_keyword">int</strong> dest2 = basicType(arg);
+<a class="jxr_linenumber" name="L1108" href="#L1108">1108</a>             <strong class="jxr_keyword">if</strong>      (dest == T_VOID)  dest = dest2;
+<a class="jxr_linenumber" name="L1109" href="#L1109">1109</a>             <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (dest != dest2)   dest = T_VOID;
+<a class="jxr_linenumber" name="L1110" href="#L1110">1110</a>             <strong class="jxr_keyword">if</strong> (dest == T_VOID)  <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L1111" href="#L1111">1111</a>             targetType = targetType.changeParameterType(spreadArgPos + i, arg);
+<a class="jxr_linenumber" name="L1112" href="#L1112">1112</a>         }
+<a class="jxr_linenumber" name="L1113" href="#L1113">1113</a>         target = target.asType(targetType);
+<a class="jxr_linenumber" name="L1114" href="#L1114">1114</a>         <strong class="jxr_keyword">int</strong> arrayArgSize = 1;  <em class="jxr_comment">// always a reference</em>
+<a class="jxr_linenumber" name="L1115" href="#L1115">1115</a>         <em class="jxr_comment">// in  arglist: [0: ...keep1 | spos: spreadArg | spos+1:      keep2... ]</em>
+<a class="jxr_linenumber" name="L1116" href="#L1116">1116</a>         <em class="jxr_comment">// out arglist: [0: ...keep1 | spos: spread... | spos+scount: keep2... ]</em>
+<a class="jxr_linenumber" name="L1117" href="#L1117">1117</a>         <strong class="jxr_keyword">int</strong> keep2OutPos  = spreadArgPos + spreadArgCount;
+<a class="jxr_linenumber" name="L1118" href="#L1118">1118</a>         <strong class="jxr_keyword">int</strong> keep1OutSlot = targetType.parameterSlotDepth(spreadArgPos);   <em class="jxr_comment">// leading edge of |spread...|</em>
+<a class="jxr_linenumber" name="L1119" href="#L1119">1119</a>         <strong class="jxr_keyword">int</strong> spreadSlot   = targetType.parameterSlotDepth(keep2OutPos);    <em class="jxr_comment">// trailing edge of |spread...|</em>
+<a class="jxr_linenumber" name="L1120" href="#L1120">1120</a>         assert(spreadSlot == newType.parameterSlotDepth(spreadArgPos+arrayArgSize));
+<a class="jxr_linenumber" name="L1121" href="#L1121">1121</a>         <strong class="jxr_keyword">int</strong> slotCount    = keep1OutSlot - spreadSlot;                     <em class="jxr_comment">// slots in |spread...|</em>
+<a class="jxr_linenumber" name="L1122" href="#L1122">1122</a>         assert(slotCount &gt;= spreadArgCount);
+<a class="jxr_linenumber" name="L1123" href="#L1123">1123</a>         <strong class="jxr_keyword">int</strong> stackMove = - arrayArgSize + slotCount;  <em class="jxr_comment">// pop array, push N slots</em>
+<a class="jxr_linenumber" name="L1124" href="#L1124">1124</a>         <strong class="jxr_keyword">long</strong> conv = makeSpreadConv(OP_SPREAD_ARGS, spreadArgPos, T_OBJECT, dest, stackMove);
+<a class="jxr_linenumber" name="L1125" href="#L1125">1125</a>         MethodHandle res = <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, conv, spreadArgType);
+<a class="jxr_linenumber" name="L1126" href="#L1126">1126</a>         assert(res.type().parameterType(spreadArgPos) == spreadArgType);
+<a class="jxr_linenumber" name="L1127" href="#L1127">1127</a>         <strong class="jxr_keyword">return</strong> res;
+<a class="jxr_linenumber" name="L1128" href="#L1128">1128</a>     }
+<a class="jxr_linenumber" name="L1129" href="#L1129">1129</a> 
+<a class="jxr_linenumber" name="L1130" href="#L1130">1130</a>     <em class="jxr_javadoccomment">/** Can an adapter collect a series of arguments, replacing them by zero or one results? */</em>
+<a class="jxr_linenumber" name="L1131" href="#L1131">1131</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> canCollectArguments(MethodType targetType,
+<a class="jxr_linenumber" name="L1132" href="#L1132">1132</a>                 MethodType collectorType, <strong class="jxr_keyword">int</strong> collectArgPos, <strong class="jxr_keyword">boolean</strong> retainOriginalArgs) {
+<a class="jxr_linenumber" name="L1133" href="#L1133">1133</a>         <strong class="jxr_keyword">if</strong> (!convOpSupported(retainOriginalArgs ? OP_FOLD_ARGS : OP_COLLECT_ARGS))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1134" href="#L1134">1134</a>         <strong class="jxr_keyword">int</strong> collectArgCount = collectorType.parameterCount();
+<a class="jxr_linenumber" name="L1135" href="#L1135">1135</a>         Class&lt;?&gt; rtype = collectorType.returnType();
+<a class="jxr_linenumber" name="L1136" href="#L1136">1136</a>         assert(rtype == <strong class="jxr_keyword">void</strong>.<strong class="jxr_keyword">class</strong> || targetType.parameterType(collectArgPos) == rtype)
+<a class="jxr_linenumber" name="L1137" href="#L1137">1137</a>                 <em class="jxr_comment">// [(Object)Object[], (Object[])Object[], 0, 1]</em>
+<a class="jxr_linenumber" name="L1138" href="#L1138">1138</a>                 : Arrays.asList(targetType, collectorType, collectArgPos, collectArgCount)
+<a class="jxr_linenumber" name="L1139" href="#L1139">1139</a>                 ;
+<a class="jxr_linenumber" name="L1140" href="#L1140">1140</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1141" href="#L1141">1141</a>     }
+<a class="jxr_linenumber" name="L1142" href="#L1142">1142</a> 
+<a class="jxr_linenumber" name="L1143" href="#L1143">1143</a>     <em class="jxr_javadoccomment">/** Factory method:  Collect or filter selected argument(s). */</em>
+<a class="jxr_linenumber" name="L1144" href="#L1144">1144</a>     <strong class="jxr_keyword">static</strong> MethodHandle makeCollectArguments(MethodHandle target,
+<a class="jxr_linenumber" name="L1145" href="#L1145">1145</a>                 MethodHandle collector, <strong class="jxr_keyword">int</strong> collectArgPos, <strong class="jxr_keyword">boolean</strong> retainOriginalArgs) {
+<a class="jxr_linenumber" name="L1146" href="#L1146">1146</a>         assert(canCollectArguments(target.type(), collector.type(), collectArgPos, retainOriginalArgs));
+<a class="jxr_linenumber" name="L1147" href="#L1147">1147</a>         MethodType targetType = target.type();
+<a class="jxr_linenumber" name="L1148" href="#L1148">1148</a>         MethodType collectorType = collector.type();
+<a class="jxr_linenumber" name="L1149" href="#L1149">1149</a>         <strong class="jxr_keyword">int</strong> collectArgCount = collectorType.parameterCount();
+<a class="jxr_linenumber" name="L1150" href="#L1150">1150</a>         Class&lt;?&gt; collectValType = collectorType.returnType();
+<a class="jxr_linenumber" name="L1151" href="#L1151">1151</a>         <strong class="jxr_keyword">int</strong> collectValCount = (collectValType == <strong class="jxr_keyword">void</strong>.<strong class="jxr_keyword">class</strong> ? 0 : 1);
+<a class="jxr_linenumber" name="L1152" href="#L1152">1152</a>         <strong class="jxr_keyword">int</strong> collectValSlots = collectorType.returnSlotCount();
+<a class="jxr_linenumber" name="L1153" href="#L1153">1153</a>         MethodType newType = targetType
+<a class="jxr_linenumber" name="L1154" href="#L1154">1154</a>                 .dropParameterTypes(collectArgPos, collectArgPos+collectValCount);
+<a class="jxr_linenumber" name="L1155" href="#L1155">1155</a>         <strong class="jxr_keyword">if</strong> (!retainOriginalArgs) {
+<a class="jxr_linenumber" name="L1156" href="#L1156">1156</a>             newType = newType
+<a class="jxr_linenumber" name="L1157" href="#L1157">1157</a>                 .insertParameterTypes(collectArgPos, collectorType.parameterList());
+<a class="jxr_linenumber" name="L1158" href="#L1158">1158</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1159" href="#L1159">1159</a>             <em class="jxr_comment">// parameter types at the fold point must be the same</em>
+<a class="jxr_linenumber" name="L1160" href="#L1160">1160</a>             assert(diffParamTypes(newType, collectArgPos, targetType, collectValCount, collectArgCount, false) == 0)
+<a class="jxr_linenumber" name="L1161" href="#L1161">1161</a>                 : Arrays.asList(target, collector, collectArgPos, retainOriginalArgs);
+<a class="jxr_linenumber" name="L1162" href="#L1162">1162</a>         }
+<a class="jxr_linenumber" name="L1163" href="#L1163">1163</a>         <em class="jxr_comment">// in  arglist: [0: ...keep1 | cpos: collect...  | cpos+cacount: keep2... ]</em>
+<a class="jxr_linenumber" name="L1164" href="#L1164">1164</a>         <em class="jxr_comment">// out arglist: [0: ...keep1 | cpos: collectVal? | cpos+cvcount: keep2... ]</em>
+<a class="jxr_linenumber" name="L1165" href="#L1165">1165</a>         <em class="jxr_comment">// out(retain): [0: ...keep1 | cpos: cV? coll... | cpos+cvc+cac: keep2... ]</em>
+<a class="jxr_linenumber" name="L1166" href="#L1166">1166</a>         <strong class="jxr_keyword">int</strong> keep2InPos   = collectArgPos + collectArgCount;
+<a class="jxr_linenumber" name="L1167" href="#L1167">1167</a>         <strong class="jxr_keyword">int</strong> keep1InSlot  = newType.parameterSlotDepth(collectArgPos);  <em class="jxr_comment">// leading edge of |collect...|</em>
+<a class="jxr_linenumber" name="L1168" href="#L1168">1168</a>         <strong class="jxr_keyword">int</strong> collectSlot  = newType.parameterSlotDepth(keep2InPos);     <em class="jxr_comment">// trailing edge of |collect...|</em>
+<a class="jxr_linenumber" name="L1169" href="#L1169">1169</a>         <strong class="jxr_keyword">int</strong> slotCount    = keep1InSlot - collectSlot;                  <em class="jxr_comment">// slots in |collect...|</em>
+<a class="jxr_linenumber" name="L1170" href="#L1170">1170</a>         assert(slotCount &gt;= collectArgCount);
+<a class="jxr_linenumber" name="L1171" href="#L1171">1171</a>         assert(collectSlot == targetType.parameterSlotDepth(
+<a class="jxr_linenumber" name="L1172" href="#L1172">1172</a>                 collectArgPos + collectValCount + (retainOriginalArgs ? collectArgCount : 0) ));
+<a class="jxr_linenumber" name="L1173" href="#L1173">1173</a>         <strong class="jxr_keyword">int</strong> dest = basicType(collectValType);
+<a class="jxr_linenumber" name="L1174" href="#L1174">1174</a>         <strong class="jxr_keyword">int</strong> src = T_VOID;
+<a class="jxr_linenumber" name="L1175" href="#L1175">1175</a>         <em class="jxr_comment">// src is not significant; remove?</em>
+<a class="jxr_linenumber" name="L1176" href="#L1176">1176</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; collectArgCount; i++) {
+<a class="jxr_linenumber" name="L1177" href="#L1177">1177</a>             <strong class="jxr_keyword">int</strong> src2 = basicType(collectorType.parameterType(i));
+<a class="jxr_linenumber" name="L1178" href="#L1178">1178</a>             <strong class="jxr_keyword">if</strong>      (src == T_VOID)  src = src2;
+<a class="jxr_linenumber" name="L1179" href="#L1179">1179</a>             <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (src != src2)    src = T_VOID;
+<a class="jxr_linenumber" name="L1180" href="#L1180">1180</a>             <strong class="jxr_keyword">if</strong> (src == T_VOID)  <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L1181" href="#L1181">1181</a>         }
+<a class="jxr_linenumber" name="L1182" href="#L1182">1182</a>         <strong class="jxr_keyword">int</strong> stackMove = collectValSlots;  <em class="jxr_comment">// push 0..2 results</em>
+<a class="jxr_linenumber" name="L1183" href="#L1183">1183</a>         <strong class="jxr_keyword">if</strong> (!retainOriginalArgs)  stackMove -= slotCount; <em class="jxr_comment">// pop N arguments</em>
+<a class="jxr_linenumber" name="L1184" href="#L1184">1184</a>         <strong class="jxr_keyword">int</strong> lastCollectArg = keep2InPos-1;
+<a class="jxr_linenumber" name="L1185" href="#L1185">1185</a>         <strong class="jxr_keyword">long</strong> conv = makeSpreadConv(retainOriginalArgs ? OP_FOLD_ARGS : OP_COLLECT_ARGS,
+<a class="jxr_linenumber" name="L1186" href="#L1186">1186</a>                                    lastCollectArg, src, dest, stackMove);
+<a class="jxr_linenumber" name="L1187" href="#L1187">1187</a>         MethodHandle res = <strong class="jxr_keyword">new</strong> AdapterMethodHandle(target, newType, conv, collector);
+<a class="jxr_linenumber" name="L1188" href="#L1188">1188</a>         assert(res.type().parameterList().subList(collectArgPos, collectArgPos+collectArgCount)
+<a class="jxr_linenumber" name="L1189" href="#L1189">1189</a>                 .equals(collector.type().parameterList()));
+<a class="jxr_linenumber" name="L1190" href="#L1190">1190</a>         <strong class="jxr_keyword">return</strong> res;
+<a class="jxr_linenumber" name="L1191" href="#L1191">1191</a>     }
+<a class="jxr_linenumber" name="L1192" href="#L1192">1192</a> 
+<a class="jxr_linenumber" name="L1193" href="#L1193">1193</a>     @Override
+<a class="jxr_linenumber" name="L1194" href="#L1194">1194</a>     String debugString() {
+<a class="jxr_linenumber" name="L1195" href="#L1195">1195</a>         <strong class="jxr_keyword">return</strong> getNameString(nonAdapter((MethodHandle)vmtarget), <strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L1196" href="#L1196">1196</a>     }
+<a class="jxr_linenumber" name="L1197" href="#L1197">1197</a> 
+<a class="jxr_linenumber" name="L1198" href="#L1198">1198</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> MethodHandle nonAdapter(MethodHandle mh) {
+<a class="jxr_linenumber" name="L1199" href="#L1199">1199</a>         <strong class="jxr_keyword">while</strong> (mh instanceof AdapterMethodHandle) {
+<a class="jxr_linenumber" name="L1200" href="#L1200">1200</a>             mh = (MethodHandle) mh.vmtarget;
+<a class="jxr_linenumber" name="L1201" href="#L1201">1201</a>         }
+<a class="jxr_linenumber" name="L1202" href="#L1202">1202</a>         <strong class="jxr_keyword">return</strong> mh;
+<a class="jxr_linenumber" name="L1203" href="#L1203">1203</a>     }
+<a class="jxr_linenumber" name="L1204" href="#L1204">1204</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

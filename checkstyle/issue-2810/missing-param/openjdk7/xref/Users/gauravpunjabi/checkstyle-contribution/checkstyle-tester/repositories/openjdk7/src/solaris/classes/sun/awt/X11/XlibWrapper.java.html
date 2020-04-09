@@ -1,0 +1,668 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>XlibWrapper xref</title>
+<link type="text/css" rel="stylesheet" href="../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 2002, 2009, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.  Oracle designates this</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * particular file as subject to the "Classpath" exception as provided</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * by Oracle in the LICENSE file that accompanied this code.</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">package</strong> sun.awt.X11;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.security.AccessController;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.security.PrivilegedAction;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> sun.misc.*;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> XlibWrapper
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  {
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>      <strong class="jxr_keyword">static</strong> Unsafe unsafe = Unsafe.getUnsafe();
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>      <em class="jxr_comment">// strange constants</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAXSIZE = 32767;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MINSIZE = 1;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>      <em class="jxr_comment">// define a private constructor here to prevent this class and all</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>      <em class="jxr_comment">// its descendants from being created</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>      <strong class="jxr_keyword">private</strong> XlibWrapper()
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>      {
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>      }
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_comment">   Display *XOpenDisplay(display_name)</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_comment">   char *display_name;</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> String eventToString[]=
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>      {<span class="jxr_string">"&lt;none:0&gt;"</span>, <span class="jxr_string">"&lt;none:1&gt;"</span>, <span class="jxr_string">"KeyPress"</span>, <span class="jxr_string">"KeyRelease"</span>, <span class="jxr_string">"ButtonPress"</span>, <span class="jxr_string">"ButtonRelease"</span>,
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>       <span class="jxr_string">"MotionNotify"</span>, <span class="jxr_string">"EnterNotify"</span>, <span class="jxr_string">"LeaveNotify"</span>, <span class="jxr_string">"FocusIn"</span>, <span class="jxr_string">"FocusOut"</span>,
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>       <span class="jxr_string">"KeymapNotify"</span>, <span class="jxr_string">"Expose"</span>, <span class="jxr_string">"GraphicsExpose"</span>, <span class="jxr_string">"NoExpose"</span>, <span class="jxr_string">"VisibilityNotify"</span>,
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>       <span class="jxr_string">"CreateNotify"</span>, <span class="jxr_string">"DestroyNotify"</span>, <span class="jxr_string">"UnmapNotify"</span>, <span class="jxr_string">"MapNotify"</span>, <span class="jxr_string">"MapRequest"</span>,
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>       <span class="jxr_string">"ReparentNotify"</span>, <span class="jxr_string">"ConfigureNotify"</span>, <span class="jxr_string">"ConfigureRequest"</span>, <span class="jxr_string">"GravityNotify"</span>,
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>       <span class="jxr_string">"ResizeRequest"</span>, <span class="jxr_string">"CirculateNotify"</span>, <span class="jxr_string">"CirculateRequest"</span>, <span class="jxr_string">"PropertyNotify"</span>,
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>       <span class="jxr_string">"SelectionClear"</span>, <span class="jxr_string">"SelectionRequest"</span>, <span class="jxr_string">"SelectionNotify"</span>, <span class="jxr_string">"ColormapNotify"</span>,
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>       <span class="jxr_string">"ClientMessage"</span>, <span class="jxr_string">"MappingNotify"</span>, <span class="jxr_string">"LASTEvent"</span>};
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XFree(<strong class="jxr_keyword">long</strong> ptr);
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> memcpy(<strong class="jxr_keyword">long</strong> dest_ptr, <strong class="jxr_keyword">long</strong> src_ptr, <strong class="jxr_keyword">long</strong> length);
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> getAddress(Object o);
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> copyIntArray(<strong class="jxr_keyword">long</strong> dest_ptr, Object array, <strong class="jxr_keyword">int</strong> size_bytes);
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> copyLongArray(<strong class="jxr_keyword">long</strong> dest_ptr, Object array, <strong class="jxr_keyword">int</strong> size_bytes);
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment">     * Gets byte string from str_ptr and copies it into byte array</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment">     * String should be NULL terminated</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> byte[] getStringBytes(<strong class="jxr_keyword">long</strong> str_ptr);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>      <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XOpenDisplay(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>      <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XCloseDisplay(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>      <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XDisplayString(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>      <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSetCloseDownMode(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">int</strong> close_mode);
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>      <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> DefaultScreen(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> ScreenOfDisplay(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> screen_number);
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> DoesBackingStore(<strong class="jxr_keyword">long</strong> screen);
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong>  <strong class="jxr_keyword">long</strong> DisplayWidth(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> screen);
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong>  <strong class="jxr_keyword">long</strong> DisplayWidthMM(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> screen);
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> DisplayHeight(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> screen);
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> DisplayHeightMM(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> screen);
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>      <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> RootWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> screen_number);
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> ScreenCount(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_comment">   Window XCreateWindow(display, parent, x, y, width, height,</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_comment">   border_width, depth,</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_comment">   class, visual, valuemask, attributes)</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_comment">   Display *display;</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_comment">   Window parent;</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_comment">   int x, y;</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_comment">   unsigned int width, height;</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_comment">   unsigned int border_width;</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_comment">   int depth;</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_comment">   unsigned int class;</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_comment">   Visual *visual</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_comment">   unsigned long valuemask;</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_comment">   XSetWindowAttributes *attributes;</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XCreateWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> parent, <strong class="jxr_keyword">int</strong> x,<strong class="jxr_keyword">int</strong>  y, <strong class="jxr_keyword">int</strong> width, <strong class="jxr_keyword">int</strong> height, <strong class="jxr_keyword">int</strong> border_width, <strong class="jxr_keyword">int</strong> depth, <strong class="jxr_keyword">long</strong> wclass, <strong class="jxr_keyword">long</strong> visual, <strong class="jxr_keyword">long</strong> valuemask, <strong class="jxr_keyword">long</strong> attributes);
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XDestroyWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window);
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XGrabPointer(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> grab_window,
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>                                    <strong class="jxr_keyword">int</strong> owner_events, <strong class="jxr_keyword">int</strong> event_mask, <strong class="jxr_keyword">int</strong> pointer_mode,
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>                                    <strong class="jxr_keyword">int</strong> keyboard_mode, <strong class="jxr_keyword">long</strong> confine_to, <strong class="jxr_keyword">long</strong> cursor, <strong class="jxr_keyword">long</strong> time);
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XUngrabPointer(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> time);
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XGrabKeyboard(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> grab_window,
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>                                     <strong class="jxr_keyword">int</strong> owner_events, <strong class="jxr_keyword">int</strong> pointer_mode,
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>                                     <strong class="jxr_keyword">int</strong> keyboard_mode, <strong class="jxr_keyword">long</strong> time);
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XUngrabKeyboard(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> time);
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XGrabServer(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XUngrabServer(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> <em class="jxr_comment">void XSetWMProperties(display, w, window_name, icon_name,</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_comment">argv, argc, normal_hints, wm_hints, class_hints)</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_comment">Display *display;</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> <em class="jxr_comment">Window w;</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_comment">XTextProperty *window_name;</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_comment">XTextProperty *icon_name;</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_comment">char **argv;</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> <em class="jxr_comment">int argc;</em>
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> <em class="jxr_comment">XSizeHints *normal_hints;</em>
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> <em class="jxr_comment">XWMHints *wm_hints;</em>
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> <em class="jxr_comment">XClassHint *class_hints;</em>
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_comment">XMapWindow(display, w)</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_comment">Display *display;</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> <em class="jxr_comment">Window w;</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>     <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XMapWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window);
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>     <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XMapRaised(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window);
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>     <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XRaiseWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window);
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XLowerWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window);
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XRestackWindows(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> windows, <strong class="jxr_keyword">int</strong> length);
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XConfigureWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window,
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>             <strong class="jxr_keyword">long</strong> value_mask, <strong class="jxr_keyword">long</strong> values);
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSetInputFocus(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window);
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSetInputFocus2(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> time);
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XGetInputFocus(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> <em class="jxr_comment">XUnmapWindow(display, w)</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> <em class="jxr_comment">Display *display;</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> <em class="jxr_comment">Window w;</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>     <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XUnmapWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window);
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_comment">  XSelectInput(display, w, event_mask)</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> <em class="jxr_comment">  Display *display;</em>
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> <em class="jxr_comment">  Window w;</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> <em class="jxr_comment">  long event_mask;</em>
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>     <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSelectInput(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> event_mask);
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> <em class="jxr_comment">       XNextEvent(display, event_return)</em>
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> <em class="jxr_comment">       Display *display;</em>
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> <em class="jxr_comment">       XEvent *event_return;</em>
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> <em class="jxr_comment">    */</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>     <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XNextEvent(<strong class="jxr_keyword">long</strong> display,<strong class="jxr_keyword">long</strong> ptr);
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> 
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_comment">     XMaskEvent(display, event_mask, event_return)</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_comment">           Display *display;</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_comment">           long event_mask;</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_comment">           XEvent *event_return;</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XMaskEvent(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> event_mask, <strong class="jxr_keyword">long</strong> event_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> 
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XWindowEvent(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> event_mask, <strong class="jxr_keyword">long</strong> event_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> 
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_comment">      Bool XFilterEvent(event, w)</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_comment">           XEvent *event;</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_comment">           Window w;</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_comment">    */</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> XFilterEvent(<strong class="jxr_keyword">long</strong> ptr, <strong class="jxr_keyword">long</strong> window);
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> 
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> <em class="jxr_comment">     Bool XSupportsLocale()</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> XSupportsLocale();
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> 
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> <em class="jxr_comment">     char *XSetLocaleModifiers(modifier_list)</em>
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> <em class="jxr_comment">           char *modifier_list;</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> String XSetLocaleModifiers(String modifier_list);
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> 
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>     <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XTranslateCoordinates(
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>                                              <strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> src_w, <strong class="jxr_keyword">long</strong> dest_w,
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>                                              <strong class="jxr_keyword">long</strong> src_x, <strong class="jxr_keyword">long</strong> src_y,
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>                                              <strong class="jxr_keyword">long</strong> dest_x_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> dest_y_<strong class="jxr_keyword">return</strong>,
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>                                              <strong class="jxr_keyword">long</strong> child_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> 
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> <em class="jxr_comment">       XPeekEvent(display, event_return)</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> <em class="jxr_comment">       Display *display;</em>
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> <em class="jxr_comment">       XEvent *event_return;</em>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> <em class="jxr_comment">    */</em>
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> 
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>     <strong class="jxr_keyword">static</strong>  <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XPeekEvent(<strong class="jxr_keyword">long</strong> display,<strong class="jxr_keyword">long</strong> ptr);
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> 
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> <em class="jxr_comment">  XFlush(display)</em>
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> <em class="jxr_comment">  Display *display;</em>
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> 
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XFlush(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> 
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_comment">  XSync(display, discard)</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_comment">  Display *display;</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> <em class="jxr_comment">  Bool discard;</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSync(<strong class="jxr_keyword">long</strong> display,<strong class="jxr_keyword">int</strong> discard);
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> 
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> 
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> <em class="jxr_comment">/*    XMoveResizeWindow(display, w, x, y, width, height)</em>
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> <em class="jxr_comment">      Display *display;</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> <em class="jxr_comment">      Window w;</em>
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> <em class="jxr_comment">      int x, y;</em>
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> <em class="jxr_comment">      unsigned int width, height;</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XMoveResizeWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">int</strong> x, <strong class="jxr_keyword">int</strong> y, <strong class="jxr_keyword">int</strong> width, <strong class="jxr_keyword">int</strong> height);
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XResizeWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">int</strong> width, <strong class="jxr_keyword">int</strong> height);
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XMoveWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">int</strong> x, <strong class="jxr_keyword">int</strong> y);
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> 
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_comment">     Bool XQueryPointer(display, w, root_return, child_return,</em>
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_comment">     root_x_return, root_y_return,</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_comment">                          win_x_return, win_y_return,</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> <em class="jxr_comment">     mask_return)</em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> <em class="jxr_comment">           Display *display;</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_comment">           Window w;</em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_comment">           Window *root_return, *child_return;</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_comment">           int *root_x_return, *root_y_return;</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> <em class="jxr_comment">           int *win_x_return, *win_y_return;</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> <em class="jxr_comment">           unsigned int *mask_return;</em>
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>  <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong>  XQueryPointer (<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> root_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> child_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> root_x_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> root_y_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> win_x_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> win_y_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> mask_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> 
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_comment">/*    XFreeCursor(display, cursor)</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_comment">           Display *display;</em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_comment">           Cursor cursor;</em>
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> 
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>  <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XFreeCursor(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> cursor);
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> <em class="jxr_comment">   XSetWindowBackground(display, w, background_pixel)</em>
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> <em class="jxr_comment">   Display *display;</em>
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> <em class="jxr_comment">   Window w;</em>
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> <em class="jxr_comment">   unsigned long background_pixel;</em>
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> 
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSetWindowBackground(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> background_pixel);
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> 
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XEventsQueued(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">int</strong> mode);
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> 
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> <em class="jxr_comment">  Atom XInternAtom(display, atom_name, only_if_exists)</em>
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> <em class="jxr_comment">  Display *display;</em>
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> <em class="jxr_comment">  char *atom_name;</em>
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> <em class="jxr_comment">  Bool only_if_exists;</em>
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> 
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XInternAtoms(<strong class="jxr_keyword">long</strong> display, String[] names, <strong class="jxr_keyword">boolean</strong> only_<strong class="jxr_keyword">if</strong>_exists, <strong class="jxr_keyword">long</strong> atoms);
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> 
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> SetProperty(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> atom, String str);
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> String GetProperty(<strong class="jxr_keyword">long</strong> display ,<strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> atom);
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> InternAtom(<strong class="jxr_keyword">long</strong> display, String string, <strong class="jxr_keyword">int</strong> only_<strong class="jxr_keyword">if</strong>_exists);
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XGetWindowProperty(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> atom,
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>                                          <strong class="jxr_keyword">long</strong> <strong class="jxr_keyword">long</strong>_offset, <strong class="jxr_keyword">long</strong> <strong class="jxr_keyword">long</strong>_length,
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>                                          <strong class="jxr_keyword">long</strong> delete, <strong class="jxr_keyword">long</strong> req_type, <strong class="jxr_keyword">long</strong> actualy_type,
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>                                          <strong class="jxr_keyword">long</strong> actualy_format, <strong class="jxr_keyword">long</strong> nitems_ptr,
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>                                          <strong class="jxr_keyword">long</strong> bytes_after, <strong class="jxr_keyword">long</strong> data_ptr);
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>     <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> XChangePropertyImpl(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> atom,
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>                                            <strong class="jxr_keyword">long</strong> type, <strong class="jxr_keyword">int</strong> format, <strong class="jxr_keyword">int</strong> mode, <strong class="jxr_keyword">long</strong> data,
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>                                            <strong class="jxr_keyword">int</strong> nelements);
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> XChangeProperty(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> atom,
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>                                 <strong class="jxr_keyword">long</strong> type, <strong class="jxr_keyword">int</strong> format, <strong class="jxr_keyword">int</strong> mode, <strong class="jxr_keyword">long</strong> data,
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>                                 <strong class="jxr_keyword">int</strong> nelements) {
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>         <em class="jxr_comment">// TODO: handling of XChangePropertyImpl return value, if not Success - don't cache</em>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>         <strong class="jxr_keyword">if</strong> (XPropertyCache.isCachingSupported() &amp;&amp;
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>             XToolkit.windowToXWindow(window) != <strong class="jxr_keyword">null</strong> &amp;&amp;
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>             WindowPropertyGetter.isCacheableProperty(XAtom.get(atom)) &amp;&amp;
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>             mode == XConstants.PropModeReplace)
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>         {
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>             <strong class="jxr_keyword">int</strong> length = (format / 8) * nelements;
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>             XPropertyCache.storeCache(
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>                 <strong class="jxr_keyword">new</strong> XPropertyCache.PropertyCacheEntry(format,
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>                                                       nelements,
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>                                                       0,
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>                                                       data,
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>                                                       length),
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>                 window,
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>                 XAtom.get(atom));
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>         }
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>         XChangePropertyImpl(display, window, atom, type, format, mode, data, nelements);
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>     }
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XChangePropertyS(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> atom,
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>                                        <strong class="jxr_keyword">long</strong> type, <strong class="jxr_keyword">int</strong> format, <strong class="jxr_keyword">int</strong> mode, String value);
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XDeleteProperty(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> atom);
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> 
+<a class="jxr_linenumber" name="L344" href="#L344">344</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSetTransientFor(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> <strong class="jxr_keyword">transient</strong>_<strong class="jxr_keyword">for</strong>_window);
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSetWMHints(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> wmhints);
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XGetWMHints(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> wmhints);
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XAllocWMHints();
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XGetPointerMapping(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> map, <strong class="jxr_keyword">int</strong> buttonNumber);
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> String XGetDefault(<strong class="jxr_keyword">long</strong> display, String program, String option);
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> getScreenOfWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window);
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XScreenNumberOfScreen(<strong class="jxr_keyword">long</strong> screen);
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XIconifyWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> screenNumber);
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> String ServerVendor(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> VendorRelease(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> IsXsunKPBehavior(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> IsSunKeyboard(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> IsKanaKeyboard(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XBell(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">int</strong> percent);
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> <em class="jxr_comment">          Cursor XCreateFontCursor(display, shape)</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> <em class="jxr_comment">           Display *display;</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> <em class="jxr_comment">           unsigned int shape;</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> 
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> <em class="jxr_comment">           we always pass int as shape param.</em>
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_comment">           perhaps later we will need to change type of shape to long.</em>
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XCreateFontCursor(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">int</strong> shape);
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> <em class="jxr_comment">     Pixmap XCreateBitmapFromData(display, d, data, width,</em>
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> <em class="jxr_comment">     height)</em>
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> <em class="jxr_comment">           Display *display;</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> <em class="jxr_comment">           Drawable d;</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_comment">           char *data;</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_comment">           unsigned int width, height;</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_comment">*/</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> 
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XCreateBitmapFromData(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> drawable, <strong class="jxr_keyword">long</strong> data, <strong class="jxr_keyword">int</strong> width, <strong class="jxr_keyword">int</strong> height);
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 
+<a class="jxr_linenumber" name="L383" href="#L383">383</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> <em class="jxr_comment">      XFreePixmap(display, pixmap)</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> <em class="jxr_comment">           Display *display;</em>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> <em class="jxr_comment">           Pixmap pixmap;</em>
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> <em class="jxr_comment">  */</em>
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>    <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XFreePixmap(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> pixmap);
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> 
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> <em class="jxr_comment">     Cursor XCreatePixmapCursor(display, source, mask,</em>
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> <em class="jxr_comment">     foreground_color, background_color, x, y)</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> <em class="jxr_comment">           Display *display;</em>
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> <em class="jxr_comment">           Pixmap source;</em>
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> <em class="jxr_comment">           Pixmap mask;</em>
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> <em class="jxr_comment">           XColor *foreground_color;</em>
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> <em class="jxr_comment">           XColor *background_color;</em>
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> <em class="jxr_comment">           unsigned int x, y;</em>
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> <em class="jxr_comment">    */</em>
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>    <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XCreatePixmapCursor(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> source, <strong class="jxr_keyword">long</strong> mask, <strong class="jxr_keyword">long</strong> fore, <strong class="jxr_keyword">long</strong> back, <strong class="jxr_keyword">int</strong> x, <strong class="jxr_keyword">int</strong> y);
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> 
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_comment">         Status XQueryBestCursor(display, d, width, height,</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> <em class="jxr_comment">     width_return, height_return)</em>
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> <em class="jxr_comment">           Display *display;</em>
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> <em class="jxr_comment">           Drawable d;</em>
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> <em class="jxr_comment">           unsigned int width, height;</em>
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> <em class="jxr_comment">           unsigned int *width_return, *height_return;</em>
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> 
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> <em class="jxr_comment">    */</em>
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> 
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> XQueryBestCursor(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> drawable, <strong class="jxr_keyword">int</strong> width, <strong class="jxr_keyword">int</strong> height, <strong class="jxr_keyword">long</strong> width_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> height_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> 
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> 
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> <em class="jxr_comment">     Status XAllocColor(display, colormap, screen_in_out)</em>
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> <em class="jxr_comment">           Display *display;</em>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> <em class="jxr_comment">           Colormap colormap;</em>
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> <em class="jxr_comment">           XColor *screen_in_out;</em>
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> <em class="jxr_comment">  */</em>
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> 
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> XAllocColor( <strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> colormap, <strong class="jxr_keyword">long</strong> screen_in_out);
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> 
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> SetToolkitErrorHandler();
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSetErrorHandler(<strong class="jxr_keyword">long</strong> handler);
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> CallErrorHandler(<strong class="jxr_keyword">long</strong> handler, <strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> event_ptr);
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> 
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> <em class="jxr_comment">      XChangeWindowAttributes(display, w, valuemask, attributes)</em>
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> <em class="jxr_comment">           Display *display;</em>
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> <em class="jxr_comment">           Window w;</em>
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> <em class="jxr_comment">           unsigned long valuemask;</em>
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> <em class="jxr_comment">           XSetWindowAttributes *attributes;</em>
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> <em class="jxr_comment">  */</em>
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> 
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XChangeWindowAttributes(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> valuemask, <strong class="jxr_keyword">long</strong> attributes);
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XGetWindowAttributes(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> attr_ptr);
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XGetGeometry(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> drawable, <strong class="jxr_keyword">long</strong> root_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> x_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> y_<strong class="jxr_keyword">return</strong>,
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>                                    <strong class="jxr_keyword">long</strong> width_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> height_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> border_width_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> depth_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XGetWMNormalHints(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> hints, <strong class="jxr_keyword">long</strong> supplied_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSetWMNormalHints(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> hints);
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSetMinMaxHints(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">int</strong> x, <strong class="jxr_keyword">int</strong> y, <strong class="jxr_keyword">int</strong> width, <strong class="jxr_keyword">int</strong> height, <strong class="jxr_keyword">long</strong> flags);
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XAllocSizeHints();
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> 
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XSendEvent(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">boolean</strong> propagate, <strong class="jxr_keyword">long</strong> event_mask, <strong class="jxr_keyword">long</strong> event);
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XPutBackEvent(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> event);
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XQueryTree(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> root_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> parent_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> children_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> nchildren_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XGetVisualInfo(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> vinfo_mask, <strong class="jxr_keyword">long</strong> vinfo_template, <strong class="jxr_keyword">long</strong> nitems_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XReparentWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> parent, <strong class="jxr_keyword">int</strong> x, <strong class="jxr_keyword">int</strong> y);
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> 
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XConvertSelection(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> selection,
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>                                          <strong class="jxr_keyword">long</strong> target, <strong class="jxr_keyword">long</strong> property,
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>                                          <strong class="jxr_keyword">long</strong> requestor, <strong class="jxr_keyword">long</strong> time);
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> 
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSetSelectionOwner(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> selection,
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>                                           <strong class="jxr_keyword">long</strong> owner, <strong class="jxr_keyword">long</strong> time);
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> 
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XGetSelectionOwner(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> selection);
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> 
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> String XGetAtomName(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> atom);
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> 
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XMaxRequestSize(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> 
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> 
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XCreatePixmap(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> drawable, <strong class="jxr_keyword">int</strong> width, <strong class="jxr_keyword">int</strong> height, <strong class="jxr_keyword">int</strong> depth);
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XCreateImage(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> visual_ptr, <strong class="jxr_keyword">int</strong> depth, <strong class="jxr_keyword">int</strong> format,
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>                                     <strong class="jxr_keyword">int</strong> offset, <strong class="jxr_keyword">long</strong> data, <strong class="jxr_keyword">int</strong> width, <strong class="jxr_keyword">int</strong> height, <strong class="jxr_keyword">int</strong> bitmap_pad,
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>                                     <strong class="jxr_keyword">int</strong> bytes_per_line);
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XDestroyImage(<strong class="jxr_keyword">long</strong> image);
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XPutImage(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> drawable, <strong class="jxr_keyword">long</strong> gc, <strong class="jxr_keyword">long</strong> image,
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>                                  <strong class="jxr_keyword">int</strong> src_x, <strong class="jxr_keyword">int</strong> src_y, <strong class="jxr_keyword">int</strong> dest_x, <strong class="jxr_keyword">int</strong> dest_y,
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>                                  <strong class="jxr_keyword">int</strong> width, <strong class="jxr_keyword">int</strong> height);
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XCreateGC(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> drawable, <strong class="jxr_keyword">long</strong> valuemask, <strong class="jxr_keyword">long</strong> values);
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XFreeGC(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> gc);
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XSetWindowBackgroundPixmap(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> pixmap);
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XClearWindow(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window);
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XGetIconSizes(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> ret_sizes, <strong class="jxr_keyword">long</strong> ret_count);
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XdbeQueryExtension(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> major_version_<strong class="jxr_keyword">return</strong>,
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>                                          <strong class="jxr_keyword">long</strong> minor_version_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> XQueryExtension(<strong class="jxr_keyword">long</strong> display, String name, <strong class="jxr_keyword">long</strong> mop_<strong class="jxr_keyword">return</strong>,
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>                                          <strong class="jxr_keyword">long</strong> feve_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> err_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> IsKeypadKey(<strong class="jxr_keyword">long</strong> keysym);
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XdbeAllocateBackBufferName(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">int</strong> swap_action);
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XdbeDeallocateBackBufferName(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> buffer);
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XdbeBeginIdiom(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L490" href="#L490">490</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XdbeEndIdiom(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XdbeSwapBuffers(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> swap_info, <strong class="jxr_keyword">int</strong> num_windows);
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> 
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XQueryKeymap(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> vector);
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XKeycodeToKeysym(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">int</strong> keycode, <strong class="jxr_keyword">int</strong> index);
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> 
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XKeysymToKeycode(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> keysym);
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> 
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>     <em class="jxr_comment">// xkb-related</em>
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XkbGetEffectiveGroup(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XkbKeycodeToKeysym(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">int</strong> keycode, <strong class="jxr_keyword">int</strong> group, <strong class="jxr_keyword">int</strong> level);
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XkbSelectEvents(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> device, <strong class="jxr_keyword">long</strong> bits_to_change, <strong class="jxr_keyword">long</strong> values_<strong class="jxr_keyword">for</strong>_bits);
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XkbSelectEventDetails(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> device, <strong class="jxr_keyword">long</strong> event_type,
+<a class="jxr_linenumber" name="L503" href="#L503">503</a>                                               <strong class="jxr_keyword">long</strong> bits_to_change, <strong class="jxr_keyword">long</strong> values_<strong class="jxr_keyword">for</strong>_bits);
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> XkbQueryExtension(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> opcode_rtrn, <strong class="jxr_keyword">long</strong> event_rtrn,
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>               <strong class="jxr_keyword">long</strong> error_rtrn, <strong class="jxr_keyword">long</strong> major_in_out, <strong class="jxr_keyword">long</strong> minor_in_out);
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> XkbLibraryVersion(<strong class="jxr_keyword">long</strong> lib_major_in_out, <strong class="jxr_keyword">long</strong> lib_minor_in_out);
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XkbGetMap(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> which, <strong class="jxr_keyword">long</strong> device_spec);
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XkbGetUpdatedMap(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> which, <strong class="jxr_keyword">long</strong> xkb);
+<a class="jxr_linenumber" name="L509" href="#L509">509</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XkbFreeKeyboard(<strong class="jxr_keyword">long</strong> xkb, <strong class="jxr_keyword">long</strong> which, <strong class="jxr_keyword">boolean</strong> free_all);
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> XkbTranslateKeyCode(<strong class="jxr_keyword">long</strong> xkb, <strong class="jxr_keyword">int</strong> keycode, <strong class="jxr_keyword">long</strong> mods, <strong class="jxr_keyword">long</strong> mods_rtrn, <strong class="jxr_keyword">long</strong> keysym_rtrn);
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> 
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> 
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XConvertCase(<strong class="jxr_keyword">long</strong> keysym,
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>                                     <strong class="jxr_keyword">long</strong> keysym_lowercase,
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>                                     <strong class="jxr_keyword">long</strong> keysym_uppercase);
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> 
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">long</strong> XGetModifierMapping(<strong class="jxr_keyword">long</strong> display);
+<a class="jxr_linenumber" name="L518" href="#L518">518</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XFreeModifiermap(<strong class="jxr_keyword">long</strong> keymap);
+<a class="jxr_linenumber" name="L519" href="#L519">519</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XRefreshKeyboardMapping(<strong class="jxr_keyword">long</strong> event);
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> 
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> 
+<a class="jxr_linenumber" name="L522" href="#L522">522</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> XChangeActivePointerGrab(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">int</strong> mask,
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>                                                 <strong class="jxr_keyword">long</strong> cursor, <strong class="jxr_keyword">long</strong> time);
+<a class="jxr_linenumber" name="L524" href="#L524">524</a> 
+<a class="jxr_linenumber" name="L525" href="#L525">525</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> <em class="jxr_comment">      int (*XSynchronize(Display *display, Bool onoff))();</em>
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> <em class="jxr_comment">          display   Specifies the connection to the X server.</em>
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> <em class="jxr_comment">          onoff     Specifies a Boolean value that indicates whether to enable or disable synchronization.</em>
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L530" href="#L530">530</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">int</strong> XSynchronize(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">boolean</strong> onoff);
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> 
+<a class="jxr_linenumber" name="L532" href="#L532">532</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> <em class="jxr_javadoccomment">     * Extracts an X event that can be processed in a secondary loop.</em>
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> <em class="jxr_javadoccomment">     * Should only be called on the toolkit thread.</em>
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> <em class="jxr_javadoccomment">     * Returns false if this secondary event was terminated.</em>
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L537" href="#L537">537</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> XNextSecondaryLoopEvent(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> ptr);
+<a class="jxr_linenumber" name="L538" href="#L538">538</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> <em class="jxr_javadoccomment">     * Terminates the topmost secondary loop (if any).</em>
+<a class="jxr_linenumber" name="L540" href="#L540">540</a> <em class="jxr_javadoccomment">     * Should never be called on the toolkit thread.</em>
+<a class="jxr_linenumber" name="L541" href="#L541">541</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L542" href="#L542">542</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> ExitSecondaryLoop();
+<a class="jxr_linenumber" name="L543" href="#L543">543</a> 
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L545" href="#L545">545</a> <em class="jxr_javadoccomment">     * Calls XTextPropertyToStringList on the specified byte array and returns</em>
+<a class="jxr_linenumber" name="L546" href="#L546">546</a> <em class="jxr_javadoccomment">     * the array of strings.</em>
+<a class="jxr_linenumber" name="L547" href="#L547">547</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L548" href="#L548">548</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> String[] XTextPropertyToStringList(byte[] bytes, <strong class="jxr_keyword">long</strong> encoding_atom);
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> 
+<a class="jxr_linenumber" name="L550" href="#L550">550</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> <em class="jxr_javadoccomment">     * XSHAPE extension support.</em>
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L553" href="#L553">553</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">boolean</strong> XShapeQueryExtension(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> event_base_<strong class="jxr_keyword">return</strong>, <strong class="jxr_keyword">long</strong> error_base_<strong class="jxr_keyword">return</strong>);
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> SetRectangularShape(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window,
+<a class="jxr_linenumber" name="L555" href="#L555">555</a>             <strong class="jxr_keyword">int</strong> lox, <strong class="jxr_keyword">int</strong> loy, <strong class="jxr_keyword">int</strong> hix, <strong class="jxr_keyword">int</strong> hiy,
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>             sun.java2d.pipe.Region region);
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>     <em class="jxr_javadoccomment">/** Each int in the bitmap array is one pixel with a 32-bit color:</em>
+<a class="jxr_linenumber" name="L558" href="#L558">558</a> <em class="jxr_javadoccomment">     *  R, G, B, and Alpha.</em>
+<a class="jxr_linenumber" name="L559" href="#L559">559</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> SetBitmapShape(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window,
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>              <strong class="jxr_keyword">int</strong> width, <strong class="jxr_keyword">int</strong> height, <strong class="jxr_keyword">int</strong>[] bitmap);
+<a class="jxr_linenumber" name="L562" href="#L562">562</a> 
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> SetZOrder(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> window, <strong class="jxr_keyword">long</strong> above);
+<a class="jxr_linenumber" name="L564" href="#L564">564</a> 
+<a class="jxr_linenumber" name="L565" href="#L565">565</a> <em class="jxr_comment">/* Global memory area used for X lib parameter passing */</em>
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> 
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> lbuffer = unsafe.allocateMemory(64);  <em class="jxr_comment">// array to hold 8 longs</em>
+<a class="jxr_linenumber" name="L568" href="#L568">568</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> ibuffer = unsafe.allocateMemory(32);  <em class="jxr_comment">// array to hold 8 ints</em>
+<a class="jxr_linenumber" name="L569" href="#L569">569</a> 
+<a class="jxr_linenumber" name="L570" href="#L570">570</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> larg1 = lbuffer;
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> larg2 = larg1+8;
+<a class="jxr_linenumber" name="L572" href="#L572">572</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> larg3 = larg2+8;
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> larg4 = larg3+8;
+<a class="jxr_linenumber" name="L574" href="#L574">574</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> larg5 = larg4+8;
+<a class="jxr_linenumber" name="L575" href="#L575">575</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> larg6 = larg5+8;
+<a class="jxr_linenumber" name="L576" href="#L576">576</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> larg7 = larg6+8;
+<a class="jxr_linenumber" name="L577" href="#L577">577</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> larg8 = larg7+8;
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> 
+<a class="jxr_linenumber" name="L579" href="#L579">579</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> iarg1 = ibuffer;
+<a class="jxr_linenumber" name="L580" href="#L580">580</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> iarg2 = iarg1+4;
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> iarg3 = iarg2+4;
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> iarg4 = iarg3+4;
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> iarg5 = iarg4+4;
+<a class="jxr_linenumber" name="L584" href="#L584">584</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> iarg6 = iarg5+4;
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> iarg7 = iarg6+4;
+<a class="jxr_linenumber" name="L586" href="#L586">586</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> iarg8 = iarg7+4;
+<a class="jxr_linenumber" name="L587" href="#L587">587</a> 
+<a class="jxr_linenumber" name="L588" href="#L588">588</a> 
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> dataModel;
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> isBuildInternal;
+<a class="jxr_linenumber" name="L591" href="#L591">591</a> 
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>     <strong class="jxr_keyword">static</strong> {
+<a class="jxr_linenumber" name="L593" href="#L593">593</a>         String dataModelProp = (String)AccessController.doPrivileged(
+<a class="jxr_linenumber" name="L594" href="#L594">594</a>             <strong class="jxr_keyword">new</strong> PrivilegedAction() {
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>                     <strong class="jxr_keyword">public</strong> Object run() {
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>                         <strong class="jxr_keyword">return</strong> System.getProperty(<span class="jxr_string">"sun.arch.data.model"</span>);
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>                     }
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>                 });
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>             dataModel = Integer.parseInt(dataModelProp);
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>         } <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>             dataModel = 32;
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>         }
+<a class="jxr_linenumber" name="L604" href="#L604">604</a> 
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>         isBuildInternal = getBuildInternal();
+<a class="jxr_linenumber" name="L606" href="#L606">606</a> 
+<a class="jxr_linenumber" name="L607" href="#L607">607</a> <em class="jxr_comment">//      System.loadLibrary("mawt");</em>
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>     }
+<a class="jxr_linenumber" name="L609" href="#L609">609</a> 
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">int</strong> getDataModel() {
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>         <strong class="jxr_keyword">return</strong> dataModel;
+<a class="jxr_linenumber" name="L612" href="#L612">612</a>     }
+<a class="jxr_linenumber" name="L613" href="#L613">613</a> 
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>     <strong class="jxr_keyword">static</strong> String hintsToString(<strong class="jxr_keyword">long</strong> flags) {
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>         StringBuffer buf = <strong class="jxr_keyword">new</strong> StringBuffer();
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>         <strong class="jxr_keyword">if</strong> ((flags &amp; XUtilConstants.PMaxSize) != 0) {
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>             buf.append(<span class="jxr_string">"PMaxSize "</span>);
+<a class="jxr_linenumber" name="L618" href="#L618">618</a>         }
+<a class="jxr_linenumber" name="L619" href="#L619">619</a>         <strong class="jxr_keyword">if</strong> ((flags &amp; XUtilConstants.PMinSize) != 0) {
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>             buf.append(<span class="jxr_string">"PMinSize "</span>);
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>         }
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>         <strong class="jxr_keyword">if</strong> ((flags &amp; XUtilConstants.USSize) != 0) {
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>             buf.append(<span class="jxr_string">"USSize "</span>);
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>         }
+<a class="jxr_linenumber" name="L625" href="#L625">625</a>         <strong class="jxr_keyword">if</strong> ((flags &amp; XUtilConstants.USPosition) != 0) {
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>             buf.append(<span class="jxr_string">"USPosition "</span>);
+<a class="jxr_linenumber" name="L627" href="#L627">627</a>         }
+<a class="jxr_linenumber" name="L628" href="#L628">628</a>         <strong class="jxr_keyword">if</strong> ((flags &amp; XUtilConstants.PPosition) != 0) {
+<a class="jxr_linenumber" name="L629" href="#L629">629</a>             buf.append(<span class="jxr_string">"PPosition "</span>);
+<a class="jxr_linenumber" name="L630" href="#L630">630</a>         }
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>         <strong class="jxr_keyword">if</strong> ((flags &amp; XUtilConstants.PSize) != 0) {
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>             buf.append(<span class="jxr_string">"PSize "</span>);
+<a class="jxr_linenumber" name="L633" href="#L633">633</a>         }
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>         <strong class="jxr_keyword">if</strong> ((flags &amp; XUtilConstants.PWinGravity) != 0) {
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>             buf.append(<span class="jxr_string">"PWinGravity "</span>);
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>         }
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>         <strong class="jxr_keyword">return</strong> buf.toString();
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>     }
+<a class="jxr_linenumber" name="L639" href="#L639">639</a>     <strong class="jxr_keyword">static</strong> String getEventToString( <strong class="jxr_keyword">int</strong> type ) {
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>         <strong class="jxr_keyword">if</strong>( (type &gt;= 0) &amp;&amp; (type &lt; eventToString.length)) {
+<a class="jxr_linenumber" name="L641" href="#L641">641</a>             <strong class="jxr_keyword">return</strong> eventToString[type];
+<a class="jxr_linenumber" name="L642" href="#L642">642</a>         }<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong>( type == XToolkit.getXKBBaseEventCode() ) {
+<a class="jxr_linenumber" name="L643" href="#L643">643</a>             <em class="jxr_comment">//XXX TODO various xkb types</em>
+<a class="jxr_linenumber" name="L644" href="#L644">644</a>             <strong class="jxr_keyword">return</strong> <span class="jxr_string">"XkbEvent"</span>;
+<a class="jxr_linenumber" name="L645" href="#L645">645</a>         }
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>         <strong class="jxr_keyword">return</strong> eventToString[0];
+<a class="jxr_linenumber" name="L647" href="#L647">647</a>     }
+<a class="jxr_linenumber" name="L648" href="#L648">648</a> 
+<a class="jxr_linenumber" name="L649" href="#L649">649</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> getBuildInternal() {
+<a class="jxr_linenumber" name="L650" href="#L650">650</a>         String javaVersion = XToolkit.getSystemProperty(<span class="jxr_string">"java.version"</span>);
+<a class="jxr_linenumber" name="L651" href="#L651">651</a>         <strong class="jxr_keyword">return</strong> javaVersion != <strong class="jxr_keyword">null</strong> &amp;&amp; javaVersion.contains(<span class="jxr_string">"internal"</span>);
+<a class="jxr_linenumber" name="L652" href="#L652">652</a>     }
+<a class="jxr_linenumber" name="L653" href="#L653">653</a> 
+<a class="jxr_linenumber" name="L654" href="#L654">654</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">native</strong> <strong class="jxr_keyword">void</strong> PrintXErrorEvent(<strong class="jxr_keyword">long</strong> display, <strong class="jxr_keyword">long</strong> event_ptr);
+<a class="jxr_linenumber" name="L655" href="#L655">655</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

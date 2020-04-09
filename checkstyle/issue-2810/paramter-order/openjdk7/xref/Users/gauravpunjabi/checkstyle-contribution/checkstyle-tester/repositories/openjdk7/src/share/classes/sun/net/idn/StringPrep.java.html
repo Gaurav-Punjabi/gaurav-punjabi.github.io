@@ -1,0 +1,500 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>StringPrep xref</title>
+<link type="text/css" rel="stylesheet" href="../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * published by the Free Software Foundation.  Oracle designates this</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * particular file as subject to the "Classpath" exception as provided</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * by Oracle in the LICENSE file that accompanied this code.</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_comment"> *******************************************************************************</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_comment"> * Copyright (C) 2003-2004, International Business Machines Corporation and         *</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_comment"> * others. All Rights Reserved.                                                *</em>
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_comment"> *******************************************************************************</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_comment">// CHANGELOG</em>
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_comment">//      2005-05-19 Edward Wang</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_comment">//          - copy this file from icu4jsrc_3_2/src/com/ibm/icu/text/StringPrep.java</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_comment">//          - move from package com.ibm.icu.text to package sun.net.idn</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_comment">//          - use ParseException instead of StringPrepParseException</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_comment">//          - change 'Normalizer.getUnicodeVersion()' to 'NormalizerImpl.getUnicodeVersion()'</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_comment">//          - remove all @deprecated tag to make compiler happy</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_comment">//      2007-08-14 Martin Buchholz</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_comment">//          - remove redundant casts</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">package</strong> sun.net.idn;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> java.io.BufferedInputStream;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> java.io.ByteArrayInputStream;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> java.io.InputStream;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> java.text.ParseException;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> sun.text.Normalizer;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> sun.text.normalizer.CharTrie;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> sun.text.normalizer.Trie;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> sun.text.normalizer.NormalizerImpl;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> sun.text.normalizer.VersionInfo;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <strong class="jxr_keyword">import</strong> sun.text.normalizer.UCharacter;
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <strong class="jxr_keyword">import</strong> sun.text.normalizer.UCharacterIterator;
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <strong class="jxr_keyword">import</strong> sun.text.normalizer.UTF16;
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <strong class="jxr_keyword">import</strong> sun.net.idn.UCharacterDirection;
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <strong class="jxr_keyword">import</strong> sun.net.idn.StringPrepDataReader;
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> * StringPrep API implements the StingPrep framework as described by</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> * &lt;a href="<a href="http://www.ietf.org/rfc/rfc3454.txt" target="alexandria_uri">http://www.ietf.org/rfc/rfc3454.txt</a>"&gt;RFC 3454&lt;/a&gt;.</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> * StringPrep prepares Unicode strings for use in network protocols.</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment"> * Profiles of StingPrep are set of rules and data according to which the</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment"> * Unicode Strings are prepared. Each profiles contains tables which describe</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment"> * how a code point should be treated. The tables are broadly classied into</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment"> * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment"> *     &lt;li&gt; Unassigned Table: Contains code points that are unassigned</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment"> *          in the Unicode Version supported by StringPrep. Currently</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment"> *          RFC 3454 supports Unicode 3.2. &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment"> *     &lt;li&gt; Prohibited Table: Contains code points that are prohibted from</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment"> *          the output of the StringPrep processing function. &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment"> *     &lt;li&gt; Mapping Table: Contains code ponts that are deleted from the output or case mapped. &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment"> * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment"> * The procedure for preparing Unicode strings:</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment"> * &lt;ol&gt;</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment"> *      &lt;li&gt; Map: For each character in the input, check if it has a mapping</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment"> *           and, if so, replace it with its mapping. &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_javadoccomment"> *      &lt;li&gt; Normalize: Possibly normalize the result of step 1 using Unicode</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment"> *           normalization. &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment"> *      &lt;li&gt; Prohibit: Check for any characters that are not allowed in the</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment"> *           output.  If any are found, return an error.&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment"> *      &lt;li&gt; Check bidi: Possibly check for right-to-left characters, and if</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment"> *           any are found, make sure that the whole string satisfies the</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_javadoccomment"> *           requirements for bidirectional strings.  If the string does not</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  <em class="jxr_javadoccomment"> *           satisfy the requirements for bidirectional strings, return an</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  <em class="jxr_javadoccomment"> *           error.  &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment"> * &lt;/ol&gt;</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment"> * @author Ram Viswanadha</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment"> * @draft ICU 2.8</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> StringPrep {
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment">     * Option to prohibit processing of unassigned code points in the input</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">     * @see   #prepare</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">     * @draft ICU 2.8</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> DEFAULT = 0x0000;
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">     * Option to allow processing of unassigned code points in the input</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">     * @see   #prepare</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">     * @draft ICU 2.8</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> ALLOW_UNASSIGNED = 0x0001;
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> UNASSIGNED        = 0x0000;
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAP               = 0x0001;
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> PROHIBITED        = 0x0002;
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> DELETE            = 0x0003;
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> TYPE_LIMIT        = 0x0004;
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> NORMALIZATION_ON  = 0x0001;
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> CHECK_BIDI_ON     = 0x0002;
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> TYPE_THRESHOLD       = 0xFFF0;
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAX_INDEX_VALUE      = 0x3FBF;   <em class="jxr_comment">/*16139*/</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAX_INDEX_TOP_LENGTH = 0x0003;
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>     <em class="jxr_comment">/* indexes[] value names */</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> INDEX_TRIE_SIZE                  =  0; <em class="jxr_comment">/* number of bytes in normalization trie */</em>
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> INDEX_MAPPING_DATA_SIZE          =  1; <em class="jxr_comment">/* The array that contains the mapping   */</em>
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> NORM_CORRECTNS_LAST_UNI_VERSION  =  2; <em class="jxr_comment">/* The index of Unicode version of last entry in NormalizationCorrections.txt */</em>
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> ONE_UCHAR_MAPPING_INDEX_START    =  3; <em class="jxr_comment">/* The starting index of 1 UChar mapping index in the mapping data array */</em>
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> TWO_UCHARS_MAPPING_INDEX_START   =  4; <em class="jxr_comment">/* The starting index of 2 UChars mapping index in the mapping data array */</em>
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> THREE_UCHARS_MAPPING_INDEX_START =  5;
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> FOUR_UCHARS_MAPPING_INDEX_START  =  6;
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> OPTIONS                          =  7; <em class="jxr_comment">/* Bit set of options to turn on in the profile */</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> INDEX_TOP                        = 16;                          <em class="jxr_comment">/* changing this requires a new formatVersion */</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_javadoccomment">     * Default buffer size of datafile</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> DATA_BUFFER_SIZE = 25000;
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>     <em class="jxr_comment">/* Wrappers for Trie implementations */</em>
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> StringPrepTrieImpl <strong class="jxr_keyword">implements</strong> Trie.DataManipulate{
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>         <strong class="jxr_keyword">private</strong> CharTrie sprepTrie = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>        <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment">        * Called by com.ibm.icu.util.Trie to extract from a lead surrogate's</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment">        * data the index array offset of the indexes for that lead surrogate.</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">        * @param property data value for a surrogate from the trie, including</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_javadoccomment">        *        the folding offset</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_javadoccomment">        * @return data offset or 0 if there is no data for the lead surrogate</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> <em class="jxr_javadoccomment">        */</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>          <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> getFoldingOffset(<strong class="jxr_keyword">int</strong> value){
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>             <strong class="jxr_keyword">return</strong> value;
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>         }
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>     }
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>     <em class="jxr_comment">// CharTrie implmentation for reading the trie data</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>     <strong class="jxr_keyword">private</strong> StringPrepTrieImpl sprepTrieImpl;
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>     <em class="jxr_comment">// Indexes read from the data file</em>
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong>[] indexes;
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>     <em class="jxr_comment">// mapping data read from the data file</em>
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">char</strong>[] mappingData;
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>     <em class="jxr_comment">// format version of the data file</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>     <strong class="jxr_keyword">private</strong> byte[] formatVersion;
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>     <em class="jxr_comment">// the version of Unicode supported by the data file</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>     <strong class="jxr_keyword">private</strong> VersionInfo sprepUniVer;
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>     <em class="jxr_comment">// the Unicode version of last entry in the</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>     <em class="jxr_comment">// NormalizationCorrections.txt file if normalization</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>     <em class="jxr_comment">// is turned on</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>     <strong class="jxr_keyword">private</strong> VersionInfo normCorrVer;
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>     <em class="jxr_comment">// Option to turn on Normalization</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> doNFKC;
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>     <em class="jxr_comment">// Option to turn on checking for BiDi rules</em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> checkBiDi;
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">char</strong> getCodePointValue(<strong class="jxr_keyword">int</strong> ch){
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>         <strong class="jxr_keyword">return</strong> sprepTrieImpl.sprepTrie.getCodePointValue(ch);
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>     }
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> VersionInfo getVersionInfo(<strong class="jxr_keyword">int</strong> comp){
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>         <strong class="jxr_keyword">int</strong> micro = comp &amp; 0xFF;
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>         <strong class="jxr_keyword">int</strong> milli =(comp &gt;&gt; 8)  &amp; 0xFF;
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>         <strong class="jxr_keyword">int</strong> minor =(comp &gt;&gt; 16) &amp; 0xFF;
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>         <strong class="jxr_keyword">int</strong> major =(comp &gt;&gt; 24) &amp; 0xFF;
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>         <strong class="jxr_keyword">return</strong> VersionInfo.getInstance(major,minor,milli,micro);
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>     }
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> VersionInfo getVersionInfo(byte[] version){
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>         <strong class="jxr_keyword">if</strong>(version.length != 4){
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>         }
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>         <strong class="jxr_keyword">return</strong> VersionInfo.getInstance((<strong class="jxr_keyword">int</strong>)version[0],(<strong class="jxr_keyword">int</strong>) version[1],(<strong class="jxr_keyword">int</strong>) version[2],(<strong class="jxr_keyword">int</strong>) version[3]);
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>     }
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> <em class="jxr_javadoccomment">     * Creates an StringPrep object after reading the input stream.</em>
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> <em class="jxr_javadoccomment">     * The object does not hold a reference to the input steam, so the stream can be</em>
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_javadoccomment">     * closed after the method returns.</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_javadoccomment">     * @param inputStream The stream for reading the StringPrep profile binarySun</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_javadoccomment">     * @throws IOException</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment">     * @draft ICU 2.8</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>     <strong class="jxr_keyword">public</strong> StringPrep(InputStream inputStream) <strong class="jxr_keyword">throws</strong> IOException{
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>         BufferedInputStream b = <strong class="jxr_keyword">new</strong> BufferedInputStream(inputStream,DATA_BUFFER_SIZE);
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> 
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>         StringPrepDataReader reader = <strong class="jxr_keyword">new</strong> StringPrepDataReader(b);
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> 
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>         <em class="jxr_comment">// read the indexes</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>         indexes = reader.readIndexes(INDEX_TOP);
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> 
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>         byte[] sprepBytes = <strong class="jxr_keyword">new</strong> byte[indexes[INDEX_TRIE_SIZE]];
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> 
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>         <em class="jxr_comment">//indexes[INDEX_MAPPING_DATA_SIZE] store the size of mappingData in bytes</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>         mappingData = <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">char</strong>[indexes[INDEX_MAPPING_DATA_SIZE]/2];
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>         <em class="jxr_comment">// load the rest of the data data and initialize the data members</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>         reader.read(sprepBytes,mappingData);
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> 
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>         sprepTrieImpl           = <strong class="jxr_keyword">new</strong> StringPrepTrieImpl();
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>         sprepTrieImpl.sprepTrie = <strong class="jxr_keyword">new</strong> CharTrie( <strong class="jxr_keyword">new</strong> ByteArrayInputStream(sprepBytes),sprepTrieImpl  );
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> 
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>         <em class="jxr_comment">// get the data format version</em>
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>         formatVersion = reader.getDataFormatVersion();
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> 
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>         <em class="jxr_comment">// get the options</em>
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>         doNFKC            = ((indexes[OPTIONS] &amp; NORMALIZATION_ON) &gt; 0);
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>         checkBiDi         = ((indexes[OPTIONS] &amp; CHECK_BIDI_ON) &gt; 0);
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>         sprepUniVer   = getVersionInfo(reader.getUnicodeVersion());
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>         normCorrVer   = getVersionInfo(indexes[NORM_CORRECTNS_LAST_UNI_VERSION]);
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>         VersionInfo normUniVer = NormalizerImpl.getUnicodeVersion();
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>         <strong class="jxr_keyword">if</strong>(normUniVer.compareTo(sprepUniVer) &lt; 0 &amp;&amp; <em class="jxr_comment">/* the Unicode version of SPREP file must be less than the Unicode Vesion of the normalization data */</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>            normUniVer.compareTo(normCorrVer) &lt; 0 &amp;&amp; <em class="jxr_comment">/* the Unicode version of the NormalizationCorrections.txt file should be less than the Unicode Vesion of the normalization data */</em>
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>            ((indexes[OPTIONS] &amp; NORMALIZATION_ON) &gt; 0) <em class="jxr_comment">/* normalization turned on*/</em>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>            ){
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IOException(<span class="jxr_string">"Normalization Correction version not supported"</span>);
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>         }
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>         b.close();
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>     }
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> 
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> Values{
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>         <strong class="jxr_keyword">boolean</strong> isIndex;
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>         <strong class="jxr_keyword">int</strong> value;
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>         <strong class="jxr_keyword">int</strong> type;
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>         <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> reset(){
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>             isIndex = false;
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>             value = 0;
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>             type = -1;
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>         }
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>     }
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> 
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">void</strong> getValues(<strong class="jxr_keyword">char</strong> trieWord,Values values){
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>         values.reset();
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>         <strong class="jxr_keyword">if</strong>(trieWord == 0){
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>             <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> <em class="jxr_comment">             * Initial value stored in the mapping table</em>
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> <em class="jxr_comment">             * just return TYPE_LIMIT .. so that</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> <em class="jxr_comment">             * the source codepoint is copied to the destination</em>
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> <em class="jxr_comment">             */</em>
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>             values.type = TYPE_LIMIT;
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>         }<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong>(trieWord &gt;= TYPE_THRESHOLD){
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>             values.type = (trieWord - TYPE_THRESHOLD);
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>         }<strong class="jxr_keyword">else</strong>{
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>             <em class="jxr_comment">/* get the type */</em>
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>             values.type = MAP;
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>             <em class="jxr_comment">/* ascertain if the value is index or delta */</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>             <strong class="jxr_keyword">if</strong>((trieWord &amp; 0x02)&gt;0){
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>                 values.isIndex = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>                 values.value = trieWord  &gt;&gt; 2; <em class="jxr_comment">//mask off the lower 2 bits and shift</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>             }<strong class="jxr_keyword">else</strong>{
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>                 values.isIndex = false;
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>                 values.value = (trieWord&lt;&lt;16)&gt;&gt;16;
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>                 values.value =  (values.value &gt;&gt; 2);
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> 
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>             }
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>             <strong class="jxr_keyword">if</strong>((trieWord&gt;&gt;2) == MAX_INDEX_VALUE){
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>                 values.type = DELETE;
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>                 values.isIndex = false;
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>                 values.value = 0;
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>             }
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>         }
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>     }
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> 
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>     <strong class="jxr_keyword">private</strong> StringBuffer map( UCharacterIterator iter, <strong class="jxr_keyword">int</strong> options)
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>                             <strong class="jxr_keyword">throws</strong> ParseException {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> 
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>         Values val = <strong class="jxr_keyword">new</strong> Values();
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>         <strong class="jxr_keyword">char</strong> result = 0;
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>         <strong class="jxr_keyword">int</strong> ch  = UCharacterIterator.DONE;
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>         StringBuffer dest = <strong class="jxr_keyword">new</strong> StringBuffer();
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>         <strong class="jxr_keyword">boolean</strong> allowUnassigned = ((options &amp; ALLOW_UNASSIGNED)&gt;0);
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> 
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>         <strong class="jxr_keyword">while</strong>((ch=iter.nextCodePoint())!= UCharacterIterator.DONE){
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> 
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>             result = getCodePointValue(ch);
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>             getValues(result,val);
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> 
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>             <em class="jxr_comment">// check if the source codepoint is unassigned</em>
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>             <strong class="jxr_keyword">if</strong>(val.type == UNASSIGNED &amp;&amp; allowUnassigned == false){
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>                  <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ParseException(<span class="jxr_string">"An unassigned code point was found in the input "</span> +
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>                                           iter.getText(), iter.getIndex());
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>             }<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong>((val.type == MAP)){
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>                 <strong class="jxr_keyword">int</strong> index, length;
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>                 <strong class="jxr_keyword">if</strong>(val.isIndex){
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>                     index = val.value;
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>                     <strong class="jxr_keyword">if</strong>(index &gt;= indexes[ONE_UCHAR_MAPPING_INDEX_START] &amp;&amp;
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>                              index &lt; indexes[TWO_UCHARS_MAPPING_INDEX_START]){
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>                         length = 1;
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>                     }<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong>(index &gt;= indexes[TWO_UCHARS_MAPPING_INDEX_START] &amp;&amp;
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>                              index &lt; indexes[THREE_UCHARS_MAPPING_INDEX_START]){
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>                         length = 2;
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>                     }<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong>(index &gt;= indexes[THREE_UCHARS_MAPPING_INDEX_START] &amp;&amp;
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>                              index &lt; indexes[FOUR_UCHARS_MAPPING_INDEX_START]){
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>                         length = 3;
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>                     }<strong class="jxr_keyword">else</strong>{
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>                         length = mappingData[index++];
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>                     }
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>                     <em class="jxr_comment">/* copy mapping to destination */</em>
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>                     dest.append(mappingData,index,length);
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>                     <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>                 }<strong class="jxr_keyword">else</strong>{
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>                     ch -= val.value;
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>                 }
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>             }<strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong>(val.type == DELETE){
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>                 <em class="jxr_comment">// just consume the codepoint and contine</em>
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>                 <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>             }
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>             <em class="jxr_comment">//copy the source into destination</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>             UTF16.append(dest,ch);
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>         }
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> 
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>         <strong class="jxr_keyword">return</strong> dest;
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>     }
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>     <strong class="jxr_keyword">private</strong> StringBuffer normalize(StringBuffer src){
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>         <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> <em class="jxr_comment">         * Option UNORM_BEFORE_PRI_29:</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> <em class="jxr_comment">         *</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> <em class="jxr_comment">         * IDNA as interpreted by IETF members (see unicode mailing list 2004H1)</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> <em class="jxr_comment">         * requires strict adherence to Unicode 3.2 normalization,</em>
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> <em class="jxr_comment">         * including buggy composition from before fixing Public Review Issue #29.</em>
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> <em class="jxr_comment">         * Note that this results in some valid but nonsensical text to be</em>
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> <em class="jxr_comment">         * either corrupted or rejected, depending on the text.</em>
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> <em class="jxr_comment">         * See <a href="http://www.unicode.org/review/resolved-pri.html" target="alexandria_uri">http://www.unicode.org/review/resolved-pri.html</a>#pri29</em>
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> <em class="jxr_comment">         * See unorm.cpp and cnormtst.c</em>
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> <em class="jxr_comment">         */</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> StringBuffer(
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>             Normalizer.normalize(
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>                 src.toString(),
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>                 java.text.Normalizer.Form.NFKC,
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>                 Normalizer.UNICODE_3_2|NormalizerImpl.BEFORE_PRI_29));
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>     }
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> <em class="jxr_comment">    boolean isLabelSeparator(int ch){</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> <em class="jxr_comment">        int result = getCodePointValue(ch);</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> <em class="jxr_comment">        if( (result &amp; 0x07)  == LABEL_SEPARATOR){</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> <em class="jxr_comment">            return true;</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> <em class="jxr_comment">        }</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> <em class="jxr_comment">        return false;</em>
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> <em class="jxr_comment">    }</em>
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_comment">    */</em>
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>      <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> <em class="jxr_comment">       1) Map -- For each character in the input, check if it has a mapping</em>
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> <em class="jxr_comment">          and, if so, replace it with its mapping.</em>
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> <em class="jxr_comment">       2) Normalize -- Possibly normalize the result of step 1 using Unicode</em>
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> <em class="jxr_comment">          normalization.</em>
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> <em class="jxr_comment">       3) Prohibit -- Check for any characters that are not allowed in the</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> <em class="jxr_comment">          output.  If any are found, return an error.</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> 
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_comment">       4) Check bidi -- Possibly check for right-to-left characters, and if</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_comment">          any are found, make sure that the whole string satisfies the</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> <em class="jxr_comment">          requirements for bidirectional strings.  If the string does not</em>
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> <em class="jxr_comment">          satisfy the requirements for bidirectional strings, return an</em>
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> <em class="jxr_comment">          error.</em>
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> <em class="jxr_comment">          [Unicode3.2] defines several bidirectional categories; each character</em>
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> <em class="jxr_comment">           has one bidirectional category assigned to it.  For the purposes of</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> <em class="jxr_comment">           the requirements below, an "RandALCat character" is a character that</em>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> <em class="jxr_comment">           has Unicode bidirectional categories "R" or "AL"; an "LCat character"</em>
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> <em class="jxr_comment">           is a character that has Unicode bidirectional category "L".  Note</em>
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> <em class="jxr_comment">           that there are many characters which fall in neither of the above</em>
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> <em class="jxr_comment">           definitions; Latin digits (&lt;U+0030&gt; through &lt;U+0039&gt;) are examples of</em>
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> <em class="jxr_comment">           this because they have bidirectional category "EN".</em>
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> 
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> <em class="jxr_comment">           In any profile that specifies bidirectional character handling, all</em>
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> <em class="jxr_comment">           three of the following requirements MUST be met:</em>
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> 
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> <em class="jxr_comment">           1) The characters in section 5.8 MUST be prohibited.</em>
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> <em class="jxr_comment">           2) If a string contains any RandALCat character, the string MUST NOT</em>
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> <em class="jxr_comment">              contain any LCat character.</em>
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> <em class="jxr_comment">           3) If a string contains any RandALCat character, a RandALCat</em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_comment">              character MUST be the first character of the string, and a</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_comment">              RandALCat character MUST be the last character of the string.</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_comment">    */</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> <em class="jxr_javadoccomment">     * Prepare the input buffer for use in applications with the given profile. This operation maps, normalizes(NFKC),</em>
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> <em class="jxr_javadoccomment">     * checks for prohited and BiDi characters in the order defined by RFC 3454</em>
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> <em class="jxr_javadoccomment">     * depending on the options specified in the profile.</em>
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> <em class="jxr_javadoccomment">     * @param src           A UCharacterIterator object containing the source string</em>
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> <em class="jxr_javadoccomment">     * @param options       A bit set of options:</em>
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> <em class="jxr_javadoccomment">     *  - StringPrep.NONE               Prohibit processing of unassigned code points in the input</em>
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> <em class="jxr_javadoccomment">     *  - StringPrep.ALLOW_UNASSIGNED   Treat the unassigned code points are in the input</em>
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> <em class="jxr_javadoccomment">     *                                  as normal Unicode code points.</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> <em class="jxr_javadoccomment">     * @return StringBuffer A StringBuffer containing the output</em>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> <em class="jxr_javadoccomment">     * @throws ParseException</em>
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> <em class="jxr_javadoccomment">     * @draft ICU 2.8</em>
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>     <strong class="jxr_keyword">public</strong> StringBuffer prepare(UCharacterIterator src, <strong class="jxr_keyword">int</strong> options)
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>                         <strong class="jxr_keyword">throws</strong> ParseException{
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>         <em class="jxr_comment">// map</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>         StringBuffer mapOut = map(src,options);
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>         StringBuffer normOut = mapOut;<em class="jxr_comment">// initialize</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> 
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>         <strong class="jxr_keyword">if</strong>(doNFKC){
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>             <em class="jxr_comment">// normalize</em>
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>             normOut = normalize(mapOut);
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>         }
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> 
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>         <strong class="jxr_keyword">int</strong> ch;
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>         <strong class="jxr_keyword">char</strong> result;
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>         UCharacterIterator iter = UCharacterIterator.getInstance(normOut);
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>         Values val = <strong class="jxr_keyword">new</strong> Values();
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>         <strong class="jxr_keyword">int</strong> direction=UCharacterDirection.CHAR_DIRECTION_COUNT,
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>             firstCharDir=UCharacterDirection.CHAR_DIRECTION_COUNT;
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>         <strong class="jxr_keyword">int</strong> rtlPos=-1, ltrPos=-1;
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>         <strong class="jxr_keyword">boolean</strong> rightToLeft=false, leftToRight=false;
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>         <strong class="jxr_keyword">while</strong>((ch=iter.nextCodePoint())!= UCharacterIterator.DONE){
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>             result = getCodePointValue(ch);
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>             getValues(result,val);
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>             <strong class="jxr_keyword">if</strong>(val.type == PROHIBITED ){
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>                 <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ParseException(<span class="jxr_string">"A prohibited code point was found in the input"</span> +
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>                                          iter.getText(), val.value);
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>             }
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> 
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>             direction = UCharacter.getDirection(ch);
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>             <strong class="jxr_keyword">if</strong>(firstCharDir == UCharacterDirection.CHAR_DIRECTION_COUNT){
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>                 firstCharDir = direction;
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>             }
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>             <strong class="jxr_keyword">if</strong>(direction == UCharacterDirection.LEFT_TO_RIGHT){
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>                 leftToRight = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>                 ltrPos = iter.getIndex()-1;
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>             }
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>             <strong class="jxr_keyword">if</strong>(direction == UCharacterDirection.RIGHT_TO_LEFT || direction == UCharacterDirection.RIGHT_TO_LEFT_ARABIC){
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>                 rightToLeft = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>                 rtlPos = iter.getIndex()-1;
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>             }
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>         }
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>         <strong class="jxr_keyword">if</strong>(checkBiDi == <strong class="jxr_keyword">true</strong>){
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>             <em class="jxr_comment">// satisfy 2</em>
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>             <strong class="jxr_keyword">if</strong>( leftToRight == <strong class="jxr_keyword">true</strong> &amp;&amp; rightToLeft == <strong class="jxr_keyword">true</strong>){
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>                 <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ParseException(<span class="jxr_string">"The input does not conform to the rules for BiDi code points."</span> +
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>                                          iter.getText(),
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>                                          (rtlPos&gt;ltrPos) ? rtlPos : ltrPos);
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>              }
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> 
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>             <em class="jxr_comment">//satisfy 3</em>
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>             <strong class="jxr_keyword">if</strong>( rightToLeft == <strong class="jxr_keyword">true</strong> &amp;&amp;
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>                 !((firstCharDir == UCharacterDirection.RIGHT_TO_LEFT || firstCharDir == UCharacterDirection.RIGHT_TO_LEFT_ARABIC) &amp;&amp;
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>                 (direction == UCharacterDirection.RIGHT_TO_LEFT || direction == UCharacterDirection.RIGHT_TO_LEFT_ARABIC))
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>               ){
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>                 <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ParseException(<span class="jxr_string">"The input does not conform to the rules for BiDi code points."</span> +
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>                                          iter.getText(),
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>                                          (rtlPos&gt;ltrPos) ? rtlPos : ltrPos);
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>             }
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>         }
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>         <strong class="jxr_keyword">return</strong> normOut;
+<a class="jxr_linenumber" name="L485" href="#L485">485</a> 
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>       }
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

@@ -1,0 +1,1104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>DefaultMemStore xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_javadoccomment"> * Licensed to the Apache Software Foundation (ASF) under one</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_javadoccomment"> * or more contributor license agreements.  See the NOTICE file</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_javadoccomment"> * distributed with this work for additional information</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_javadoccomment"> * regarding copyright ownership.  The ASF licenses this file</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_javadoccomment"> * to you under the Apache License, Version 2.0 (the</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_javadoccomment"> * "License"); you may not use this file except in compliance</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_javadoccomment"> * with the License.  You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_javadoccomment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_javadoccomment"> * Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_javadoccomment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_javadoccomment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_javadoccomment"> * See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_javadoccomment"> * limitations under the License.</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">package</strong> org.apache.hadoop.hbase.regionserver;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> java.lang.management.ManagementFactory;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.lang.management.RuntimeMXBean;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> java.util.Iterator;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.NavigableSet;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.SortedSet;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> java.util.concurrent.atomic.AtomicLong;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.logging.Log;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.logging.LogFactory;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.classification.InterfaceAudience;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.conf.Configuration;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.Cell;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.CellUtil;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.HBaseConfiguration;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.HConstants;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.KeyValue;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.KeyValueUtil;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.client.Scan;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.ByteRange;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.Bytes;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.ClassSize;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.CollectionBackedScanner;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.EnvironmentEdgeManager;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.Pair;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> org.apache.hadoop.hbase.util.ReflectionUtils;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> org.apache.htrace.Trace;
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> * The MemStore holds in-memory modifications to the Store.  Modifications</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> * are {@link Cell}s.  When asked to flush, current memstore is moved</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> * to snapshot and is cleared.  We continue to serve edits out of new memstore</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment"> * and backing snapshot until flusher reports in that the flush succeeded. At</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment"> * this point we let the snapshot go.</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment"> *  &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment"> * The MemStore functions should not be called in parallel. Callers should hold</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> *  write and read locks. This is done in {@link HStore}.</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> *  &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> * TODO: Adjust size of the memstore when we remove items because they have</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> * been deleted.</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment"> * TODO: With new KVSLS, need to make sure we update HeapSize with difference</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment"> * in KV size.</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  @InterfaceAudience.Private
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> DefaultMemStore <strong class="jxr_keyword">implements</strong> MemStore {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Log LOG = LogFactory.getLog(DefaultMemStore.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>    <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String USEMSLAB_KEY = <span class="jxr_string">"hbase.hregion.memstore.mslab.enabled"</span>;
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> USEMSLAB_DEFAULT = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>    <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String MSLAB_CLASS_NAME = <span class="jxr_string">"hbase.regionserver.mslab.class"</span>;
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>    <strong class="jxr_keyword">private</strong> Configuration conf;
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>    <em class="jxr_comment">// MemStore.  Use a CellSkipListSet rather than SkipListSet because of the</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>    <em class="jxr_comment">// better semantics.  The Map will overwrite if passed a key it already had</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>    <em class="jxr_comment">// whereas the Set will not add new Cell if key is same though value might be</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>    <em class="jxr_comment">// different.  Value is not important -- just make sure always same</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>    <em class="jxr_comment">// reference passed.</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>    <strong class="jxr_keyword">volatile</strong> CellSkipListSet cellSet;
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>    <em class="jxr_comment">// Snapshot of memstore.  Made for flusher.</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>    <strong class="jxr_keyword">volatile</strong> CellSkipListSet snapshot;
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>    <strong class="jxr_keyword">final</strong> KeyValue.KVComparator comparator;
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>    <em class="jxr_comment">// Used to track own heapSize</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>    <strong class="jxr_keyword">final</strong> AtomicLong size;
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">volatile</strong> <strong class="jxr_keyword">long</strong> snapshotSize;
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>    <em class="jxr_comment">// Used to track when to flush</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>    <strong class="jxr_keyword">volatile</strong> <strong class="jxr_keyword">long</strong> timeOfOldestEdit = Long.MAX_VALUE;
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>    TimeRangeTracker timeRangeTracker;
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>    TimeRangeTracker snapshotTimeRangeTracker;
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>    <strong class="jxr_keyword">volatile</strong> MemStoreLAB allocator;
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>   <strong class="jxr_keyword">volatile</strong> MemStoreLAB snapshotAllocator;
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>   <strong class="jxr_keyword">volatile</strong> <strong class="jxr_keyword">long</strong> snapshotId;
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">   * Default constructor. Used for tests.</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>   <strong class="jxr_keyword">public</strong> DefaultMemStore() {
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>     <strong class="jxr_keyword">this</strong>(HBaseConfiguration.create(), KeyValue.COMPARATOR);
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>   }
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_javadoccomment">   * Constructor.</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment">   * @param c Comparator</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>   <strong class="jxr_keyword">public</strong> DefaultMemStore(<strong class="jxr_keyword">final</strong> Configuration conf,
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>                   <strong class="jxr_keyword">final</strong> KeyValue.KVComparator c) {
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>     <strong class="jxr_keyword">this</strong>.conf = conf;
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>     <strong class="jxr_keyword">this</strong>.comparator = c;
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>     <strong class="jxr_keyword">this</strong>.cellSet = <strong class="jxr_keyword">new</strong> CellSkipListSet(c);
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>     <strong class="jxr_keyword">this</strong>.snapshot = <strong class="jxr_keyword">new</strong> CellSkipListSet(c);
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>     timeRangeTracker = <strong class="jxr_keyword">new</strong> TimeRangeTracker();
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>     snapshotTimeRangeTracker = <strong class="jxr_keyword">new</strong> TimeRangeTracker();
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>     <strong class="jxr_keyword">this</strong>.size = <strong class="jxr_keyword">new</strong> AtomicLong(DEEP_OVERHEAD);
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>     <strong class="jxr_keyword">this</strong>.snapshotSize = 0;
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>     <strong class="jxr_keyword">if</strong> (conf.getBoolean(USEMSLAB_KEY, USEMSLAB_DEFAULT)) {
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>       String className = conf.get(MSLAB_CLASS_NAME, HeapMemStoreLAB.<strong class="jxr_keyword">class</strong>.getName());
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>       <strong class="jxr_keyword">this</strong>.allocator = ReflectionUtils.instantiateWithCustomCtor(className,
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>           <strong class="jxr_keyword">new</strong> Class[] { Configuration.<strong class="jxr_keyword">class</strong> }, <strong class="jxr_keyword">new</strong> Object[] { conf });
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>       <strong class="jxr_keyword">this</strong>.allocator = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>     }
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>   }
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>   <strong class="jxr_keyword">void</strong> dump() {
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>     <strong class="jxr_keyword">for</strong> (Cell cell: <strong class="jxr_keyword">this</strong>.cellSet) {
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>       LOG.info(cell);
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>     }
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>     <strong class="jxr_keyword">for</strong> (Cell cell: <strong class="jxr_keyword">this</strong>.snapshot) {
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>       LOG.info(cell);
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>     }
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>   }
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> <em class="jxr_javadoccomment">   * Creates a snapshot of the current memstore.</em>
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> <em class="jxr_javadoccomment">   * Snapshot must be cleared by call to {@link #clearSnapshot(long)}</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>   @Override
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>   <strong class="jxr_keyword">public</strong> MemStoreSnapshot snapshot() {
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>     <em class="jxr_comment">// If snapshot currently has entries, then flusher failed or didn't call</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>     <em class="jxr_comment">// cleanup.  Log a warning.</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>     <strong class="jxr_keyword">if</strong> (!<strong class="jxr_keyword">this</strong>.snapshot.isEmpty()) {
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>       LOG.warn(<span class="jxr_string">"Snapshot called again without clearing previous. "</span> +
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>           <span class="jxr_string">"Doing nothing. Another ongoing flush or did we fail last attempt?"</span>);
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>       <strong class="jxr_keyword">this</strong>.snapshotId = EnvironmentEdgeManager.currentTime();
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>       <strong class="jxr_keyword">this</strong>.snapshotSize = keySize();
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>       <strong class="jxr_keyword">if</strong> (!<strong class="jxr_keyword">this</strong>.cellSet.isEmpty()) {
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>         <strong class="jxr_keyword">this</strong>.snapshot = <strong class="jxr_keyword">this</strong>.cellSet;
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>         <strong class="jxr_keyword">this</strong>.cellSet = <strong class="jxr_keyword">new</strong> CellSkipListSet(<strong class="jxr_keyword">this</strong>.comparator);
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>         <strong class="jxr_keyword">this</strong>.snapshotTimeRangeTracker = <strong class="jxr_keyword">this</strong>.timeRangeTracker;
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>         <strong class="jxr_keyword">this</strong>.timeRangeTracker = <strong class="jxr_keyword">new</strong> TimeRangeTracker();
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>         <em class="jxr_comment">// Reset heap to not include any keys</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>         <strong class="jxr_keyword">this</strong>.size.set(DEEP_OVERHEAD);
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>         <strong class="jxr_keyword">this</strong>.snapshotAllocator = <strong class="jxr_keyword">this</strong>.allocator;
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>         <em class="jxr_comment">// Reset allocator so we get a fresh buffer for the new memstore</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>         <strong class="jxr_keyword">if</strong> (allocator != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>           String className = conf.get(MSLAB_CLASS_NAME, HeapMemStoreLAB.<strong class="jxr_keyword">class</strong>.getName());
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>           <strong class="jxr_keyword">this</strong>.allocator = ReflectionUtils.instantiateWithCustomCtor(className,
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>               <strong class="jxr_keyword">new</strong> Class[] { Configuration.<strong class="jxr_keyword">class</strong> }, <strong class="jxr_keyword">new</strong> Object[] { conf });
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>         }
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>         timeOfOldestEdit = Long.MAX_VALUE;
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>       }
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>     }
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> MemStoreSnapshot(<strong class="jxr_keyword">this</strong>.snapshotId, snapshot.size(), <strong class="jxr_keyword">this</strong>.snapshotSize,
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>         <strong class="jxr_keyword">this</strong>.snapshotTimeRangeTracker, <strong class="jxr_keyword">new</strong> CollectionBackedScanner(snapshot, <strong class="jxr_keyword">this</strong>.comparator));
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>   }
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">   * The passed snapshot was successfully persisted; it can be let go.</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> <em class="jxr_javadoccomment">   * @param id Id of the snapshot to clean out.</em>
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> <em class="jxr_javadoccomment">   * @throws UnexpectedStateException</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> <em class="jxr_javadoccomment">   * @see #snapshot()</em>
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>   @Override
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> clearSnapshot(<strong class="jxr_keyword">long</strong> id) <strong class="jxr_keyword">throws</strong> UnexpectedStateException {
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>     MemStoreLAB tmpAllocator = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>     <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.snapshotId != id) {
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>       <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnexpectedStateException(<span class="jxr_string">"Current snapshot id is "</span> + <strong class="jxr_keyword">this</strong>.snapshotId + <span class="jxr_string">",passed "</span>
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>           + id);
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>     }
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>     <em class="jxr_comment">// OK. Passed in snapshot is same as current snapshot. If not-empty,</em>
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>     <em class="jxr_comment">// create a new snapshot and let the old one go.</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>     <strong class="jxr_keyword">if</strong> (!<strong class="jxr_keyword">this</strong>.snapshot.isEmpty()) {
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>       <strong class="jxr_keyword">this</strong>.snapshot = <strong class="jxr_keyword">new</strong> CellSkipListSet(<strong class="jxr_keyword">this</strong>.comparator);
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>       <strong class="jxr_keyword">this</strong>.snapshotTimeRangeTracker = <strong class="jxr_keyword">new</strong> TimeRangeTracker();
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>     }
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>     <strong class="jxr_keyword">this</strong>.snapshotSize = 0;
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>     <strong class="jxr_keyword">this</strong>.snapshotId = -1;
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>     <strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">this</strong>.snapshotAllocator != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>       tmpAllocator = <strong class="jxr_keyword">this</strong>.snapshotAllocator;
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>       <strong class="jxr_keyword">this</strong>.snapshotAllocator = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>     }
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>     <strong class="jxr_keyword">if</strong> (tmpAllocator != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>       tmpAllocator.close();
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>     }
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>   }
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> 
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>   @Override
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> getFlushableSize() {
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>.snapshotSize &gt; 0 ? <strong class="jxr_keyword">this</strong>.snapshotSize : keySize();
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>   }
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> 
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>   @Override
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> getSnapshotSize() {
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>.snapshotSize;
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>   }
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> 
+<a class="jxr_linenumber" name="L217" href="#L217">217</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> <em class="jxr_javadoccomment">   * Write an update</em>
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> <em class="jxr_javadoccomment">   * @param cell</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> <em class="jxr_javadoccomment">   * @return approximate size of the passed KV &amp; newly added KV which maybe different than the</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> <em class="jxr_javadoccomment">   *         passed-in KV</em>
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L223" href="#L223">223</a>   @Override
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>   <strong class="jxr_keyword">public</strong> Pair&lt;Long, Cell&gt; add(Cell cell) {
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>     Cell toAdd = maybeCloneWithAllocator(cell);
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Pair&lt;Long, Cell&gt;(internalAdd(toAdd), toAdd);
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>   }
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> 
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>   @Override
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> timeOfOldestEdit() {
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>     <strong class="jxr_keyword">return</strong> timeOfOldestEdit;
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>   }
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> 
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> addToCellSet(Cell e) {
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>     <strong class="jxr_keyword">boolean</strong> b = <strong class="jxr_keyword">this</strong>.cellSet.add(e);
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>     setOldestEditTimeToNow();
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>     <strong class="jxr_keyword">return</strong> b;
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>   }
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> 
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> removeFromCellSet(Cell e) {
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>     <strong class="jxr_keyword">boolean</strong> b = <strong class="jxr_keyword">this</strong>.cellSet.remove(e);
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>     setOldestEditTimeToNow();
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>     <strong class="jxr_keyword">return</strong> b;
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>   }
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> 
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>   <strong class="jxr_keyword">void</strong> setOldestEditTimeToNow() {
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>     <strong class="jxr_keyword">if</strong> (timeOfOldestEdit == Long.MAX_VALUE) {
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>       timeOfOldestEdit = EnvironmentEdgeManager.currentTime();
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>     }
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>   }
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">   * Internal version of add() that doesn't clone Cells with the</em>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> <em class="jxr_javadoccomment">   * allocator, and doesn't take the lock.</em>
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> <em class="jxr_javadoccomment">   * Callers should ensure they already have the read lock taken</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">long</strong> internalAdd(<strong class="jxr_keyword">final</strong> Cell toAdd) {
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>     <strong class="jxr_keyword">long</strong> s = heapSizeChange(toAdd, addToCellSet(toAdd));
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>     timeRangeTracker.includeTimestamp(toAdd);
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>     <strong class="jxr_keyword">this</strong>.size.addAndGet(s);
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>     <strong class="jxr_keyword">return</strong> s;
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>   }
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> 
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>   <strong class="jxr_keyword">private</strong> Cell maybeCloneWithAllocator(Cell cell) {
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>     <strong class="jxr_keyword">if</strong> (allocator == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>       <strong class="jxr_keyword">return</strong> cell;
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>     }
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>     <strong class="jxr_keyword">int</strong> len = KeyValueUtil.length(cell);
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>     ByteRange alloc = allocator.allocateBytes(len);
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>     <strong class="jxr_keyword">if</strong> (alloc == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>       <em class="jxr_comment">// The allocation was too large, allocator decided</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>       <em class="jxr_comment">// not to do anything with it.</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>       <strong class="jxr_keyword">return</strong> cell;
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>     }
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>     assert alloc.getBytes() != <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>     KeyValueUtil.appendToByteArray(cell, alloc.getBytes(), alloc.getOffset());
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>     KeyValue newKv = <strong class="jxr_keyword">new</strong> KeyValue(alloc.getBytes(), alloc.getOffset(), len);
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>     newKv.setSequenceId(cell.getSequenceId());
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>     <strong class="jxr_keyword">return</strong> newKv;
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>   }
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> 
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> <em class="jxr_javadoccomment">   * Remove n key from the memstore. Only cells that have the same key and the</em>
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> <em class="jxr_javadoccomment">   * same memstoreTS are removed.  It is ok to not update timeRangeTracker</em>
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> <em class="jxr_javadoccomment">   * in this call. It is possible that we can optimize this method by using</em>
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> <em class="jxr_javadoccomment">   * tailMap/iterator, but since this method is called rarely (only for</em>
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> <em class="jxr_javadoccomment">   * error recovery), we can leave those optimization for the future.</em>
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> <em class="jxr_javadoccomment">   * @param cell</em>
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>   @Override
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> rollback(Cell cell) {
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>     <em class="jxr_comment">// If the key is in the snapshot, delete it. We should not update</em>
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>     <em class="jxr_comment">// this.size, because that tracks the size of only the memstore and</em>
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>     <em class="jxr_comment">// not the snapshot. The flush of this snapshot to disk has not</em>
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>     <em class="jxr_comment">// yet started because Store.flush() waits for all rwcc transactions to</em>
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>     <em class="jxr_comment">// commit before starting the flush to disk.</em>
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>     Cell found = <strong class="jxr_keyword">this</strong>.snapshot.get(cell);
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>     <strong class="jxr_keyword">if</strong> (found != <strong class="jxr_keyword">null</strong> &amp;&amp; found.getSequenceId() == cell.getSequenceId()) {
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>       <strong class="jxr_keyword">this</strong>.snapshot.remove(cell);
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>       <strong class="jxr_keyword">long</strong> sz = heapSizeChange(cell, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>       <strong class="jxr_keyword">this</strong>.snapshotSize -= sz;
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>     }
+<a class="jxr_linenumber" name="L305" href="#L305">305</a>     <em class="jxr_comment">// If the key is in the memstore, delete it. Update this.size.</em>
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>     found = <strong class="jxr_keyword">this</strong>.cellSet.get(cell);
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>     <strong class="jxr_keyword">if</strong> (found != <strong class="jxr_keyword">null</strong> &amp;&amp; found.getSequenceId() == cell.getSequenceId()) {
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>       removeFromCellSet(cell);
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>       <strong class="jxr_keyword">long</strong> s = heapSizeChange(cell, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>       <strong class="jxr_keyword">this</strong>.size.addAndGet(-s);
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>     }
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>   }
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> <em class="jxr_javadoccomment">   * Write a delete</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> <em class="jxr_javadoccomment">   * @param deleteCell</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> <em class="jxr_javadoccomment">   * @return approximate size of the passed key and value.</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>   @Override
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> delete(Cell deleteCell) {
+<a class="jxr_linenumber" name="L321" href="#L321">321</a>     <strong class="jxr_keyword">long</strong> s = 0;
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>     Cell toAdd = maybeCloneWithAllocator(deleteCell);
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>     s += heapSizeChange(toAdd, addToCellSet(toAdd));
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>     timeRangeTracker.includeTimestamp(toAdd);
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>     <strong class="jxr_keyword">this</strong>.size.addAndGet(s);
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>     <strong class="jxr_keyword">return</strong> s;
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>   }
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> <em class="jxr_javadoccomment">   * @param cell Find the row that comes after this one.  If null, we return the</em>
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> <em class="jxr_javadoccomment">   * first.</em>
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> <em class="jxr_javadoccomment">   * @return Next row or null if none found.</em>
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>   Cell getNextRow(<strong class="jxr_keyword">final</strong> Cell cell) {
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>     <strong class="jxr_keyword">return</strong> getLowest(getNextRow(cell, <strong class="jxr_keyword">this</strong>.cellSet), getNextRow(cell, <strong class="jxr_keyword">this</strong>.snapshot));
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>   }
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> <em class="jxr_comment">   * @param a</em>
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> <em class="jxr_comment">   * @param b</em>
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> <em class="jxr_comment">   * @return Return lowest of a or b or null if both a and b are null</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> <em class="jxr_comment">   */</em>
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>   <strong class="jxr_keyword">private</strong> Cell getLowest(<strong class="jxr_keyword">final</strong> Cell a, <strong class="jxr_keyword">final</strong> Cell b) {
+<a class="jxr_linenumber" name="L344" href="#L344">344</a>     <strong class="jxr_keyword">if</strong> (a == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>       <strong class="jxr_keyword">return</strong> b;
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>     }
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>     <strong class="jxr_keyword">if</strong> (b == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>       <strong class="jxr_keyword">return</strong> a;
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>     }
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>     <strong class="jxr_keyword">return</strong> comparator.compareRows(a, b) &lt;= 0? a: b;
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>   }
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> <em class="jxr_comment">   * @param key Find row that follows this one.  If null, return first.</em>
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> <em class="jxr_comment">   * @param map Set to look in for a row beyond &lt;code&gt;row&lt;/code&gt;.</em>
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> <em class="jxr_comment">   * @return Next row or null if none found.  If one found, will be a new</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> <em class="jxr_comment">   * KeyValue -- can be destroyed by subsequent calls to this method.</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> <em class="jxr_comment">   */</em>
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>   <strong class="jxr_keyword">private</strong> Cell getNextRow(<strong class="jxr_keyword">final</strong> Cell key,
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>       <strong class="jxr_keyword">final</strong> NavigableSet&lt;Cell&gt; set) {
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>     Cell result = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>     SortedSet&lt;Cell&gt; tail = key == <strong class="jxr_keyword">null</strong>? set: set.tailSet(key);
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>     <em class="jxr_comment">// Iterate until we fall into the next row; i.e. move off current row</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>     <strong class="jxr_keyword">for</strong> (Cell cell: tail) {
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>       <strong class="jxr_keyword">if</strong> (comparator.compareRows(cell, key) &lt;= 0)
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>         <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L367" href="#L367">367</a>       <em class="jxr_comment">// Note: Not suppressing deletes or expired cells.  Needs to be handled</em>
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>       <em class="jxr_comment">// by higher up functions.</em>
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>       result = cell;
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>       <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>     }
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>     <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>   }
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> <em class="jxr_javadoccomment">   * @param state column/delete tracking state</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>   @Override
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> getRowKeyAtOrBefore(<strong class="jxr_keyword">final</strong> GetClosestRowBeforeTracker state) {
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>     getRowKeyAtOrBefore(cellSet, state);
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>     getRowKeyAtOrBefore(snapshot, state);
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>   }
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> 
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> <em class="jxr_comment">   * @param set</em>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> <em class="jxr_comment">   * @param state Accumulates deletes and candidates.</em>
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> <em class="jxr_comment">   */</em>
+<a class="jxr_linenumber" name="L388" href="#L388">388</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> getRowKeyAtOrBefore(<strong class="jxr_keyword">final</strong> NavigableSet&lt;Cell&gt; set,
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>       <strong class="jxr_keyword">final</strong> GetClosestRowBeforeTracker state) {
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>     <strong class="jxr_keyword">if</strong> (set.isEmpty()) {
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>       <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>     }
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>     <strong class="jxr_keyword">if</strong> (!walkForwardInSingleRow(set, state.getTargetKey(), state)) {
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>       <em class="jxr_comment">// Found nothing in row.  Try backing up.</em>
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>       getRowKeyBefore(set, state);
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>     }
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>   }
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> <em class="jxr_comment">   * Walk forward in a row from &lt;code&gt;firstOnRow&lt;/code&gt;.  Presumption is that</em>
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> <em class="jxr_comment">   * we have been passed the first possible key on a row.  As we walk forward</em>
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> <em class="jxr_comment">   * we accumulate deletes until we hit a candidate on the row at which point</em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_comment">   * we return.</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_comment">   * @param set</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_comment">   * @param firstOnRow First possible key on this row.</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> <em class="jxr_comment">   * @param state</em>
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> <em class="jxr_comment">   * @return True if we found a candidate walking this row.</em>
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> <em class="jxr_comment">   */</em>
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> walkForwardInSingleRow(<strong class="jxr_keyword">final</strong> SortedSet&lt;Cell&gt; set,
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>       <strong class="jxr_keyword">final</strong> Cell firstOnRow, <strong class="jxr_keyword">final</strong> GetClosestRowBeforeTracker state) {
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>     <strong class="jxr_keyword">boolean</strong> foundCandidate = false;
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>     SortedSet&lt;Cell&gt; tail = set.tailSet(firstOnRow);
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>     <strong class="jxr_keyword">if</strong> (tail.isEmpty()) <strong class="jxr_keyword">return</strong> foundCandidate;
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>     <strong class="jxr_keyword">for</strong> (Iterator&lt;Cell&gt; i = tail.iterator(); i.hasNext();) {
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>       Cell kv = i.next();
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>       <em class="jxr_comment">// Did we go beyond the target row? If so break.</em>
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>       <strong class="jxr_keyword">if</strong> (state.isTooFar(kv, firstOnRow)) <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>       <strong class="jxr_keyword">if</strong> (state.isExpired(kv)) {
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>         i.remove();
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>         <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>       }
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>       <em class="jxr_comment">// If we added something, this row is a contender. break.</em>
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>       <strong class="jxr_keyword">if</strong> (state.handle(kv)) {
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>         foundCandidate = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>       }
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>     }
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>     <strong class="jxr_keyword">return</strong> foundCandidate;
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>   }
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> 
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> <em class="jxr_comment">   * Walk backwards through the passed set a row at a time until we run out of</em>
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> <em class="jxr_comment">   * set or until we get a candidate.</em>
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> <em class="jxr_comment">   * @param set</em>
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> <em class="jxr_comment">   * @param state</em>
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> <em class="jxr_comment">   */</em>
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> getRowKeyBefore(NavigableSet&lt;Cell&gt; set,
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>       <strong class="jxr_keyword">final</strong> GetClosestRowBeforeTracker state) {
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>     Cell firstOnRow = state.getTargetKey();
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>     <strong class="jxr_keyword">for</strong> (Member p = memberOfPreviousRow(set, state, firstOnRow);
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>         p != <strong class="jxr_keyword">null</strong>; p = memberOfPreviousRow(p.set, state, firstOnRow)) {
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>       <em class="jxr_comment">// Make sure we don't fall out of our table.</em>
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>       <strong class="jxr_keyword">if</strong> (!state.isTargetTable(p.cell)) <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>       <em class="jxr_comment">// Stop looking if we've exited the better candidate range.</em>
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>       <strong class="jxr_keyword">if</strong> (!state.isBetterCandidate(p.cell)) <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>       <em class="jxr_comment">// Make into firstOnRow</em>
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>       firstOnRow = <strong class="jxr_keyword">new</strong> KeyValue(p.cell.getRowArray(), p.cell.getRowOffset(), p.cell.getRowLength(),
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>           HConstants.LATEST_TIMESTAMP);
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>       <em class="jxr_comment">// If we find something, break;</em>
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>       <strong class="jxr_keyword">if</strong> (walkForwardInSingleRow(p.set, firstOnRow, state)) <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>     }
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>   }
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> 
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> <em class="jxr_javadoccomment">   * Only used by tests. TODO: Remove</em>
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L457" href="#L457">457</a> <em class="jxr_javadoccomment">   * Given the specs of a column, update it, first by inserting a new record,</em>
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> <em class="jxr_javadoccomment">   * then removing the old one.  Since there is only 1 KeyValue involved, the memstoreTS</em>
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> <em class="jxr_javadoccomment">   * will be set to 0, thus ensuring that they instantly appear to anyone. The underlying</em>
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> <em class="jxr_javadoccomment">   * store will ensure that the insert/delete each are atomic. A scanner/reader will either</em>
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> <em class="jxr_javadoccomment">   * get the new value, or the old value and all readers will eventually only see the new</em>
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> <em class="jxr_javadoccomment">   * value after the old was removed.</em>
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> <em class="jxr_javadoccomment">   * @param row</em>
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> <em class="jxr_javadoccomment">   * @param family</em>
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> <em class="jxr_javadoccomment">   * @param qualifier</em>
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> <em class="jxr_javadoccomment">   * @param newValue</em>
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> <em class="jxr_javadoccomment">   * @param now</em>
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> <em class="jxr_javadoccomment">   * @return  Timestamp</em>
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>   @Override
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> updateColumnValue(byte[] row,
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>                                 byte[] family,
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>                                 byte[] qualifier,
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>                                 <strong class="jxr_keyword">long</strong> newValue,
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>                                 <strong class="jxr_keyword">long</strong> now) {
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>     Cell firstCell = KeyValueUtil.createFirstOnRow(row, family, qualifier);
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>     <em class="jxr_comment">// Is there a Cell in 'snapshot' with the same TS? If so, upgrade the timestamp a bit.</em>
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>     SortedSet&lt;Cell&gt; snSs = snapshot.tailSet(firstCell);
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>     <strong class="jxr_keyword">if</strong> (!snSs.isEmpty()) {
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>       Cell snc = snSs.first();
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>       <em class="jxr_comment">// is there a matching Cell in the snapshot?</em>
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>       <strong class="jxr_keyword">if</strong> (CellUtil.matchingRow(snc, firstCell) &amp;&amp; CellUtil.matchingQualifier(snc, firstCell)) {
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>         <strong class="jxr_keyword">if</strong> (snc.getTimestamp() == now) {
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>           <em class="jxr_comment">// poop,</em>
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>           now += 1;
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>         }
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>       }
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>     }
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> 
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>     <em class="jxr_comment">// logic here: the new ts MUST be at least 'now'. But it could be larger if necessary.</em>
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>     <em class="jxr_comment">// But the timestamp should also be max(now, mostRecentTsInMemstore)</em>
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> 
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>     <em class="jxr_comment">// so we cant add the new Cell w/o knowing what's there already, but we also</em>
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>     <em class="jxr_comment">// want to take this chance to delete some cells. So two loops (sad)</em>
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> 
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>     SortedSet&lt;Cell&gt; ss = cellSet.tailSet(firstCell);
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>     <strong class="jxr_keyword">for</strong> (Cell cell : ss) {
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>       <em class="jxr_comment">// if this isnt the row we are interested in, then bail:</em>
+<a class="jxr_linenumber" name="L500" href="#L500">500</a>       <strong class="jxr_keyword">if</strong> (!CellUtil.matchingColumn(cell, family, qualifier)
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>           || !CellUtil.matchingRow(cell, firstCell)) {
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>         <strong class="jxr_keyword">break</strong>; <em class="jxr_comment">// rows dont match, bail.</em>
+<a class="jxr_linenumber" name="L503" href="#L503">503</a>       }
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> 
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>       <em class="jxr_comment">// if the qualifier matches and it's a put, just RM it out of the cellSet.</em>
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>       <strong class="jxr_keyword">if</strong> (cell.getTypeByte() == KeyValue.Type.Put.getCode() &amp;&amp;
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>           cell.getTimestamp() &gt; now &amp;&amp; CellUtil.matchingQualifier(firstCell, cell)) {
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>         now = cell.getTimestamp();
+<a class="jxr_linenumber" name="L509" href="#L509">509</a>       }
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>     }
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> 
+<a class="jxr_linenumber" name="L512" href="#L512">512</a>     <em class="jxr_comment">// create or update (upsert) a new Cell with</em>
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>     <em class="jxr_comment">// 'now' and a 0 memstoreTS == immediately visible</em>
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>     List&lt;Cell&gt; cells = <strong class="jxr_keyword">new</strong> ArrayList&lt;Cell&gt;(1);
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>     cells.add(<strong class="jxr_keyword">new</strong> KeyValue(row, family, qualifier, now, Bytes.toBytes(newValue)));
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>     <strong class="jxr_keyword">return</strong> upsert(cells, 1L);
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>   }
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> 
+<a class="jxr_linenumber" name="L519" href="#L519">519</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> <em class="jxr_javadoccomment">   * Update or insert the specified KeyValues.</em>
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> <em class="jxr_javadoccomment">   * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> <em class="jxr_javadoccomment">   * For each KeyValue, insert into MemStore.  This will atomically upsert the</em>
+<a class="jxr_linenumber" name="L523" href="#L523">523</a> <em class="jxr_javadoccomment">   * value for that row/family/qualifier.  If a KeyValue did already exist,</em>
+<a class="jxr_linenumber" name="L524" href="#L524">524</a> <em class="jxr_javadoccomment">   * it will then be removed.</em>
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> <em class="jxr_javadoccomment">   * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> <em class="jxr_javadoccomment">   * Currently the memstoreTS is kept at 0 so as each insert happens, it will</em>
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> <em class="jxr_javadoccomment">   * be immediately visible.  May want to change this so it is atomic across</em>
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> <em class="jxr_javadoccomment">   * all KeyValues.</em>
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> <em class="jxr_javadoccomment">   * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> <em class="jxr_javadoccomment">   * This is called under row lock, so Get operations will still see updates</em>
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> <em class="jxr_javadoccomment">   * atomically.  Scans will only see each KeyValue update as atomic.</em>
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> <em class="jxr_javadoccomment">   * @param cells</em>
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> <em class="jxr_javadoccomment">   * @param readpoint readpoint below which we can safely remove duplicate KVs</em>
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> <em class="jxr_javadoccomment">   * @return change in memstore size</em>
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L537" href="#L537">537</a>   @Override
+<a class="jxr_linenumber" name="L538" href="#L538">538</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> upsert(Iterable&lt;Cell&gt; cells, <strong class="jxr_keyword">long</strong> readpoint) {
+<a class="jxr_linenumber" name="L539" href="#L539">539</a>     <strong class="jxr_keyword">long</strong> size = 0;
+<a class="jxr_linenumber" name="L540" href="#L540">540</a>     <strong class="jxr_keyword">for</strong> (Cell cell : cells) {
+<a class="jxr_linenumber" name="L541" href="#L541">541</a>       size += upsert(cell, readpoint);
+<a class="jxr_linenumber" name="L542" href="#L542">542</a>     }
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>     <strong class="jxr_keyword">return</strong> size;
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>   }
+<a class="jxr_linenumber" name="L545" href="#L545">545</a> 
+<a class="jxr_linenumber" name="L546" href="#L546">546</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L547" href="#L547">547</a> <em class="jxr_javadoccomment">   * Inserts the specified KeyValue into MemStore and deletes any existing</em>
+<a class="jxr_linenumber" name="L548" href="#L548">548</a> <em class="jxr_javadoccomment">   * versions of the same row/family/qualifier as the specified KeyValue.</em>
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> <em class="jxr_javadoccomment">   * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L550" href="#L550">550</a> <em class="jxr_javadoccomment">   * First, the specified KeyValue is inserted into the Memstore.</em>
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> <em class="jxr_javadoccomment">   * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> <em class="jxr_javadoccomment">   * If there are any existing KeyValues in this MemStore with the same row,</em>
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> <em class="jxr_javadoccomment">   * family, and qualifier, they are removed.</em>
+<a class="jxr_linenumber" name="L554" href="#L554">554</a> <em class="jxr_javadoccomment">   * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L555" href="#L555">555</a> <em class="jxr_javadoccomment">   * Callers must hold the read lock.</em>
+<a class="jxr_linenumber" name="L556" href="#L556">556</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L557" href="#L557">557</a> <em class="jxr_javadoccomment">   * @param cell</em>
+<a class="jxr_linenumber" name="L558" href="#L558">558</a> <em class="jxr_javadoccomment">   * @return change in size of MemStore</em>
+<a class="jxr_linenumber" name="L559" href="#L559">559</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">long</strong> upsert(Cell cell, <strong class="jxr_keyword">long</strong> readpoint) {
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>     <em class="jxr_comment">// Add the Cell to the MemStore</em>
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>     <em class="jxr_comment">// Use the internalAdd method here since we (a) already have a lock</em>
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>     <em class="jxr_comment">// and (b) cannot safely use the MSLAB here without potentially</em>
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>     <em class="jxr_comment">// hitting OOME - see TestMemStore.testUpsertMSLAB for a</em>
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>     <em class="jxr_comment">// test that triggers the pathological case if we don't avoid MSLAB</em>
+<a class="jxr_linenumber" name="L566" href="#L566">566</a>     <em class="jxr_comment">// here.</em>
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>     <strong class="jxr_keyword">long</strong> addedSize = internalAdd(cell);
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> 
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>     <em class="jxr_comment">// Get the Cells for the row/family/qualifier regardless of timestamp.</em>
+<a class="jxr_linenumber" name="L570" href="#L570">570</a>     <em class="jxr_comment">// For this case we want to clean up any other puts</em>
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>     Cell firstCell = KeyValueUtil.createFirstOnRow(
+<a class="jxr_linenumber" name="L572" href="#L572">572</a>         cell.getRowArray(), cell.getRowOffset(), cell.getRowLength(),
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>         cell.getFamilyArray(), cell.getFamilyOffset(), cell.getFamilyLength(),
+<a class="jxr_linenumber" name="L574" href="#L574">574</a>         cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength());
+<a class="jxr_linenumber" name="L575" href="#L575">575</a>     SortedSet&lt;Cell&gt; ss = cellSet.tailSet(firstCell);
+<a class="jxr_linenumber" name="L576" href="#L576">576</a>     Iterator&lt;Cell&gt; it = ss.iterator();
+<a class="jxr_linenumber" name="L577" href="#L577">577</a>     <em class="jxr_comment">// versions visible to oldest scanner</em>
+<a class="jxr_linenumber" name="L578" href="#L578">578</a>     <strong class="jxr_keyword">int</strong> versionsVisible = 0;
+<a class="jxr_linenumber" name="L579" href="#L579">579</a>     <strong class="jxr_keyword">while</strong> ( it.hasNext() ) {
+<a class="jxr_linenumber" name="L580" href="#L580">580</a>       Cell cur = it.next();
+<a class="jxr_linenumber" name="L581" href="#L581">581</a> 
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>       <strong class="jxr_keyword">if</strong> (cell == cur) {
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>         <em class="jxr_comment">// ignore the one just put in</em>
+<a class="jxr_linenumber" name="L584" href="#L584">584</a>         <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>       }
+<a class="jxr_linenumber" name="L586" href="#L586">586</a>       <em class="jxr_comment">// check that this is the row and column we are interested in, otherwise bail</em>
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>       <strong class="jxr_keyword">if</strong> (CellUtil.matchingRow(cell, cur) &amp;&amp; CellUtil.matchingQualifier(cell, cur)) {
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>         <em class="jxr_comment">// only remove Puts that concurrent scanners cannot possibly see</em>
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>         <strong class="jxr_keyword">if</strong> (cur.getTypeByte() == KeyValue.Type.Put.getCode() &amp;&amp;
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>             cur.getSequenceId() &lt;= readpoint) {
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>           <strong class="jxr_keyword">if</strong> (versionsVisible &gt;= 1) {
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>             <em class="jxr_comment">// if we get here we have seen at least one version visible to the oldest scanner,</em>
+<a class="jxr_linenumber" name="L593" href="#L593">593</a>             <em class="jxr_comment">// which means we can prove that no scanner will see this version</em>
+<a class="jxr_linenumber" name="L594" href="#L594">594</a> 
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>             <em class="jxr_comment">// false means there was a change, so give us the size.</em>
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>             <strong class="jxr_keyword">long</strong> delta = heapSizeChange(cur, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>             addedSize -= delta;
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>             <strong class="jxr_keyword">this</strong>.size.addAndGet(-delta);
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>             it.remove();
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>             setOldestEditTimeToNow();
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>           } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>             versionsVisible++;
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>           }
+<a class="jxr_linenumber" name="L604" href="#L604">604</a>         }
+<a class="jxr_linenumber" name="L605" href="#L605">605</a>       } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>         <em class="jxr_comment">// past the row or column, done</em>
+<a class="jxr_linenumber" name="L607" href="#L607">607</a>         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>       }
+<a class="jxr_linenumber" name="L609" href="#L609">609</a>     }
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>     <strong class="jxr_keyword">return</strong> addedSize;
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>   }
+<a class="jxr_linenumber" name="L612" href="#L612">612</a> 
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L614" href="#L614">614</a> <em class="jxr_comment">   * Immutable data structure to hold member found in set and the set it was</em>
+<a class="jxr_linenumber" name="L615" href="#L615">615</a> <em class="jxr_comment">   * found in. Include set because it is carrying context.</em>
+<a class="jxr_linenumber" name="L616" href="#L616">616</a> <em class="jxr_comment">   */</em>
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> Member {
+<a class="jxr_linenumber" name="L618" href="#L618">618</a>     <strong class="jxr_keyword">final</strong> Cell cell;
+<a class="jxr_linenumber" name="L619" href="#L619">619</a>     <strong class="jxr_keyword">final</strong> NavigableSet&lt;Cell&gt; set;
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>     Member(<strong class="jxr_keyword">final</strong> NavigableSet&lt;Cell&gt; s, <strong class="jxr_keyword">final</strong> Cell kv) {
+<a class="jxr_linenumber" name="L621" href="#L621">621</a>       <strong class="jxr_keyword">this</strong>.cell = kv;
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>       <strong class="jxr_keyword">this</strong>.set = s;
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>     }
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>   }
+<a class="jxr_linenumber" name="L625" href="#L625">625</a> 
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L627" href="#L627">627</a> <em class="jxr_comment">   * @param set Set to walk back in.  Pass a first in row or we'll return</em>
+<a class="jxr_linenumber" name="L628" href="#L628">628</a> <em class="jxr_comment">   * same row (loop).</em>
+<a class="jxr_linenumber" name="L629" href="#L629">629</a> <em class="jxr_comment">   * @param state Utility and context.</em>
+<a class="jxr_linenumber" name="L630" href="#L630">630</a> <em class="jxr_comment">   * @param firstOnRow First item on the row after the one we want to find a</em>
+<a class="jxr_linenumber" name="L631" href="#L631">631</a> <em class="jxr_comment">   * member in.</em>
+<a class="jxr_linenumber" name="L632" href="#L632">632</a> <em class="jxr_comment">   * @return Null or member of row previous to &lt;code&gt;firstOnRow&lt;/code&gt;</em>
+<a class="jxr_linenumber" name="L633" href="#L633">633</a> <em class="jxr_comment">   */</em>
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>   <strong class="jxr_keyword">private</strong> Member memberOfPreviousRow(NavigableSet&lt;Cell&gt; set,
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>       <strong class="jxr_keyword">final</strong> GetClosestRowBeforeTracker state, <strong class="jxr_keyword">final</strong> Cell firstOnRow) {
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>     NavigableSet&lt;Cell&gt; head = set.headSet(firstOnRow, false);
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>     <strong class="jxr_keyword">if</strong> (head.isEmpty()) <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>     <strong class="jxr_keyword">for</strong> (Iterator&lt;Cell&gt; i = head.descendingIterator(); i.hasNext();) {
+<a class="jxr_linenumber" name="L639" href="#L639">639</a>       Cell found = i.next();
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>       <strong class="jxr_keyword">if</strong> (state.isExpired(found)) {
+<a class="jxr_linenumber" name="L641" href="#L641">641</a>         i.remove();
+<a class="jxr_linenumber" name="L642" href="#L642">642</a>         <strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L643" href="#L643">643</a>       }
+<a class="jxr_linenumber" name="L644" href="#L644">644</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Member(head, found);
+<a class="jxr_linenumber" name="L645" href="#L645">645</a>     }
+<a class="jxr_linenumber" name="L646" href="#L646">646</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L647" href="#L647">647</a>   }
+<a class="jxr_linenumber" name="L648" href="#L648">648</a> 
+<a class="jxr_linenumber" name="L649" href="#L649">649</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L650" href="#L650">650</a> <em class="jxr_javadoccomment">   * @return scanner on memstore and snapshot in this order.</em>
+<a class="jxr_linenumber" name="L651" href="#L651">651</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L652" href="#L652">652</a>   @Override
+<a class="jxr_linenumber" name="L653" href="#L653">653</a>   <strong class="jxr_keyword">public</strong> List&lt;KeyValueScanner&gt; getScanners(<strong class="jxr_keyword">long</strong> readPt) {
+<a class="jxr_linenumber" name="L654" href="#L654">654</a>     <strong class="jxr_keyword">return</strong> Collections.&lt;KeyValueScanner&gt; singletonList(<strong class="jxr_keyword">new</strong> MemStoreScanner(readPt));
+<a class="jxr_linenumber" name="L655" href="#L655">655</a>   }
+<a class="jxr_linenumber" name="L656" href="#L656">656</a> 
+<a class="jxr_linenumber" name="L657" href="#L657">657</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L658" href="#L658">658</a> <em class="jxr_javadoccomment">   * Check if this memstore may contain the required keys</em>
+<a class="jxr_linenumber" name="L659" href="#L659">659</a> <em class="jxr_javadoccomment">   * @param scan</em>
+<a class="jxr_linenumber" name="L660" href="#L660">660</a> <em class="jxr_javadoccomment">   * @return False if the key definitely does not exist in this Memstore</em>
+<a class="jxr_linenumber" name="L661" href="#L661">661</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L662" href="#L662">662</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> shouldSeek(Scan scan, <strong class="jxr_keyword">long</strong> oldestUnexpiredTS) {
+<a class="jxr_linenumber" name="L663" href="#L663">663</a>     <strong class="jxr_keyword">return</strong> (timeRangeTracker.includesTimeRange(scan.getTimeRange()) ||
+<a class="jxr_linenumber" name="L664" href="#L664">664</a>         snapshotTimeRangeTracker.includesTimeRange(scan.getTimeRange()))
+<a class="jxr_linenumber" name="L665" href="#L665">665</a>         &amp;&amp; (Math.max(timeRangeTracker.getMaximumTimestamp(),
+<a class="jxr_linenumber" name="L666" href="#L666">666</a>                      snapshotTimeRangeTracker.getMaximumTimestamp()) &gt;=
+<a class="jxr_linenumber" name="L667" href="#L667">667</a>             oldestUnexpiredTS);
+<a class="jxr_linenumber" name="L668" href="#L668">668</a>   }
+<a class="jxr_linenumber" name="L669" href="#L669">669</a> 
+<a class="jxr_linenumber" name="L670" href="#L670">670</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L671" href="#L671">671</a> <em class="jxr_comment">   * MemStoreScanner implements the KeyValueScanner.</em>
+<a class="jxr_linenumber" name="L672" href="#L672">672</a> <em class="jxr_comment">   * It lets the caller scan the contents of a memstore -- both current</em>
+<a class="jxr_linenumber" name="L673" href="#L673">673</a> <em class="jxr_comment">   * map and snapshot.</em>
+<a class="jxr_linenumber" name="L674" href="#L674">674</a> <em class="jxr_comment">   * This behaves as if it were a real scanner but does not maintain position.</em>
+<a class="jxr_linenumber" name="L675" href="#L675">675</a> <em class="jxr_comment">   */</em>
+<a class="jxr_linenumber" name="L676" href="#L676">676</a>   <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">class</strong> MemStoreScanner <strong class="jxr_keyword">extends</strong> NonLazyKeyValueScanner {
+<a class="jxr_linenumber" name="L677" href="#L677">677</a>     <em class="jxr_comment">// Next row information for either cellSet or snapshot</em>
+<a class="jxr_linenumber" name="L678" href="#L678">678</a>     <strong class="jxr_keyword">private</strong> Cell cellSetNextRow = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L679" href="#L679">679</a>     <strong class="jxr_keyword">private</strong> Cell snapshotNextRow = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L680" href="#L680">680</a> 
+<a class="jxr_linenumber" name="L681" href="#L681">681</a>     <em class="jxr_comment">// last iterated Cells for cellSet and snapshot (to restore iterator state after reseek)</em>
+<a class="jxr_linenumber" name="L682" href="#L682">682</a>     <strong class="jxr_keyword">private</strong> Cell cellSetItRow = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L683" href="#L683">683</a>     <strong class="jxr_keyword">private</strong> Cell snapshotItRow = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L684" href="#L684">684</a>     
+<a class="jxr_linenumber" name="L685" href="#L685">685</a>     <em class="jxr_comment">// iterator based scanning.</em>
+<a class="jxr_linenumber" name="L686" href="#L686">686</a>     <strong class="jxr_keyword">private</strong> Iterator&lt;Cell&gt; cellSetIt;
+<a class="jxr_linenumber" name="L687" href="#L687">687</a>     <strong class="jxr_keyword">private</strong> Iterator&lt;Cell&gt; snapshotIt;
+<a class="jxr_linenumber" name="L688" href="#L688">688</a> 
+<a class="jxr_linenumber" name="L689" href="#L689">689</a>     <em class="jxr_comment">// The cellSet and snapshot at the time of creating this scanner</em>
+<a class="jxr_linenumber" name="L690" href="#L690">690</a>     <strong class="jxr_keyword">private</strong> CellSkipListSet cellSetAtCreation;
+<a class="jxr_linenumber" name="L691" href="#L691">691</a>     <strong class="jxr_keyword">private</strong> CellSkipListSet snapshotAtCreation;
+<a class="jxr_linenumber" name="L692" href="#L692">692</a> 
+<a class="jxr_linenumber" name="L693" href="#L693">693</a>     <em class="jxr_comment">// the pre-calculated Cell to be returned by peek() or next()</em>
+<a class="jxr_linenumber" name="L694" href="#L694">694</a>     <strong class="jxr_keyword">private</strong> Cell theNext;
+<a class="jxr_linenumber" name="L695" href="#L695">695</a> 
+<a class="jxr_linenumber" name="L696" href="#L696">696</a>     <em class="jxr_comment">// The allocator and snapshot allocator at the time of creating this scanner</em>
+<a class="jxr_linenumber" name="L697" href="#L697">697</a>     <strong class="jxr_keyword">volatile</strong> MemStoreLAB allocatorAtCreation;
+<a class="jxr_linenumber" name="L698" href="#L698">698</a>     <strong class="jxr_keyword">volatile</strong> MemStoreLAB snapshotAllocatorAtCreation;
+<a class="jxr_linenumber" name="L699" href="#L699">699</a>     
+<a class="jxr_linenumber" name="L700" href="#L700">700</a>     <em class="jxr_comment">// A flag represents whether could stop skipping Cells for MVCC</em>
+<a class="jxr_linenumber" name="L701" href="#L701">701</a>     <em class="jxr_comment">// if have encountered the next row. Only used for reversed scan</em>
+<a class="jxr_linenumber" name="L702" href="#L702">702</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> stopSkippingCellsIfNextRow = false;
+<a class="jxr_linenumber" name="L703" href="#L703">703</a> 
+<a class="jxr_linenumber" name="L704" href="#L704">704</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">long</strong> readPoint;
+<a class="jxr_linenumber" name="L705" href="#L705">705</a> 
+<a class="jxr_linenumber" name="L706" href="#L706">706</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L707" href="#L707">707</a> <em class="jxr_comment">    Some notes...</em>
+<a class="jxr_linenumber" name="L708" href="#L708">708</a> 
+<a class="jxr_linenumber" name="L709" href="#L709">709</a> <em class="jxr_comment">     So memstorescanner is fixed at creation time. this includes pointers/iterators into</em>
+<a class="jxr_linenumber" name="L710" href="#L710">710</a> <em class="jxr_comment">    existing kvset/snapshot.  during a snapshot creation, the kvset is null, and the</em>
+<a class="jxr_linenumber" name="L711" href="#L711">711</a> <em class="jxr_comment">    snapshot is moved.  since kvset is null there is no point on reseeking on both,</em>
+<a class="jxr_linenumber" name="L712" href="#L712">712</a> <em class="jxr_comment">      we can save us the trouble. During the snapshot-&gt;hfile transition, the memstore</em>
+<a class="jxr_linenumber" name="L713" href="#L713">713</a> <em class="jxr_comment">      scanner is re-created by StoreScanner#updateReaders().  StoreScanner should</em>
+<a class="jxr_linenumber" name="L714" href="#L714">714</a> <em class="jxr_comment">      potentially do something smarter by adjusting the existing memstore scanner.</em>
+<a class="jxr_linenumber" name="L715" href="#L715">715</a> 
+<a class="jxr_linenumber" name="L716" href="#L716">716</a> <em class="jxr_comment">      But there is a greater problem here, that being once a scanner has progressed</em>
+<a class="jxr_linenumber" name="L717" href="#L717">717</a> <em class="jxr_comment">      during a snapshot scenario, we currently iterate past the kvset then 'finish' up.</em>
+<a class="jxr_linenumber" name="L718" href="#L718">718</a> <em class="jxr_comment">      if a scan lasts a little while, there is a chance for new entries in kvset to</em>
+<a class="jxr_linenumber" name="L719" href="#L719">719</a> <em class="jxr_comment">      become available but we will never see them.  This needs to be handled at the</em>
+<a class="jxr_linenumber" name="L720" href="#L720">720</a> <em class="jxr_comment">      StoreScanner level with coordination with MemStoreScanner.</em>
+<a class="jxr_linenumber" name="L721" href="#L721">721</a> 
+<a class="jxr_linenumber" name="L722" href="#L722">722</a> <em class="jxr_comment">      Currently, this problem is only partly managed: during the small amount of time</em>
+<a class="jxr_linenumber" name="L723" href="#L723">723</a> <em class="jxr_comment">      when the StoreScanner has not yet created a new MemStoreScanner, we will miss</em>
+<a class="jxr_linenumber" name="L724" href="#L724">724</a> <em class="jxr_comment">      the adds to kvset in the MemStoreScanner.</em>
+<a class="jxr_linenumber" name="L725" href="#L725">725</a> <em class="jxr_comment">    */</em>
+<a class="jxr_linenumber" name="L726" href="#L726">726</a> 
+<a class="jxr_linenumber" name="L727" href="#L727">727</a>     MemStoreScanner(<strong class="jxr_keyword">long</strong> readPoint) {
+<a class="jxr_linenumber" name="L728" href="#L728">728</a>       <strong class="jxr_keyword">super</strong>();
+<a class="jxr_linenumber" name="L729" href="#L729">729</a> 
+<a class="jxr_linenumber" name="L730" href="#L730">730</a>       <strong class="jxr_keyword">this</strong>.readPoint = readPoint;
+<a class="jxr_linenumber" name="L731" href="#L731">731</a>       cellSetAtCreation = cellSet;
+<a class="jxr_linenumber" name="L732" href="#L732">732</a>       snapshotAtCreation = snapshot;
+<a class="jxr_linenumber" name="L733" href="#L733">733</a>       <strong class="jxr_keyword">if</strong> (allocator != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L734" href="#L734">734</a>         <strong class="jxr_keyword">this</strong>.allocatorAtCreation = allocator;
+<a class="jxr_linenumber" name="L735" href="#L735">735</a>         <strong class="jxr_keyword">this</strong>.allocatorAtCreation.incScannerCount();
+<a class="jxr_linenumber" name="L736" href="#L736">736</a>       }
+<a class="jxr_linenumber" name="L737" href="#L737">737</a>       <strong class="jxr_keyword">if</strong> (snapshotAllocator != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L738" href="#L738">738</a>         <strong class="jxr_keyword">this</strong>.snapshotAllocatorAtCreation = snapshotAllocator;
+<a class="jxr_linenumber" name="L739" href="#L739">739</a>         <strong class="jxr_keyword">this</strong>.snapshotAllocatorAtCreation.incScannerCount();
+<a class="jxr_linenumber" name="L740" href="#L740">740</a>       }
+<a class="jxr_linenumber" name="L741" href="#L741">741</a>       <strong class="jxr_keyword">if</strong> (Trace.isTracing() &amp;&amp; Trace.currentSpan() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L742" href="#L742">742</a>         Trace.currentSpan().addTimelineAnnotation(<span class="jxr_string">"Creating MemStoreScanner"</span>);
+<a class="jxr_linenumber" name="L743" href="#L743">743</a>       }
+<a class="jxr_linenumber" name="L744" href="#L744">744</a>     }
+<a class="jxr_linenumber" name="L745" href="#L745">745</a> 
+<a class="jxr_linenumber" name="L746" href="#L746">746</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L747" href="#L747">747</a> <em class="jxr_javadoccomment">     * Lock on 'this' must be held by caller.</em>
+<a class="jxr_linenumber" name="L748" href="#L748">748</a> <em class="jxr_javadoccomment">     * @param it</em>
+<a class="jxr_linenumber" name="L749" href="#L749">749</a> <em class="jxr_javadoccomment">     * @return Next Cell</em>
+<a class="jxr_linenumber" name="L750" href="#L750">750</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L751" href="#L751">751</a>     <strong class="jxr_keyword">private</strong> Cell getNext(Iterator&lt;Cell&gt; it) {
+<a class="jxr_linenumber" name="L752" href="#L752">752</a>       Cell startCell = theNext;
+<a class="jxr_linenumber" name="L753" href="#L753">753</a>       Cell v = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L754" href="#L754">754</a>       <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L755" href="#L755">755</a>         <strong class="jxr_keyword">while</strong> (it.hasNext()) {
+<a class="jxr_linenumber" name="L756" href="#L756">756</a>           v = it.next();
+<a class="jxr_linenumber" name="L757" href="#L757">757</a>           <strong class="jxr_keyword">if</strong> (v.getSequenceId() &lt;= <strong class="jxr_keyword">this</strong>.readPoint) {
+<a class="jxr_linenumber" name="L758" href="#L758">758</a>             <strong class="jxr_keyword">return</strong> v;
+<a class="jxr_linenumber" name="L759" href="#L759">759</a>           }
+<a class="jxr_linenumber" name="L760" href="#L760">760</a>           <strong class="jxr_keyword">if</strong> (stopSkippingCellsIfNextRow &amp;&amp; startCell != <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L761" href="#L761">761</a>               &amp;&amp; comparator.compareRows(v, startCell) &gt; 0) {
+<a class="jxr_linenumber" name="L762" href="#L762">762</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L763" href="#L763">763</a>           }
+<a class="jxr_linenumber" name="L764" href="#L764">764</a>         }
+<a class="jxr_linenumber" name="L765" href="#L765">765</a> 
+<a class="jxr_linenumber" name="L766" href="#L766">766</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L767" href="#L767">767</a>       } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L768" href="#L768">768</a>         <strong class="jxr_keyword">if</strong> (v != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L769" href="#L769">769</a>           <em class="jxr_comment">// in all cases, remember the last Cell iterated to</em>
+<a class="jxr_linenumber" name="L770" href="#L770">770</a>           <strong class="jxr_keyword">if</strong> (it == snapshotIt) {
+<a class="jxr_linenumber" name="L771" href="#L771">771</a>             snapshotItRow = v;
+<a class="jxr_linenumber" name="L772" href="#L772">772</a>           } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L773" href="#L773">773</a>             cellSetItRow = v;
+<a class="jxr_linenumber" name="L774" href="#L774">774</a>           }
+<a class="jxr_linenumber" name="L775" href="#L775">775</a>         }
+<a class="jxr_linenumber" name="L776" href="#L776">776</a>       }
+<a class="jxr_linenumber" name="L777" href="#L777">777</a>     }
+<a class="jxr_linenumber" name="L778" href="#L778">778</a> 
+<a class="jxr_linenumber" name="L779" href="#L779">779</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L780" href="#L780">780</a> <em class="jxr_javadoccomment">     *  Set the scanner at the seek key.</em>
+<a class="jxr_linenumber" name="L781" href="#L781">781</a> <em class="jxr_javadoccomment">     *  Must be called only once: there is no thread safety between the scanner</em>
+<a class="jxr_linenumber" name="L782" href="#L782">782</a> <em class="jxr_javadoccomment">     *   and the memStore.</em>
+<a class="jxr_linenumber" name="L783" href="#L783">783</a> <em class="jxr_javadoccomment">     * @param key seek value</em>
+<a class="jxr_linenumber" name="L784" href="#L784">784</a> <em class="jxr_javadoccomment">     * @return false if the key is null or if there is no data</em>
+<a class="jxr_linenumber" name="L785" href="#L785">785</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L786" href="#L786">786</a>     @Override
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">boolean</strong> seek(Cell key) {
+<a class="jxr_linenumber" name="L788" href="#L788">788</a>       <strong class="jxr_keyword">if</strong> (key == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L789" href="#L789">789</a>         close();
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L791" href="#L791">791</a>       }
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>       <em class="jxr_comment">// kvset and snapshot will never be null.</em>
+<a class="jxr_linenumber" name="L793" href="#L793">793</a>       <em class="jxr_comment">// if tailSet can't find anything, SortedSet is empty (not null).</em>
+<a class="jxr_linenumber" name="L794" href="#L794">794</a>       cellSetIt = cellSetAtCreation.tailSet(key).iterator();
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>       snapshotIt = snapshotAtCreation.tailSet(key).iterator();
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>       cellSetItRow = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L797" href="#L797">797</a>       snapshotItRow = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L798" href="#L798">798</a> 
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>       <strong class="jxr_keyword">return</strong> seekInSubLists(key);
+<a class="jxr_linenumber" name="L800" href="#L800">800</a>     }
+<a class="jxr_linenumber" name="L801" href="#L801">801</a> 
+<a class="jxr_linenumber" name="L802" href="#L802">802</a> 
+<a class="jxr_linenumber" name="L803" href="#L803">803</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L804" href="#L804">804</a> <em class="jxr_javadoccomment">     * (Re)initialize the iterators after a seek or a reseek.</em>
+<a class="jxr_linenumber" name="L805" href="#L805">805</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L806" href="#L806">806</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">boolean</strong> seekInSubLists(Cell key){
+<a class="jxr_linenumber" name="L807" href="#L807">807</a>       cellSetNextRow = getNext(cellSetIt);
+<a class="jxr_linenumber" name="L808" href="#L808">808</a>       snapshotNextRow = getNext(snapshotIt);
+<a class="jxr_linenumber" name="L809" href="#L809">809</a> 
+<a class="jxr_linenumber" name="L810" href="#L810">810</a>       <em class="jxr_comment">// Calculate the next value</em>
+<a class="jxr_linenumber" name="L811" href="#L811">811</a>       theNext = getLowest(cellSetNextRow, snapshotNextRow);
+<a class="jxr_linenumber" name="L812" href="#L812">812</a> 
+<a class="jxr_linenumber" name="L813" href="#L813">813</a>       <em class="jxr_comment">// has data</em>
+<a class="jxr_linenumber" name="L814" href="#L814">814</a>       <strong class="jxr_keyword">return</strong> (theNext != <strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>     }
+<a class="jxr_linenumber" name="L816" href="#L816">816</a> 
+<a class="jxr_linenumber" name="L817" href="#L817">817</a> 
+<a class="jxr_linenumber" name="L818" href="#L818">818</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L819" href="#L819">819</a> <em class="jxr_javadoccomment">     * Move forward on the sub-lists set previously by seek.</em>
+<a class="jxr_linenumber" name="L820" href="#L820">820</a> <em class="jxr_javadoccomment">     * @param key seek value (should be non-null)</em>
+<a class="jxr_linenumber" name="L821" href="#L821">821</a> <em class="jxr_javadoccomment">     * @return true if there is at least one KV to read, false otherwise</em>
+<a class="jxr_linenumber" name="L822" href="#L822">822</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L823" href="#L823">823</a>     @Override
+<a class="jxr_linenumber" name="L824" href="#L824">824</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">boolean</strong> reseek(Cell key) {
+<a class="jxr_linenumber" name="L825" href="#L825">825</a>       <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L826" href="#L826">826</a> <em class="jxr_comment">      See HBASE-4195 &amp; HBASE-3855 &amp; HBASE-6591 for the background on this implementation.</em>
+<a class="jxr_linenumber" name="L827" href="#L827">827</a> <em class="jxr_comment">      This code is executed concurrently with flush and puts, without locks.</em>
+<a class="jxr_linenumber" name="L828" href="#L828">828</a> <em class="jxr_comment">      Two points must be known when working on this code:</em>
+<a class="jxr_linenumber" name="L829" href="#L829">829</a> <em class="jxr_comment">      1) It's not possible to use the 'kvTail' and 'snapshot'</em>
+<a class="jxr_linenumber" name="L830" href="#L830">830</a> <em class="jxr_comment">       variables, as they are modified during a flush.</em>
+<a class="jxr_linenumber" name="L831" href="#L831">831</a> <em class="jxr_comment">      2) The ideal implementation for performance would use the sub skip list</em>
+<a class="jxr_linenumber" name="L832" href="#L832">832</a> <em class="jxr_comment">       implicitly pointed by the iterators 'kvsetIt' and</em>
+<a class="jxr_linenumber" name="L833" href="#L833">833</a> <em class="jxr_comment">       'snapshotIt'. Unfortunately the Java API does not offer a method to</em>
+<a class="jxr_linenumber" name="L834" href="#L834">834</a> <em class="jxr_comment">       get it. So we remember the last keys we iterated to and restore</em>
+<a class="jxr_linenumber" name="L835" href="#L835">835</a> <em class="jxr_comment">       the reseeked set to at least that point.</em>
+<a class="jxr_linenumber" name="L836" href="#L836">836</a> <em class="jxr_comment">       */</em>
+<a class="jxr_linenumber" name="L837" href="#L837">837</a>       cellSetIt = cellSetAtCreation.tailSet(getHighest(key, cellSetItRow)).iterator();
+<a class="jxr_linenumber" name="L838" href="#L838">838</a>       snapshotIt = snapshotAtCreation.tailSet(getHighest(key, snapshotItRow)).iterator();
+<a class="jxr_linenumber" name="L839" href="#L839">839</a> 
+<a class="jxr_linenumber" name="L840" href="#L840">840</a>       <strong class="jxr_keyword">return</strong> seekInSubLists(key);
+<a class="jxr_linenumber" name="L841" href="#L841">841</a>     }
+<a class="jxr_linenumber" name="L842" href="#L842">842</a> 
+<a class="jxr_linenumber" name="L843" href="#L843">843</a> 
+<a class="jxr_linenumber" name="L844" href="#L844">844</a>     @Override
+<a class="jxr_linenumber" name="L845" href="#L845">845</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> Cell peek() {
+<a class="jxr_linenumber" name="L846" href="#L846">846</a>       <em class="jxr_comment">//DebugPrint.println(" MS@" + hashCode() + " peek = " + getLowest());</em>
+<a class="jxr_linenumber" name="L847" href="#L847">847</a>       <strong class="jxr_keyword">return</strong> theNext;
+<a class="jxr_linenumber" name="L848" href="#L848">848</a>     }
+<a class="jxr_linenumber" name="L849" href="#L849">849</a> 
+<a class="jxr_linenumber" name="L850" href="#L850">850</a>     @Override
+<a class="jxr_linenumber" name="L851" href="#L851">851</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> Cell next() {
+<a class="jxr_linenumber" name="L852" href="#L852">852</a>       <strong class="jxr_keyword">if</strong> (theNext == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L853" href="#L853">853</a>           <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L854" href="#L854">854</a>       }
+<a class="jxr_linenumber" name="L855" href="#L855">855</a> 
+<a class="jxr_linenumber" name="L856" href="#L856">856</a>       <strong class="jxr_keyword">final</strong> Cell ret = theNext;
+<a class="jxr_linenumber" name="L857" href="#L857">857</a> 
+<a class="jxr_linenumber" name="L858" href="#L858">858</a>       <em class="jxr_comment">// Advance one of the iterators</em>
+<a class="jxr_linenumber" name="L859" href="#L859">859</a>       <strong class="jxr_keyword">if</strong> (theNext == cellSetNextRow) {
+<a class="jxr_linenumber" name="L860" href="#L860">860</a>         cellSetNextRow = getNext(cellSetIt);
+<a class="jxr_linenumber" name="L861" href="#L861">861</a>       } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L862" href="#L862">862</a>         snapshotNextRow = getNext(snapshotIt);
+<a class="jxr_linenumber" name="L863" href="#L863">863</a>       }
+<a class="jxr_linenumber" name="L864" href="#L864">864</a> 
+<a class="jxr_linenumber" name="L865" href="#L865">865</a>       <em class="jxr_comment">// Calculate the next value</em>
+<a class="jxr_linenumber" name="L866" href="#L866">866</a>       theNext = getLowest(cellSetNextRow, snapshotNextRow);
+<a class="jxr_linenumber" name="L867" href="#L867">867</a> 
+<a class="jxr_linenumber" name="L868" href="#L868">868</a>       <em class="jxr_comment">//long readpoint = ReadWriteConsistencyControl.getThreadReadPoint();</em>
+<a class="jxr_linenumber" name="L869" href="#L869">869</a>       <em class="jxr_comment">//DebugPrint.println(" MS@" + hashCode() + " next: " + theNext + " next_next: " +</em>
+<a class="jxr_linenumber" name="L870" href="#L870">870</a>       <em class="jxr_comment">//    getLowest() + " threadpoint=" + readpoint);</em>
+<a class="jxr_linenumber" name="L871" href="#L871">871</a>       <strong class="jxr_keyword">return</strong> ret;
+<a class="jxr_linenumber" name="L872" href="#L872">872</a>     }
+<a class="jxr_linenumber" name="L873" href="#L873">873</a> 
+<a class="jxr_linenumber" name="L874" href="#L874">874</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L875" href="#L875">875</a> <em class="jxr_comment">     * Returns the lower of the two key values, or null if they are both null.</em>
+<a class="jxr_linenumber" name="L876" href="#L876">876</a> <em class="jxr_comment">     * This uses comparator.compare() to compare the KeyValue using the memstore</em>
+<a class="jxr_linenumber" name="L877" href="#L877">877</a> <em class="jxr_comment">     * comparator.</em>
+<a class="jxr_linenumber" name="L878" href="#L878">878</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L879" href="#L879">879</a>     <strong class="jxr_keyword">private</strong> Cell getLowest(Cell first, Cell second) {
+<a class="jxr_linenumber" name="L880" href="#L880">880</a>       <strong class="jxr_keyword">if</strong> (first == <strong class="jxr_keyword">null</strong> &amp;&amp; second == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L881" href="#L881">881</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L882" href="#L882">882</a>       }
+<a class="jxr_linenumber" name="L883" href="#L883">883</a>       <strong class="jxr_keyword">if</strong> (first != <strong class="jxr_keyword">null</strong> &amp;&amp; second != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L884" href="#L884">884</a>         <strong class="jxr_keyword">int</strong> compare = comparator.compare(first, second);
+<a class="jxr_linenumber" name="L885" href="#L885">885</a>         <strong class="jxr_keyword">return</strong> (compare &lt;= 0 ? first : second);
+<a class="jxr_linenumber" name="L886" href="#L886">886</a>       }
+<a class="jxr_linenumber" name="L887" href="#L887">887</a>       <strong class="jxr_keyword">return</strong> (first != <strong class="jxr_keyword">null</strong> ? first : second);
+<a class="jxr_linenumber" name="L888" href="#L888">888</a>     }
+<a class="jxr_linenumber" name="L889" href="#L889">889</a> 
+<a class="jxr_linenumber" name="L890" href="#L890">890</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L891" href="#L891">891</a> <em class="jxr_comment">     * Returns the higher of the two cells, or null if they are both null.</em>
+<a class="jxr_linenumber" name="L892" href="#L892">892</a> <em class="jxr_comment">     * This uses comparator.compare() to compare the Cell using the memstore</em>
+<a class="jxr_linenumber" name="L893" href="#L893">893</a> <em class="jxr_comment">     * comparator.</em>
+<a class="jxr_linenumber" name="L894" href="#L894">894</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L895" href="#L895">895</a>     <strong class="jxr_keyword">private</strong> Cell getHighest(Cell first, Cell second) {
+<a class="jxr_linenumber" name="L896" href="#L896">896</a>       <strong class="jxr_keyword">if</strong> (first == <strong class="jxr_keyword">null</strong> &amp;&amp; second == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L897" href="#L897">897</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L898" href="#L898">898</a>       }
+<a class="jxr_linenumber" name="L899" href="#L899">899</a>       <strong class="jxr_keyword">if</strong> (first != <strong class="jxr_keyword">null</strong> &amp;&amp; second != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L900" href="#L900">900</a>         <strong class="jxr_keyword">int</strong> compare = comparator.compare(first, second);
+<a class="jxr_linenumber" name="L901" href="#L901">901</a>         <strong class="jxr_keyword">return</strong> (compare &gt; 0 ? first : second);
+<a class="jxr_linenumber" name="L902" href="#L902">902</a>       }
+<a class="jxr_linenumber" name="L903" href="#L903">903</a>       <strong class="jxr_keyword">return</strong> (first != <strong class="jxr_keyword">null</strong> ? first : second);
+<a class="jxr_linenumber" name="L904" href="#L904">904</a>     }
+<a class="jxr_linenumber" name="L905" href="#L905">905</a> 
+<a class="jxr_linenumber" name="L906" href="#L906">906</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">void</strong> close() {
+<a class="jxr_linenumber" name="L907" href="#L907">907</a>       <strong class="jxr_keyword">this</strong>.cellSetNextRow = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L908" href="#L908">908</a>       <strong class="jxr_keyword">this</strong>.snapshotNextRow = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L909" href="#L909">909</a> 
+<a class="jxr_linenumber" name="L910" href="#L910">910</a>       <strong class="jxr_keyword">this</strong>.cellSetIt = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L911" href="#L911">911</a>       <strong class="jxr_keyword">this</strong>.snapshotIt = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L912" href="#L912">912</a>       
+<a class="jxr_linenumber" name="L913" href="#L913">913</a>       <strong class="jxr_keyword">if</strong> (allocatorAtCreation != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L914" href="#L914">914</a>         <strong class="jxr_keyword">this</strong>.allocatorAtCreation.decScannerCount();
+<a class="jxr_linenumber" name="L915" href="#L915">915</a>         <strong class="jxr_keyword">this</strong>.allocatorAtCreation = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L916" href="#L916">916</a>       }
+<a class="jxr_linenumber" name="L917" href="#L917">917</a>       <strong class="jxr_keyword">if</strong> (snapshotAllocatorAtCreation != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L918" href="#L918">918</a>         <strong class="jxr_keyword">this</strong>.snapshotAllocatorAtCreation.decScannerCount();
+<a class="jxr_linenumber" name="L919" href="#L919">919</a>         <strong class="jxr_keyword">this</strong>.snapshotAllocatorAtCreation = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L920" href="#L920">920</a>       }
+<a class="jxr_linenumber" name="L921" href="#L921">921</a> 
+<a class="jxr_linenumber" name="L922" href="#L922">922</a>       <strong class="jxr_keyword">this</strong>.cellSetItRow = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L923" href="#L923">923</a>       <strong class="jxr_keyword">this</strong>.snapshotItRow = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L924" href="#L924">924</a>     }
+<a class="jxr_linenumber" name="L925" href="#L925">925</a> 
+<a class="jxr_linenumber" name="L926" href="#L926">926</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L927" href="#L927">927</a> <em class="jxr_javadoccomment">     * MemStoreScanner returns max value as sequence id because it will</em>
+<a class="jxr_linenumber" name="L928" href="#L928">928</a> <em class="jxr_javadoccomment">     * always have the latest data among all files.</em>
+<a class="jxr_linenumber" name="L929" href="#L929">929</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L930" href="#L930">930</a>     @Override
+<a class="jxr_linenumber" name="L931" href="#L931">931</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> getSequenceID() {
+<a class="jxr_linenumber" name="L932" href="#L932">932</a>       <strong class="jxr_keyword">return</strong> Long.MAX_VALUE;
+<a class="jxr_linenumber" name="L933" href="#L933">933</a>     }
+<a class="jxr_linenumber" name="L934" href="#L934">934</a> 
+<a class="jxr_linenumber" name="L935" href="#L935">935</a>     @Override
+<a class="jxr_linenumber" name="L936" href="#L936">936</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> shouldUseScanner(Scan scan, SortedSet&lt;byte[]&gt; columns,
+<a class="jxr_linenumber" name="L937" href="#L937">937</a>         <strong class="jxr_keyword">long</strong> oldestUnexpiredTS) {
+<a class="jxr_linenumber" name="L938" href="#L938">938</a>       <strong class="jxr_keyword">return</strong> shouldSeek(scan, oldestUnexpiredTS);
+<a class="jxr_linenumber" name="L939" href="#L939">939</a>     }
+<a class="jxr_linenumber" name="L940" href="#L940">940</a> 
+<a class="jxr_linenumber" name="L941" href="#L941">941</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L942" href="#L942">942</a> <em class="jxr_javadoccomment">     * Seek scanner to the given key first. If it returns false(means</em>
+<a class="jxr_linenumber" name="L943" href="#L943">943</a> <em class="jxr_javadoccomment">     * peek()==null) or scanner's peek row is bigger than row of given key, seek</em>
+<a class="jxr_linenumber" name="L944" href="#L944">944</a> <em class="jxr_javadoccomment">     * the scanner to the previous row of given key</em>
+<a class="jxr_linenumber" name="L945" href="#L945">945</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L946" href="#L946">946</a>     @Override
+<a class="jxr_linenumber" name="L947" href="#L947">947</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">boolean</strong> backwardSeek(Cell key) {
+<a class="jxr_linenumber" name="L948" href="#L948">948</a>       seek(key);
+<a class="jxr_linenumber" name="L949" href="#L949">949</a>       <strong class="jxr_keyword">if</strong> (peek() == <strong class="jxr_keyword">null</strong> || comparator.compareRows(peek(), key) &gt; 0) {
+<a class="jxr_linenumber" name="L950" href="#L950">950</a>         <strong class="jxr_keyword">return</strong> seekToPreviousRow(key);
+<a class="jxr_linenumber" name="L951" href="#L951">951</a>       }
+<a class="jxr_linenumber" name="L952" href="#L952">952</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L953" href="#L953">953</a>     }
+<a class="jxr_linenumber" name="L954" href="#L954">954</a> 
+<a class="jxr_linenumber" name="L955" href="#L955">955</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L956" href="#L956">956</a> <em class="jxr_javadoccomment">     * Separately get the KeyValue before the specified key from kvset and</em>
+<a class="jxr_linenumber" name="L957" href="#L957">957</a> <em class="jxr_javadoccomment">     * snapshotset, and use the row of higher one as the previous row of</em>
+<a class="jxr_linenumber" name="L958" href="#L958">958</a> <em class="jxr_javadoccomment">     * specified key, then seek to the first KeyValue of previous row</em>
+<a class="jxr_linenumber" name="L959" href="#L959">959</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L960" href="#L960">960</a>     @Override
+<a class="jxr_linenumber" name="L961" href="#L961">961</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">boolean</strong> seekToPreviousRow(Cell key) {
+<a class="jxr_linenumber" name="L962" href="#L962">962</a>       Cell firstKeyOnRow = KeyValueUtil.createFirstOnRow(key.getRowArray(), key.getRowOffset(),
+<a class="jxr_linenumber" name="L963" href="#L963">963</a>           key.getRowLength());
+<a class="jxr_linenumber" name="L964" href="#L964">964</a>       SortedSet&lt;Cell&gt; cellHead = cellSetAtCreation.headSet(firstKeyOnRow);
+<a class="jxr_linenumber" name="L965" href="#L965">965</a>       Cell cellSetBeforeRow = cellHead.isEmpty() ? <strong class="jxr_keyword">null</strong> : cellHead.last();
+<a class="jxr_linenumber" name="L966" href="#L966">966</a>       SortedSet&lt;Cell&gt; snapshotHead = snapshotAtCreation
+<a class="jxr_linenumber" name="L967" href="#L967">967</a>           .headSet(firstKeyOnRow);
+<a class="jxr_linenumber" name="L968" href="#L968">968</a>       Cell snapshotBeforeRow = snapshotHead.isEmpty() ? <strong class="jxr_keyword">null</strong> : snapshotHead
+<a class="jxr_linenumber" name="L969" href="#L969">969</a>           .last();
+<a class="jxr_linenumber" name="L970" href="#L970">970</a>       Cell lastCellBeforeRow = getHighest(cellSetBeforeRow, snapshotBeforeRow);
+<a class="jxr_linenumber" name="L971" href="#L971">971</a>       <strong class="jxr_keyword">if</strong> (lastCellBeforeRow == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L972" href="#L972">972</a>         theNext = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L973" href="#L973">973</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L974" href="#L974">974</a>       }
+<a class="jxr_linenumber" name="L975" href="#L975">975</a>       Cell firstKeyOnPreviousRow = KeyValueUtil.createFirstOnRow(lastCellBeforeRow.getRowArray(),
+<a class="jxr_linenumber" name="L976" href="#L976">976</a>           lastCellBeforeRow.getRowOffset(), lastCellBeforeRow.getRowLength());
+<a class="jxr_linenumber" name="L977" href="#L977">977</a>       <strong class="jxr_keyword">this</strong>.stopSkippingCellsIfNextRow = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L978" href="#L978">978</a>       seek(firstKeyOnPreviousRow);
+<a class="jxr_linenumber" name="L979" href="#L979">979</a>       <strong class="jxr_keyword">this</strong>.stopSkippingCellsIfNextRow = false;
+<a class="jxr_linenumber" name="L980" href="#L980">980</a>       <strong class="jxr_keyword">if</strong> (peek() == <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L981" href="#L981">981</a>           || comparator.compareRows(peek(), firstKeyOnPreviousRow) &gt; 0) {
+<a class="jxr_linenumber" name="L982" href="#L982">982</a>         <strong class="jxr_keyword">return</strong> seekToPreviousRow(lastCellBeforeRow);
+<a class="jxr_linenumber" name="L983" href="#L983">983</a>       }
+<a class="jxr_linenumber" name="L984" href="#L984">984</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L985" href="#L985">985</a>     }
+<a class="jxr_linenumber" name="L986" href="#L986">986</a> 
+<a class="jxr_linenumber" name="L987" href="#L987">987</a>     @Override
+<a class="jxr_linenumber" name="L988" href="#L988">988</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">synchronized</strong> <strong class="jxr_keyword">boolean</strong> seekToLastRow() {
+<a class="jxr_linenumber" name="L989" href="#L989">989</a>       Cell first = cellSetAtCreation.isEmpty() ? <strong class="jxr_keyword">null</strong> : cellSetAtCreation
+<a class="jxr_linenumber" name="L990" href="#L990">990</a>           .last();
+<a class="jxr_linenumber" name="L991" href="#L991">991</a>       Cell second = snapshotAtCreation.isEmpty() ? <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L992" href="#L992">992</a>           : snapshotAtCreation.last();
+<a class="jxr_linenumber" name="L993" href="#L993">993</a>       Cell higherCell = getHighest(first, second);
+<a class="jxr_linenumber" name="L994" href="#L994">994</a>       <strong class="jxr_keyword">if</strong> (higherCell == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L995" href="#L995">995</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L996" href="#L996">996</a>       }
+<a class="jxr_linenumber" name="L997" href="#L997">997</a>       Cell firstCellOnLastRow = KeyValueUtil.createFirstOnRow(higherCell.getRowArray(),
+<a class="jxr_linenumber" name="L998" href="#L998">998</a>           higherCell.getRowOffset(), higherCell.getRowLength());
+<a class="jxr_linenumber" name="L999" href="#L999">999</a>       <strong class="jxr_keyword">if</strong> (seek(firstCellOnLastRow)) {
+<a class="jxr_linenumber" name="L1000" href="#L1000">1000</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1001" href="#L1001">1001</a>       } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1002" href="#L1002">1002</a>         <strong class="jxr_keyword">return</strong> seekToPreviousRow(higherCell);
+<a class="jxr_linenumber" name="L1003" href="#L1003">1003</a>       }
+<a class="jxr_linenumber" name="L1004" href="#L1004">1004</a> 
+<a class="jxr_linenumber" name="L1005" href="#L1005">1005</a>     }
+<a class="jxr_linenumber" name="L1006" href="#L1006">1006</a>   }
+<a class="jxr_linenumber" name="L1007" href="#L1007">1007</a> 
+<a class="jxr_linenumber" name="L1008" href="#L1008">1008</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> FIXED_OVERHEAD = ClassSize.align(
+<a class="jxr_linenumber" name="L1009" href="#L1009">1009</a>       ClassSize.OBJECT + (9 * ClassSize.REFERENCE) + (3 * Bytes.SIZEOF_LONG));
+<a class="jxr_linenumber" name="L1010" href="#L1010">1010</a> 
+<a class="jxr_linenumber" name="L1011" href="#L1011">1011</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> DEEP_OVERHEAD = ClassSize.align(FIXED_OVERHEAD +
+<a class="jxr_linenumber" name="L1012" href="#L1012">1012</a>       ClassSize.ATOMIC_LONG + (2 * ClassSize.TIMERANGE_TRACKER) +
+<a class="jxr_linenumber" name="L1013" href="#L1013">1013</a>       (2 * ClassSize.CELL_SKIPLIST_SET) + (2 * ClassSize.CONCURRENT_SKIPLISTMAP));
+<a class="jxr_linenumber" name="L1014" href="#L1014">1014</a> 
+<a class="jxr_linenumber" name="L1015" href="#L1015">1015</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L1016" href="#L1016">1016</a> <em class="jxr_comment">   * Calculate how the MemStore size has changed.  Includes overhead of the</em>
+<a class="jxr_linenumber" name="L1017" href="#L1017">1017</a> <em class="jxr_comment">   * backing Map.</em>
+<a class="jxr_linenumber" name="L1018" href="#L1018">1018</a> <em class="jxr_comment">   * @param cell</em>
+<a class="jxr_linenumber" name="L1019" href="#L1019">1019</a> <em class="jxr_comment">   * @param notpresent True if the cell was NOT present in the set.</em>
+<a class="jxr_linenumber" name="L1020" href="#L1020">1020</a> <em class="jxr_comment">   * @return Size</em>
+<a class="jxr_linenumber" name="L1021" href="#L1021">1021</a> <em class="jxr_comment">   */</em>
+<a class="jxr_linenumber" name="L1022" href="#L1022">1022</a>   <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> heapSizeChange(<strong class="jxr_keyword">final</strong> Cell cell, <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> notpresent) {
+<a class="jxr_linenumber" name="L1023" href="#L1023">1023</a>     <strong class="jxr_keyword">return</strong> notpresent ? ClassSize.align(ClassSize.CONCURRENT_SKIPLISTMAP_ENTRY
+<a class="jxr_linenumber" name="L1024" href="#L1024">1024</a>         + CellUtil.estimatedHeapSizeOf(cell)) : 0;
+<a class="jxr_linenumber" name="L1025" href="#L1025">1025</a>   }
+<a class="jxr_linenumber" name="L1026" href="#L1026">1026</a> 
+<a class="jxr_linenumber" name="L1027" href="#L1027">1027</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">long</strong> keySize() {
+<a class="jxr_linenumber" name="L1028" href="#L1028">1028</a>     <strong class="jxr_keyword">return</strong> heapSize() - DEEP_OVERHEAD;
+<a class="jxr_linenumber" name="L1029" href="#L1029">1029</a>   }
+<a class="jxr_linenumber" name="L1030" href="#L1030">1030</a> 
+<a class="jxr_linenumber" name="L1031" href="#L1031">1031</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1032" href="#L1032">1032</a> <em class="jxr_javadoccomment">   * Get the entire heap usage for this MemStore not including keys in the</em>
+<a class="jxr_linenumber" name="L1033" href="#L1033">1033</a> <em class="jxr_javadoccomment">   * snapshot.</em>
+<a class="jxr_linenumber" name="L1034" href="#L1034">1034</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L1035" href="#L1035">1035</a>   @Override
+<a class="jxr_linenumber" name="L1036" href="#L1036">1036</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> heapSize() {
+<a class="jxr_linenumber" name="L1037" href="#L1037">1037</a>     <strong class="jxr_keyword">return</strong> size.get();
+<a class="jxr_linenumber" name="L1038" href="#L1038">1038</a>   }
+<a class="jxr_linenumber" name="L1039" href="#L1039">1039</a> 
+<a class="jxr_linenumber" name="L1040" href="#L1040">1040</a>   @Override
+<a class="jxr_linenumber" name="L1041" href="#L1041">1041</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> size() {
+<a class="jxr_linenumber" name="L1042" href="#L1042">1042</a>     <strong class="jxr_keyword">return</strong> heapSize();
+<a class="jxr_linenumber" name="L1043" href="#L1043">1043</a>   }
+<a class="jxr_linenumber" name="L1044" href="#L1044">1044</a> 
+<a class="jxr_linenumber" name="L1045" href="#L1045">1045</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1046" href="#L1046">1046</a> <em class="jxr_javadoccomment">   * Code to help figure if our approximation of object heap sizes is close</em>
+<a class="jxr_linenumber" name="L1047" href="#L1047">1047</a> <em class="jxr_javadoccomment">   * enough.  See hbase-900.  Fills memstores then waits so user can heap</em>
+<a class="jxr_linenumber" name="L1048" href="#L1048">1048</a> <em class="jxr_javadoccomment">   * dump and bring up resultant hprof in something like jprofiler which</em>
+<a class="jxr_linenumber" name="L1049" href="#L1049">1049</a> <em class="jxr_javadoccomment">   * allows you get 'deep size' on objects.</em>
+<a class="jxr_linenumber" name="L1050" href="#L1050">1050</a> <em class="jxr_javadoccomment">   * @param args main args</em>
+<a class="jxr_linenumber" name="L1051" href="#L1051">1051</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L1052" href="#L1052">1052</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> main(String [] args) {
+<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a>     RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a>     LOG.info(<span class="jxr_string">"vmName="</span> + runtime.getVmName() + <span class="jxr_string">", vmVendor="</span> +
+<a class="jxr_linenumber" name="L1055" href="#L1055">1055</a>       runtime.getVmVendor() + <span class="jxr_string">", vmVersion="</span> + runtime.getVmVersion());
+<a class="jxr_linenumber" name="L1056" href="#L1056">1056</a>     LOG.info(<span class="jxr_string">"vmInputArguments="</span> + runtime.getInputArguments());
+<a class="jxr_linenumber" name="L1057" href="#L1057">1057</a>     DefaultMemStore memstore1 = <strong class="jxr_keyword">new</strong> DefaultMemStore();
+<a class="jxr_linenumber" name="L1058" href="#L1058">1058</a>     <em class="jxr_comment">// TODO: x32 vs x64</em>
+<a class="jxr_linenumber" name="L1059" href="#L1059">1059</a>     <strong class="jxr_keyword">long</strong> size = 0;
+<a class="jxr_linenumber" name="L1060" href="#L1060">1060</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> count = 10000;
+<a class="jxr_linenumber" name="L1061" href="#L1061">1061</a>     byte [] fam = Bytes.toBytes(<span class="jxr_string">"col"</span>);
+<a class="jxr_linenumber" name="L1062" href="#L1062">1062</a>     byte [] qf = Bytes.toBytes(<span class="jxr_string">"umn"</span>);
+<a class="jxr_linenumber" name="L1063" href="#L1063">1063</a>     byte [] empty = <strong class="jxr_keyword">new</strong> byte[0];
+<a class="jxr_linenumber" name="L1064" href="#L1064">1064</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; count; i++) {
+<a class="jxr_linenumber" name="L1065" href="#L1065">1065</a>       <em class="jxr_comment">// Give each its own ts</em>
+<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a>       Pair&lt;Long, Cell&gt; ret = memstore1.add(<strong class="jxr_keyword">new</strong> KeyValue(Bytes.toBytes(i), fam, qf, i, empty));
+<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a>       size += ret.getFirst();
+<a class="jxr_linenumber" name="L1068" href="#L1068">1068</a>     }
+<a class="jxr_linenumber" name="L1069" href="#L1069">1069</a>     LOG.info(<span class="jxr_string">"memstore1 estimated size="</span> + size);
+<a class="jxr_linenumber" name="L1070" href="#L1070">1070</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; count; i++) {
+<a class="jxr_linenumber" name="L1071" href="#L1071">1071</a>       Pair&lt;Long, Cell&gt; ret = memstore1.add(<strong class="jxr_keyword">new</strong> KeyValue(Bytes.toBytes(i), fam, qf, i, empty));
+<a class="jxr_linenumber" name="L1072" href="#L1072">1072</a>       size += ret.getFirst();
+<a class="jxr_linenumber" name="L1073" href="#L1073">1073</a>     }
+<a class="jxr_linenumber" name="L1074" href="#L1074">1074</a>     LOG.info(<span class="jxr_string">"memstore1 estimated size (2nd loading of same data)="</span> + size);
+<a class="jxr_linenumber" name="L1075" href="#L1075">1075</a>     <em class="jxr_comment">// Make a variably sized memstore.</em>
+<a class="jxr_linenumber" name="L1076" href="#L1076">1076</a>     DefaultMemStore memstore2 = <strong class="jxr_keyword">new</strong> DefaultMemStore();
+<a class="jxr_linenumber" name="L1077" href="#L1077">1077</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; count; i++) {
+<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a>       Pair&lt;Long, Cell&gt; ret = memstore2.add(<strong class="jxr_keyword">new</strong> KeyValue(Bytes.toBytes(i), fam, qf, i,
+<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a>         <strong class="jxr_keyword">new</strong> byte[i]));
+<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a>       size += ret.getFirst();
+<a class="jxr_linenumber" name="L1081" href="#L1081">1081</a>     }
+<a class="jxr_linenumber" name="L1082" href="#L1082">1082</a>     LOG.info(<span class="jxr_string">"memstore2 estimated size="</span> + size);
+<a class="jxr_linenumber" name="L1083" href="#L1083">1083</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> seconds = 30;
+<a class="jxr_linenumber" name="L1084" href="#L1084">1084</a>     LOG.info(<span class="jxr_string">"Waiting "</span> + seconds + <span class="jxr_string">" seconds while heap dump is taken"</span>);
+<a class="jxr_linenumber" name="L1085" href="#L1085">1085</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; seconds; i++) {
+<a class="jxr_linenumber" name="L1086" href="#L1086">1086</a>       <em class="jxr_comment">// Thread.sleep(1000);</em>
+<a class="jxr_linenumber" name="L1087" href="#L1087">1087</a>     }
+<a class="jxr_linenumber" name="L1088" href="#L1088">1088</a>     LOG.info(<span class="jxr_string">"Exiting."</span>);
+<a class="jxr_linenumber" name="L1089" href="#L1089">1089</a>   }
+<a class="jxr_linenumber" name="L1090" href="#L1090">1090</a> 
+<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

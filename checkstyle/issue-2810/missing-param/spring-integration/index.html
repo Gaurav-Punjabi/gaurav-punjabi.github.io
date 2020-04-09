@@ -1,0 +1,2642 @@
+<html>
+	<head>
+		<title>checkstyle xml difference report</title>
+		<style type="text/css" media="all">@import url("./css/maven-base.css");@import url("./css/maven-theme.css"); );</style>
+		<link rel="stylesheet" href="./css/site.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<http-equiv http-equiv="Content-Language" content="en"></http-equiv>
+	</head>
+	<body class="composite">
+		<div id="contentBox">
+			<div class="section">
+				<h2 a="Checkstyle XML difference report">Checkstyle XML difference report</h2>
+				This is symmetric difference generated from two checkstyle-result.xml reports. <br/>
+				All matching records from each XML file are deleted, then remaining records are merged into single report. <br>
+		        <a href="https://github.com/checkstyle/contribution/tree/master/patch-diff-report-tool">Utility that generated this report.</a>
+			</div>
+
+			
+				<h2 a="Checkstyle configuration report">Checkstyle configuration report</h2>
+				<div class="section">
+					<table border="0" class="bodyTable">
+							<tr class="a">
+								<th>Module Name</th>
+								<th>Base properties</th>
+								<th>Patch properties</th>
+							</tr>
+							
+								
+									<tr>
+										<td class="c">Checker</td>
+										
+										<td class="c">
+											
+												severity
+												
+													<li>warning</li>
+												
+												<br/>
+											
+												charset
+												
+													<li>UTF-8</li>
+												
+												<br/>
+											
+												haltOnException
+												
+													<li>false</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												severity
+												
+													<li>warning</li>
+												
+												<br/>
+											
+												charset
+												
+													<li>UTF-8</li>
+												
+												<br/>
+											
+												haltOnException
+												
+													<li>false</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+										
+									<tr>
+										<td class="c">BeforeExecutionExclusionFileFilter</td>
+										
+										<td class="c">
+											
+												fileNamePattern
+												
+													<li>module\-info\.java$</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												fileNamePattern
+												
+													<li>module\-info\.java$</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+										
+									<tr>
+										<td class="c">TreeWalker</td>
+										
+										<td class="c">
+											
+										</td>
+										
+										
+										<td class="c">
+											
+										</td>
+										
+									</tr>
+									
+										
+									<tr>
+										<td class="c">JavadocMethod</td>
+										<td class="b">
+											
+										</td>
+										
+										
+										<td class="a">
+											
+												validateParameterOrder
+												
+													<li>true</li>
+												
+												<br/>
+											
+												allowMissingParamTags
+												
+													<li>true</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+									</tr>
+									
+								
+									
+										
+									<tr>
+										<td class="c">SuppressionXpathSingleFilter</td>
+										
+										<td class="c">
+											
+												message
+												
+													<li>Javadoc comment at column \d+ has parse error</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												message
+												
+													<li>Javadoc comment at column \d+ has parse error</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+								
+									
+										
+									<tr>
+										<td class="c">SuppressionSingleFilter</td>
+										
+										<td class="c">
+											
+												checks
+												
+													<li>Checker</li>
+												
+												<br/>
+											
+												message
+												
+													<li>Exception occurred while parsing</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												checks
+												
+													<li>Checker</li>
+												
+												<br/>
+											
+												message
+												
+													<li>Exception occurred while parsing</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+								
+								
+					</table>	
+				</div>
+			
+
+			<div class="section">
+				<h2 a="Summary:">Summary:</h2>
+				<div class="section">
+					<table border="0" class="bodyTable">
+						<tr class="a">
+							<th>Report id</th>
+							<th>Files</th>
+							<th>Violations</th>
+							
+								<th>Severity-warning</th>
+							
+						</tr>
+						<tr class="b">
+							<td>base</td>
+							<td id="filesBase">2980</td>
+							<td id="totalBase">167</td>
+							
+								<td id="warningSeverityNumBase">167</td>
+							
+						</tr>
+						<tr class="a">
+							<td>patch</td>
+							<td id="filesPatch">2980</td>
+							<td id="totalPatch">66 (101 removed)</td>
+							
+								<td id="warningSeverityStatisticsPatch">66 (101 removed)</td>
+							
+						</tr>
+						<tr class="d">
+							<td/>
+							<td id="filesDiff">44 files with differences</td>
+							<td id="totalDiff">101 changes in violations</td>
+							
+								<td id="warningSeverityNumDiff">101 changes in violations</td>
+							
+						<tr>
+					</table>
+
+					
+						<br />
+						<table border="0" class="bodyTable">
+							<tr class="a">
+								<th>Report id</th>
+								
+									<th>com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck</th>
+								
+							</tr>
+							<tr class="b">
+								<td>base</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheckModuleNumBase">167</td>
+								
+							</tr>
+							<tr class="a">
+								<td>patch</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheckModuleStatisticsPatch">66 (101 removed)</td>
+								
+							</tr>
+							<tr class="d">
+								<td>changes in violations</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheckModuleNumDiff">101</td>
+								
+							<tr>
+						</table>
+					
+
+					<br />
+					Number of unique base messages reported below: <span id="uniqueMessagesBase">101</span><br />
+					Number of unique patch messages reported below: <span id="uniqueMessagesPatch">0</span><br />
+				</div>
+			</div>
+
+			<div class="section">
+				<h2 a="Violations:">Violations:</h2>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-amqp/src/main/java/org/springframework/integration/amqp/support/DefaultAmqpHeaderMapper.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A1" href = "#A1">#A1</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;headers&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-amqp/src/main/java/org/springframework/integration/amqp/support/DefaultAmqpHeaderMapper.java.html#L298">298</a></td>
+								
+								
+									
+									<td class="keepWidth">71</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/aggregator/ExpressionEvaluatingReleaseStrategy.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A2" href = "#A2">#A2</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;messages&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/aggregator/ExpressionEvaluatingReleaseStrategy.java.html#L48">48</a></td>
+								
+								
+									
+									<td class="keepWidth">48</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/config/IntegrationRegistrar.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A3" href = "#A3">#A3</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;registry&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/config/IntegrationRegistrar.java.html#L123">123</a></td>
+								
+								
+									
+									<td class="keepWidth">102</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dispatcher/RoundRobinLoadBalancingStrategy.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A4" href = "#A4">#A4</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;message&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dispatcher/RoundRobinLoadBalancingStrategy.java.html#L48">48</a></td>
+								
+								
+									
+									<td class="keepWidth">77</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A5" href = "#A5">#A5</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;handlers&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dispatcher/RoundRobinLoadBalancingStrategy.java.html#L48">48</a></td>
+								
+								
+									
+									<td class="keepWidth">113</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A6" href = "#A6">#A6</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;size&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dispatcher/RoundRobinLoadBalancingStrategy.java.html#L90">90</a></td>
+								
+								
+									
+									<td class="keepWidth">50</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dispatcher/UnicastingDispatcher.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A7" href = "#A7">#A7</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;message&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dispatcher/UnicastingDispatcher.java.html#L171">171</a></td>
+								
+								
+									
+									<td class="keepWidth">72</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A8" href = "#A8">#A8</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;allExceptions&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dispatcher/UnicastingDispatcher.java.html#L198">198</a></td>
+								
+								
+									
+									<td class="keepWidth">62</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A9" href = "#A9">#A9</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;message&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dispatcher/UnicastingDispatcher.java.html#L198">198</a></td>
+								
+								
+									
+									<td class="keepWidth">88</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A10" href = "#A10">#A10</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;isLast&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dispatcher/UnicastingDispatcher.java.html#L198">198</a></td>
+								
+								
+									
+									<td class="keepWidth">105</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dsl/context/IntegrationFlowBeanPostProcessor.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A11" href = "#A11">#A11</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;flow&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dsl/context/IntegrationFlowBeanPostProcessor.java.html#L307">307</a></td>
+								
+								
+									
+									<td class="keepWidth">67</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A12" href = "#A12">#A12</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;beanName&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/dsl/context/IntegrationFlowBeanPostProcessor.java.html#L307">307</a></td>
+								
+								
+									
+									<td class="keepWidth">80</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/expression/ReloadableResourceBundleExpressionSource.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A13" href = "#A13">#A13</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;locale&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/expression/ReloadableResourceBundleExpressionSource.java.html#L284">284</a></td>
+								
+								
+									
+									<td class="keepWidth">61</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/json/JsonPropertyAccessor.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A14" href = "#A14">#A14</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;name&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/json/JsonPropertyAccessor.java.html#L124">124</a></td>
+								
+								
+									
+									<td class="keepWidth">43</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/mapping/AbstractHeaderMapper.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A15" href = "#A15">#A15</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;source&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/mapping/AbstractHeaderMapper.java.html#L264">264</a></td>
+								
+								
+									
+									<td class="keepWidth">49</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A16" href = "#A16">#A16</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;headerMatcher&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/mapping/AbstractHeaderMapper.java.html#L264">264</a></td>
+								
+								
+									
+									<td class="keepWidth">71</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/support/MessageBuilder.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A17" href = "#A17">#A17</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;payload&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/support/MessageBuilder.java.html#L67">67</a></td>
+								
+								
+									
+									<td class="keepWidth">34</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A18" href = "#A18">#A18</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;originalMessage&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/support/MessageBuilder.java.html#L67">67</a></td>
+								
+								
+									
+									<td class="keepWidth">64</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/support/MutableMessageBuilder.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A19" href = "#A19">#A19</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;message&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/support/MutableMessageBuilder.java.html#L59">59</a></td>
+								
+								
+									
+									<td class="keepWidth">50</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/support/management/ExponentialMovingAverageRatio.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A20" href = "#A20">#A20</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;statistics&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/main/java/org/springframework/integration/support/management/ExponentialMovingAverageRatio.java.html#L234">234</a></td>
+								
+								
+									
+									<td class="keepWidth">45</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/test/java/org/springframework/integration/message/TestHandlers.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A21" href = "#A21">#A21</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;counter&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/test/java/org/springframework/integration/message/TestHandlers.java.html#L60">60</a></td>
+								
+								
+									
+									<td class="keepWidth">72</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A22" href = "#A22">#A22</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;latch&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/test/java/org/springframework/integration/message/TestHandlers.java.html#L73">73</a></td>
+								
+								
+									
+									<td class="keepWidth">74</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A23" href = "#A23">#A23</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;counter&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/test/java/org/springframework/integration/message/TestHandlers.java.html#L87">87</a></td>
+								
+								
+									
+									<td class="keepWidth">81</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A24" href = "#A24">#A24</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;latch&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/test/java/org/springframework/integration/message/TestHandlers.java.html#L87">87</a></td>
+								
+								
+									
+									<td class="keepWidth">111</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/test/java/org/springframework/integration/transformer/AvroTestClass1.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A25" href = "#A25">#A25</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;b&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/test/java/org/springframework/integration/transformer/AvroTestClass1.java.html#L50">50</a></td>
+								
+								
+									
+									<td class="keepWidth">27</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/test/java/org/springframework/integration/transformer/AvroTestClass2.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A26" href = "#A26">#A26</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;b&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-core/src/test/java/org/springframework/integration/transformer/AvroTestClass2.java.html#L50">50</a></td>
+								
+								
+									
+									<td class="keepWidth">27</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-file/src/main/java/org/springframework/integration/file/FileWritingMessageHandler.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A27" href = "#A27">#A27</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;message&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-file/src/main/java/org/springframework/integration/file/FileWritingMessageHandler.java.html#L604">604</a></td>
+								
+								
+									
+									<td class="keepWidth">64</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-file/src/main/java/org/springframework/integration/file/locking/FileChannelCache.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A28" href = "#A28">#A28</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;fileToLock&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-file/src/main/java/org/springframework/integration/file/locking/FileChannelCache.java.html#L57">57</a></td>
+								
+								
+									
+									<td class="keepWidth">48</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A29" href = "#A29">#A29</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;fileToUnlock&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-file/src/main/java/org/springframework/integration/file/locking/FileChannelCache.java.html#L93">93</a></td>
+								
+								
+									
+									<td class="keepWidth">49</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-file/src/test/java/org/springframework/integration/file/config/FileTailInboundChannelAdapterParserTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A30" href = "#A30">#A30</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;fileName&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-file/src/test/java/org/springframework/integration/file/config/FileTailInboundChannelAdapterParserTests.java.html#L138">138</a></td>
+								
+								
+									
+									<td class="keepWidth">49</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ftp/src/main/java/org/springframework/integration/ftp/session/AbstractFtpSessionFactory.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A31" href = "#A31">#A31</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;client&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ftp/src/main/java/org/springframework/integration/ftp/session/AbstractFtpSessionFactory.java.html#L218">218</a></td>
+								
+								
+									
+									<td class="keepWidth">49</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/config/HttpIntegrationConfigurationInitializer.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A32" href = "#A32">#A32</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;registry&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/config/HttpIntegrationConfigurationInitializer.java.html#L63">63</a></td>
+								
+								
+									
+									<td class="keepWidth">93</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/inbound/HttpRequestHandlingEndpointSupport.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A33" href = "#A33">#A33</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;parameterMap&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/inbound/HttpRequestHandlingEndpointSupport.java.html#L466">466</a></td>
+								
+								
+									
+									<td class="keepWidth">89</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/inbound/IntegrationRequestMappingHandlerMapping.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A34" href = "#A34">#A34</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;endpoint&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/inbound/IntegrationRequestMappingHandlerMapping.java.html#L210">210</a></td>
+								
+								
+									
+									<td class="keepWidth">82</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/multipart/MultipartHttpInputMessage.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A35" href = "#A35">#A35</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;paramOrFileName&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/multipart/MultipartHttpInputMessage.java.html#L74">74</a></td>
+								
+								
+									
+									<td class="keepWidth">54</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/outbound/AbstractHttpRequestExecutingMessageHandler.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A36" href = "#A36">#A36</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;headers&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/outbound/AbstractHttpRequestExecutingMessageHandler.java.html#L354">354</a></td>
+								
+								
+									
+									<td class="keepWidth">61</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A37" href = "#A37">#A37</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;map&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/outbound/AbstractHttpRequestExecutingMessageHandler.java.html#L473">473</a></td>
+								
+								
+									
+									<td class="keepWidth">51</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A38" href = "#A38">#A38</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;map&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-http/src/main/java/org/springframework/integration/http/outbound/AbstractHttpRequestExecutingMessageHandler.java.html#L486">486</a></td>
+								
+								
+									
+									<td class="keepWidth">52</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/tcp/connection/TcpMessageMapper.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A39" href = "#A39">#A39</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;message&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/tcp/connection/TcpMessageMapper.java.html#L260">260</a></td>
+								
+								
+									
+									<td class="keepWidth">53</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/tcp/connection/TcpNioSSLConnection.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A40" href = "#A40">#A40</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;networkBuffer&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/tcp/connection/TcpNioSSLConnection.java.html#L153">153</a></td>
+								
+								
+									
+									<td class="keepWidth">51</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A41" href = "#A41">#A41</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;result&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/tcp/connection/TcpNioSSLConnection.java.html#L239">239</a></td>
+								
+								
+									
+									<td class="keepWidth">66</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A42" href = "#A42">#A42</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;plainText&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/tcp/connection/TcpNioSSLConnection.java.html#L362">362</a></td>
+								
+								
+									
+									<td class="keepWidth">63</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A43" href = "#A43">#A43</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;resultArg&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/tcp/connection/TcpNioSSLConnection.java.html#L362">362</a></td>
+								
+								
+									
+									<td class="keepWidth">90</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A44" href = "#A44">#A44</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;result&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/tcp/connection/TcpNioSSLConnection.java.html#L397">397</a></td>
+								
+								
+									
+									<td class="keepWidth">78</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A45" href = "#A45">#A45</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;plainText&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/tcp/connection/TcpNioSSLConnection.java.html#L425">425</a></td>
+								
+								
+									
+									<td class="keepWidth">59</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A46" href = "#A46">#A46</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;encoded&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/tcp/connection/TcpNioSSLConnection.java.html#L445">445</a></td>
+								
+								
+									
+									<td class="keepWidth">46</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/udp/DatagramPacketMessageMapper.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A47" href = "#A47">#A47</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;message&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/udp/DatagramPacketMessageMapper.java.html#L156">156</a></td>
+								
+								
+									
+									<td class="keepWidth">62</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A48" href = "#A48">#A48</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;buffer&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/udp/DatagramPacketMessageMapper.java.html#L286">286</a></td>
+								
+								
+									
+									<td class="keepWidth">47</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A49" href = "#A49">#A49</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;prefix&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/main/java/org/springframework/integration/ip/udp/DatagramPacketMessageMapper.java.html#L286">286</a></td>
+								
+								
+									
+									<td class="keepWidth">62</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/tcp/TcpOutboundGatewayTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A50" href = "#A50">#A50</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;ccf&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/tcp/TcpOutboundGatewayTests.java.html#L342">342</a></td>
+								
+								
+									
+									<td class="keepWidth">79</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A51" href = "#A51">#A51</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;server&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/tcp/TcpOutboundGatewayTests.java.html#L343">343</a></td>
+								
+								
+									
+									<td class="keepWidth">44</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A52" href = "#A52">#A52</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;port&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java.html#L59">59</a></td>
+								
+								
+									
+									<td class="keepWidth">63</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A53" href = "#A53">#A53</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;port&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java.html#L103">103</a></td>
+								
+								
+									
+									<td class="keepWidth">71</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A54" href = "#A54">#A54</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;port&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java.html#L138">138</a></td>
+								
+								
+									
+									<td class="keepWidth">67</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A55" href = "#A55">#A55</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;howMany&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java.html#L138">138</a></td>
+								
+								
+									
+									<td class="keepWidth">83</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A56" href = "#A56">#A56</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;noDelay&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java.html#L138">138</a></td>
+								
+								
+									
+									<td class="keepWidth">106</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A57" href = "#A57">#A57</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;port&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java.html#L188">188</a></td>
+								
+								
+									
+									<td class="keepWidth">63</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A58" href = "#A58">#A58</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;port&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java.html#L232">232</a></td>
+								
+								
+									
+									<td class="keepWidth">71</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A59" href = "#A59">#A59</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;port&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java.html#L268">268</a></td>
+								
+								
+									
+									<td class="keepWidth">61</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A60" href = "#A60">#A60</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;port&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java.html#L313">313</a></td>
+								
+								
+									
+									<td class="keepWidth">57</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A61" href = "#A61">#A61</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;port&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java.html#L338">338</a></td>
+								
+								
+									
+									<td class="keepWidth">50</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A62" href = "#A62">#A62</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;port&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-ip/src/test/java/org/springframework/integration/ip/util/SocketTestUtils.java.html#L395">395</a></td>
+								
+								
+									
+									<td class="keepWidth">69</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jdbc/src/main/java/org/springframework/integration/jdbc/StoredProcExecutor.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A63" href = "#A63">#A63</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;storedProcedureName&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jdbc/src/main/java/org/springframework/integration/jdbc/StoredProcExecutor.java.html#L285">285</a></td>
+								
+								
+									
+									<td class="keepWidth">89</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jdbc/src/main/java/org/springframework/integration/jdbc/config/JdbcTypesEnum.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A64" href = "#A64">#A64</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;code&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jdbc/src/main/java/org/springframework/integration/jdbc/config/JdbcTypesEnum.java.html#L73">73</a></td>
+								
+								
+									
+									<td class="keepWidth">27</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/DefaultJmsHeaderMapper.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A65" href = "#A65">#A65</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;headerName&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/DefaultJmsHeaderMapper.java.html#L316">316</a></td>
+								
+								
+									
+									<td class="keepWidth">46</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A66" href = "#A66">#A66</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;propertyName&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/DefaultJmsHeaderMapper.java.html#L331">331</a></td>
+								
+								
+									
+									<td class="keepWidth">44</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A67" href = "#A67">#A67</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;reqDestination&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L895">895</a></td>
+								
+								
+									
+									<td class="keepWidth">90</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A68" href = "#A68">#A68</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;jmsRequest&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L896">896</a></td>
+								
+								
+									
+									<td class="keepWidth">43</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A69" href = "#A69">#A69</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;replyTo&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L896">896</a></td>
+								
+								
+									
+									<td class="keepWidth">67</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A70" href = "#A70">#A70</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;session&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L896">896</a></td>
+								
+								
+									
+									<td class="keepWidth">84</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A71" href = "#A71">#A71</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;priority&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L896">896</a></td>
+								
+								
+									
+									<td class="keepWidth">97</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A72" href = "#A72">#A72</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;reqDestination&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L929">929</a></td>
+								
+								
+									
+									<td class="keepWidth">95</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A73" href = "#A73">#A73</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;jmsRequest&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L930">930</a></td>
+								
+								
+									
+									<td class="keepWidth">43</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A74" href = "#A74">#A74</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;replyTo&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L930">930</a></td>
+								
+								
+									
+									<td class="keepWidth">67</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A75" href = "#A75">#A75</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;session&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L930">930</a></td>
+								
+								
+									
+									<td class="keepWidth">84</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A76" href = "#A76">#A76</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;priority&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L930">930</a></td>
+								
+								
+									
+									<td class="keepWidth">97</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A77" href = "#A77">#A77</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;reqDestination&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L950">950</a></td>
+								
+								
+									
+									<td class="keepWidth">88</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A78" href = "#A78">#A78</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;jmsRequest&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L951">951</a></td>
+								
+								
+									
+									<td class="keepWidth">43</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A79" href = "#A79">#A79</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;replyTo&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L951">951</a></td>
+								
+								
+									
+									<td class="keepWidth">67</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A80" href = "#A80">#A80</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;session&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L951">951</a></td>
+								
+								
+									
+									<td class="keepWidth">84</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A81" href = "#A81">#A81</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;priority&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L951">951</a></td>
+								
+								
+									
+									<td class="keepWidth">97</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A82" href = "#A82">#A82</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;destination&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/main/java/org/springframework/integration/jms/JmsOutboundGateway.java.html#L1228">1228</a></td>
+								
+								
+									
+									<td class="keepWidth">63</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/test/java/org/springframework/integration/jms/SubscribableJmsChannelTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A83" href = "#A83">#A83</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;channel&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jms/src/test/java/org/springframework/integration/jms/SubscribableJmsChannelTests.java.html#L355">355</a></td>
+								
+								
+									
+									<td class="keepWidth">90</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jmx/src/main/java/org/springframework/integration/jmx/OperationInvokingMessageHandler.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A84" href = "#A84">#A84</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;message&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jmx/src/main/java/org/springframework/integration/jmx/OperationInvokingMessageHandler.java.html#L230">230</a></td>
+								
+								
+									
+									<td class="keepWidth">57</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A85" href = "#A85">#A85</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;message&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jmx/src/main/java/org/springframework/integration/jmx/OperationInvokingMessageHandler.java.html#L253">253</a></td>
+								
+								
+									
+									<td class="keepWidth">56</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jmx/src/main/java/org/springframework/integration/monitor/IntegrationMBeanExporter.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A86" href = "#A86">#A86</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;monitor&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jmx/src/main/java/org/springframework/integration/monitor/IntegrationMBeanExporter.java.html#L1033">1033</a></td>
+								
+								
+									
+									<td class="keepWidth">106</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A87" href = "#A87">#A87</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;endpoint&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jmx/src/main/java/org/springframework/integration/monitor/IntegrationMBeanExporter.java.html#L1034">1034</a></td>
+								
+								
+									
+									<td class="keepWidth">43</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A88" href = "#A88">#A88</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;monitor&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jmx/src/main/java/org/springframework/integration/monitor/IntegrationMBeanExporter.java.html#L1161">1161</a></td>
+								
+								
+									
+									<td class="keepWidth">97</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A89" href = "#A89">#A89</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;endpoint&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jmx/src/main/java/org/springframework/integration/monitor/IntegrationMBeanExporter.java.html#L1161">1161</a></td>
+								
+								
+									
+									<td class="keepWidth">113</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jpa/src/main/java/org/springframework/integration/jpa/core/DefaultJpaOperations.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A90" href = "#A90">#A90</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;queryString&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jpa/src/main/java/org/springframework/integration/jpa/core/DefaultJpaOperations.java.html#L313">313</a></td>
+								
+								
+									
+									<td class="keepWidth">53</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A91" href = "#A91">#A91</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;source&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jpa/src/main/java/org/springframework/integration/jpa/core/DefaultJpaOperations.java.html#L313">313</a></td>
+								
+								
+									
+									<td class="keepWidth">82</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A92" href = "#A92">#A92</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;query&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-jpa/src/main/java/org/springframework/integration/jpa/core/DefaultJpaOperations.java.html#L313">313</a></td>
+								
+								
+									
+									<td class="keepWidth">96</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-mail/src/main/java/org/springframework/integration/mail/AbstractMailReceiver.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A93" href = "#A93">#A93</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;messages&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-mail/src/main/java/org/springframework/integration/mail/AbstractMailReceiver.java.html#L549">549</a></td>
+								
+								
+									
+									<td class="keepWidth">68</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-test-support/src/main/java/org/springframework/integration/test/matcher/PayloadMatcher.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A94" href = "#A94">#A94</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;matcher&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-test-support/src/main/java/org/springframework/integration/test/matcher/PayloadMatcher.java.html#L70">70</a></td>
+								
+								
+									
+									<td class="keepWidth">43</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-webflux/src/main/java/org/springframework/integration/webflux/config/WebFluxIntegrationConfigurationInitializer.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A95" href = "#A95">#A95</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;registry&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-webflux/src/main/java/org/springframework/integration/webflux/config/WebFluxIntegrationConfigurationInitializer.java.html#L69">69</a></td>
+								
+								
+									
+									<td class="keepWidth">101</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-webflux/src/main/java/org/springframework/integration/webflux/inbound/WebFluxIntegrationRequestMappingHandlerMapping.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A96" href = "#A96">#A96</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;endpoint&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-webflux/src/main/java/org/springframework/integration/webflux/inbound/WebFluxIntegrationRequestMappingHandlerMapping.java.html#L135">135</a></td>
+								
+								
+									
+									<td class="keepWidth">81</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-websocket/src/main/java/org/springframework/integration/websocket/config/WebSocketIntegrationConfigurationInitializer.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A97" href = "#A97">#A97</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;registry&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-websocket/src/main/java/org/springframework/integration/websocket/config/WebSocketIntegrationConfigurationInitializer.java.html#L87">87</a></td>
+								
+								
+									
+									<td class="keepWidth">80</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-xml/src/main/java/org/springframework/integration/xml/transformer/AbstractXmlTransformer.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A98" href = "#A98">#A98</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;resultType&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-xml/src/main/java/org/springframework/integration/xml/transformer/AbstractXmlTransformer.java.html#L87">87</a></td>
+								
+								
+									
+									<td class="keepWidth">61</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A99" href = "#A99">#A99</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;resultFactoryName&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-xml/src/main/java/org/springframework/integration/xml/transformer/AbstractXmlTransformer.java.html#L87">87</a></td>
+								
+								
+									
+									<td class="keepWidth">80</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A100" href = "#A100">#A100</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;beanFactory&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-xml/src/main/java/org/springframework/integration/xml/transformer/AbstractXmlTransformer.java.html#L87">87</a></td>
+								
+								
+									
+									<td class="keepWidth">111</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-xml/src/main/java/org/springframework/integration/xml/transformer/XsltPayloadTransformer.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A101" href = "#A101">#A101</a></td>
+								<td>warning</td>
+								<td>JavadocMethod</td>
+								<td>Expected @param tag for &#39;xslResource&#39;.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-integration/spring-integration-xml/src/main/java/org/springframework/integration/xml/transformer/XsltPayloadTransformer.java.html#L425">425</a></td>
+								
+								
+									
+									<td class="keepWidth">75</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
