@@ -1,0 +1,1266 @@
+<html>
+	<head>
+		<title>checkstyle xml difference report</title>
+		<style type="text/css" media="all">@import url("./css/maven-base.css");@import url("./css/maven-theme.css"); );</style>
+		<link rel="stylesheet" href="./css/site.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<http-equiv http-equiv="Content-Language" content="en"></http-equiv>
+	</head>
+	<body class="composite">
+		<div id="contentBox">
+			<div class="section">
+				<h2 a="Checkstyle XML difference report">Checkstyle XML difference report</h2>
+				This is symmetric difference generated from two checkstyle-result.xml reports. <br/>
+				All matching records from each XML file are deleted, then remaining records are merged into single report. <br>
+		        <a href="https://github.com/checkstyle/contribution/tree/master/patch-diff-report-tool">Utility that generated this report.</a>
+			</div>
+
+			
+				<h2 a="Checkstyle configuration report">Checkstyle configuration report</h2>
+				<div class="section">
+					<table border="0" class="bodyTable">
+							<tr class="a">
+								<th>Module Name</th>
+								<th>Base properties</th>
+								<th>Patch properties</th>
+							</tr>
+							
+								
+									<tr>
+										<td class="c">Checker</td>
+										
+										<td class="c">
+											
+												severity
+												
+													<li>warning</li>
+												
+												<br/>
+											
+												charset
+												
+													<li>UTF-8</li>
+												
+												<br/>
+											
+												haltOnException
+												
+													<li>false</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												severity
+												
+													<li>warning</li>
+												
+												<br/>
+											
+												charset
+												
+													<li>UTF-8</li>
+												
+												<br/>
+											
+												haltOnException
+												
+													<li>false</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+										
+									<tr>
+										<td class="c">BeforeExecutionExclusionFileFilter</td>
+										
+										<td class="c">
+											
+												fileNamePattern
+												
+													<li>module\-info\.java$</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												fileNamePattern
+												
+													<li>module\-info\.java$</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+										
+									<tr>
+										<td class="c">TreeWalker</td>
+										
+										<td class="c">
+											
+										</td>
+										
+										
+										<td class="c">
+											
+										</td>
+										
+									</tr>
+									
+										
+									<tr>
+										<td class="c">JavadocTagContinuationIndentation</td>
+										
+										<td class="c">
+											
+										</td>
+										
+										
+										<td class="c">
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+										
+									<tr>
+										<td class="c">SuppressionXpathSingleFilter</td>
+										
+										<td class="c">
+											
+												message
+												
+													<li>Javadoc comment at column \d+ has parse error</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												message
+												
+													<li>Javadoc comment at column \d+ has parse error</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+								
+									
+										
+									<tr>
+										<td class="c">SuppressionSingleFilter</td>
+										
+										<td class="c">
+											
+												checks
+												
+													<li>Checker</li>
+												
+												<br/>
+											
+												message
+												
+													<li>Exception occurred while parsing</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												checks
+												
+													<li>Checker</li>
+												
+												<br/>
+											
+												message
+												
+													<li>Exception occurred while parsing</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+								
+								
+					</table>	
+				</div>
+			
+
+			<div class="section">
+				<h2 a="Summary:">Summary:</h2>
+				<div class="section">
+					<table border="0" class="bodyTable">
+						<tr class="a">
+							<th>Report id</th>
+							<th>Files</th>
+							<th>Violations</th>
+							
+								<th>Severity-warning</th>
+							
+						</tr>
+						<tr class="b">
+							<td>base</td>
+							<td id="filesBase">5911</td>
+							<td id="totalBase">2736</td>
+							
+								<td id="warningSeverityNumBase">2736</td>
+							
+						</tr>
+						<tr class="a">
+							<td>patch</td>
+							<td id="filesPatch">5911</td>
+							<td id="totalPatch">2779 (43 added)</td>
+							
+								<td id="warningSeverityStatisticsPatch">2779 (43 added)</td>
+							
+						</tr>
+						<tr class="d">
+							<td/>
+							<td id="filesDiff">17 files with differences</td>
+							<td id="totalDiff">43 changes in violations</td>
+							
+								<td id="warningSeverityNumDiff">43 changes in violations</td>
+							
+						<tr>
+					</table>
+
+					
+						<br />
+						<table border="0" class="bodyTable">
+							<tr class="a">
+								<th>Report id</th>
+								
+									<th>com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTagContinuationIndentationCheck</th>
+								
+							</tr>
+							<tr class="b">
+								<td>base</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTagContinuationIndentationCheckModuleNumBase">2736</td>
+								
+							</tr>
+							<tr class="a">
+								<td>patch</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTagContinuationIndentationCheckModuleStatisticsPatch">2779 (43 added)</td>
+								
+							</tr>
+							<tr class="d">
+								<td>changes in violations</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTagContinuationIndentationCheckModuleNumDiff">43</td>
+								
+							<tr>
+						</table>
+					
+
+					<br />
+					Number of unique base messages reported below: <span id="uniqueMessagesBase">0</span><br />
+					Number of unique patch messages reported below: <span id="uniqueMessagesPatch">43</span><br />
+				</div>
+			</div>
+
+			<div class="section">
+				<h2 a="Violations:">Violations:</h2>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-beans/src/main/java/org/springframework/beans/factory/config/AutowireCapableBeanFactory.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A1" href = "#A1">#A1</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-beans/src/main/java/org/springframework/beans/factory/config/AutowireCapableBeanFactory.java.html#L151">151</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A2" href = "#A2">#A2</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-beans/src/main/java/org/springframework/beans/factory/config/AutowireCapableBeanFactory.java.html#L257">257</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-beans/src/main/java/org/springframework/beans/factory/support/AbstractBeanFactory.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A3" href = "#A3">#A3</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-beans/src/main/java/org/springframework/beans/factory/support/AbstractBeanFactory.java.html#L1616">1616</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-beans/src/test/java/org/springframework/beans/factory/DefaultListableBeanFactoryTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A4" href = "#A4">#A4</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-beans/src/test/java/org/springframework/beans/factory/DefaultListableBeanFactoryTests.java.html#L2223">2223</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/cache/ehcache/EhCacheManagerFactoryBean.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A5" href = "#A5">#A5</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/cache/ehcache/EhCacheManagerFactoryBean.java.html#L98">98</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A6" href = "#A6">#A6</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L80">80</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A7" href = "#A7">#A7</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L89">89</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A8" href = "#A8">#A8</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L91">91</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A9" href = "#A9">#A9</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L101">101</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A10" href = "#A10">#A10</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L103">103</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A11" href = "#A11">#A11</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L115">115</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A12" href = "#A12">#A12</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L117">117</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A13" href = "#A13">#A13</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L119">119</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A14" href = "#A14">#A14</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L121">121</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A15" href = "#A15">#A15</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L132">132</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A16" href = "#A16">#A16</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L134">134</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A17" href = "#A17">#A17</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L136">136</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A18" href = "#A18">#A18</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSender.java.html#L138">138</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSenderImpl.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A19" href = "#A19">#A19</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSenderImpl.java.html#L383">383</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A20" href = "#A20">#A20</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context-support/src/main/java/org/springframework/mail/javamail/JavaMailSenderImpl.java.html#L385">385</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context/src/main/java/org/springframework/jmx/export/MBeanExporter.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A21" href = "#A21">#A21</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context/src/main/java/org/springframework/jmx/export/MBeanExporter.java.html#L744">744</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context/src/main/java/org/springframework/jmx/support/JmxUtils.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A22" href = "#A22">#A22</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context/src/main/java/org/springframework/jmx/support/JmxUtils.java.html#L72">72</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A23" href = "#A23">#A23</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context/src/main/java/org/springframework/jmx/support/JmxUtils.java.html#L88">88</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context/src/main/java/org/springframework/jmx/support/MBeanServerFactoryBean.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A24" href = "#A24">#A24</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-context/src/main/java/org/springframework/jmx/support/MBeanServerFactoryBean.java.html#L155">155</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/core/namedparam/NamedParameterJdbcOperations.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A25" href = "#A25">#A25</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/core/namedparam/NamedParameterJdbcOperations.java.html#L231">231</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A26" href = "#A26">#A26</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/core/namedparam/NamedParameterJdbcOperations.java.html#L248">248</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A27" href = "#A27">#A27</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/core/namedparam/NamedParameterJdbcOperations.java.html#L265">265</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A28" href = "#A28">#A28</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/core/namedparam/NamedParameterJdbcOperations.java.html#L284">284</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A29" href = "#A29">#A29</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/core/namedparam/NamedParameterJdbcOperations.java.html#L301">301</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A30" href = "#A30">#A30</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/core/namedparam/NamedParameterJdbcOperations.java.html#L321">321</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A31" href = "#A31">#A31</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/core/namedparam/NamedParameterJdbcOperations.java.html#L337">337</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A32" href = "#A32">#A32</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/core/namedparam/NamedParameterJdbcOperations.java.html#L356">356</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/datasource/DataSourceUtils.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A33" href = "#A33">#A33</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/datasource/DataSourceUtils.java.html#L72">72</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/object/SqlUpdate.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A34" href = "#A34">#A34</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-jdbc/src/main/java/org/springframework/jdbc/object/SqlUpdate.java.html#L146">146</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-test/src/main/java/org/springframework/test/context/SmartContextLoader.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A35" href = "#A35">#A35</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-test/src/main/java/org/springframework/test/context/SmartContextLoader.java.html#L120">120</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/jca/cci/connection/ConnectionFactoryUtils.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A36" href = "#A36">#A36</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/jca/cci/connection/ConnectionFactoryUtils.java.html#L67">67</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A37" href = "#A37">#A37</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/jca/cci/connection/ConnectionFactoryUtils.java.html#L87">87</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/jca/cci/core/support/CciDaoSupport.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A38" href = "#A38">#A38</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/jca/cci/core/support/CciDaoSupport.java.html#L121">121</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/transaction/support/AbstractPlatformTransactionManager.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A39" href = "#A39">#A39</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/transaction/support/AbstractPlatformTransactionManager.java.html#L1042">1042</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A40" href = "#A40">#A40</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/transaction/support/AbstractPlatformTransactionManager.java.html#L1119">1119</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A41" href = "#A41">#A41</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/transaction/support/AbstractPlatformTransactionManager.java.html#L1137">1137</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/transaction/support/AbstractTransactionStatus.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A42" href = "#A42">#A42</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/transaction/support/AbstractTransactionStatus.java.html#L141">141</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A43" href = "#A43">#A43</a></td>
+								<td>warning</td>
+								<td>JavadocTagContinuationIndentation</td>
+								<td>Line continuation have incorrect indentation level, expected level should be 4.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-tx/src/main/java/org/springframework/transaction/support/AbstractTransactionStatus.java.html#L216">216</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
