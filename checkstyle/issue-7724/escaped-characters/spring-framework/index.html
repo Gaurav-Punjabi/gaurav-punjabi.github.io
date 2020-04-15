@@ -1,0 +1,1576 @@
+<html>
+	<head>
+		<title>checkstyle xml difference report</title>
+		<style type="text/css" media="all">@import url("./css/maven-base.css");@import url("./css/maven-theme.css"); );</style>
+		<link rel="stylesheet" href="./css/site.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<http-equiv http-equiv="Content-Language" content="en"></http-equiv>
+	</head>
+	<body class="composite">
+		<div id="contentBox">
+			<div class="section">
+				<h2 a="Checkstyle XML difference report">Checkstyle XML difference report</h2>
+				This is symmetric difference generated from two checkstyle-result.xml reports. <br/>
+				All matching records from each XML file are deleted, then remaining records are merged into single report. <br>
+		        <a href="https://github.com/checkstyle/contribution/tree/master/patch-diff-report-tool">Utility that generated this report.</a>
+			</div>
+
+			
+				<h2 a="Checkstyle configuration report">Checkstyle configuration report</h2>
+				<div class="section">
+					<table border="0" class="bodyTable">
+							<tr class="a">
+								<th>Module Name</th>
+								<th>Base properties</th>
+								<th>Patch properties</th>
+							</tr>
+							
+								
+									<tr>
+										<td class="c">Checker</td>
+										
+										<td class="c">
+											
+												severity
+												
+													<li>warning</li>
+												
+												<br/>
+											
+												charset
+												
+													<li>UTF-8</li>
+												
+												<br/>
+											
+												haltOnException
+												
+													<li>false</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												severity
+												
+													<li>warning</li>
+												
+												<br/>
+											
+												charset
+												
+													<li>UTF-8</li>
+												
+												<br/>
+											
+												haltOnException
+												
+													<li>false</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+										
+									<tr>
+										<td class="c">BeforeExecutionExclusionFileFilter</td>
+										
+										<td class="c">
+											
+												fileNamePattern
+												
+													<li>module\-info\.java$</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												fileNamePattern
+												
+													<li>module\-info\.java$</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+										
+									<tr>
+										<td class="c">TreeWalker</td>
+										
+										<td class="c">
+											
+										</td>
+										
+										
+										<td class="c">
+											
+										</td>
+										
+									</tr>
+									
+										
+									<tr>
+										<td class="c">AvoidEscapedUnicodeCharacters</td>
+										
+										<td class="c">
+											
+												allowIfAllCharactersEscaped
+												
+													<li>true</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												allowIfAllCharactersEscaped
+												
+													<li>true</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+										
+									<tr>
+										<td class="c">SuppressionXpathSingleFilter</td>
+										
+										<td class="c">
+											
+												message
+												
+													<li>Javadoc comment at column \d+ has parse error</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												message
+												
+													<li>Javadoc comment at column \d+ has parse error</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+								
+									
+										
+									<tr>
+										<td class="c">SuppressionSingleFilter</td>
+										
+										<td class="c">
+											
+												checks
+												
+													<li>Checker</li>
+												
+												<br/>
+											
+												message
+												
+													<li>Exception occurred while parsing</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												checks
+												
+													<li>Checker</li>
+												
+												<br/>
+											
+												message
+												
+													<li>Exception occurred while parsing</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+								
+								
+					</table>	
+				</div>
+			
+
+			<div class="section">
+				<h2 a="Summary:">Summary:</h2>
+				<div class="section">
+					<table border="0" class="bodyTable">
+						<tr class="a">
+							<th>Report id</th>
+							<th>Files</th>
+							<th>Violations</th>
+							
+								<th>Severity-warning</th>
+							
+						</tr>
+						<tr class="b">
+							<td>base</td>
+							<td id="filesBase">5911</td>
+							<td id="totalBase">31</td>
+							
+								<td id="warningSeverityNumBase">31</td>
+							
+						</tr>
+						<tr class="a">
+							<td>patch</td>
+							<td id="filesPatch">5911</td>
+							<td id="totalPatch">32 (31 removed, 32 added)</td>
+							
+								<td id="warningSeverityStatisticsPatch">32 (31 removed, 32 added)</td>
+							
+						</tr>
+						<tr class="d">
+							<td/>
+							<td id="filesDiff">14 files with differences</td>
+							<td id="totalDiff">63 changes in violations</td>
+							
+								<td id="warningSeverityNumDiff">63 changes in violations</td>
+							
+						<tr>
+					</table>
+
+					
+						<br />
+						<table border="0" class="bodyTable">
+							<tr class="a">
+								<th>Report id</th>
+								
+									<th>com.puppycrawl.tools.checkstyle.checks.AvoidEscapedUnicodeCharactersCheck</th>
+								
+							</tr>
+							<tr class="b">
+								<td>base</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.AvoidEscapedUnicodeCharactersCheckModuleNumBase">31</td>
+								
+							</tr>
+							<tr class="a">
+								<td>patch</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.AvoidEscapedUnicodeCharactersCheckModuleStatisticsPatch">32 (31 removed, 32 added)</td>
+								
+							</tr>
+							<tr class="d">
+								<td>changes in violations</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.AvoidEscapedUnicodeCharactersCheckModuleNumDiff">63</td>
+								
+							<tr>
+						</table>
+					
+
+					<br />
+					Number of unique base messages reported below: <span id="uniqueMessagesBase">31</span><br />
+					Number of unique patch messages reported below: <span id="uniqueMessagesPatch">32</span><br />
+				</div>
+			</div>
+
+			<div class="section">
+				<h2 a="Violations:">Violations:</h2>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-beans/src/test/java/org/springframework/beans/propertyeditors/URIEditorTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A1" href = "#A1">#A1</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-beans/src/test/java/org/springframework/beans/propertyeditors/URIEditorTests.java.html#L125">125</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A2" href = "#A2">#A2</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-beans/src/test/java/org/springframework/beans/propertyeditors/URIEditorTests.java.html#L125">125</a></td>
+								
+								
+									
+									<td class="keepWidth">37</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-messaging/src/test/java/org/springframework/messaging/converter/MappingJackson2MessageConverterTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A3" href = "#A3">#A3</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-messaging/src/test/java/org/springframework/messaging/converter/MappingJackson2MessageConverterTests.java.html#L153">153</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A4" href = "#A4">#A4</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-messaging/src/test/java/org/springframework/messaging/converter/MappingJackson2MessageConverterTests.java.html#L153">153</a></td>
+								
+								
+									
+									<td class="keepWidth">34</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A5" href = "#A5">#A5</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-messaging/src/test/java/org/springframework/messaging/converter/MappingJackson2MessageConverterTests.java.html#L170">170</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A6" href = "#A6">#A6</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-messaging/src/test/java/org/springframework/messaging/converter/MappingJackson2MessageConverterTests.java.html#L170">170</a></td>
+								
+								
+									
+									<td class="keepWidth">34</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-messaging/src/test/java/org/springframework/messaging/converter/StringMessageConverterTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A7" href = "#A7">#A7</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-messaging/src/test/java/org/springframework/messaging/converter/StringMessageConverterTests.java.html#L73">73</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A8" href = "#A8">#A8</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-messaging/src/test/java/org/springframework/messaging/converter/StringMessageConverterTests.java.html#L73">73</a></td>
+								
+								
+									
+									<td class="keepWidth">34</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A9" href = "#A9">#A9</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-messaging/src/test/java/org/springframework/messaging/converter/StringMessageConverterTests.java.html#L83">83</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A10" href = "#A10">#A10</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-messaging/src/test/java/org/springframework/messaging/converter/StringMessageConverterTests.java.html#L83">83</a></td>
+								
+								
+									
+									<td class="keepWidth">34</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-oxm/src/test/java/org/springframework/oxm/jibx/JibxUnmarshallerTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A11" href = "#A11">#A11</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-oxm/src/test/java/org/springframework/oxm/jibx/JibxUnmarshallerTests.java.html#L44">44</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A12" href = "#A12">#A12</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-oxm/src/test/java/org/springframework/oxm/jibx/JibxUnmarshallerTests.java.html#L44">44</a></td>
+								
+								
+									
+									<td class="keepWidth">41</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A13" href = "#A13">#A13</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-oxm/src/test/java/org/springframework/oxm/jibx/JibxUnmarshallerTests.java.html#L90">90</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A14" href = "#A14">#A14</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-oxm/src/test/java/org/springframework/oxm/jibx/JibxUnmarshallerTests.java.html#L90">90</a></td>
+								
+								
+									
+									<td class="keepWidth">52</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/FormHttpMessageConverterTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A15" href = "#A15">#A15</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/FormHttpMessageConverterTests.java.html#L126">126</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A16" href = "#A16">#A16</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/FormHttpMessageConverterTests.java.html#L126">126</a></td>
+								
+								
+									
+									<td class="keepWidth">40</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A17" href = "#A17">#A17</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/FormHttpMessageConverterTests.java.html#L174">174</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A18" href = "#A18">#A18</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/FormHttpMessageConverterTests.java.html#L174">174</a></td>
+								
+								
+									
+									<td class="keepWidth">30</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/StringHttpMessageConverterTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A19" href = "#A19">#A19</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/StringHttpMessageConverterTests.java.html#L66">66</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A20" href = "#A20">#A20</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/StringHttpMessageConverterTests.java.html#L66">66</a></td>
+								
+								
+									
+									<td class="keepWidth">31</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A21" href = "#A21">#A21</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/StringHttpMessageConverterTests.java.html#L81">81</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A22" href = "#A22">#A22</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/StringHttpMessageConverterTests.java.html#L81">81</a></td>
+								
+								
+									
+									<td class="keepWidth">31</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A23" href = "#A23">#A23</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/StringHttpMessageConverterTests.java.html#L99">99</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A24" href = "#A24">#A24</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/StringHttpMessageConverterTests.java.html#L99">99</a></td>
+								
+								
+									
+									<td class="keepWidth">31</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/json/GsonHttpMessageConverterTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A25" href = "#A25">#A25</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/json/GsonHttpMessageConverterTests.java.html#L138">138</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A26" href = "#A26">#A26</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/json/GsonHttpMessageConverterTests.java.html#L138">138</a></td>
+								
+								
+									
+									<td class="keepWidth">31</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/json/MappingJackson2HttpMessageConverterTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A27" href = "#A27">#A27</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/json/MappingJackson2HttpMessageConverterTests.java.html#L135">135</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A28" href = "#A28">#A28</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/http/converter/json/MappingJackson2HttpMessageConverterTests.java.html#L135">135</a></td>
+								
+								
+									
+									<td class="keepWidth">31</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/client/AbstractJettyServerTestCase.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A29" href = "#A29">#A29</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/client/AbstractJettyServerTestCase.java.html#L52">52</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A30" href = "#A30">#A30</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/client/AbstractJettyServerTestCase.java.html#L52">52</a></td>
+								
+								
+									
+									<td class="keepWidth">46</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/client/RestTemplateIntegrationTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A31" href = "#A31">#A31</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/client/RestTemplateIntegrationTests.java.html#L160">160</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A32" href = "#A32">#A32</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/client/RestTemplateIntegrationTests.java.html#L160">160</a></td>
+								
+								
+									
+									<td class="keepWidth">95</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A33" href = "#A33">#A33</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/client/RestTemplateIntegrationTests.java.html#L166">166</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A34" href = "#A34">#A34</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/client/RestTemplateIntegrationTests.java.html#L166">166</a></td>
+								
+								
+									
+									<td class="keepWidth">94</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriComponentsTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A35" href = "#A35">#A35</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriComponentsTests.java.html#L48">48</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A36" href = "#A36">#A36</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriComponentsTests.java.html#L48">48</a></td>
+								
+								
+									
+									<td class="keepWidth">33</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A37" href = "#A37">#A37</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriComponentsTests.java.html#L55">55</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A38" href = "#A38">#A38</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriComponentsTests.java.html#L55">55</a></td>
+								
+								
+									
+									<td class="keepWidth">33</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A39" href = "#A39">#A39</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriComponentsTests.java.html#L56">56</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A40" href = "#A40">#A40</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriComponentsTests.java.html#L56">56</a></td>
+								
+								
+									
+									<td class="keepWidth">38</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriTemplateTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A41" href = "#A41">#A41</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriTemplateTests.java.html#L86">86</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A42" href = "#A42">#A42</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriTemplateTests.java.html#L86">86</a></td>
+								
+								
+									
+									<td class="keepWidth">86</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A43" href = "#A43">#A43</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriTemplateTests.java.html#L104">104</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A44" href = "#A44">#A44</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriTemplateTests.java.html#L104">104</a></td>
+								
+								
+									
+									<td class="keepWidth">46</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A45" href = "#A45">#A45</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L60">60</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A46" href = "#A46">#A46</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L60">60</a></td>
+								
+								
+									
+									<td class="keepWidth">92</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A47" href = "#A47">#A47</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L74">74</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A48" href = "#A48">#A48</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L74">74</a></td>
+								
+								
+									
+									<td class="keepWidth">96</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A49" href = "#A49">#A49</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L97">97</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A50" href = "#A50">#A50</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L97">97</a></td>
+								
+								
+									
+									<td class="keepWidth">56</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A51" href = "#A51">#A51</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L98">98</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A52" href = "#A52">#A52</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L98">98</a></td>
+								
+								
+									
+									<td class="keepWidth">56</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A53" href = "#A53">#A53</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L99">99</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A54" href = "#A54">#A54</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L99">99</a></td>
+								
+								
+									
+									<td class="keepWidth">56</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A55" href = "#A55">#A55</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L99">99</a></td>
+								
+								
+									
+									<td class="keepWidth">91</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A56" href = "#A56">#A56</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L115">115</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A57" href = "#A57">#A57</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L115">115</a></td>
+								
+								
+									
+									<td class="keepWidth">52</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A58" href = "#A58">#A58</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L144">144</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A59" href = "#A59">#A59</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L144">144</a></td>
+								
+								
+									
+									<td class="keepWidth">56</td>
+								
+							</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A60" href = "#A60">#A60</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L146">146</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A61" href = "#A61">#A61</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-web/src/test/java/org/springframework/web/util/UriUtilsTests.java.html#L146">146</a></td>
+								
+								
+									
+									<td class="keepWidth">56</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-webmvc/src/test/java/org/springframework/web/servlet/view/BaseViewTests.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="b">
+								
+								<td class="keepWidth"><a name="A62" href = "#A62">#A62</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-webmvc/src/test/java/org/springframework/web/servlet/view/BaseViewTests.java.html#L223">223</a></td>
+								
+								
+									<td class="keepWidth"> </td>
+									
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A63" href = "#A63">#A63</a></td>
+								<td>warning</td>
+								<td>AvoidEscapedUnicodeCharacters</td>
+								<td>Unicode escape(s) usage should be avoided.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/spring-framework/spring-webmvc/src/test/java/org/springframework/web/servlet/view/BaseViewTests.java.html#L223">223</a></td>
+								
+								
+									
+									<td class="keepWidth">33</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
