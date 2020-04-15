@@ -1,0 +1,655 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>InternetDomainName xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (C) 2009 The Guava Authors</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * in compliance with the License. You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software distributed under the License</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * or implied. See the License for the specific language governing permissions and limitations under</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * the License.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">package</strong> com.google.common.net;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkArgument;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkNotNull;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Preconditions.checkState;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.Beta;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.GwtCompatible;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Ascii;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.CharMatcher;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Joiner;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Optional;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> com.google.common.base.Splitter;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableList;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> com.google.errorprone.annotations.Immutable;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> com.google.thirdparty.publicsuffix.PublicSuffixPatterns;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> com.google.thirdparty.publicsuffix.PublicSuffixType;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.checkerframework.checker.nullness.compatqual.NullableDecl;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment"> * An immutable well-formed internet domain name, such as {@code com} or {@code foo.co.uk}. Only</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment"> * syntactic analysis is performed; no DNS lookups or other network interactions take place. Thus</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> * there is no guarantee that the domain actually exists on the internet.</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;One common use of this class is to determine whether a given string is likely to represent an</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment"> * addressable domain on the web -- that is, for a candidate string {@code "xxx"}, might browsing to</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment"> * {@code "<a href="http://xxx/" target="alexandria_uri">http://xxx/</a>"} result in a webpage being displayed? In the past, this test was frequently</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment"> * done by determining whether the domain ended with a {@linkplain #isPublicSuffix() public suffix}</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment"> * but was not itself a public suffix. However, this test is no longer accurate. There are many</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment"> * domains which are both public suffixes and addressable as hosts; {@code "uk.com"} is one example.</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment"> * Using the subset of public suffixes that are {@linkplain #isRegistrySuffix() registry suffixes},</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment"> * one can get a better result, as only a few registry suffixes are addressable. However, the most</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment"> * useful test to determine if a domain is a plausible web host is {@link #hasPublicSuffix()}. This</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment"> * will return {@code true} for many domains which (currently) are not hosts, such as {@code "com"},</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment"> * but given that any public suffix may become a host without warning, it is better to err on the</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment"> * side of permissiveness and thus avoid spurious rejection of valid sites. Of course, to actually</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> * determine addressability of any host, clients of this class will need to perform their own DNS</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> * lookups.</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;During construction, names are normalized in two ways:</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment"> * &lt;ol&gt;</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;ASCII uppercase characters are converted to lowercase.</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment"> *   &lt;li&gt;Unicode dot separators other than the ASCII period ({@code '.'}) are converted to the ASCII</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> *       period.</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> * &lt;/ol&gt;</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;The normalized values will be returned from {@link #toString()} and {@link #parts()}, and will</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> * be reflected in the result of {@link #equals(Object)}.</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;&lt;a href="<a href="http://en.wikipedia.org/wiki/Internationalized_domain_name" target="alexandria_uri">http://en.wikipedia.org/wiki/Internationalized_domain_name</a>"&gt;Internationalized domain</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment"> * names&lt;/a&gt; such as {@code 网络.cn} are supported, as are the equivalent &lt;a</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment"> * href="<a href="http://en.wikipedia.org/wiki/Internationalized_domain_name" target="alexandria_uri">http://en.wikipedia.org/wiki/Internationalized_domain_name</a>"&gt;IDNA Punycode-encoded&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment"> * versions.</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment"> * @author Catherine Berry</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment"> * @since 5.0</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  @Beta
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  @GwtCompatible
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  @Immutable
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> InternetDomainName {
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> CharMatcher DOTS_MATCHER = CharMatcher.anyOf(<span class="jxr_string">".\u3002\uFF0E\uFF61"</span>);
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Splitter DOT_SPLITTER = Splitter.on('.');
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Joiner DOT_JOINER = Joiner.on('.');
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment">   * Value of {@link #publicSuffixIndex} or {@link #registrySuffixIndex} which indicates that no</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment">   * relevant suffix was found.</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> NO_SUFFIX_FOUND = -1;
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment">   * Maximum parts (labels) in a domain name. This value arises from the 255-octet limit described</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment">   * in &lt;a href="<a href="http://www.ietf.org/rfc/rfc2181.txt" target="alexandria_uri">http://www.ietf.org/rfc/rfc2181.txt</a>"&gt;RFC 2181&lt;/a&gt; part 11 with the fact that the</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment">   * encoding of each part occupies at least two bytes (dot plus label externally, length byte plus</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment">   * label internally). Thus, if all labels have the minimum size of one byte, 127 of them will fit.</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAX_PARTS = 127;
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>    <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">   * Maximum length of a full domain name, including separators, and leaving room for the root</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">   * label. See &lt;a href="<a href="http://www.ietf.org/rfc/rfc2181.txt" target="alexandria_uri">http://www.ietf.org/rfc/rfc2181.txt</a>"&gt;RFC 2181&lt;/a&gt; part 11.</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAX_LENGTH = 253;
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">   * Maximum size of a single part of a domain name. See &lt;a</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">   * href="<a href="http://www.ietf.org/rfc/rfc2181.txt" target="alexandria_uri">http://www.ietf.org/rfc/rfc2181.txt</a>"&gt;RFC 2181&lt;/a&gt; part 11.</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAX_DOMAIN_PART_LENGTH = 63;
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>   <em class="jxr_javadoccomment">/** The full domain name, converted to lower case. */</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String name;
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>   <em class="jxr_javadoccomment">/** The parts of the domain name, converted to lower case. */</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> ImmutableList&lt;String&gt; parts;
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> <em class="jxr_javadoccomment">   * The index in the {@link #parts()} list at which the public suffix begins. For example, for the</em>
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> <em class="jxr_javadoccomment">   * domain name {@code myblog.blogspot.co.uk}, the value would be 1 (the index of the {@code</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> <em class="jxr_javadoccomment">   * blogspot} part). The value is negative (specifically, {@link #NO_SUFFIX_FOUND}) if no public</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">   * suffix was found.</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> publicSuffixIndex;
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">   * The index in the {@link #parts()} list at which the registry suffix begins. For example, for</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_javadoccomment">   * the domain name {@code myblog.blogspot.co.uk}, the value would be 2 (the index of the {@code</em>
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> <em class="jxr_javadoccomment">   * co} part). The value is negative (specifically, {@link #NO_SUFFIX_FOUND}) if no registry suffix</em>
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> <em class="jxr_javadoccomment">   * was found.</em>
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> registrySuffixIndex;
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>   <em class="jxr_javadoccomment">/** Constructor used to implement {@link #from(String)}, and from subclasses. */</em>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>   InternetDomainName(String name) {
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>     <em class="jxr_comment">// Normalize:</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>     <em class="jxr_comment">// * ASCII characters to lowercase</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>     <em class="jxr_comment">// * All dot-like characters to '.'</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>     <em class="jxr_comment">// * Strip trailing '.'</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>     name = Ascii.toLowerCase(DOTS_MATCHER.replaceFrom(name, '.'));
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>     <strong class="jxr_keyword">if</strong> (name.endsWith(<span class="jxr_string">"."</span>)) {
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>       name = name.substring(0, name.length() - 1);
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>     }
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>     checkArgument(name.length() &lt;= MAX_LENGTH, <span class="jxr_string">"Domain name too long: '%s':"</span>, name);
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>     <strong class="jxr_keyword">this</strong>.name = name;
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>     <strong class="jxr_keyword">this</strong>.parts = ImmutableList.copyOf(DOT_SPLITTER.split(name));
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>     checkArgument(parts.size() &lt;= MAX_PARTS, <span class="jxr_string">"Domain has too many parts: '%s'"</span>, name);
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>     checkArgument(validateSyntax(parts), <span class="jxr_string">"Not a valid domain name: '%s'"</span>, name);
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>     <strong class="jxr_keyword">this</strong>.publicSuffixIndex = findSuffixOfType(Optional.&lt;PublicSuffixType&gt;absent());
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>     <strong class="jxr_keyword">this</strong>.registrySuffixIndex = findSuffixOfType(Optional.of(PublicSuffixType.REGISTRY));
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>   }
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> <em class="jxr_javadoccomment">   * Returns the index of the leftmost part of the suffix, or -1 if not found. Note that the value</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> <em class="jxr_javadoccomment">   * defined as a suffix may not produce {@code true} results from {@link #isPublicSuffix()} or</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> <em class="jxr_javadoccomment">   * {@link #isRegistrySuffix()} if the domain ends with an excluded domain pattern such as {@code</em>
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> <em class="jxr_javadoccomment">   * "nhs.uk"}.</em>
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment">   * &lt;p&gt;If a {@code desiredType} is specified, this method only finds suffixes of the given type.</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> <em class="jxr_javadoccomment">   * Otherwise, it finds the first suffix of any type.</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> findSuffixOfType(Optional&lt;PublicSuffixType&gt; desiredType) {
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> partsSize = parts.size();
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; partsSize; i++) {
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>       String ancestorName = DOT_JOINER.join(parts.subList(i, partsSize));
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>       <strong class="jxr_keyword">if</strong> (matchesType(
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>           desiredType, Optional.fromNullable(PublicSuffixPatterns.EXACT.get(ancestorName)))) {
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>         <strong class="jxr_keyword">return</strong> i;
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>       }
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>       <em class="jxr_comment">// Excluded domains (e.g. !nhs.uk) use the next highest</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>       <em class="jxr_comment">// domain as the effective public suffix (e.g. uk).</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>       <strong class="jxr_keyword">if</strong> (PublicSuffixPatterns.EXCLUDED.containsKey(ancestorName)) {
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>         <strong class="jxr_keyword">return</strong> i + 1;
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>       }
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>       <strong class="jxr_keyword">if</strong> (matchesWildcardSuffixType(desiredType, ancestorName)) {
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>         <strong class="jxr_keyword">return</strong> i;
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>       }
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>     }
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>     <strong class="jxr_keyword">return</strong> NO_SUFFIX_FOUND;
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>   }
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> <em class="jxr_javadoccomment">   * Returns an instance of {@link InternetDomainName} after lenient validation. Specifically,</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> <em class="jxr_javadoccomment">   * validation against &lt;a href="<a href="http://www.ietf.org/rfc/rfc3490.txt" target="alexandria_uri">http://www.ietf.org/rfc/rfc3490.txt</a>"&gt;RFC 3490&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> <em class="jxr_javadoccomment">   * ("Internationalizing Domain Names in Applications") is skipped, while validation against &lt;a</em>
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> <em class="jxr_javadoccomment">   * href="<a href="http://www.ietf.org/rfc/rfc1035.txt" target="alexandria_uri">http://www.ietf.org/rfc/rfc1035.txt</a>"&gt;RFC 1035&lt;/a&gt; is relaxed in the following ways:</em>
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_javadoccomment">   * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;Any part containing non-ASCII characters is considered valid.</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;Underscores ('_') are permitted wherever dashes ('-') are permitted.</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_javadoccomment">   *   &lt;li&gt;Parts other than the final part may start with a digit, as mandated by &lt;a</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment">   *       href="<a href="https://tools.ietf.org/html/rfc1123" target="alexandria_uri">https://tools.ietf.org/html/rfc1123</a>#section-2"&gt;RFC 1123&lt;/a&gt;.</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_javadoccomment">   * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> <em class="jxr_javadoccomment">   * @param domain A domain name (not IP address)</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if {@code domain} is not syntactically valid according to</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">   *     {@link #isValid}</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment">   * @since 10.0 (previously named {@code fromLenient})</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> InternetDomainName from(String domain) {
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> InternetDomainName(checkNotNull(domain));
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>   }
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> <em class="jxr_javadoccomment">   * Validation method used by {@code from} to ensure that the domain name is syntactically valid</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> <em class="jxr_javadoccomment">   * according to RFC 1035.</em>
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> <em class="jxr_javadoccomment">   * @return Is the domain name syntactically valid?</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> validateSyntax(List&lt;String&gt; parts) {
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>     <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> lastIndex = parts.size() - 1;
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> 
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>     <em class="jxr_comment">// Validate the last part specially, as it has different syntax rules.</em>
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>     <strong class="jxr_keyword">if</strong> (!validatePart(parts.get(lastIndex), <strong class="jxr_keyword">true</strong>)) {
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>       <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>     }
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; lastIndex; i++) {
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>       String part = parts.get(i);
+<a class="jxr_linenumber" name="L230" href="#L230">230</a>       <strong class="jxr_keyword">if</strong> (!validatePart(part, false)) {
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>       }
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>     }
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 
+<a class="jxr_linenumber" name="L235" href="#L235">235</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>   }
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> 
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> CharMatcher DASH_MATCHER = CharMatcher.anyOf(<span class="jxr_string">"-_"</span>);
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> 
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> CharMatcher DIGIT_MATCHER = CharMatcher.inRange('0', '9');
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> 
+<a class="jxr_linenumber" name="L242" href="#L242">242</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> CharMatcher LETTER_MATCHER =
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>       CharMatcher.inRange('a', 'z').or(CharMatcher.inRange('A', 'Z'));
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> 
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> CharMatcher PART_CHAR_MATCHER =
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>       DIGIT_MATCHER.or(LETTER_MATCHER).or(DASH_MATCHER);
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> 
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> <em class="jxr_javadoccomment">   * Helper method for {@link #validateSyntax(List)}. Validates that one part of a domain name is</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> <em class="jxr_javadoccomment">   * valid.</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> <em class="jxr_javadoccomment">   * @param part The domain name part to be validated</em>
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">   * @param isFinalPart Is this the final (rightmost) domain part?</em>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> <em class="jxr_javadoccomment">   * @return Whether the part is valid</em>
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> validatePart(String part, <strong class="jxr_keyword">boolean</strong> isFinalPart) {
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> 
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>     <em class="jxr_comment">// These tests could be collapsed into one big boolean expression, but</em>
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>     <em class="jxr_comment">// they have been left as independent tests for clarity.</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> 
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>     <strong class="jxr_keyword">if</strong> (part.length() &lt; 1 || part.length() &gt; MAX_DOMAIN_PART_LENGTH) {
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>       <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>     }
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> 
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_comment">     * GWT claims to support java.lang.Character's char-classification methods, but it actually only</em>
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_comment">     * works for ASCII. So for now, assume any non-ASCII characters are valid. The only place this</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_comment">     * seems to be documented is here:</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> <em class="jxr_comment">     * <a href="https://groups.google.com/d/topic/google-web-toolkit-contributors/1UEzsryq1XI" target="alexandria_uri">https://groups.google.com/d/topic/google-web-toolkit-contributors/1UEzsryq1XI</a></em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> <em class="jxr_comment">     *</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_comment">     * &lt;p&gt;ASCII characters in the part are expected to be valid per RFC 1035, with underscore also</em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_comment">     * being allowed due to widespread practice.</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> 
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>     String asciiChars = CharMatcher.ascii().retainFrom(part);
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>     <strong class="jxr_keyword">if</strong> (!PART_CHAR_MATCHER.matchesAllOf(asciiChars)) {
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>       <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>     }
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> 
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>     <em class="jxr_comment">// No initial or final dashes or underscores.</em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> 
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>     <strong class="jxr_keyword">if</strong> (DASH_MATCHER.matches(part.charAt(0))
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>         || DASH_MATCHER.matches(part.charAt(part.length() - 1))) {
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>       <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>     }
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> 
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>     <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> <em class="jxr_comment">     * Note that we allow (in contravention of a strict interpretation of the relevant RFCs) domain</em>
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> <em class="jxr_comment">     * parts other than the last may begin with a digit (for example, "3com.com"). It's important to</em>
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> <em class="jxr_comment">     * disallow an initial digit in the last part; it's the only thing that stops an IPv4 numeric</em>
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> <em class="jxr_comment">     * address like 127.0.0.1 from looking like a valid domain name.</em>
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> <em class="jxr_comment">     */</em>
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> 
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>     <strong class="jxr_keyword">if</strong> (isFinalPart &amp;&amp; DIGIT_MATCHER.matches(part.charAt(0))) {
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>       <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>     }
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> 
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>     <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>   }
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> <em class="jxr_javadoccomment">   * Returns the individual components of this domain name, normalized to all lower case. For</em>
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> <em class="jxr_javadoccomment">   * example, for the domain name {@code mail.google.com}, this method returns the list {@code</em>
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> <em class="jxr_javadoccomment">   * ["mail", "google", "com"]}.</em>
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>   <strong class="jxr_keyword">public</strong> ImmutableList&lt;String&gt; parts() {
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>     <strong class="jxr_keyword">return</strong> parts;
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>   }
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> <em class="jxr_javadoccomment">   * Indicates whether this domain name represents a &lt;i&gt;public suffix&lt;/i&gt;, as defined by the Mozilla</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> <em class="jxr_javadoccomment">   * Foundation's &lt;a href="<a href="http://publicsuffix.org/" target="alexandria_uri">http://publicsuffix.org/</a>"&gt;Public Suffix List&lt;/a&gt; (PSL). A public suffix</em>
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> <em class="jxr_javadoccomment">   * is one under which Internet users can directly register names, such as {@code com}, {@code</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> <em class="jxr_javadoccomment">   * co.uk} or {@code pvt.k12.wy.us}. Examples of domain names that are &lt;i&gt;not&lt;/i&gt; public suffixes</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> <em class="jxr_javadoccomment">   * include {@code google.com}, {@code foo.co.uk}, and {@code myblog.blogspot.com}.</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Public suffixes are a proper superset of {@linkplain #isRegistrySuffix() registry suffixes}.</em>
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> <em class="jxr_javadoccomment">   * The list of public suffixes additionally contains privately owned domain names under which</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> <em class="jxr_javadoccomment">   * Internet users can register subdomains. An example of a public suffix that is not a registry</em>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> <em class="jxr_javadoccomment">   * suffix is {@code blogspot.com}. Note that it is true that all public suffixes &lt;i&gt;have&lt;/i&gt;</em>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> <em class="jxr_javadoccomment">   * registry suffixes, since domain name registries collectively control all internet domain names.</em>
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> <em class="jxr_javadoccomment">   * &lt;p&gt;For considerations on whether the public suffix or registry suffix designation is more</em>
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> <em class="jxr_javadoccomment">   * suitable for your application, see &lt;a</em>
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> <em class="jxr_javadoccomment">   * href="<a href="https://github.com/google/guava/wiki/InternetDomainNameExplained" target="alexandria_uri">https://github.com/google/guava/wiki/InternetDomainNameExplained</a>"&gt;this article&lt;/a&gt;.</em>
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> <em class="jxr_javadoccomment">   * @return {@code true} if this domain name appears exactly on the public suffix list</em>
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> <em class="jxr_javadoccomment">   * @since 6.0</em>
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isPublicSuffix() {
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>     <strong class="jxr_keyword">return</strong> publicSuffixIndex == 0;
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>   }
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> <em class="jxr_javadoccomment">   * Indicates whether this domain name ends in a {@linkplain #isPublicSuffix() public suffix},</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> <em class="jxr_javadoccomment">   * including if it is a public suffix itself. For example, returns {@code true} for {@code</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> <em class="jxr_javadoccomment">   * www.google.com}, {@code foo.co.uk} and {@code com}, but not for {@code invalid} or {@code</em>
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> <em class="jxr_javadoccomment">   * google.invalid}. This is the recommended method for determining whether a domain is potentially</em>
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> <em class="jxr_javadoccomment">   * an addressable host.</em>
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Note that this method is equivalent to {@link #hasRegistrySuffix()} because all registry</em>
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> <em class="jxr_javadoccomment">   * suffixes are public suffixes &lt;i&gt;and&lt;/i&gt; all public suffixes have registry suffixes.</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> <em class="jxr_javadoccomment">   * @since 6.0</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasPublicSuffix() {
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>     <strong class="jxr_keyword">return</strong> publicSuffixIndex != NO_SUFFIX_FOUND;
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>   }
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> <em class="jxr_javadoccomment">   * Returns the {@linkplain #isPublicSuffix() public suffix} portion of the domain name, or {@code</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> <em class="jxr_javadoccomment">   * null} if no public suffix is present.</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> <em class="jxr_javadoccomment">   * @since 6.0</em>
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>   <strong class="jxr_keyword">public</strong> InternetDomainName publicSuffix() {
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>     <strong class="jxr_keyword">return</strong> hasPublicSuffix() ? ancestor(publicSuffixIndex) : <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>   }
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> <em class="jxr_javadoccomment">   * Indicates whether this domain name ends in a {@linkplain #isPublicSuffix() public suffix},</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> <em class="jxr_javadoccomment">   * while not being a public suffix itself. For example, returns {@code true} for {@code</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> <em class="jxr_javadoccomment">   * www.google.com}, {@code foo.co.uk} and {@code myblog.blogspot.com}, but not for {@code com},</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> <em class="jxr_javadoccomment">   * {@code co.uk}, {@code google.invalid}, or {@code blogspot.com}.</em>
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_javadoccomment">   * &lt;p&gt;This method can be used to determine whether it will probably be possible to set cookies on</em>
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> <em class="jxr_javadoccomment">   * the domain, though even that depends on individual browsers' implementations of cookie</em>
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> <em class="jxr_javadoccomment">   * controls. See &lt;a href="<a href="http://www.ietf.org/rfc/rfc2109.txt" target="alexandria_uri">http://www.ietf.org/rfc/rfc2109.txt</a>"&gt;RFC 2109&lt;/a&gt; for details.</em>
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> <em class="jxr_javadoccomment">   * @since 6.0</em>
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isUnderPublicSuffix() {
+<a class="jxr_linenumber" name="L374" href="#L374">374</a>     <strong class="jxr_keyword">return</strong> publicSuffixIndex &gt; 0;
+<a class="jxr_linenumber" name="L375" href="#L375">375</a>   }
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> 
+<a class="jxr_linenumber" name="L377" href="#L377">377</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment">   * Indicates whether this domain name is composed of exactly one subdomain component followed by a</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_javadoccomment">   * {@linkplain #isPublicSuffix() public suffix}. For example, returns {@code true} for {@code</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> <em class="jxr_javadoccomment">   * google.com} {@code foo.co.uk}, and {@code myblog.blogspot.com}, but not for {@code</em>
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> <em class="jxr_javadoccomment">   * www.google.com}, {@code co.uk}, or {@code blogspot.com}.</em>
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> <em class="jxr_javadoccomment">   * &lt;p&gt;This method can be used to determine whether a domain is probably the highest level for</em>
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> <em class="jxr_javadoccomment">   * which cookies may be set, though even that depends on individual browsers' implementations of</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> <em class="jxr_javadoccomment">   * cookie controls. See &lt;a href="<a href="http://www.ietf.org/rfc/rfc2109.txt" target="alexandria_uri">http://www.ietf.org/rfc/rfc2109.txt</a>"&gt;RFC 2109&lt;/a&gt; for details.</em>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> <em class="jxr_javadoccomment">   * @since 6.0</em>
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isTopPrivateDomain() {
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>     <strong class="jxr_keyword">return</strong> publicSuffixIndex == 1;
+<a class="jxr_linenumber" name="L391" href="#L391">391</a>   }
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> <em class="jxr_javadoccomment">   * Returns the portion of this domain name that is one level beneath the {@linkplain</em>
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> <em class="jxr_javadoccomment">   * #isPublicSuffix() public suffix}. For example, for {@code x.adwords.google.co.uk} it returns</em>
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> <em class="jxr_javadoccomment">   * {@code google.co.uk}, since {@code co.uk} is a public suffix. Similarly, for {@code</em>
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> <em class="jxr_javadoccomment">   * myblog.blogspot.com} it returns the same domain, {@code myblog.blogspot.com}, since {@code</em>
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> <em class="jxr_javadoccomment">   * blogspot.com} is a public suffix.</em>
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> <em class="jxr_javadoccomment">   * &lt;p&gt;If {@link #isTopPrivateDomain()} is true, the current domain name instance is returned.</em>
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> <em class="jxr_javadoccomment">   * &lt;p&gt;This method can be used to determine the probable highest level parent domain for which</em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_javadoccomment">   * cookies may be set, though even that depends on individual browsers' implementations of cookie</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> <em class="jxr_javadoccomment">   * controls.</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> <em class="jxr_javadoccomment">   * @throws IllegalStateException if this domain does not end with a public suffix</em>
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> <em class="jxr_javadoccomment">   * @since 6.0</em>
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>   <strong class="jxr_keyword">public</strong> InternetDomainName topPrivateDomain() {
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>     <strong class="jxr_keyword">if</strong> (isTopPrivateDomain()) {
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>     }
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>     checkState(isUnderPublicSuffix(), <span class="jxr_string">"Not under a public suffix: %s"</span>, name);
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>     <strong class="jxr_keyword">return</strong> ancestor(publicSuffixIndex - 1);
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>   }
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> 
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> <em class="jxr_javadoccomment">   * Indicates whether this domain name represents a &lt;i&gt;registry suffix&lt;/i&gt;, as defined by a subset</em>
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> <em class="jxr_javadoccomment">   * of the Mozilla Foundation's &lt;a href="<a href="http://publicsuffix.org/" target="alexandria_uri">http://publicsuffix.org/</a>"&gt;Public Suffix List&lt;/a&gt; (PSL). A</em>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> <em class="jxr_javadoccomment">   * registry suffix is one under which Internet users can directly register names via a domain name</em>
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> <em class="jxr_javadoccomment">   * registrar, and have such registrations lawfully protected by internet-governing bodies such as</em>
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> <em class="jxr_javadoccomment">   * ICANN. Examples of registry suffixes include {@code com}, {@code co.uk}, and {@code</em>
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> <em class="jxr_javadoccomment">   * pvt.k12.wy.us}. Examples of domain names that are &lt;i&gt;not&lt;/i&gt; registry suffixes include {@code</em>
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> <em class="jxr_javadoccomment">   * google.com} and {@code foo.co.uk}.</em>
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Registry suffixes are a proper subset of {@linkplain #isPublicSuffix() public suffixes}. The</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">   * list of public suffixes additionally contains privately owned domain names under which Internet</em>
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> <em class="jxr_javadoccomment">   * users can register subdomains. An example of a public suffix that is not a registry suffix is</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> <em class="jxr_javadoccomment">   * {@code blogspot.com}. Note that it is true that all public suffixes &lt;i&gt;have&lt;/i&gt; registry</em>
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> <em class="jxr_javadoccomment">   * suffixes, since domain name registries collectively control all internet domain names.</em>
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> <em class="jxr_javadoccomment">   * &lt;p&gt;For considerations on whether the public suffix or registry suffix designation is more</em>
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> <em class="jxr_javadoccomment">   * suitable for your application, see &lt;a</em>
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> <em class="jxr_javadoccomment">   * href="<a href="https://github.com/google/guava/wiki/InternetDomainNameExplained" target="alexandria_uri">https://github.com/google/guava/wiki/InternetDomainNameExplained</a>"&gt;this article&lt;/a&gt;.</em>
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> <em class="jxr_javadoccomment">   * @return {@code true} if this domain name appears exactly on the public suffix list as part of</em>
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> <em class="jxr_javadoccomment">   *     the registry suffix section (labelled "ICANN").</em>
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> <em class="jxr_javadoccomment">   * @since 23.3</em>
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isRegistrySuffix() {
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>     <strong class="jxr_keyword">return</strong> registrySuffixIndex == 0;
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>   }
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> <em class="jxr_javadoccomment">   * Indicates whether this domain name ends in a {@linkplain #isRegistrySuffix() registry suffix},</em>
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> <em class="jxr_javadoccomment">   * including if it is a registry suffix itself. For example, returns {@code true} for {@code</em>
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> <em class="jxr_javadoccomment">   * www.google.com}, {@code foo.co.uk} and {@code com}, but not for {@code invalid} or {@code</em>
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> <em class="jxr_javadoccomment">   * google.invalid}.</em>
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> <em class="jxr_javadoccomment">   * &lt;p&gt;Note that this method is equivalent to {@link #hasPublicSuffix()} because all registry</em>
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> <em class="jxr_javadoccomment">   * suffixes are public suffixes &lt;i&gt;and&lt;/i&gt; all public suffixes have registry suffixes.</em>
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> <em class="jxr_javadoccomment">   * @since 23.3</em>
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L455" href="#L455">455</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasRegistrySuffix() {
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>     <strong class="jxr_keyword">return</strong> registrySuffixIndex != NO_SUFFIX_FOUND;
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>   }
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> 
+<a class="jxr_linenumber" name="L459" href="#L459">459</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> <em class="jxr_javadoccomment">   * Returns the {@linkplain #isRegistrySuffix() registry suffix} portion of the domain name, or</em>
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> <em class="jxr_javadoccomment">   * {@code null} if no registry suffix is present.</em>
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> <em class="jxr_javadoccomment">   * @since 23.3</em>
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>   <strong class="jxr_keyword">public</strong> InternetDomainName registrySuffix() {
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>     <strong class="jxr_keyword">return</strong> hasRegistrySuffix() ? ancestor(registrySuffixIndex) : <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>   }
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> 
+<a class="jxr_linenumber" name="L469" href="#L469">469</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> <em class="jxr_javadoccomment">   * Indicates whether this domain name ends in a {@linkplain #isRegistrySuffix() registry suffix},</em>
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> <em class="jxr_javadoccomment">   * while not being a registry suffix itself. For example, returns {@code true} for {@code</em>
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> <em class="jxr_javadoccomment">   * www.google.com}, {@code foo.co.uk} and {@code blogspot.com}, but not for {@code com}, {@code</em>
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> <em class="jxr_javadoccomment">   * co.uk}, or {@code google.invalid}.</em>
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> <em class="jxr_javadoccomment">   * @since 23.3</em>
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L477" href="#L477">477</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isUnderRegistrySuffix() {
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>     <strong class="jxr_keyword">return</strong> registrySuffixIndex &gt; 0;
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>   }
+<a class="jxr_linenumber" name="L480" href="#L480">480</a> 
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L482" href="#L482">482</a> <em class="jxr_javadoccomment">   * Indicates whether this domain name is composed of exactly one subdomain component followed by a</em>
+<a class="jxr_linenumber" name="L483" href="#L483">483</a> <em class="jxr_javadoccomment">   * {@linkplain #isRegistrySuffix() registry suffix}. For example, returns {@code true} for {@code</em>
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> <em class="jxr_javadoccomment">   * google.com}, {@code foo.co.uk}, and {@code blogspot.com}, but not for {@code www.google.com},</em>
+<a class="jxr_linenumber" name="L485" href="#L485">485</a> <em class="jxr_javadoccomment">   * {@code co.uk}, or {@code myblog.blogspot.com}.</em>
+<a class="jxr_linenumber" name="L486" href="#L486">486</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;Warning:&lt;/b&gt; This method should not be used to determine the probable highest level</em>
+<a class="jxr_linenumber" name="L488" href="#L488">488</a> <em class="jxr_javadoccomment">   * parent domain for which cookies may be set. Use {@link #topPrivateDomain()} for that purpose.</em>
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> <em class="jxr_javadoccomment">   * @since 23.3</em>
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L492" href="#L492">492</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isTopDomainUnderRegistrySuffix() {
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>     <strong class="jxr_keyword">return</strong> registrySuffixIndex == 1;
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>   }
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> 
+<a class="jxr_linenumber" name="L496" href="#L496">496</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> <em class="jxr_javadoccomment">   * Returns the portion of this domain name that is one level beneath the {@linkplain</em>
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> <em class="jxr_javadoccomment">   * #isRegistrySuffix() registry suffix}. For example, for {@code x.adwords.google.co.uk} it</em>
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> <em class="jxr_javadoccomment">   * returns {@code google.co.uk}, since {@code co.uk} is a registry suffix. Similarly, for {@code</em>
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> <em class="jxr_javadoccomment">   * myblog.blogspot.com} it returns {@code blogspot.com}, since {@code com} is a registry suffix.</em>
+<a class="jxr_linenumber" name="L501" href="#L501">501</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> <em class="jxr_javadoccomment">   * &lt;p&gt;If {@link #isTopDomainUnderRegistrySuffix()} is true, the current domain name instance is</em>
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> <em class="jxr_javadoccomment">   * returned.</em>
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> <em class="jxr_javadoccomment">   * &lt;p&gt;&lt;b&gt;Warning:&lt;/b&gt; This method should not be used to determine whether a domain is probably the</em>
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> <em class="jxr_javadoccomment">   * highest level for which cookies may be set. Use {@link #isTopPrivateDomain()} for that purpose.</em>
+<a class="jxr_linenumber" name="L507" href="#L507">507</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L508" href="#L508">508</a> <em class="jxr_javadoccomment">   * @throws IllegalStateException if this domain does not end with a registry suffix</em>
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> <em class="jxr_javadoccomment">   * @since 23.3</em>
+<a class="jxr_linenumber" name="L510" href="#L510">510</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L511" href="#L511">511</a>   <strong class="jxr_keyword">public</strong> InternetDomainName topDomainUnderRegistrySuffix() {
+<a class="jxr_linenumber" name="L512" href="#L512">512</a>     <strong class="jxr_keyword">if</strong> (isTopDomainUnderRegistrySuffix()) {
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>     }
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>     checkState(isUnderRegistrySuffix(), <span class="jxr_string">"Not under a registry suffix: %s"</span>, name);
+<a class="jxr_linenumber" name="L516" href="#L516">516</a>     <strong class="jxr_keyword">return</strong> ancestor(registrySuffixIndex - 1);
+<a class="jxr_linenumber" name="L517" href="#L517">517</a>   }
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> 
+<a class="jxr_linenumber" name="L519" href="#L519">519</a>   <em class="jxr_javadoccomment">/** Indicates whether this domain is composed of two or more parts. */</em>
+<a class="jxr_linenumber" name="L520" href="#L520">520</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasParent() {
+<a class="jxr_linenumber" name="L521" href="#L521">521</a>     <strong class="jxr_keyword">return</strong> parts.size() &gt; 1;
+<a class="jxr_linenumber" name="L522" href="#L522">522</a>   }
+<a class="jxr_linenumber" name="L523" href="#L523">523</a> 
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> <em class="jxr_javadoccomment">   * Returns an {@code InternetDomainName} that is the immediate ancestor of this one; that is, the</em>
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> <em class="jxr_javadoccomment">   * current domain with the leftmost part removed. For example, the parent of {@code</em>
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> <em class="jxr_javadoccomment">   * www.google.com} is {@code google.com}.</em>
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> <em class="jxr_javadoccomment">   * @throws IllegalStateException if the domain has no parent, as determined by {@link #hasParent}</em>
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L531" href="#L531">531</a>   <strong class="jxr_keyword">public</strong> InternetDomainName parent() {
+<a class="jxr_linenumber" name="L532" href="#L532">532</a>     checkState(hasParent(), <span class="jxr_string">"Domain '%s' has no parent"</span>, name);
+<a class="jxr_linenumber" name="L533" href="#L533">533</a>     <strong class="jxr_keyword">return</strong> ancestor(1);
+<a class="jxr_linenumber" name="L534" href="#L534">534</a>   }
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> 
+<a class="jxr_linenumber" name="L536" href="#L536">536</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> <em class="jxr_javadoccomment">   * Returns the ancestor of the current domain at the given number of levels "higher" (rightward)</em>
+<a class="jxr_linenumber" name="L538" href="#L538">538</a> <em class="jxr_javadoccomment">   * in the subdomain list. The number of levels must be non-negative, and less than {@code N-1},</em>
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> <em class="jxr_javadoccomment">   * where {@code N} is the number of parts in the domain.</em>
+<a class="jxr_linenumber" name="L540" href="#L540">540</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L541" href="#L541">541</a> <em class="jxr_javadoccomment">   * &lt;p&gt;TODO: Reasonable candidate for addition to public API.</em>
+<a class="jxr_linenumber" name="L542" href="#L542">542</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>   <strong class="jxr_keyword">private</strong> InternetDomainName ancestor(<strong class="jxr_keyword">int</strong> levels) {
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>     <strong class="jxr_keyword">return</strong> from(DOT_JOINER.join(parts.subList(levels, parts.size())));
+<a class="jxr_linenumber" name="L545" href="#L545">545</a>   }
+<a class="jxr_linenumber" name="L546" href="#L546">546</a> 
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L548" href="#L548">548</a> <em class="jxr_javadoccomment">   * Creates and returns a new {@code InternetDomainName} by prepending the argument and a dot to</em>
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> <em class="jxr_javadoccomment">   * the current name. For example, {@code InternetDomainName.from("foo.com").child("www.bar")}</em>
+<a class="jxr_linenumber" name="L550" href="#L550">550</a> <em class="jxr_javadoccomment">   * returns a new {@code InternetDomainName} with the value {@code www.bar.foo.com}. Only lenient</em>
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> <em class="jxr_javadoccomment">   * validation is performed, as described {@link #from(String) here}.</em>
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> <em class="jxr_javadoccomment">   * @throws NullPointerException if leftParts is null</em>
+<a class="jxr_linenumber" name="L554" href="#L554">554</a> <em class="jxr_javadoccomment">   * @throws IllegalArgumentException if the resulting name is not valid</em>
+<a class="jxr_linenumber" name="L555" href="#L555">555</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>   <strong class="jxr_keyword">public</strong> InternetDomainName child(String leftParts) {
+<a class="jxr_linenumber" name="L557" href="#L557">557</a>     <strong class="jxr_keyword">return</strong> from(checkNotNull(leftParts) + <span class="jxr_string">"."</span> + name);
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>   }
+<a class="jxr_linenumber" name="L559" href="#L559">559</a> 
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L561" href="#L561">561</a> <em class="jxr_javadoccomment">   * Indicates whether the argument is a syntactically valid domain name using lenient validation.</em>
+<a class="jxr_linenumber" name="L562" href="#L562">562</a> <em class="jxr_javadoccomment">   * Specifically, validation against &lt;a href="<a href="http://www.ietf.org/rfc/rfc3490.txt" target="alexandria_uri">http://www.ietf.org/rfc/rfc3490.txt</a>"&gt;RFC 3490&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="L563" href="#L563">563</a> <em class="jxr_javadoccomment">   * ("Internationalizing Domain Names in Applications") is skipped.</em>
+<a class="jxr_linenumber" name="L564" href="#L564">564</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L565" href="#L565">565</a> <em class="jxr_javadoccomment">   * &lt;p&gt;The following two code snippets are equivalent:</em>
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L567" href="#L567">567</a> <em class="jxr_javadoccomment">   * &lt;pre&gt;{@code</em>
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> <em class="jxr_javadoccomment">   * domainName = InternetDomainName.isValid(name)</em>
+<a class="jxr_linenumber" name="L569" href="#L569">569</a> <em class="jxr_javadoccomment">   *     ? InternetDomainName.from(name)</em>
+<a class="jxr_linenumber" name="L570" href="#L570">570</a> <em class="jxr_javadoccomment">   *     : DEFAULT_DOMAIN;</em>
+<a class="jxr_linenumber" name="L571" href="#L571">571</a> <em class="jxr_javadoccomment">   * }&lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L572" href="#L572">572</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L573" href="#L573">573</a> <em class="jxr_javadoccomment">   * &lt;pre&gt;{@code</em>
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> <em class="jxr_javadoccomment">   * try {</em>
+<a class="jxr_linenumber" name="L575" href="#L575">575</a> <em class="jxr_javadoccomment">   *   domainName = InternetDomainName.from(name);</em>
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> <em class="jxr_javadoccomment">   * } catch (IllegalArgumentException e) {</em>
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> <em class="jxr_javadoccomment">   *   domainName = DEFAULT_DOMAIN;</em>
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> <em class="jxr_javadoccomment">   * }</em>
+<a class="jxr_linenumber" name="L579" href="#L579">579</a> <em class="jxr_javadoccomment">   * }&lt;/pre&gt;</em>
+<a class="jxr_linenumber" name="L580" href="#L580">580</a> <em class="jxr_javadoccomment">   *</em>
+<a class="jxr_linenumber" name="L581" href="#L581">581</a> <em class="jxr_javadoccomment">   * @since 8.0 (previously named {@code isValidLenient})</em>
+<a class="jxr_linenumber" name="L582" href="#L582">582</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L583" href="#L583">583</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isValid(String name) {
+<a class="jxr_linenumber" name="L584" href="#L584">584</a>     <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>       from(name);
+<a class="jxr_linenumber" name="L586" href="#L586">586</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>     } <strong class="jxr_keyword">catch</strong> (IllegalArgumentException e) {
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>       <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>     }
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>   }
+<a class="jxr_linenumber" name="L591" href="#L591">591</a> 
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L593" href="#L593">593</a> <em class="jxr_javadoccomment">   * Does the domain name match one of the "wildcard" patterns (e.g. {@code "*.ar"})? If a {@code</em>
+<a class="jxr_linenumber" name="L594" href="#L594">594</a> <em class="jxr_javadoccomment">   * desiredType} is specified, the wildcard pattern must also match that type.</em>
+<a class="jxr_linenumber" name="L595" href="#L595">595</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> matchesWildcardSuffixType(
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>       Optional&lt;PublicSuffixType&gt; desiredType, String domain) {
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>     List&lt;String&gt; pieces = DOT_SPLITTER.limit(2).splitToList(domain);
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>     <strong class="jxr_keyword">return</strong> pieces.size() == 2
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>         &amp;&amp; matchesType(
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>             desiredType, Optional.fromNullable(PublicSuffixPatterns.UNDER.get(pieces.get(1))));
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>   }
+<a class="jxr_linenumber" name="L603" href="#L603">603</a> 
+<a class="jxr_linenumber" name="L604" href="#L604">604</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L605" href="#L605">605</a> <em class="jxr_javadoccomment">   * If a {@code desiredType} is specified, returns true only if the {@code actualType} is</em>
+<a class="jxr_linenumber" name="L606" href="#L606">606</a> <em class="jxr_javadoccomment">   * identical. Otherwise, returns true as long as {@code actualType} is present.</em>
+<a class="jxr_linenumber" name="L607" href="#L607">607</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> matchesType(
+<a class="jxr_linenumber" name="L609" href="#L609">609</a>       Optional&lt;PublicSuffixType&gt; desiredType, Optional&lt;PublicSuffixType&gt; actualType) {
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>     <strong class="jxr_keyword">return</strong> desiredType.isPresent() ? desiredType.equals(actualType) : actualType.isPresent();
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>   }
+<a class="jxr_linenumber" name="L612" href="#L612">612</a> 
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>   <em class="jxr_javadoccomment">/** Returns the domain name, normalized to all lower case. */</em>
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>   @Override
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>   <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>     <strong class="jxr_keyword">return</strong> name;
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>   }
+<a class="jxr_linenumber" name="L618" href="#L618">618</a> 
+<a class="jxr_linenumber" name="L619" href="#L619">619</a>   <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L620" href="#L620">620</a> <em class="jxr_javadoccomment">   * Equality testing is based on the text supplied by the caller, after normalization as described</em>
+<a class="jxr_linenumber" name="L621" href="#L621">621</a> <em class="jxr_javadoccomment">   * in the class documentation. For example, a non-ASCII Unicode domain name and the Punycode</em>
+<a class="jxr_linenumber" name="L622" href="#L622">622</a> <em class="jxr_javadoccomment">   * version of the same domain name would not be considered equal.</em>
+<a class="jxr_linenumber" name="L623" href="#L623">623</a> <em class="jxr_javadoccomment">   */</em>
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>   @Override
+<a class="jxr_linenumber" name="L625" href="#L625">625</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> equals(@NullableDecl Object object) {
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>     <strong class="jxr_keyword">if</strong> (object == <strong class="jxr_keyword">this</strong>) {
+<a class="jxr_linenumber" name="L627" href="#L627">627</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L628" href="#L628">628</a>     }
+<a class="jxr_linenumber" name="L629" href="#L629">629</a> 
+<a class="jxr_linenumber" name="L630" href="#L630">630</a>     <strong class="jxr_keyword">if</strong> (object instanceof InternetDomainName) {
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>       InternetDomainName that = (InternetDomainName) object;
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>       <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>.name.equals(that.name);
+<a class="jxr_linenumber" name="L633" href="#L633">633</a>     }
+<a class="jxr_linenumber" name="L634" href="#L634">634</a> 
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>     <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>   }
+<a class="jxr_linenumber" name="L637" href="#L637">637</a> 
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>   @Override
+<a class="jxr_linenumber" name="L639" href="#L639">639</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> hashCode() {
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>     <strong class="jxr_keyword">return</strong> name.hashCode();
+<a class="jxr_linenumber" name="L641" href="#L641">641</a>   }
+<a class="jxr_linenumber" name="L642" href="#L642">642</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>
