@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>LocaleTest xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/* </em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Hibernate, Relational Persistence for Idiomatic Java</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * JBoss, Home of Professional Open Source</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * Copyright 2013 Red Hat Inc. and/or its affiliates and other contributors</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * as indicated by the @authors tag. All rights reserved.</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * See the copyright.txt in the distribution for a</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * full listing of individual contributors.</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * This copyrighted material is made available to anyone wishing to use,</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * modify, copy, or redistribute it subject to the terms and conditions</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * of the GNU Lesser General Public License, v. 2.1.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * This program is distributed in the hope that it will be useful, but WITHOUT A</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * You should have received a copy of the GNU Lesser General Public License,</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * v.2.1 along with this distribution; if not, write to the Free Software</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * MA  02110-1301, USA.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">package</strong> org.hibernate.test.locale;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertTrue;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.fail;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.Locale;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.hibernate.HibernateException;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.hibernate.hql.internal.ast.ASTQueryTranslatorFactory;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.hibernate.hql.spi.QueryTranslator;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.hibernate.hql.spi.QueryTranslatorFactory;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.hibernate.testing.TestForIssue;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.hibernate.testing.junit4.BaseCoreFunctionalTestCase;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.hibernate.tool.hbm2ddl.SchemaValidator;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.junit.AfterClass;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.junit.BeforeClass;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment"> * @author Brett Meyer</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> LocaleTest <strong class="jxr_keyword">extends</strong> BaseCoreFunctionalTestCase {
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String asciiRegex = <span class="jxr_string">"^&#92;&#92;p{ASCII}*$"</span>;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  	
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Locale currentLocale;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	@Test
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	@TestForIssue(jiraKey = <span class="jxr_string">"HHH-8579"</span>)
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testAliasWithLocale() {
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  		<em class="jxr_comment">// Without the HHH-8579 fix, this will generate non-ascii query aliases.</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		String hql = <span class="jxr_string">"from IAmAFoo"</span>;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  		
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  		QueryTranslatorFactory ast = <strong class="jxr_keyword">new</strong> ASTQueryTranslatorFactory();
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  		QueryTranslator queryTranslator = ast.createQueryTranslator(
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  				hql, hql, Collections.EMPTY_MAP, sessionFactory() );
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  		queryTranslator.compile( Collections.EMPTY_MAP, false );
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  		String sql = queryTranslator.getSQLString();
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  		
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  		assertTrue( sql.matches( asciiRegex ) );
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  	}
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  	
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  	@Test
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  	@TestForIssue(jiraKey = <span class="jxr_string">"HHH-8765"</span>)
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testMetadataWithLocale() {
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		SchemaValidator sv = <strong class="jxr_keyword">new</strong> SchemaValidator( configuration() );
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  			<em class="jxr_comment">// Rather than building TableMetadata and checking for ascii values in table/column names, simply</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			<em class="jxr_comment">// attempt to validate.</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			sv.validate();
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		}
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		<strong class="jxr_keyword">catch</strong> (HibernateException e) {
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  			fail(<span class="jxr_string">"Failed with the Turkish locale, most likely due to the use of String#toLowerCase() within hbm2ddl.  "</span>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  					+ <span class="jxr_string">"Search for all instaces and replace with StringHelper#toLowerCase(String)!  "</span> + e.getMessage());
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		}
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  	}
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  	@BeforeClass
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> beforeClass() {
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  		currentLocale = Locale.getDefault();
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  		<em class="jxr_comment">// Turkish will generate a "dotless i" when toLowerCase is used on "I".</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		Locale.setDefault(Locale.forLanguageTag(<span class="jxr_string">"tr-TR"</span>));
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  	}
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  	@AfterClass
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> afterClass() {
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  		Locale.setDefault(currentLocale);
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  	}
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  	
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  	@Override
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  	<strong class="jxr_keyword">protected</strong> Class&lt;?&gt;[] getAnnotatedClasses() {
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Class&lt;?&gt;[] { IAmAFoo.<strong class="jxr_keyword">class</strong> };
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  	}
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

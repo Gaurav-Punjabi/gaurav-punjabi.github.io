@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>SerializableToBlobTypeTest xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> org.hibernate.test.annotations.lob;
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertEquals;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> org.hibernate.Session;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.hibernate.cfg.Configuration;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> org.hibernate.mapping.PersistentClass;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> org.hibernate.testing.DialectChecks;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> org.hibernate.testing.RequiresDialectFeature;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> org.hibernate.testing.junit4.BaseCoreFunctionalTestCase;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> org.hibernate.type.SerializableToBlobType;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> org.hibernate.type.Type;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_javadoccomment"> * Test type definition for SerializableToBlobType</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_javadoccomment"> * @author Janario Oliveira</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  @RequiresDialectFeature( DialectChecks.SupportsExpectedLobUsagePattern.<strong class="jxr_keyword">class</strong> )
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> SerializableToBlobTypeTest <strong class="jxr_keyword">extends</strong> BaseCoreFunctionalTestCase {
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  	@Test
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testTypeDefinition() {
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  		Configuration cfg = configuration();
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  		PersistentClass pc = cfg.getClassMapping( EntitySerialize.<strong class="jxr_keyword">class</strong>.getName() );
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  		<em class="jxr_comment">// explicitLob of SerializableToBlobType</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  		Type explicitLobType = pc.getProperty( <span class="jxr_string">"explicitLob"</span> ).getType();
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  		assertEquals( ExplicitSerializable.<strong class="jxr_keyword">class</strong>, explicitLobType.getReturnedClass() );
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  		assertEquals( SerializableToBlobType.<strong class="jxr_keyword">class</strong>.getName(), explicitLobType.getName() );
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  		<em class="jxr_comment">// explicit of ExplicitSerializableType</em>
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  		Type explicitType = pc.getProperty( <span class="jxr_string">"explicit"</span> ).getType();
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  		assertEquals( ExplicitSerializable.<strong class="jxr_keyword">class</strong>, explicitType.getReturnedClass() );
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  		assertEquals( ExplicitSerializableType.<strong class="jxr_keyword">class</strong>.getName(), explicitType.getName() );
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  		<em class="jxr_comment">// implicit of ImplicitSerializableType</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  		Type implicitType = pc.getProperty( <span class="jxr_string">"implicit"</span> ).getType();
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  		assertEquals( ImplicitSerializable.<strong class="jxr_keyword">class</strong>, implicitType.getReturnedClass() );
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  		assertEquals( ImplicitSerializableType.<strong class="jxr_keyword">class</strong>.getName(), implicitType.getName() );
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  		<em class="jxr_comment">// explicitOverridingImplicit ExplicitSerializableType overrides ImplicitSerializableType</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  		Type overrideType = pc.getProperty( <span class="jxr_string">"explicitOverridingImplicit"</span> ).getType();
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  		assertEquals( ImplicitSerializable.<strong class="jxr_keyword">class</strong>, overrideType.getReturnedClass() );
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  		assertEquals( ExplicitSerializableType.<strong class="jxr_keyword">class</strong>.getName(), overrideType.getName() );
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  	}
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	@Test
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testPersist() {
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  		EntitySerialize entitySerialize = <strong class="jxr_keyword">new</strong> EntitySerialize();
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  		entitySerialize.explicitLob = <strong class="jxr_keyword">new</strong> ExplicitSerializable();
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		entitySerialize.explicitLob.value = <span class="jxr_string">"explicitLob"</span>;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  		entitySerialize.explicitLob.defaultValue = <span class="jxr_string">"defaultExplicitLob"</span>;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  		entitySerialize.explicit = <strong class="jxr_keyword">new</strong> ExplicitSerializable();
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  		entitySerialize.explicit.value = <span class="jxr_string">"explicit"</span>;
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  		entitySerialize.implicit = <strong class="jxr_keyword">new</strong> ImplicitSerializable();
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  		entitySerialize.implicit.value = <span class="jxr_string">"implicit"</span>;
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		entitySerialize.explicitOverridingImplicit = <strong class="jxr_keyword">new</strong> ImplicitSerializable();
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		entitySerialize.explicitOverridingImplicit.value = <span class="jxr_string">"explicitOverridingImplicit"</span>;
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		Session session = openSession();
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		session.getTransaction().begin();
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		session.persist( entitySerialize );
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  		session.getTransaction().commit();
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  		session.close();
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		session = openSession();
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		EntitySerialize persistedSerialize = (EntitySerialize) session.get( EntitySerialize.<strong class="jxr_keyword">class</strong>, entitySerialize.id );
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		assertEquals( <span class="jxr_string">"explicitLob"</span>, persistedSerialize.explicitLob.value );
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		assertEquals( <span class="jxr_string">"explicit"</span>, persistedSerialize.explicit.value );
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		assertEquals( <span class="jxr_string">"implicit"</span>, persistedSerialize.implicit.value );
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		assertEquals( <span class="jxr_string">"explicitOverridingImplicit"</span>, persistedSerialize.explicitOverridingImplicit.value );
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  		assertEquals( <span class="jxr_string">"defaultExplicitLob"</span>, persistedSerialize.explicitLob.defaultValue );
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		session.close();
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	}
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  	@Override
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	<strong class="jxr_keyword">protected</strong> Class[] getAnnotatedClasses() {
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Class[] { EntitySerialize.<strong class="jxr_keyword">class</strong> };
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	}
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

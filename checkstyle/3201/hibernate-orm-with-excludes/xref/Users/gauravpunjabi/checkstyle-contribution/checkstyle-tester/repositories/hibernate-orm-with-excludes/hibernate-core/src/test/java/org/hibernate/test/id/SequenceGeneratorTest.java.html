@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>SequenceGeneratorTest xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> org.hibernate.test.id;
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.junit.Assert.assertTrue;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> org.hibernate.Session;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.hibernate.Transaction;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> org.hibernate.dialect.SQLServer2012Dialect;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> org.hibernate.testing.DialectChecks;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> org.hibernate.testing.RequiresDialectFeature;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> org.hibernate.testing.SkipForDialect;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> org.hibernate.testing.TestForIssue;
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> org.hibernate.testing.junit4.BaseCoreFunctionalTestCase;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> SequenceGeneratorTest <strong class="jxr_keyword">extends</strong> BaseCoreFunctionalTestCase {
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>      @Override
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>      <strong class="jxr_keyword">public</strong> String[] getMappings() {
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>          <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> String[] { <span class="jxr_string">"id/Person.hbm.xml"</span> };
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>      }
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_javadoccomment">     * This seems a little trivial, but we need to guarantee that all Dialects start their sequences on a non-0 value.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>      @Test
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>      @TestForIssue(jiraKey = <span class="jxr_string">"HHH-8814"</span>)
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>      @RequiresDialectFeature(DialectChecks.SupportsSequences.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  	@SkipForDialect(
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  			value= SQLServer2012Dialect.<strong class="jxr_keyword">class</strong>,
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  			comment=<span class="jxr_string">"SQLServer2012Dialect initializes sequence to minimum value (e.g., Long.MIN_VALUE; Hibernate assumes it is uninitialized."</span>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  	)
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testStartOfSequence() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>          Session s = openSession();
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>          Transaction tx = s.beginTransaction();
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>          <strong class="jxr_keyword">final</strong> Person person = <strong class="jxr_keyword">new</strong> Person();
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>          s.persist(person);
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>          tx.commit();
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>          s.close();
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>          
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>          assertTrue(person.getId() &gt; 0);
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>      }
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>SipHashFunctionTest xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (C) 2012 The Guava Authors</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * in compliance with the License. You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software distributed under the License</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * or implied. See the License for the specific language governing permissions and limitations under</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * the License.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">package</strong> com.google.common.hash;
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> com.google.common.base.Charsets.UTF_8;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ImmutableSet;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> junit.framework.TestCase;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_javadoccomment"> * Unit tests for {@link SipHashFunction}.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_javadoccomment"> * @author Kurt Alfred Kluever</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> SipHashFunctionTest <strong class="jxr_keyword">extends</strong> TestCase {
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>    <em class="jxr_comment">// From https://131002.net/siphash/siphash24.c</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>    <em class="jxr_comment">// k = 00 01 02 ...</em>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> K0 = 0x0706050403020100L;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> K1 = 0x0f0e0d0c0b0a0908L;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> HashFunction SIP_WITH_KEY = Hashing.sipHash24(K0, K1);
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> HashFunction SIP_WITHOUT_KEY = Hashing.sipHash24();
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>    <em class="jxr_comment">// These constants were originally ported from https://www.131002.net/siphash/siphash24.c. See:</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>    <em class="jxr_comment">// https://github.com/nahi/siphash-java-inline/blob/master/src/test/java/org/jruby/util/SipHashInlineTest.java</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong>[] EXPECTED =
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>        <strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">long</strong>[] {
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>          0x726fdb47dd0e0e31L,
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>          0x74f839c593dc67fdL,
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>          0x0d6c8009d9a94f5aL,
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>          0x85676696d7fb7e2dL,
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>          0xcf2794e0277187b7L,
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>          0x18765564cd99a68dL,
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>          0xcbc9466e58fee3ceL,
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>          0xab0200f58b01d137L,
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>          0x93f5f5799a932462L,
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>          0x9e0082df0ba9e4b0L,
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>          0x7a5dbbc594ddb9f3L,
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>          0xf4b32f46226bada7L,
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>          0x751e8fbc860ee5fbL,
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>          0x14ea5627c0843d90L,
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>          0xf723ca908e7af2eeL,
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>          0xa129ca6149be45e5L,
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>          0x3f2acc7f57c29bdbL,
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>          0x699ae9f52cbe4794L,
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>          0x4bc1b3f0968dd39cL,
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>          0xbb6dc91da77961bdL,
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>          0xbed65cf21aa2ee98L,
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>          0xd0f2cbb02e3b67c7L,
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>          0x93536795e3a33e88L,
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>          0xa80c038ccd5ccec8L,
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>          0xb8ad50c6f649af94L,
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>          0xbce192de8a85b8eaL,
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>          0x17d835b85bbb15f3L,
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>          0x2f2e6163076bcfadL,
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>          0xde4daaaca71dc9a5L,
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>          0xa6a2506687956571L,
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>          0xad87a3535c49ef28L,
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>          0x32d892fad841c342L,
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>          0x7127512f72f27cceL,
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>          0xa7f32346f95978e3L,
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>          0x12e0b01abb051238L,
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>          0x15e034d40fa197aeL,
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>          0x314dffbe0815a3b4L,
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>          0x027990f029623981L,
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>          0xcadcd4e59ef40c4dL,
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>          0x9abfd8766a33735cL,
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>          0x0e3ea96b5304a7d0L,
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>          0xad0c42d6fc585992L,
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>          0x187306c89bc215a9L,
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>          0xd4a60abcf3792b95L,
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>          0xf935451de4f21df2L,
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>          0xa9538f0419755787L,
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>          0xdb9acddff56ca510L,
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>          0xd06c98cd5c0975ebL,
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>          0xe612a3cb9ecba951L,
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>          0xc766e62cfcadaf96L,
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>          0xee64435a9752fe72L,
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>          0xa192d576b245165aL,
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>          0x0a8787bf8ecb74b2L,
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>          0x81b3e73d20b49b6fL,
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>          0x7fa8220ba3b2eceaL,
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>          0x245731c13ca42499L,
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>          0xb78dbfaf3a8d83bdL,
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>          0xea1ad565322a1a0bL,
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>          0x60e61c23a3795013L,
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>          0x6606d7e446282b93L,
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>         0x6ca4ecb15c5f91e1L,
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>         0x9f626da15c9625f3L,
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>         0xe51b38608ef25f57L,
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>         0x958a324ceb064572L
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>       };
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testVectors() {
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>     <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; EXPECTED.length; ++i) {
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>       byte[] msg = <strong class="jxr_keyword">new</strong> byte[i];
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>       <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> j = 0; j &lt; i; ++j) {
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>         msg[j] = (byte) j;
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>       }
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>       assertSip(msg, EXPECTED[i]);
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>     }
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>   }
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>   <em class="jxr_comment">// This test data comes from "SipHash: a fast short-input PRF", "Appendix A: Test values".</em>
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>   <em class="jxr_comment">// It can be downloaded here: https://131002.net/siphash/siphash.pdf</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> test15ByteStringFromSipHashPaper() {
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>     byte[] message =
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>         <strong class="jxr_keyword">new</strong> byte[] {
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>           0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>         };
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>     <strong class="jxr_keyword">long</strong> k0 = 0x0706050403020100L;
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>     <strong class="jxr_keyword">long</strong> k1 = 0x0f0e0d0c0b0a0908L;
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>     assertEquals(0xa129ca6149be45e5L, Hashing.sipHash24(k0, k1).hashBytes(message).asLong());
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>   }
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>   <em class="jxr_comment">// From https://github.com/BrandonHaynes/siphash-csharp/blob/master/tests/Tests.cs</em>
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testKnownValues() {
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>     assertSip(<strong class="jxr_keyword">new</strong> byte[] {}, 0x726fdb47dd0e0e31L);
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>     assertSip(<strong class="jxr_keyword">new</strong> byte[] {0x61}, 0x2ba3e8e9a71148caL);
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>     assertSip(<strong class="jxr_keyword">new</strong> byte[1000000], 0x28205108397aa742L);
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>     assertSip(<span class="jxr_string">"12345678"</span>, 0x02130609caea37ebL);
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>     assertSip(<span class="jxr_string">"abcdef"</span>, 0x2a6e77e733c7c05dL);
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>     assertSip(<span class="jxr_string">"SipHash"</span>, 0x8325093242a96f60L);
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>   }
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>   <em class="jxr_comment">// Test for common pitfall regarding sign extension.</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>   <em class="jxr_comment">// For example: (long) data[i++] | (long) data[i++] &lt;&lt; 8 | ...</em>
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>   <em class="jxr_comment">// If data[i] == (byte) 0x80, the first cast will sign-extend it to 0xffffffffffffff80,</em>
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>   <em class="jxr_comment">// masking the remaining seven bytes.</em>
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>   <em class="jxr_comment">// To test this, we give an input where bit 7 is not cleared. For example:</em>
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>   <em class="jxr_comment">// (1) 00 01 02 03 04 05 06 07 80</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>   <em class="jxr_comment">// (2) 00 01 02 03 04 05 06 07 81</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>   <em class="jxr_comment">// (3) 00 01 02 03 04 05 06 07 ff (or anything in between)</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>   <em class="jxr_comment">// A fault implementation will generate collisions for these inputs.</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testCollisionsDueToIncorrectSignExtension() {
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>     byte[] col1 = <strong class="jxr_keyword">new</strong> byte[] {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, (byte) 0x80};
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>     byte[] col2 = <strong class="jxr_keyword">new</strong> byte[] {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, (byte) 0x81};
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>     byte[] col3 = <strong class="jxr_keyword">new</strong> byte[] {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, (byte) 0xff};
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>     ImmutableSet&lt;HashCode&gt; hashCodes =
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>         ImmutableSet.of(
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>             SIP_WITH_KEY.hashBytes(col1),
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>             SIP_WITH_KEY.hashBytes(col2),
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>             SIP_WITH_KEY.hashBytes(col3));
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>     assertEquals(3, hashCodes.size());
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>   }
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>   <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testToString() {
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>     assertEquals(<span class="jxr_string">"Hashing.sipHash24("</span> + K0 + <span class="jxr_string">", "</span> + K1 + <span class="jxr_string">")"</span>, SIP_WITH_KEY.toString());
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>     assertEquals(<span class="jxr_string">"Hashing.sipHash24("</span> + K0 + <span class="jxr_string">", "</span> + K1 + <span class="jxr_string">")"</span>, SIP_WITHOUT_KEY.toString());
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>     assertEquals(<span class="jxr_string">"Hashing.sipHash24(20, 13)"</span>, Hashing.sipHash24(20, 13).toString());
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>   }
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> assertSip(String input, <strong class="jxr_keyword">long</strong> expected) {
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>     assertEquals(expected, SIP_WITH_KEY.hashString(input, UTF_8).asLong());
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>     assertEquals(expected, SIP_WITH_KEY.newHasher().putString(input, UTF_8).hash().asLong());
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>     assertEquals(expected, SIP_WITHOUT_KEY.hashString(input, UTF_8).asLong());
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>     assertEquals(expected, SIP_WITHOUT_KEY.newHasher().putString(input, UTF_8).hash().asLong());
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>   }
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>   <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> assertSip(byte[] input, <strong class="jxr_keyword">long</strong> expected) {
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>     assertEquals(expected, SIP_WITH_KEY.hashBytes(input).asLong());
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>     assertEquals(expected, SIP_WITH_KEY.newHasher().putBytes(input).hash().asLong());
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>     assertEquals(expected, SIP_WITHOUT_KEY.hashBytes(input).asLong());
+<a class="jxr_linenumber" name="L178" href="#L178">178</a>     assertEquals(expected, SIP_WITHOUT_KEY.newHasher().putBytes(input).hash().asLong());
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>   }
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

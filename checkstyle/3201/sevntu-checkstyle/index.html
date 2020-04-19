@@ -1,0 +1,1096 @@
+<html>
+	<head>
+		<title>checkstyle xml difference report</title>
+		<style type="text/css" media="all">@import url("./css/maven-base.css");@import url("./css/maven-theme.css"); );</style>
+		<link rel="stylesheet" href="./css/site.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<http-equiv http-equiv="Content-Language" content="en"></http-equiv>
+	</head>
+	<body class="composite">
+		<div id="contentBox">
+			<div class="section">
+				<h2 a="Checkstyle XML difference report">Checkstyle XML difference report</h2>
+				This is symmetric difference generated from two checkstyle-result.xml reports. <br/>
+				All matching records from each XML file are deleted, then remaining records are merged into single report. <br>
+		        <a href="https://github.com/checkstyle/contribution/tree/master/patch-diff-report-tool">Utility that generated this report.</a>
+			</div>
+
+			
+				<h2 a="Checkstyle configuration report">Checkstyle configuration report</h2>
+				<div class="section">
+					<table border="0" class="bodyTable">
+							<tr class="a">
+								<th>Module Name</th>
+								<th>Base properties</th>
+								<th>Patch properties</th>
+							</tr>
+							
+								
+									<tr>
+										<td class="c">Checker</td>
+										
+										<td class="c">
+											
+												severity
+												
+													<li>warning</li>
+												
+												<br/>
+											
+												charset
+												
+													<li>UTF-8</li>
+												
+												<br/>
+											
+												haltOnException
+												
+													<li>false</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												severity
+												
+													<li>warning</li>
+												
+												<br/>
+											
+												charset
+												
+													<li>UTF-8</li>
+												
+												<br/>
+											
+												haltOnException
+												
+													<li>false</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+										
+									<tr>
+										<td class="c">BeforeExecutionExclusionFileFilter</td>
+										
+										<td class="c">
+											
+												fileNamePattern
+												
+													<li>module\-info\.java$</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												fileNamePattern
+												
+													<li>module\-info\.java$</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+										
+									<tr>
+										<td class="c">TreeWalker</td>
+										
+										<td class="c">
+											
+										</td>
+										
+										
+										<td class="c">
+											
+										</td>
+										
+									</tr>
+									
+										
+									<tr>
+										<td class="c">ArrayTrailingComma</td>
+										<td class="b">
+											
+										</td>
+										
+										
+										<td class="a">
+											
+												alwaysDemandTrailingComma
+												
+													<li>true</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+									</tr>
+									
+								
+									
+										
+									<tr>
+										<td class="c">SuppressionXpathSingleFilter</td>
+										
+										<td class="c">
+											
+												message
+												
+													<li>Javadoc comment at column \d+ has parse error</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												message
+												
+													<li>Javadoc comment at column \d+ has parse error</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+								
+									
+										
+									<tr>
+										<td class="c">SuppressionSingleFilter</td>
+										
+										<td class="c">
+											
+												checks
+												
+													<li>Checker</li>
+												
+												<br/>
+											
+												message
+												
+													<li>Exception occurred while parsing</li>
+												
+												<br/>
+											
+										</td>
+										
+										
+										<td class="c">
+											
+												checks
+												
+													<li>Checker</li>
+												
+												<br/>
+											
+												message
+												
+													<li>Exception occurred while parsing</li>
+												
+												<br/>
+											
+										</td>
+										
+									</tr>
+									
+								
+									
+								
+								
+					</table>	
+				</div>
+			
+
+			<div class="section">
+				<h2 a="Summary:">Summary:</h2>
+				<div class="section">
+					<table border="0" class="bodyTable">
+						<tr class="a">
+							<th>Report id</th>
+							<th>Files</th>
+							<th>Violations</th>
+							
+								<th>Severity-warning</th>
+							
+						</tr>
+						<tr class="b">
+							<td>base</td>
+							<td id="filesBase">367</td>
+							<td id="totalBase">3</td>
+							
+								<td id="warningSeverityNumBase">3</td>
+							
+						</tr>
+						<tr class="a">
+							<td>patch</td>
+							<td id="filesPatch">367</td>
+							<td id="totalPatch">34 (31 added)</td>
+							
+								<td id="warningSeverityStatisticsPatch">34 (31 added)</td>
+							
+						</tr>
+						<tr class="d">
+							<td/>
+							<td id="filesDiff">19 files with differences</td>
+							<td id="totalDiff">31 changes in violations</td>
+							
+								<td id="warningSeverityNumDiff">31 changes in violations</td>
+							
+						<tr>
+					</table>
+
+					
+						<br />
+						<table border="0" class="bodyTable">
+							<tr class="a">
+								<th>Report id</th>
+								
+									<th>com.puppycrawl.tools.checkstyle.checks.coding.ArrayTrailingCommaCheck</th>
+								
+							</tr>
+							<tr class="b">
+								<td>base</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.coding.ArrayTrailingCommaCheckModuleNumBase">3</td>
+								
+							</tr>
+							<tr class="a">
+								<td>patch</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.coding.ArrayTrailingCommaCheckModuleStatisticsPatch">34 (31 added)</td>
+								
+							</tr>
+							<tr class="d">
+								<td>changes in violations</td>
+								
+									<td id="com.puppycrawl.tools.checkstyle.checks.coding.ArrayTrailingCommaCheckModuleNumDiff">31</td>
+								
+							<tr>
+						</table>
+					
+
+					<br />
+					Number of unique base messages reported below: <span id="uniqueMessagesBase">0</span><br />
+					Number of unique patch messages reported below: <span id="uniqueMessagesPatch">31</span><br />
+				</div>
+			</div>
+
+			<div class="section">
+				<h2 a="Violations:">Violations:</h2>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/annotation/ForbidAnnotationCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A1" href = "#A1">#A1</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/annotation/ForbidAnnotationCheck.java.html#L88">88</a></td>
+								
+								
+									
+									<td class="keepWidth">37</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/AvoidDefaultSerializableInInnerClassesCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A2" href = "#A2">#A2</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/AvoidDefaultSerializableInInnerClassesCheck.java.html#L66">66</a></td>
+								
+								
+									
+									<td class="keepWidth">37</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/AvoidModifiersForTypesCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A3" href = "#A3">#A3</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/AvoidModifiersForTypesCheck.java.html#L397">397</a></td>
+								
+								
+									
+									<td class="keepWidth">37</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/DiamondOperatorForVariableDefinitionCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A4" href = "#A4">#A4</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/DiamondOperatorForVariableDefinitionCheck.java.html#L53">53</a></td>
+								
+								
+									
+									<td class="keepWidth">37</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/ForbidInstantiationCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A5" href = "#A5">#A5</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/ForbidInstantiationCheck.java.html#L100">100</a></td>
+								
+								
+									
+									<td class="keepWidth">56</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/LogicConditionNeedOptimizationCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A6" href = "#A6">#A6</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/LogicConditionNeedOptimizationCheck.java.html#L53">53</a></td>
+								
+								
+									
+									<td class="keepWidth">54</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/MoveVariableInsideIfCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A7" href = "#A7">#A7</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/MoveVariableInsideIfCheck.java.html#L127">127</a></td>
+								
+								
+									
+									<td class="keepWidth">37</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/OverridableMethodInConstructorCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A8" href = "#A8">#A8</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/OverridableMethodInConstructorCheck.java.html#L256">256</a></td>
+								
+								
+									
+									<td class="keepWidth">58</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/WhitespaceBeforeArrayInitializerCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A9" href = "#A9">#A9</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/coding/WhitespaceBeforeArrayInitializerCheck.java.html#L69">69</a></td>
+								
+								
+									
+									<td class="keepWidth">37</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/design/ConstructorWithoutParamsCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A10" href = "#A10">#A10</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/design/ConstructorWithoutParamsCheck.java.html#L138">138</a></td>
+								
+								
+									
+									<td class="keepWidth">37</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/naming/EnumValueNameCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A11" href = "#A11">#A11</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/main/java/com/github/sevntu/checkstyle/checks/naming/EnumValueNameCheck.java.html#L74">74</a></td>
+								
+								
+									
+									<td class="keepWidth">37</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/java/com/github/sevntu/checkstyle/checks/coding/TernaryPerExpressionCountCheckTest.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A12" href = "#A12">#A12</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/java/com/github/sevntu/checkstyle/checks/coding/TernaryPerExpressionCountCheckTest.java.html#L106">106</a></td>
+								
+								
+									
+									<td class="keepWidth">46</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/java/com/github/sevntu/checkstyle/checks/design/ConstructorWithoutParamsCheckTest.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A13" href = "#A13">#A13</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/java/com/github/sevntu/checkstyle/checks/design/ConstructorWithoutParamsCheckTest.java.html#L69">69</a></td>
+								
+								
+									
+									<td class="keepWidth">59</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputCustomDeclarationOrderCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A14" href = "#A14">#A14</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputCustomDeclarationOrderCheck.java.html#L15">15</a></td>
+								
+								
+									
+									<td class="keepWidth">23</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputCustomDeclarationOrderCheckAnonymousClasses.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A15" href = "#A15">#A15</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputCustomDeclarationOrderCheckAnonymousClasses.java.html#L109">109</a></td>
+								
+								
+									
+									<td class="keepWidth">9</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A16" href = "#A16">#A16</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L5">5</a></td>
+								
+								
+									
+									<td class="keepWidth">35</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A17" href = "#A17">#A17</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L6">6</a></td>
+								
+								
+									
+									<td class="keepWidth">30</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A18" href = "#A18">#A18</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L7">7</a></td>
+								
+								
+									
+									<td class="keepWidth">43</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A19" href = "#A19">#A19</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L12">12</a></td>
+								
+								
+									
+									<td class="keepWidth">23</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A20" href = "#A20">#A20</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L16">16</a></td>
+								
+								
+									
+									<td class="keepWidth">42</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A21" href = "#A21">#A21</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L17">17</a></td>
+								
+								
+									
+									<td class="keepWidth">26</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A22" href = "#A22">#A22</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L19">19</a></td>
+								
+								
+									
+									<td class="keepWidth">42</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A23" href = "#A23">#A23</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L21">21</a></td>
+								
+								
+									
+									<td class="keepWidth">30</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A24" href = "#A24">#A24</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L22">22</a></td>
+								
+								
+									
+									<td class="keepWidth">30</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A25" href = "#A25">#A25</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L24">24</a></td>
+								
+								
+									
+									<td class="keepWidth">57</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A26" href = "#A26">#A26</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L24">24</a></td>
+								
+								
+									
+									<td class="keepWidth">58</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A27" href = "#A27">#A27</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L25">25</a></td>
+								
+								
+									
+									<td class="keepWidth">49</td>
+								
+							</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A28" href = "#A28">#A28</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/coding/InputWhitespaceBeforeArrayInitializerCheck.java.html#L25">25</a></td>
+								
+								
+									
+									<td class="keepWidth">50</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/design/InputPublicReferenceToPrivateTypeCheck14.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A29" href = "#A29">#A29</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/design/InputPublicReferenceToPrivateTypeCheck14.java.html#L16">16</a></td>
+								
+								
+									
+									<td class="keepWidth">35</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/design/InputPublicReferenceToPrivateTypeCheck5.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A30" href = "#A30">#A30</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/design/InputPublicReferenceToPrivateTypeCheck5.java.html#L14">14</a></td>
+								
+								
+									
+									<td class="keepWidth">35</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+				<div class="section">
+					<h3>/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/sizes/InputLineLengthExtendedCheck.java</h3>
+					<tr class="b">
+					<table border="0" class="bodyTable">
+					        <th></th>
+							<th>Severity</th>
+							<th>Rule</th>
+							<th>Message</th>
+							<th>Line</th>
+							<th>Col</th>
+						</tr>
+						
+							
+								<tr class="a">
+							
+								<td class="keepWidth"><a name="A31" href = "#A31">#A31</a></td>
+								<td>warning</td>
+								<td>ArrayTrailingComma</td>
+								<td>Array should contain trailing comma.</td>
+								
+									
+									<td class="keepWidth"><a href = "xref/Users/gauravpunjabi/checkstyle-contribution/checkstyle-tester/repositories/sevntu-checkstyle/sevntu-checks/src/test/resources/com/github/sevntu/checkstyle/checks/sizes/InputLineLengthExtendedCheck.java.html#L43">43</a></td>
+								
+								
+									
+									<td class="keepWidth">38</td>
+								
+							</tr>
+						
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
