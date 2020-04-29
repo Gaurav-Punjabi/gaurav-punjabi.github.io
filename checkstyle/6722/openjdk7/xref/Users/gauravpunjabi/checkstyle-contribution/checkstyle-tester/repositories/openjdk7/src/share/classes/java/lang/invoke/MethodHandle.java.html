@@ -1,0 +1,1206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>MethodHandle xref</title>
+<link type="text/css" rel="stylesheet" href="../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 2008, 2011, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.  Oracle designates this</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * particular file as subject to the "Classpath" exception as provided</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * by Oracle in the LICENSE file that accompanied this code.</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">package</strong> java.lang.invoke;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> sun.invoke.util.ValueConversions;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> java.lang.invoke.MethodHandleStatics.*;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment"> * A method handle is a typed, directly executable reference to an underlying method,</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment"> * constructor, field, or similar low-level operation, with optional</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment"> * transformations of arguments or return values.</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment"> * These transformations are quite general, and include such patterns as</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> * {@linkplain #asType conversion},</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment"> * {@linkplain #bindTo insertion},</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment"> * {@linkplain java.lang.invoke.MethodHandles#dropArguments deletion},</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment"> * and {@linkplain java.lang.invoke.MethodHandles#filterArguments substitution}.</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment"> * &lt;h3&gt;Method handle contents&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment"> * Method handles are dynamically and strongly typed according to their parameter and return types.</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment"> * They are not distinguished by the name or the defining class of their underlying methods.</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment"> * A method handle must be invoked using a symbolic type descriptor which matches</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment"> * the method handle's own {@linkplain #type type descriptor}.</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment"> * Every method handle reports its type descriptor via the {@link #type type} accessor.</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment"> * This type descriptor is a {@link java.lang.invoke.MethodType MethodType} object,</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment"> * whose structure is a series of classes, one of which is</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment"> * the return type of the method (or {@code void.class} if none).</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment"> * A method handle's type controls the types of invocations it accepts,</em>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment"> * and the kinds of transformations that apply to it.</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment"> * A method handle contains a pair of special invoker methods</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment"> * called {@link #invokeExact invokeExact} and {@link #invoke invoke}.</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment"> * Both invoker methods provide direct access to the method handle's</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> * underlying method, constructor, field, or other operation,</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> * as modified by transformations of arguments and return values.</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> * Both invokers accept calls which exactly match the method handle's own type.</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> * The plain, inexact invoker also accepts a range of other call types.</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment"> * Method handles are immutable and have no visible state.</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment"> * Of course, they can be bound to underlying methods or data which exhibit state.</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment"> * With respect to the Java Memory Model, any method handle will behave</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment"> * as if all of its (internal) fields are final variables.  This means that any method</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment"> * handle made visible to the application will always be fully formed.</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment"> * This is true even if the method handle is published through a shared</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment"> * variable in a data race.</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment"> * Method handles cannot be subclassed by the user.</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment"> * Implementations may (or may not) create internal subclasses of {@code MethodHandle}</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment"> * which may be visible via the {@link java.lang.Object#getClass Object.getClass}</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment"> * operation.  The programmer should not draw conclusions about a method handle</em>
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment"> * from its specific class, as the method handle class hierarchy (if any)</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment"> * may change from time to time or across implementations from different vendors.</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment"> * &lt;h3&gt;Method handle compilation&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_javadoccomment"> * A Java method call expression naming {@code invokeExact} or {@code invoke}</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment"> * can invoke a method handle from Java source code.</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment"> * From the viewpoint of source code, these methods can take any arguments</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment"> * and their result can be cast to any return type.</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment"> * Formally this is accomplished by giving the invoker methods</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment"> * {@code Object} return types and variable arity {@code Object} arguments,</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  <em class="jxr_javadoccomment"> * but they have an additional quality called &lt;em&gt;signature polymorphism&lt;/em&gt;</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  <em class="jxr_javadoccomment"> * which connects this freedom of invocation directly to the JVM execution stack.</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  <em class="jxr_javadoccomment"> * As is usual with virtual methods, source-level calls to {@code invokeExact}</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  <em class="jxr_javadoccomment"> * and {@code invoke} compile to an {@code invokevirtual} instruction.</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  <em class="jxr_javadoccomment"> * More unusually, the compiler must record the actual argument types,</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  <em class="jxr_javadoccomment"> * and may not perform method invocation conversions on the arguments.</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  <em class="jxr_javadoccomment"> * Instead, it must push them on the stack according to their own unconverted types.</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  <em class="jxr_javadoccomment"> * The method handle object itself is pushed on the stack before the arguments.</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  <em class="jxr_javadoccomment"> * The compiler then calls the method handle with a symbolic type descriptor which</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment"> * describes the argument and return types.</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment"> * To issue a complete symbolic type descriptor, the compiler must also determine</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment"> * the return type.  This is based on a cast on the method invocation expression,</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment"> * if there is one, or else {@code Object} if the invocation is an expression</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment"> * or else {@code void} if the invocation is a statement.</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment"> * The cast may be to a primitive type (but not {@code void}).</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment"> * As a corner case, an uncasted {@code null} argument is given</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment"> * a symbolic type descriptor of {@code java.lang.Void}.</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment"> * The ambiguity with the type {@code Void} is harmless, since there are no references of type</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment"> * {@code Void} except the null reference.</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_javadoccomment"> * &lt;h3&gt;Method handle invocation&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_javadoccomment"> * The first time a {@code invokevirtual} instruction is executed</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment"> * it is linked, by symbolically resolving the names in the instruction</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment"> * and verifying that the method call is statically legal.</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment"> * This is true of calls to {@code invokeExact} and {@code invoke}.</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment"> * In this case, the symbolic type descriptor emitted by the compiler is checked for</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> <em class="jxr_javadoccomment"> * correct syntax and names it contains are resolved.</em>
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> <em class="jxr_javadoccomment"> * Thus, an {@code invokevirtual} instruction which invokes</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> <em class="jxr_javadoccomment"> * a method handle will always link, as long</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment"> * as the symbolic type descriptor is syntactically well-formed</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment"> * and the types exist.</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment"> * When the {@code invokevirtual} is executed after linking,</em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment"> * the receiving method handle's type is first checked by the JVM</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment"> * to ensure that it matches the symbolic type descriptor.</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> <em class="jxr_javadoccomment"> * If the type match fails, it means that the method which the</em>
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> <em class="jxr_javadoccomment"> * caller is invoking is not present on the individual</em>
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> <em class="jxr_javadoccomment"> * method handle being invoked.</em>
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> <em class="jxr_javadoccomment"> * In the case of {@code invokeExact}, the type descriptor of the invocation</em>
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> <em class="jxr_javadoccomment"> * (after resolving symbolic type names) must exactly match the method type</em>
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> <em class="jxr_javadoccomment"> * of the receiving method handle.</em>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> <em class="jxr_javadoccomment"> * In the case of plain, inexact {@code invoke}, the resolved type descriptor</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> <em class="jxr_javadoccomment"> * must be a valid argument to the receiver's {@link #asType asType} method.</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_javadoccomment"> * Thus, plain {@code invoke} is more permissive than {@code invokeExact}.</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> <em class="jxr_javadoccomment"> * After type matching, a call to {@code invokeExact} directly</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_javadoccomment"> * and immediately invoke the method handle's underlying method</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_javadoccomment"> * (or other behavior, as the case may be).</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> <em class="jxr_javadoccomment"> * A call to plain {@code invoke} works the same as a call to</em>
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> <em class="jxr_javadoccomment"> * {@code invokeExact}, if the symbolic type descriptor specified by the caller</em>
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> <em class="jxr_javadoccomment"> * exactly matches the method handle's own type.</em>
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> <em class="jxr_javadoccomment"> * If there is a type mismatch, {@code invoke} attempts</em>
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> <em class="jxr_javadoccomment"> * to adjust the type of the receiving method handle,</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment"> * as if by a call to {@link #asType asType},</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment"> * to obtain an exactly invokable method handle {@code M2}.</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment"> * This allows a more powerful negotiation of method type</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_javadoccomment"> * between caller and callee.</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> <em class="jxr_javadoccomment"> * (&lt;em&gt;Note:&lt;/em&gt; The adjusted method handle {@code M2} is not directly observable,</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> <em class="jxr_javadoccomment"> * and implementations are therefore not required to materialize it.)</em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> <em class="jxr_javadoccomment"> * &lt;h3&gt;Invocation checking&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_javadoccomment"> * In typical programs, method handle type matching will usually succeed.</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> <em class="jxr_javadoccomment"> * But if a match fails, the JVM will throw a {@link WrongMethodTypeException},</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> <em class="jxr_javadoccomment"> * either directly (in the case of {@code invokeExact}) or indirectly as if</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> <em class="jxr_javadoccomment"> * by a failed call to {@code asType} (in the case of {@code invoke}).</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> <em class="jxr_javadoccomment"> * Thus, a method type mismatch which might show up as a linkage error</em>
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> <em class="jxr_javadoccomment"> * in a statically typed program can show up as</em>
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment"> * a dynamic {@code WrongMethodTypeException}</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> <em class="jxr_javadoccomment"> * in a program which uses method handles.</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> <em class="jxr_javadoccomment"> * Because method types contain "live" {@code Class} objects,</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> <em class="jxr_javadoccomment"> * method type matching takes into account both types names and class loaders.</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> <em class="jxr_javadoccomment"> * Thus, even if a method handle {@code M} is created in one</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> <em class="jxr_javadoccomment"> * class loader {@code L1} and used in another {@code L2},</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> <em class="jxr_javadoccomment"> * method handle calls are type-safe, because the caller's symbolic type</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> <em class="jxr_javadoccomment"> * descriptor, as resolved in {@code L2},</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> <em class="jxr_javadoccomment"> * is matched against the original callee method's symbolic type descriptor,</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> <em class="jxr_javadoccomment"> * as resolved in {@code L1}.</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> <em class="jxr_javadoccomment"> * The resolution in {@code L1} happens when {@code M} is created</em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> <em class="jxr_javadoccomment"> * and its type is assigned, while the resolution in {@code L2} happens</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment"> * when the {@code invokevirtual} instruction is linked.</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment"> * Apart from the checking of type descriptors,</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment"> * a method handle's capability to call its underlying method is unrestricted.</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment"> * If a method handle is formed on a non-public method by a class</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> <em class="jxr_javadoccomment"> * that has access to that method, the resulting handle can be used</em>
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> <em class="jxr_javadoccomment"> * in any place by any caller who receives a reference to it.</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> <em class="jxr_javadoccomment"> * Unlike with the Core Reflection API, where access is checked every time</em>
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> <em class="jxr_javadoccomment"> * a reflective method is invoked,</em>
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_javadoccomment"> * method handle access checking is performed</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment"> * &lt;a href="MethodHandles.Lookup.html#access"&gt;when the method handle is created&lt;/a&gt;.</em>
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> <em class="jxr_javadoccomment"> * In the case of {@code ldc} (see below), access checking is performed as part of linking</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> <em class="jxr_javadoccomment"> * the constant pool entry underlying the constant method handle.</em>
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> <em class="jxr_javadoccomment"> * Thus, handles to non-public methods, or to methods in non-public classes,</em>
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> <em class="jxr_javadoccomment"> * should generally be kept secret.</em>
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> <em class="jxr_javadoccomment"> * They should not be passed to untrusted code unless their use from</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> <em class="jxr_javadoccomment"> * the untrusted code would be harmless.</em>
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> <em class="jxr_javadoccomment"> * &lt;h3&gt;Method handle creation&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> <em class="jxr_javadoccomment"> * Java code can create a method handle that directly accesses</em>
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_javadoccomment"> * any method, constructor, or field that is accessible to that code.</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_javadoccomment"> * This is done via a reflective, capability-based API called</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_javadoccomment"> * {@link java.lang.invoke.MethodHandles.Lookup MethodHandles.Lookup}</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_javadoccomment"> * For example, a static method handle can be obtained</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment"> * from {@link java.lang.invoke.MethodHandles.Lookup#findStatic Lookup.findStatic}.</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_javadoccomment"> * There are also conversion methods from Core Reflection API objects,</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment"> * such as {@link java.lang.invoke.MethodHandles.Lookup#unreflect Lookup.unreflect}.</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> <em class="jxr_javadoccomment"> * Like classes and strings, method handles that correspond to accessible</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_javadoccomment"> * fields, methods, and constructors can also be represented directly</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment"> * in a class file's constant pool as constants to be loaded by {@code ldc} bytecodes.</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment"> * A new type of constant pool entry, {@code CONSTANT_MethodHandle},</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment"> * refers directly to an associated {@code CONSTANT_Methodref},</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_javadoccomment"> * {@code CONSTANT_InterfaceMethodref}, or {@code CONSTANT_Fieldref}</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> <em class="jxr_javadoccomment"> * constant pool entry.</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> <em class="jxr_javadoccomment"> * (For more details on method handle constants,</em>
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> <em class="jxr_javadoccomment"> * see the &lt;a href="package-summary.html#mhcon"&gt;package summary&lt;/a&gt;.)</em>
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> <em class="jxr_javadoccomment"> * Method handles produced by lookups or constant loads from methods or</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> <em class="jxr_javadoccomment"> * constructors with the variable arity modifier bit ({@code 0x0080})</em>
+<a class="jxr_linenumber" name="L216" href="#L216">216</a> <em class="jxr_javadoccomment"> * have a corresponding variable arity, as if they were defined with</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> <em class="jxr_javadoccomment"> * the help of {@link #asVarargsCollector asVarargsCollector}.</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> <em class="jxr_javadoccomment"> * A method reference may refer either to a static or non-static method.</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> <em class="jxr_javadoccomment"> * In the non-static case, the method handle type includes an explicit</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> <em class="jxr_javadoccomment"> * receiver argument, prepended before any other arguments.</em>
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> <em class="jxr_javadoccomment"> * In the method handle's type, the initial receiver argument is typed</em>
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> <em class="jxr_javadoccomment"> * according to the class under which the method was initially requested.</em>
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> <em class="jxr_javadoccomment"> * (E.g., if a non-static method handle is obtained via {@code ldc},</em>
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> <em class="jxr_javadoccomment"> * the type of the receiver is the class named in the constant pool entry.)</em>
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> <em class="jxr_javadoccomment"> * When a method handle to a virtual method is invoked, the method is</em>
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> <em class="jxr_javadoccomment"> * always looked up in the receiver (that is, the first argument).</em>
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> <em class="jxr_javadoccomment"> * A non-virtual method handle to a specific virtual method implementation</em>
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> <em class="jxr_javadoccomment"> * can also be created.  These do not perform virtual lookup based on</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> <em class="jxr_javadoccomment"> * receiver type.  Such a method handle simulates the effect of</em>
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> <em class="jxr_javadoccomment"> * an {@code invokespecial} instruction to the same method.</em>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> <em class="jxr_javadoccomment"> * &lt;h3&gt;Usage examples&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> <em class="jxr_javadoccomment"> * Here are some examples of usage:</em>
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> <em class="jxr_javadoccomment"> * &lt;p&gt;&lt;blockquote&gt;&lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> <em class="jxr_javadoccomment">Object x, y; String s; int i;</em>
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> <em class="jxr_javadoccomment">MethodType mt; MethodHandle mh;</em>
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> <em class="jxr_javadoccomment">MethodHandles.Lookup lookup = MethodHandles.lookup();</em>
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> <em class="jxr_javadoccomment">// mt is (char,char)String</em>
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> <em class="jxr_javadoccomment">mt = MethodType.methodType(String.class, char.class, char.class);</em>
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> <em class="jxr_javadoccomment">mh = lookup.findVirtual(String.class, "replace", mt);</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> <em class="jxr_javadoccomment">s = (String) mh.invokeExact("daddy",'d','n');</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> <em class="jxr_javadoccomment">// invokeExact(Ljava/lang/String;CC)Ljava/lang/String;</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_javadoccomment">assertEquals(s, "nanny");</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_javadoccomment">// weakly typed invocation (using MHs.invoke)</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_javadoccomment">s = (String) mh.invokeWithArguments("sappy", 'p', 'v');</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> <em class="jxr_javadoccomment">assertEquals(s, "savvy");</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> <em class="jxr_javadoccomment">// mt is (Object[])List</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> <em class="jxr_javadoccomment">mt = MethodType.methodType(java.util.List.class, Object[].class);</em>
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> <em class="jxr_javadoccomment">mh = lookup.findStatic(java.util.Arrays.class, "asList", mt);</em>
+<a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">assert(mh.isVarargsCollector());</em>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> <em class="jxr_javadoccomment">x = mh.invoke("one", "two");</em>
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> <em class="jxr_javadoccomment">// invoke(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;</em>
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> <em class="jxr_javadoccomment">assertEquals(x, java.util.Arrays.asList("one","two"));</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> <em class="jxr_javadoccomment">// mt is (Object,Object,Object)Object</em>
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> <em class="jxr_javadoccomment">mt = MethodType.genericMethodType(3);</em>
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> <em class="jxr_javadoccomment">mh = mh.asType(mt);</em>
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> <em class="jxr_javadoccomment">x = mh.invokeExact((Object)1, (Object)2, (Object)3);</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> <em class="jxr_javadoccomment">// invokeExact(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;</em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">assertEquals(x, java.util.Arrays.asList(1,2,3));</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> <em class="jxr_javadoccomment">// mt is ()int</em>
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">mt = MethodType.methodType(int.class);</em>
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_javadoccomment">mh = lookup.findVirtual(java.util.List.class, "size", mt);</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_javadoccomment">i = (int) mh.invokeExact(java.util.Arrays.asList(1,2,3));</em>
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_javadoccomment">// invokeExact(Ljava/util/List;)I</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_javadoccomment">assert(i == 3);</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> <em class="jxr_javadoccomment">mt = MethodType.methodType(void.class, String.class);</em>
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> <em class="jxr_javadoccomment">mh = lookup.findVirtual(java.io.PrintStream.class, "println", mt);</em>
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_javadoccomment">mh.invokeExact(System.out, "Hello, world.");</em>
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">// invokeExact(Ljava/io/PrintStream;Ljava/lang/String;)V</em>
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_javadoccomment"> * &lt;/pre&gt;&lt;/blockquote&gt;</em>
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> <em class="jxr_javadoccomment"> * Each of the above calls to {@code invokeExact} or plain {@code invoke}</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> <em class="jxr_javadoccomment"> * generates a single invokevirtual instruction with</em>
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> <em class="jxr_javadoccomment"> * the symbolic type descriptor indicated in the following comment.</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> <em class="jxr_javadoccomment"> * In these examples, the helper method {@code assertEquals} is assumed to</em>
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> <em class="jxr_javadoccomment"> * be a method which calls {@link Objects.equals java.util.Objects#equals}</em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> <em class="jxr_javadoccomment"> * on its arguments, and asserts that the result is true.</em>
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_javadoccomment"> * &lt;h3&gt;Exceptions&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> <em class="jxr_javadoccomment"> * The methods {@code invokeExact} and {@code invoke} are declared</em>
+<a class="jxr_linenumber" name="L283" href="#L283">283</a> <em class="jxr_javadoccomment"> * to throw {@link java.lang.Throwable Throwable},</em>
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> <em class="jxr_javadoccomment"> * which is to say that there is no static restriction on what a method handle</em>
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> <em class="jxr_javadoccomment"> * can throw.  Since the JVM does not distinguish between checked</em>
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> <em class="jxr_javadoccomment"> * and unchecked exceptions (other than by their class, of course),</em>
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> <em class="jxr_javadoccomment"> * there is no particular effect on bytecode shape from ascribing</em>
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> <em class="jxr_javadoccomment"> * checked exceptions to method handle invocations.  But in Java source</em>
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> <em class="jxr_javadoccomment"> * code, methods which perform method handle calls must either explicitly</em>
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> <em class="jxr_javadoccomment"> * throw {@code Throwable}, or else must catch all</em>
+<a class="jxr_linenumber" name="L291" href="#L291">291</a> <em class="jxr_javadoccomment"> * throwables locally, rethrowing only those which are legal in the context,</em>
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> <em class="jxr_javadoccomment"> * and wrapping ones which are illegal.</em>
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> <em class="jxr_javadoccomment"> * &lt;h3&gt;&lt;a name="sigpoly"&gt;&lt;/a&gt;Signature polymorphism&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> <em class="jxr_javadoccomment"> * The unusual compilation and linkage behavior of</em>
+<a class="jxr_linenumber" name="L296" href="#L296">296</a> <em class="jxr_javadoccomment"> * {@code invokeExact} and plain {@code invoke}</em>
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> <em class="jxr_javadoccomment"> * is referenced by the term &lt;em&gt;signature polymorphism&lt;/em&gt;.</em>
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> <em class="jxr_javadoccomment"> * As defined in the Java Language Specification,</em>
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> <em class="jxr_javadoccomment"> * a signature polymorphic method is one which can operate with</em>
+<a class="jxr_linenumber" name="L300" href="#L300">300</a> <em class="jxr_javadoccomment"> * any of a wide range of call signatures and return types.</em>
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> <em class="jxr_javadoccomment"> * In source code, a call to a signature polymorphic method will</em>
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> <em class="jxr_javadoccomment"> * compile, regardless of the requested symbolic type descriptor.</em>
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> <em class="jxr_javadoccomment"> * As usual, the Java compiler emits an {@code invokevirtual}</em>
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> <em class="jxr_javadoccomment"> * instruction with the given symbolic type descriptor against the named method.</em>
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> <em class="jxr_javadoccomment"> * The unusual part is that the symbolic type descriptor is derived from</em>
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> <em class="jxr_javadoccomment"> * the actual argument and return types, not from the method declaration.</em>
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> <em class="jxr_javadoccomment"> * When the JVM processes bytecode containing signature polymorphic calls,</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> <em class="jxr_javadoccomment"> * it will successfully link any such call, regardless of its symbolic type descriptor.</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> <em class="jxr_javadoccomment"> * (In order to retain type safety, the JVM will guard such calls with suitable</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> <em class="jxr_javadoccomment"> * dynamic type checks, as described elsewhere.)</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> <em class="jxr_javadoccomment"> * Bytecode generators, including the compiler back end, are required to emit</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> <em class="jxr_javadoccomment"> * untransformed symbolic type descriptors for these methods.</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> <em class="jxr_javadoccomment"> * Tools which determine symbolic linkage are required to accept such</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> <em class="jxr_javadoccomment"> * untransformed descriptors, without reporting linkage errors.</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> <em class="jxr_javadoccomment"> * &lt;h3&gt;Interoperation between method handles and the Core Reflection API&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> <em class="jxr_javadoccomment"> * Using factory methods in the {@link java.lang.invoke.MethodHandles.Lookup Lookup} API,</em>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> <em class="jxr_javadoccomment"> * any class member represented by a Core Reflection API object</em>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> <em class="jxr_javadoccomment"> * can be converted to a behaviorally equivalent method handle.</em>
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> <em class="jxr_javadoccomment"> * For example, a reflective {@link java.lang.reflect.Method Method} can</em>
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> <em class="jxr_javadoccomment"> * be converted to a method handle using</em>
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> <em class="jxr_javadoccomment"> * {@link java.lang.invoke.MethodHandles.Lookup#unreflect Lookup.unreflect}.</em>
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> <em class="jxr_javadoccomment"> * The resulting method handles generally provide more direct and efficient</em>
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> <em class="jxr_javadoccomment"> * access to the underlying class members.</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> <em class="jxr_javadoccomment"> * As a special case,</em>
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> <em class="jxr_javadoccomment"> * when the Core Reflection API is used to view the signature polymorphic</em>
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> <em class="jxr_javadoccomment"> * methods {@code invokeExact} or plain {@code invoke} in this class,</em>
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> <em class="jxr_javadoccomment"> * they appear as ordinary non-polymorphic methods.</em>
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> <em class="jxr_javadoccomment"> * Their reflective appearance, as viewed by</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> <em class="jxr_javadoccomment"> * {@link java.lang.Class#getDeclaredMethod Class.getDeclaredMethod},</em>
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> <em class="jxr_javadoccomment"> * is unaffected by their special status in this API.</em>
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> <em class="jxr_javadoccomment"> * For example, {@link java.lang.reflect.Method#getModifiers Method.getModifiers}</em>
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> <em class="jxr_javadoccomment"> * will report exactly those modifier bits required for any similarly</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> <em class="jxr_javadoccomment"> * declared method, including in this case {@code native} and {@code varargs} bits.</em>
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> <em class="jxr_javadoccomment"> * As with any reflected method, these methods (when reflected) may be</em>
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> <em class="jxr_javadoccomment"> * invoked via {@link java.lang.reflect.Method#invoke java.lang.reflect.Method.invoke}.</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> <em class="jxr_javadoccomment"> * However, such reflective calls do not result in method handle invocations.</em>
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> <em class="jxr_javadoccomment"> * Such a call, if passed the required argument</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> <em class="jxr_javadoccomment"> * (a single one, of type {@code Object[]}), will ignore the argument and</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> <em class="jxr_javadoccomment"> * will throw an {@code UnsupportedOperationException}.</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> <em class="jxr_javadoccomment"> * Since {@code invokevirtual} instructions can natively</em>
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> <em class="jxr_javadoccomment"> * invoke method handles under any symbolic type descriptor, this reflective view conflicts</em>
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> <em class="jxr_javadoccomment"> * with the normal presentation of these methods via bytecodes.</em>
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> <em class="jxr_javadoccomment"> * Thus, these two native methods, when reflectively viewed by</em>
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> <em class="jxr_javadoccomment"> * {@code Class.getDeclaredMethod}, may be regarded as placeholders only.</em>
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> <em class="jxr_javadoccomment"> * In order to obtain an invoker method for a particular type descriptor,</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> <em class="jxr_javadoccomment"> * use {@link java.lang.invoke.MethodHandles#exactInvoker MethodHandles.exactInvoker},</em>
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> <em class="jxr_javadoccomment"> * or {@link java.lang.invoke.MethodHandles#invoker MethodHandles.invoker}.</em>
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> <em class="jxr_javadoccomment"> * The {@link java.lang.invoke.MethodHandles.Lookup#findVirtual Lookup.findVirtual}</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> <em class="jxr_javadoccomment"> * API is also able to return a method handle</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> <em class="jxr_javadoccomment"> * to call {@code invokeExact} or plain {@code invoke},</em>
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> <em class="jxr_javadoccomment"> * for any specified type descriptor .</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> <em class="jxr_javadoccomment"> * &lt;h3&gt;Interoperation between method handles and Java generics&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> <em class="jxr_javadoccomment"> * A method handle can be obtained on a method, constructor, or field</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> <em class="jxr_javadoccomment"> * which is declared with Java generic types.</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> <em class="jxr_javadoccomment"> * As with the Core Reflection API, the type of the method handle</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> <em class="jxr_javadoccomment"> * will constructed from the erasure of the source-level type.</em>
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> <em class="jxr_javadoccomment"> * When a method handle is invoked, the types of its arguments</em>
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_javadoccomment"> * or the return value cast type may be generic types or type instances.</em>
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> <em class="jxr_javadoccomment"> * If this occurs, the compiler will replace those</em>
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> <em class="jxr_javadoccomment"> * types by their erasures when it constructs the symbolic type descriptor</em>
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> <em class="jxr_javadoccomment"> * for the {@code invokevirtual} instruction.</em>
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> <em class="jxr_javadoccomment"> * Method handles do not represent</em>
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> <em class="jxr_javadoccomment"> * their function-like types in terms of Java parameterized (generic) types,</em>
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> <em class="jxr_javadoccomment"> * because there are three mismatches between function-like types and parameterized</em>
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> <em class="jxr_javadoccomment"> * Java types.</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> <em class="jxr_javadoccomment"> * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_javadoccomment"> * &lt;li&gt;Method types range over all possible arities,</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment"> * from no arguments to up to 255 of arguments (a limit imposed by the JVM).</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_javadoccomment"> * Generics are not variadic, and so cannot represent this.&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> <em class="jxr_javadoccomment"> * &lt;li&gt;Method types can specify arguments of primitive types,</em>
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> <em class="jxr_javadoccomment"> * which Java generic types cannot range over.&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> <em class="jxr_javadoccomment"> * &lt;li&gt;Higher order functions over method handles (combinators) are</em>
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> <em class="jxr_javadoccomment"> * often generic across a wide range of function types, including</em>
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> <em class="jxr_javadoccomment"> * those of multiple arities.  It is impossible to represent such</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> <em class="jxr_javadoccomment"> * genericity with a Java type parameter.&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> <em class="jxr_javadoccomment"> * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> <em class="jxr_javadoccomment"> * @see MethodType</em>
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> <em class="jxr_javadoccomment"> * @see MethodHandles</em>
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> <em class="jxr_javadoccomment"> * @author John Rose, JSR 292 EG</em>
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> MethodHandle {
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>     <em class="jxr_comment">// { JVM internals:</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> 
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>     <strong class="jxr_keyword">private</strong> byte       vmentry;    <em class="jxr_comment">// adapter stub or method entry point</em>
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>     <em class="jxr_comment">//private int      vmslots;    // optionally, hoist type.form.vmslots</em>
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>     <em class="jxr_comment">/*non-public*/</em> Object vmtarget;   <em class="jxr_comment">// VM-specific, class-specific target value</em>
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 
+<a class="jxr_linenumber" name="L399" href="#L399">399</a>     <em class="jxr_comment">// TO DO:  vmtarget should be invisible to Java, since the JVM puts internal</em>
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>     <em class="jxr_comment">// managed pointers into it.  Making it visible exposes it to debuggers,</em>
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>     <em class="jxr_comment">// which can cause errors when they treat the pointer as an Object.</em>
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>     <em class="jxr_comment">// These two dummy fields are present to force 'I' and 'J' signatures</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>     <em class="jxr_comment">// into this class's constant pool, so they can be transferred</em>
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>     <em class="jxr_comment">// to vmentry when this class is loaded.</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong>  INT_FIELD = 0;
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>     <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> LONG_FIELD = 0;
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>     <em class="jxr_comment">// vmentry (a void* field) is used *only* by the JVM.</em>
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>     <em class="jxr_comment">// The JVM adjusts its type to int or long depending on system wordsize.</em>
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>     <em class="jxr_comment">// Since it is statically typed as neither int nor long, it is impossible</em>
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>     <em class="jxr_comment">// to use this field from Java bytecode.  (Please don't try to, either.)</em>
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> 
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>     <em class="jxr_comment">// The vmentry is an assembly-language stub which is jumped to</em>
+<a class="jxr_linenumber" name="L415" href="#L415">415</a>     <em class="jxr_comment">// immediately after the method type is verified.</em>
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>     <em class="jxr_comment">// For a direct MH, this stub loads the vmtarget's entry point</em>
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>     <em class="jxr_comment">// and jumps to it.</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> 
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>     <em class="jxr_comment">// } End of JVM internals.</em>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>     <strong class="jxr_keyword">static</strong> { MethodHandleImpl.initStatics(); }
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> 
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>     <em class="jxr_comment">// interface MethodHandle&lt;R throws X extends Exception,A...&gt;</em>
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>     <em class="jxr_comment">// { MethodType&lt;R throws X,A...&gt; type(); public R invokeExact(A...) throws X; }</em>
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> <em class="jxr_javadoccomment">     * Internal marker interface which distinguishes (to the Java compiler)</em>
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> <em class="jxr_javadoccomment">     * those methods which are &lt;a href="MethodHandle.html#sigpoly"&gt;signature polymorphic&lt;/a&gt;.</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>     @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD})
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>     @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>     @<strong class="jxr_keyword">interface</strong> PolymorphicSignature { }
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> 
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>     <strong class="jxr_keyword">private</strong> MethodType type;
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> 
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> <em class="jxr_javadoccomment">     * Reports the type of this method handle.</em>
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> <em class="jxr_javadoccomment">     * Every invocation of this method handle via {@code invokeExact} must exactly match this type.</em>
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> <em class="jxr_javadoccomment">     * @return the method handle type</em>
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>     <strong class="jxr_keyword">public</strong> MethodType type() {
+<a class="jxr_linenumber" name="L442" href="#L442">442</a>         <strong class="jxr_keyword">return</strong> type;
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>     }
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 
+<a class="jxr_linenumber" name="L445" href="#L445">445</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> <em class="jxr_javadoccomment">     * Package-private constructor for the method handle implementation hierarchy.</em>
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> <em class="jxr_javadoccomment">     * Method handle inheritance will be contained completely within</em>
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> <em class="jxr_javadoccomment">     * the {@code java.lang.invoke} package.</em>
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L450" href="#L450">450</a>     <em class="jxr_comment">// @param type type (permanently assigned) of the new method handle</em>
+<a class="jxr_linenumber" name="L451" href="#L451">451</a>     <em class="jxr_comment">/*non-public*/</em> MethodHandle(MethodType type) {
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>         type.getClass();  <em class="jxr_comment">// elicit NPE</em>
+<a class="jxr_linenumber" name="L453" href="#L453">453</a>         <strong class="jxr_keyword">this</strong>.type = type;
+<a class="jxr_linenumber" name="L454" href="#L454">454</a>     }
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> 
+<a class="jxr_linenumber" name="L456" href="#L456">456</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L457" href="#L457">457</a> <em class="jxr_javadoccomment">     * Invokes the method handle, allowing any caller type descriptor, but requiring an exact type match.</em>
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> <em class="jxr_javadoccomment">     * The symbolic type descriptor at the call site of {@code invokeExact} must</em>
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> <em class="jxr_javadoccomment">     * exactly match this method handle's {@link #type type}.</em>
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> <em class="jxr_javadoccomment">     * No conversions are allowed on arguments or return values.</em>
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> <em class="jxr_javadoccomment">     * When this method is observed via the Core Reflection API,</em>
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> <em class="jxr_javadoccomment">     * it will appear as a single native method, taking an object array and returning an object.</em>
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> <em class="jxr_javadoccomment">     * If this native method is invoked directly via</em>
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> <em class="jxr_javadoccomment">     * {@link java.lang.reflect.Method#invoke java.lang.reflect.Method.invoke}, via JNI,</em>
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> <em class="jxr_javadoccomment">     * or indirectly via {@link java.lang.invoke.MethodHandles.Lookup#unreflect Lookup.unreflect},</em>
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> <em class="jxr_javadoccomment">     * it will throw an {@code UnsupportedOperationException}.</em>
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> <em class="jxr_javadoccomment">     * @throws WrongMethodTypeException if the target's type is not identical with the caller's symbolic type descriptor</em>
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> <em class="jxr_javadoccomment">     * @throws Throwable anything thrown by the underlying method propagates unchanged through the method handle call</em>
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">native</strong> @PolymorphicSignature Object invokeExact(Object... args) <strong class="jxr_keyword">throws</strong> Throwable;
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> 
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> <em class="jxr_javadoccomment">     * Invokes the method handle, allowing any caller type descriptor,</em>
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> <em class="jxr_javadoccomment">     * and optionally performing conversions on arguments and return values.</em>
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> <em class="jxr_javadoccomment">     * If the call site's symbolic type descriptor exactly matches this method handle's {@link #type type},</em>
+<a class="jxr_linenumber" name="L478" href="#L478">478</a> <em class="jxr_javadoccomment">     * the call proceeds as if by {@link #invokeExact invokeExact}.</em>
+<a class="jxr_linenumber" name="L479" href="#L479">479</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L480" href="#L480">480</a> <em class="jxr_javadoccomment">     * Otherwise, the call proceeds as if this method handle were first</em>
+<a class="jxr_linenumber" name="L481" href="#L481">481</a> <em class="jxr_javadoccomment">     * adjusted by calling {@link #asType asType} to adjust this method handle</em>
+<a class="jxr_linenumber" name="L482" href="#L482">482</a> <em class="jxr_javadoccomment">     * to the required type, and then the call proceeds as if by</em>
+<a class="jxr_linenumber" name="L483" href="#L483">483</a> <em class="jxr_javadoccomment">     * {@link #invokeExact invokeExact} on the adjusted method handle.</em>
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L485" href="#L485">485</a> <em class="jxr_javadoccomment">     * There is no guarantee that the {@code asType} call is actually made.</em>
+<a class="jxr_linenumber" name="L486" href="#L486">486</a> <em class="jxr_javadoccomment">     * If the JVM can predict the results of making the call, it may perform</em>
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> <em class="jxr_javadoccomment">     * adaptations directly on the caller's arguments,</em>
+<a class="jxr_linenumber" name="L488" href="#L488">488</a> <em class="jxr_javadoccomment">     * and call the target method handle according to its own exact type.</em>
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> <em class="jxr_javadoccomment">     * The resolved type descriptor at the call site of {@code invoke} must</em>
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> <em class="jxr_javadoccomment">     * be a valid argument to the receivers {@code asType} method.</em>
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> <em class="jxr_javadoccomment">     * In particular, the caller must specify the same argument arity</em>
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> <em class="jxr_javadoccomment">     * as the callee's type,</em>
+<a class="jxr_linenumber" name="L494" href="#L494">494</a> <em class="jxr_javadoccomment">     * if the callee is not a {@linkplain #asVarargsCollector variable arity collector}.</em>
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> <em class="jxr_javadoccomment">     * When this method is observed via the Core Reflection API,</em>
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> <em class="jxr_javadoccomment">     * it will appear as a single native method, taking an object array and returning an object.</em>
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> <em class="jxr_javadoccomment">     * If this native method is invoked directly via</em>
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> <em class="jxr_javadoccomment">     * {@link java.lang.reflect.Method#invoke java.lang.reflect.Method.invoke}, via JNI,</em>
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> <em class="jxr_javadoccomment">     * or indirectly via {@link java.lang.invoke.MethodHandles.Lookup#unreflect Lookup.unreflect},</em>
+<a class="jxr_linenumber" name="L501" href="#L501">501</a> <em class="jxr_javadoccomment">     * it will throw an {@code UnsupportedOperationException}.</em>
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> <em class="jxr_javadoccomment">     * @throws WrongMethodTypeException if the target's type cannot be adjusted to the caller's symbolic type descriptor</em>
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> <em class="jxr_javadoccomment">     * @throws ClassCastException if the target's type can be adjusted to the caller, but a reference cast fails</em>
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> <em class="jxr_javadoccomment">     * @throws Throwable anything thrown by the underlying method propagates unchanged through the method handle call</em>
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L506" href="#L506">506</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">native</strong> @PolymorphicSignature Object invoke(Object... args) <strong class="jxr_keyword">throws</strong> Throwable;
+<a class="jxr_linenumber" name="L507" href="#L507">507</a> 
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> <em class="jxr_javadoccomment">     * Performs a variable arity invocation, passing the arguments in the given array</em>
+<a class="jxr_linenumber" name="L510" href="#L510">510</a> <em class="jxr_javadoccomment">     * to the method handle, as if via an inexact {@link #invoke invoke} from a call site</em>
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> <em class="jxr_javadoccomment">     * which mentions only the type {@code Object}, and whose arity is the length</em>
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> <em class="jxr_javadoccomment">     * of the argument array.</em>
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L514" href="#L514">514</a> <em class="jxr_javadoccomment">     * Specifically, execution proceeds as if by the following steps,</em>
+<a class="jxr_linenumber" name="L515" href="#L515">515</a> <em class="jxr_javadoccomment">     * although the methods are not guaranteed to be called if the JVM</em>
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> <em class="jxr_javadoccomment">     * can predict their effects.</em>
+<a class="jxr_linenumber" name="L517" href="#L517">517</a> <em class="jxr_javadoccomment">     * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> <em class="jxr_javadoccomment">     * &lt;li&gt;Determine the length of the argument array as {@code N}.</em>
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> <em class="jxr_javadoccomment">     *     For a null reference, {@code N=0}. &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> <em class="jxr_javadoccomment">     * &lt;li&gt;Determine the general type {@code TN} of {@code N} arguments as</em>
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> <em class="jxr_javadoccomment">     *     as {@code TN=MethodType.genericMethodType(N)}.&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> <em class="jxr_javadoccomment">     * &lt;li&gt;Force the original target method handle {@code MH0} to the</em>
+<a class="jxr_linenumber" name="L523" href="#L523">523</a> <em class="jxr_javadoccomment">     *     required type, as {@code MH1 = MH0.asType(TN)}. &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L524" href="#L524">524</a> <em class="jxr_javadoccomment">     * &lt;li&gt;Spread the array into {@code N} separate arguments {@code A0, ...}. &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> <em class="jxr_javadoccomment">     * &lt;li&gt;Invoke the type-adjusted method handle on the unpacked arguments:</em>
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> <em class="jxr_javadoccomment">     *     MH1.invokeExact(A0, ...). &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> <em class="jxr_javadoccomment">     * &lt;li&gt;Take the return value as an {@code Object} reference. &lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> <em class="jxr_javadoccomment">     * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> <em class="jxr_javadoccomment">     * Because of the action of the {@code asType} step, the following argument</em>
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> <em class="jxr_javadoccomment">     * conversions are applied as necessary:</em>
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> <em class="jxr_javadoccomment">     * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> <em class="jxr_javadoccomment">     * &lt;li&gt;reference casting</em>
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> <em class="jxr_javadoccomment">     * &lt;li&gt;unboxing</em>
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> <em class="jxr_javadoccomment">     * &lt;li&gt;widening primitive conversions</em>
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> <em class="jxr_javadoccomment">     * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L538" href="#L538">538</a> <em class="jxr_javadoccomment">     * The result returned by the call is boxed if it is a primitive,</em>
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> <em class="jxr_javadoccomment">     * or forced to null if the return type is void.</em>
+<a class="jxr_linenumber" name="L540" href="#L540">540</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L541" href="#L541">541</a> <em class="jxr_javadoccomment">     * This call is equivalent to the following code:</em>
+<a class="jxr_linenumber" name="L542" href="#L542">542</a> <em class="jxr_javadoccomment">     * &lt;p&gt;&lt;blockquote&gt;&lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L543" href="#L543">543</a> <em class="jxr_javadoccomment">     * MethodHandle invoker = MethodHandles.spreadInvoker(this.type(), 0);</em>
+<a class="jxr_linenumber" name="L544" href="#L544">544</a> <em class="jxr_javadoccomment">     * Object result = invoker.invokeExact(this, arguments);</em>
+<a class="jxr_linenumber" name="L545" href="#L545">545</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;&lt;/blockquote&gt;</em>
+<a class="jxr_linenumber" name="L546" href="#L546">546</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L547" href="#L547">547</a> <em class="jxr_javadoccomment">     * Unlike the signature polymorphic methods {@code invokeExact} and {@code invoke},</em>
+<a class="jxr_linenumber" name="L548" href="#L548">548</a> <em class="jxr_javadoccomment">     * {@code invokeWithArguments} can be accessed normally via the Core Reflection API and JNI.</em>
+<a class="jxr_linenumber" name="L549" href="#L549">549</a> <em class="jxr_javadoccomment">     * It can therefore be used as a bridge between native or reflective code and method handles.</em>
+<a class="jxr_linenumber" name="L550" href="#L550">550</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> <em class="jxr_javadoccomment">     * @param arguments the arguments to pass to the target</em>
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> <em class="jxr_javadoccomment">     * @return the result returned by the target</em>
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> <em class="jxr_javadoccomment">     * @throws ClassCastException if an argument cannot be converted by reference casting</em>
+<a class="jxr_linenumber" name="L554" href="#L554">554</a> <em class="jxr_javadoccomment">     * @throws WrongMethodTypeException if the target's type cannot be adjusted to take the given number of {@code Object} arguments</em>
+<a class="jxr_linenumber" name="L555" href="#L555">555</a> <em class="jxr_javadoccomment">     * @throws Throwable anything thrown by the target method invocation</em>
+<a class="jxr_linenumber" name="L556" href="#L556">556</a> <em class="jxr_javadoccomment">     * @see MethodHandles#spreadInvoker</em>
+<a class="jxr_linenumber" name="L557" href="#L557">557</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>     <strong class="jxr_keyword">public</strong> Object invokeWithArguments(Object... arguments) <strong class="jxr_keyword">throws</strong> Throwable {
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>         <strong class="jxr_keyword">int</strong> argc = arguments == <strong class="jxr_keyword">null</strong> ? 0 : arguments.length;
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>         MethodType type = type();
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>         <strong class="jxr_keyword">if</strong> (type.parameterCount() != argc || isVarargsCollector()) {
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>             <em class="jxr_comment">// simulate invoke</em>
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>             <strong class="jxr_keyword">return</strong> asType(MethodType.genericMethodType(argc)).invokeWithArguments(arguments);
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>         }
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>         MethodHandle invoker = type.invokers().varargsInvoker();
+<a class="jxr_linenumber" name="L566" href="#L566">566</a>         <strong class="jxr_keyword">return</strong> invoker.invokeExact(<strong class="jxr_keyword">this</strong>, arguments);
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>     }
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> 
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L570" href="#L570">570</a> <em class="jxr_javadoccomment">     * Performs a variable arity invocation, passing the arguments in the given array</em>
+<a class="jxr_linenumber" name="L571" href="#L571">571</a> <em class="jxr_javadoccomment">     * to the method handle, as if via an inexact {@link #invoke invoke} from a call site</em>
+<a class="jxr_linenumber" name="L572" href="#L572">572</a> <em class="jxr_javadoccomment">     * which mentions only the type {@code Object}, and whose arity is the length</em>
+<a class="jxr_linenumber" name="L573" href="#L573">573</a> <em class="jxr_javadoccomment">     * of the argument array.</em>
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L575" href="#L575">575</a> <em class="jxr_javadoccomment">     * This method is also equivalent to the following code:</em>
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> <em class="jxr_javadoccomment">     * &lt;p&gt;&lt;blockquote&gt;&lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> <em class="jxr_javadoccomment">     * {@link #invokeWithArguments(Object...) invokeWithArguments}(arguments.toArray())</em>
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;&lt;/blockquote&gt;</em>
+<a class="jxr_linenumber" name="L579" href="#L579">579</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L580" href="#L580">580</a> <em class="jxr_javadoccomment">     * @param arguments the arguments to pass to the target</em>
+<a class="jxr_linenumber" name="L581" href="#L581">581</a> <em class="jxr_javadoccomment">     * @return the result returned by the target</em>
+<a class="jxr_linenumber" name="L582" href="#L582">582</a> <em class="jxr_javadoccomment">     * @throws NullPointerException if {@code arguments} is a null reference</em>
+<a class="jxr_linenumber" name="L583" href="#L583">583</a> <em class="jxr_javadoccomment">     * @throws ClassCastException if an argument cannot be converted by reference casting</em>
+<a class="jxr_linenumber" name="L584" href="#L584">584</a> <em class="jxr_javadoccomment">     * @throws WrongMethodTypeException if the target's type cannot be adjusted to take the given number of {@code Object} arguments</em>
+<a class="jxr_linenumber" name="L585" href="#L585">585</a> <em class="jxr_javadoccomment">     * @throws Throwable anything thrown by the target method invocation</em>
+<a class="jxr_linenumber" name="L586" href="#L586">586</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>     <strong class="jxr_keyword">public</strong> Object invokeWithArguments(java.util.List&lt;?&gt; arguments) <strong class="jxr_keyword">throws</strong> Throwable {
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>         <strong class="jxr_keyword">return</strong> invokeWithArguments(arguments.toArray());
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>     }
+<a class="jxr_linenumber" name="L590" href="#L590">590</a> 
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L592" href="#L592">592</a> <em class="jxr_javadoccomment">     * Produces an adapter method handle which adapts the type of the</em>
+<a class="jxr_linenumber" name="L593" href="#L593">593</a> <em class="jxr_javadoccomment">     * current method handle to a new type.</em>
+<a class="jxr_linenumber" name="L594" href="#L594">594</a> <em class="jxr_javadoccomment">     * The resulting method handle is guaranteed to report a type</em>
+<a class="jxr_linenumber" name="L595" href="#L595">595</a> <em class="jxr_javadoccomment">     * which is equal to the desired new type.</em>
+<a class="jxr_linenumber" name="L596" href="#L596">596</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L597" href="#L597">597</a> <em class="jxr_javadoccomment">     * If the original type and new type are equal, returns {@code this}.</em>
+<a class="jxr_linenumber" name="L598" href="#L598">598</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L599" href="#L599">599</a> <em class="jxr_javadoccomment">     * The new method handle, when invoked, will perform the following</em>
+<a class="jxr_linenumber" name="L600" href="#L600">600</a> <em class="jxr_javadoccomment">     * steps:</em>
+<a class="jxr_linenumber" name="L601" href="#L601">601</a> <em class="jxr_javadoccomment">     * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L602" href="#L602">602</a> <em class="jxr_javadoccomment">     * &lt;li&gt;Convert the incoming argument list to match the original</em>
+<a class="jxr_linenumber" name="L603" href="#L603">603</a> <em class="jxr_javadoccomment">     *     method handle's argument list.</em>
+<a class="jxr_linenumber" name="L604" href="#L604">604</a> <em class="jxr_javadoccomment">     * &lt;li&gt;Invoke the original method handle on the converted argument list.</em>
+<a class="jxr_linenumber" name="L605" href="#L605">605</a> <em class="jxr_javadoccomment">     * &lt;li&gt;Convert any result returned by the original method handle</em>
+<a class="jxr_linenumber" name="L606" href="#L606">606</a> <em class="jxr_javadoccomment">     *     to the return type of new method handle.</em>
+<a class="jxr_linenumber" name="L607" href="#L607">607</a> <em class="jxr_javadoccomment">     * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L608" href="#L608">608</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L609" href="#L609">609</a> <em class="jxr_javadoccomment">     * This method provides the crucial behavioral difference between</em>
+<a class="jxr_linenumber" name="L610" href="#L610">610</a> <em class="jxr_javadoccomment">     * {@link #invokeExact invokeExact} and plain, inexact {@link #invoke invoke}.</em>
+<a class="jxr_linenumber" name="L611" href="#L611">611</a> <em class="jxr_javadoccomment">     * The two methods</em>
+<a class="jxr_linenumber" name="L612" href="#L612">612</a> <em class="jxr_javadoccomment">     * perform the same steps when the caller's type descriptor exactly m atches</em>
+<a class="jxr_linenumber" name="L613" href="#L613">613</a> <em class="jxr_javadoccomment">     * the callee's, but when the types differ, plain {@link #invoke invoke}</em>
+<a class="jxr_linenumber" name="L614" href="#L614">614</a> <em class="jxr_javadoccomment">     * also calls {@code asType} (or some internal equivalent) in order</em>
+<a class="jxr_linenumber" name="L615" href="#L615">615</a> <em class="jxr_javadoccomment">     * to match up the caller's and callee's types.</em>
+<a class="jxr_linenumber" name="L616" href="#L616">616</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L617" href="#L617">617</a> <em class="jxr_javadoccomment">     * If the current method is a variable arity method handle</em>
+<a class="jxr_linenumber" name="L618" href="#L618">618</a> <em class="jxr_javadoccomment">     * argument list conversion may involve the conversion and collection</em>
+<a class="jxr_linenumber" name="L619" href="#L619">619</a> <em class="jxr_javadoccomment">     * of several arguments into an array, as</em>
+<a class="jxr_linenumber" name="L620" href="#L620">620</a> <em class="jxr_javadoccomment">     * {@linkplain #asVarargsCollector described elsewhere}.</em>
+<a class="jxr_linenumber" name="L621" href="#L621">621</a> <em class="jxr_javadoccomment">     * In every other case, all conversions are applied &lt;em&gt;pairwise&lt;/em&gt;,</em>
+<a class="jxr_linenumber" name="L622" href="#L622">622</a> <em class="jxr_javadoccomment">     * which means that each argument or return value is converted to</em>
+<a class="jxr_linenumber" name="L623" href="#L623">623</a> <em class="jxr_javadoccomment">     * exactly one argument or return value (or no return value).</em>
+<a class="jxr_linenumber" name="L624" href="#L624">624</a> <em class="jxr_javadoccomment">     * The applied conversions are defined by consulting the</em>
+<a class="jxr_linenumber" name="L625" href="#L625">625</a> <em class="jxr_javadoccomment">     * the corresponding component types of the old and new</em>
+<a class="jxr_linenumber" name="L626" href="#L626">626</a> <em class="jxr_javadoccomment">     * method handle types.</em>
+<a class="jxr_linenumber" name="L627" href="#L627">627</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L628" href="#L628">628</a> <em class="jxr_javadoccomment">     * Let &lt;em&gt;T0&lt;/em&gt; and &lt;em&gt;T1&lt;/em&gt; be corresponding new and old parameter types,</em>
+<a class="jxr_linenumber" name="L629" href="#L629">629</a> <em class="jxr_javadoccomment">     * or old and new return types.  Specifically, for some valid index {@code i}, let</em>
+<a class="jxr_linenumber" name="L630" href="#L630">630</a> <em class="jxr_javadoccomment">     * &lt;em&gt;T0&lt;/em&gt;{@code =newType.parameterType(i)} and &lt;em&gt;T1&lt;/em&gt;{@code =this.type().parameterType(i)}.</em>
+<a class="jxr_linenumber" name="L631" href="#L631">631</a> <em class="jxr_javadoccomment">     * Or else, going the other way for return values, let</em>
+<a class="jxr_linenumber" name="L632" href="#L632">632</a> <em class="jxr_javadoccomment">     * &lt;em&gt;T0&lt;/em&gt;{@code =this.type().returnType()} and &lt;em&gt;T1&lt;/em&gt;{@code =newType.returnType()}.</em>
+<a class="jxr_linenumber" name="L633" href="#L633">633</a> <em class="jxr_javadoccomment">     * If the types are the same, the new method handle makes no change</em>
+<a class="jxr_linenumber" name="L634" href="#L634">634</a> <em class="jxr_javadoccomment">     * to the corresponding argument or return value (if any).</em>
+<a class="jxr_linenumber" name="L635" href="#L635">635</a> <em class="jxr_javadoccomment">     * Otherwise, one of the following conversions is applied</em>
+<a class="jxr_linenumber" name="L636" href="#L636">636</a> <em class="jxr_javadoccomment">     * if possible:</em>
+<a class="jxr_linenumber" name="L637" href="#L637">637</a> <em class="jxr_javadoccomment">     * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L638" href="#L638">638</a> <em class="jxr_javadoccomment">     * &lt;li&gt;If &lt;em&gt;T0&lt;/em&gt; and &lt;em&gt;T1&lt;/em&gt; are references, then a cast to &lt;em&gt;T1&lt;/em&gt; is applied.</em>
+<a class="jxr_linenumber" name="L639" href="#L639">639</a> <em class="jxr_javadoccomment">     *     (The types do not need to be related in any particular way.</em>
+<a class="jxr_linenumber" name="L640" href="#L640">640</a> <em class="jxr_javadoccomment">     *     This is because a dynamic value of null can convert to any reference type.)</em>
+<a class="jxr_linenumber" name="L641" href="#L641">641</a> <em class="jxr_javadoccomment">     * &lt;li&gt;If &lt;em&gt;T0&lt;/em&gt; and &lt;em&gt;T1&lt;/em&gt; are primitives, then a Java method invocation</em>
+<a class="jxr_linenumber" name="L642" href="#L642">642</a> <em class="jxr_javadoccomment">     *     conversion (JLS 5.3) is applied, if one exists.</em>
+<a class="jxr_linenumber" name="L643" href="#L643">643</a> <em class="jxr_javadoccomment">     *     (Specifically, &lt;em&gt;T0&lt;/em&gt; must convert to &lt;em&gt;T1&lt;/em&gt; by a widening primitive conversion.)</em>
+<a class="jxr_linenumber" name="L644" href="#L644">644</a> <em class="jxr_javadoccomment">     * &lt;li&gt;If &lt;em&gt;T0&lt;/em&gt; is a primitive and &lt;em&gt;T1&lt;/em&gt; a reference,</em>
+<a class="jxr_linenumber" name="L645" href="#L645">645</a> <em class="jxr_javadoccomment">     *     a Java casting conversion (JLS 5.5) is applied if one exists.</em>
+<a class="jxr_linenumber" name="L646" href="#L646">646</a> <em class="jxr_javadoccomment">     *     (Specifically, the value is boxed from &lt;em&gt;T0&lt;/em&gt; to its wrapper class,</em>
+<a class="jxr_linenumber" name="L647" href="#L647">647</a> <em class="jxr_javadoccomment">     *     which is then widened as needed to &lt;em&gt;T1&lt;/em&gt;.)</em>
+<a class="jxr_linenumber" name="L648" href="#L648">648</a> <em class="jxr_javadoccomment">     * &lt;li&gt;If &lt;em&gt;T0&lt;/em&gt; is a reference and &lt;em&gt;T1&lt;/em&gt; a primitive, an unboxing</em>
+<a class="jxr_linenumber" name="L649" href="#L649">649</a> <em class="jxr_javadoccomment">     *     conversion will be applied at runtime, possibly followed</em>
+<a class="jxr_linenumber" name="L650" href="#L650">650</a> <em class="jxr_javadoccomment">     *     by a Java method invocation conversion (JLS 5.3)</em>
+<a class="jxr_linenumber" name="L651" href="#L651">651</a> <em class="jxr_javadoccomment">     *     on the primitive value.  (These are the primitive widening conversions.)</em>
+<a class="jxr_linenumber" name="L652" href="#L652">652</a> <em class="jxr_javadoccomment">     *     &lt;em&gt;T0&lt;/em&gt; must be a wrapper class or a supertype of one.</em>
+<a class="jxr_linenumber" name="L653" href="#L653">653</a> <em class="jxr_javadoccomment">     *     (In the case where &lt;em&gt;T0&lt;/em&gt; is Object, these are the conversions</em>
+<a class="jxr_linenumber" name="L654" href="#L654">654</a> <em class="jxr_javadoccomment">     *     allowed by {@link java.lang.reflect.Method#invoke java.lang.reflect.Method.invoke}.)</em>
+<a class="jxr_linenumber" name="L655" href="#L655">655</a> <em class="jxr_javadoccomment">     *     The unboxing conversion must have a possibility of success, which means that</em>
+<a class="jxr_linenumber" name="L656" href="#L656">656</a> <em class="jxr_javadoccomment">     *     if &lt;em&gt;T0&lt;/em&gt; is not itself a wrapper class, there must exist at least one</em>
+<a class="jxr_linenumber" name="L657" href="#L657">657</a> <em class="jxr_javadoccomment">     *     wrapper class &lt;em&gt;TW&lt;/em&gt; which is a subtype of &lt;em&gt;T0&lt;/em&gt; and whose unboxed</em>
+<a class="jxr_linenumber" name="L658" href="#L658">658</a> <em class="jxr_javadoccomment">     *     primitive value can be widened to &lt;em&gt;T1&lt;/em&gt;.</em>
+<a class="jxr_linenumber" name="L659" href="#L659">659</a> <em class="jxr_javadoccomment">     * &lt;li&gt;If the return type &lt;em&gt;T1&lt;/em&gt; is marked as void, any returned value is discarded</em>
+<a class="jxr_linenumber" name="L660" href="#L660">660</a> <em class="jxr_javadoccomment">     * &lt;li&gt;If the return type &lt;em&gt;T0&lt;/em&gt; is void and &lt;em&gt;T1&lt;/em&gt; a reference, a null value is introduced.</em>
+<a class="jxr_linenumber" name="L661" href="#L661">661</a> <em class="jxr_javadoccomment">     * &lt;li&gt;If the return type &lt;em&gt;T0&lt;/em&gt; is void and &lt;em&gt;T1&lt;/em&gt; a primitive,</em>
+<a class="jxr_linenumber" name="L662" href="#L662">662</a> <em class="jxr_javadoccomment">     *     a zero value is introduced.</em>
+<a class="jxr_linenumber" name="L663" href="#L663">663</a> <em class="jxr_javadoccomment">     * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L664" href="#L664">664</a> <em class="jxr_javadoccomment">    * (&lt;em&gt;Note:&lt;/em&gt; Both &lt;em&gt;T0&lt;/em&gt; and &lt;em&gt;T1&lt;/em&gt; may be regarded as static types,</em>
+<a class="jxr_linenumber" name="L665" href="#L665">665</a> <em class="jxr_javadoccomment">     * because neither corresponds specifically to the &lt;em&gt;dynamic type&lt;/em&gt; of any</em>
+<a class="jxr_linenumber" name="L666" href="#L666">666</a> <em class="jxr_javadoccomment">     * actual argument or return value.)</em>
+<a class="jxr_linenumber" name="L667" href="#L667">667</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L668" href="#L668">668</a> <em class="jxr_javadoccomment">     * The method handle conversion cannot be made if any one of the required</em>
+<a class="jxr_linenumber" name="L669" href="#L669">669</a> <em class="jxr_javadoccomment">     * pairwise conversions cannot be made.</em>
+<a class="jxr_linenumber" name="L670" href="#L670">670</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L671" href="#L671">671</a> <em class="jxr_javadoccomment">     * At runtime, the conversions applied to reference arguments</em>
+<a class="jxr_linenumber" name="L672" href="#L672">672</a> <em class="jxr_javadoccomment">     * or return values may require additional runtime checks which can fail.</em>
+<a class="jxr_linenumber" name="L673" href="#L673">673</a> <em class="jxr_javadoccomment">     * An unboxing operation may fail because the original reference is null,</em>
+<a class="jxr_linenumber" name="L674" href="#L674">674</a> <em class="jxr_javadoccomment">     * causing a {@link java.lang.NullPointerException NullPointerException}.</em>
+<a class="jxr_linenumber" name="L675" href="#L675">675</a> <em class="jxr_javadoccomment">     * An unboxing operation or a reference cast may also fail on a reference</em>
+<a class="jxr_linenumber" name="L676" href="#L676">676</a> <em class="jxr_javadoccomment">     * to an object of the wrong type,</em>
+<a class="jxr_linenumber" name="L677" href="#L677">677</a> <em class="jxr_javadoccomment">     * causing a {@link java.lang.ClassCastException ClassCastException}.</em>
+<a class="jxr_linenumber" name="L678" href="#L678">678</a> <em class="jxr_javadoccomment">     * Although an unboxing operation may accept several kinds of wrappers,</em>
+<a class="jxr_linenumber" name="L679" href="#L679">679</a> <em class="jxr_javadoccomment">     * if none are available, a {@code ClassCastException} will be thrown.</em>
+<a class="jxr_linenumber" name="L680" href="#L680">680</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L681" href="#L681">681</a> <em class="jxr_javadoccomment">     * @param newType the expected type of the new method handle</em>
+<a class="jxr_linenumber" name="L682" href="#L682">682</a> <em class="jxr_javadoccomment">     * @return a method handle which delegates to {@code this} after performing</em>
+<a class="jxr_linenumber" name="L683" href="#L683">683</a> <em class="jxr_javadoccomment">     *           any necessary argument conversions, and arranges for any</em>
+<a class="jxr_linenumber" name="L684" href="#L684">684</a> <em class="jxr_javadoccomment">     *           necessary return value conversions</em>
+<a class="jxr_linenumber" name="L685" href="#L685">685</a> <em class="jxr_javadoccomment">     * @throws NullPointerException if {@code newType} is a null reference</em>
+<a class="jxr_linenumber" name="L686" href="#L686">686</a> <em class="jxr_javadoccomment">     * @throws WrongMethodTypeException if the conversion cannot be made</em>
+<a class="jxr_linenumber" name="L687" href="#L687">687</a> <em class="jxr_javadoccomment">     * @see MethodHandles#explicitCastArguments</em>
+<a class="jxr_linenumber" name="L688" href="#L688">688</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L689" href="#L689">689</a>     <strong class="jxr_keyword">public</strong> MethodHandle asType(MethodType newType) {
+<a class="jxr_linenumber" name="L690" href="#L690">690</a>         <strong class="jxr_keyword">if</strong> (!type.isConvertibleTo(newType)) {
+<a class="jxr_linenumber" name="L691" href="#L691">691</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> WrongMethodTypeException(<span class="jxr_string">"cannot convert "</span>+<strong class="jxr_keyword">this</strong>+<span class="jxr_string">" to "</span>+newType);
+<a class="jxr_linenumber" name="L692" href="#L692">692</a>         }
+<a class="jxr_linenumber" name="L693" href="#L693">693</a>         <strong class="jxr_keyword">return</strong> MethodHandleImpl.convertArguments(<strong class="jxr_keyword">this</strong>, newType, 1);
+<a class="jxr_linenumber" name="L694" href="#L694">694</a>     }
+<a class="jxr_linenumber" name="L695" href="#L695">695</a> 
+<a class="jxr_linenumber" name="L696" href="#L696">696</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L697" href="#L697">697</a> <em class="jxr_javadoccomment">     * Makes an &lt;em&gt;array-spreading&lt;/em&gt; method handle, which accepts a trailing array argument</em>
+<a class="jxr_linenumber" name="L698" href="#L698">698</a> <em class="jxr_javadoccomment">     * and spreads its elements as positional arguments.</em>
+<a class="jxr_linenumber" name="L699" href="#L699">699</a> <em class="jxr_javadoccomment">     * The new method handle adapts, as its &lt;i&gt;target&lt;/i&gt;,</em>
+<a class="jxr_linenumber" name="L700" href="#L700">700</a> <em class="jxr_javadoccomment">     * the current method handle.  The type of the adapter will be</em>
+<a class="jxr_linenumber" name="L701" href="#L701">701</a> <em class="jxr_javadoccomment">     * the same as the type of the target, except that the final</em>
+<a class="jxr_linenumber" name="L702" href="#L702">702</a> <em class="jxr_javadoccomment">     * {@code arrayLength} parameters of the target's type are replaced</em>
+<a class="jxr_linenumber" name="L703" href="#L703">703</a> <em class="jxr_javadoccomment">     * by a single array parameter of type {@code arrayType}.</em>
+<a class="jxr_linenumber" name="L704" href="#L704">704</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L705" href="#L705">705</a> <em class="jxr_javadoccomment">     * If the array element type differs from any of the corresponding</em>
+<a class="jxr_linenumber" name="L706" href="#L706">706</a> <em class="jxr_javadoccomment">     * argument types on the original target,</em>
+<a class="jxr_linenumber" name="L707" href="#L707">707</a> <em class="jxr_javadoccomment">     * the original target is adapted to take the array elements directly,</em>
+<a class="jxr_linenumber" name="L708" href="#L708">708</a> <em class="jxr_javadoccomment">     * as if by a call to {@link #asType asType}.</em>
+<a class="jxr_linenumber" name="L709" href="#L709">709</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L710" href="#L710">710</a> <em class="jxr_javadoccomment">     * When called, the adapter replaces a trailing array argument</em>
+<a class="jxr_linenumber" name="L711" href="#L711">711</a> <em class="jxr_javadoccomment">     * by the array's elements, each as its own argument to the target.</em>
+<a class="jxr_linenumber" name="L712" href="#L712">712</a> <em class="jxr_javadoccomment">     * (The order of the arguments is preserved.)</em>
+<a class="jxr_linenumber" name="L713" href="#L713">713</a> <em class="jxr_javadoccomment">     * They are converted pairwise by casting and/or unboxing</em>
+<a class="jxr_linenumber" name="L714" href="#L714">714</a> <em class="jxr_javadoccomment">     * to the types of the trailing parameters of the target.</em>
+<a class="jxr_linenumber" name="L715" href="#L715">715</a> <em class="jxr_javadoccomment">     * Finally the target is called.</em>
+<a class="jxr_linenumber" name="L716" href="#L716">716</a> <em class="jxr_javadoccomment">     * What the target eventually returns is returned unchanged by the adapter.</em>
+<a class="jxr_linenumber" name="L717" href="#L717">717</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L718" href="#L718">718</a> <em class="jxr_javadoccomment">     * Before calling the target, the adapter verifies that the array</em>
+<a class="jxr_linenumber" name="L719" href="#L719">719</a> <em class="jxr_javadoccomment">     * contains exactly enough elements to provide a correct argument count</em>
+<a class="jxr_linenumber" name="L720" href="#L720">720</a> <em class="jxr_javadoccomment">     * to the target method handle.</em>
+<a class="jxr_linenumber" name="L721" href="#L721">721</a> <em class="jxr_javadoccomment">     * (The array may also be null when zero elements are required.)</em>
+<a class="jxr_linenumber" name="L722" href="#L722">722</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L723" href="#L723">723</a> <em class="jxr_javadoccomment">     * Here are some simple examples of array-spreading method handles:</em>
+<a class="jxr_linenumber" name="L724" href="#L724">724</a> <em class="jxr_javadoccomment">     * &lt;blockquote&gt;&lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L725" href="#L725">725</a> <em class="jxr_javadoccomment">MethodHandle equals = publicLookup()</em>
+<a class="jxr_linenumber" name="L726" href="#L726">726</a> <em class="jxr_javadoccomment">  .findVirtual(String.class, "equals", methodType(boolean.class, Object.class));</em>
+<a class="jxr_linenumber" name="L727" href="#L727">727</a> <em class="jxr_javadoccomment">assert( (boolean) equals.invokeExact("me", (Object)"me"));</em>
+<a class="jxr_linenumber" name="L728" href="#L728">728</a> <em class="jxr_javadoccomment">assert(!(boolean) equals.invokeExact("me", (Object)"thee"));</em>
+<a class="jxr_linenumber" name="L729" href="#L729">729</a> <em class="jxr_javadoccomment">// spread both arguments from a 2-array:</em>
+<a class="jxr_linenumber" name="L730" href="#L730">730</a> <em class="jxr_javadoccomment">MethodHandle eq2 = equals.asSpreader(Object[].class, 2);</em>
+<a class="jxr_linenumber" name="L731" href="#L731">731</a> <em class="jxr_javadoccomment">assert( (boolean) eq2.invokeExact(new Object[]{ "me", "me" }));</em>
+<a class="jxr_linenumber" name="L732" href="#L732">732</a> <em class="jxr_javadoccomment">assert(!(boolean) eq2.invokeExact(new Object[]{ "me", "thee" }));</em>
+<a class="jxr_linenumber" name="L733" href="#L733">733</a> <em class="jxr_javadoccomment">// spread both arguments from a String array:</em>
+<a class="jxr_linenumber" name="L734" href="#L734">734</a> <em class="jxr_javadoccomment">MethodHandle eq2s = equals.asSpreader(String[].class, 2);</em>
+<a class="jxr_linenumber" name="L735" href="#L735">735</a> <em class="jxr_javadoccomment">assert( (boolean) eq2s.invokeExact(new String[]{ "me", "me" }));</em>
+<a class="jxr_linenumber" name="L736" href="#L736">736</a> <em class="jxr_javadoccomment">assert(!(boolean) eq2s.invokeExact(new String[]{ "me", "thee" }));</em>
+<a class="jxr_linenumber" name="L737" href="#L737">737</a> <em class="jxr_javadoccomment">// spread second arguments from a 1-array:</em>
+<a class="jxr_linenumber" name="L738" href="#L738">738</a> <em class="jxr_javadoccomment">MethodHandle eq1 = equals.asSpreader(Object[].class, 1);</em>
+<a class="jxr_linenumber" name="L739" href="#L739">739</a> <em class="jxr_javadoccomment">assert( (boolean) eq1.invokeExact("me", new Object[]{ "me" }));</em>
+<a class="jxr_linenumber" name="L740" href="#L740">740</a> <em class="jxr_javadoccomment">assert(!(boolean) eq1.invokeExact("me", new Object[]{ "thee" }));</em>
+<a class="jxr_linenumber" name="L741" href="#L741">741</a> <em class="jxr_javadoccomment">// spread no arguments from a 0-array or null:</em>
+<a class="jxr_linenumber" name="L742" href="#L742">742</a> <em class="jxr_javadoccomment">MethodHandle eq0 = equals.asSpreader(Object[].class, 0);</em>
+<a class="jxr_linenumber" name="L743" href="#L743">743</a> <em class="jxr_javadoccomment">assert( (boolean) eq0.invokeExact("me", (Object)"me", new Object[0]));</em>
+<a class="jxr_linenumber" name="L744" href="#L744">744</a> <em class="jxr_javadoccomment">assert(!(boolean) eq0.invokeExact("me", (Object)"thee", (Object[])null));</em>
+<a class="jxr_linenumber" name="L745" href="#L745">745</a> <em class="jxr_javadoccomment">// asSpreader and asCollector are approximate inverses:</em>
+<a class="jxr_linenumber" name="L746" href="#L746">746</a> <em class="jxr_javadoccomment">for (int n = 0; n &lt;= 2; n++) {</em>
+<a class="jxr_linenumber" name="L747" href="#L747">747</a> <em class="jxr_javadoccomment">    for (Class&lt;?&gt; a : new Class&lt;?&gt;[]{Object[].class, String[].class, CharSequence[].class}) {</em>
+<a class="jxr_linenumber" name="L748" href="#L748">748</a> <em class="jxr_javadoccomment">        MethodHandle equals2 = equals.asSpreader(a, n).asCollector(a, n);</em>
+<a class="jxr_linenumber" name="L749" href="#L749">749</a> <em class="jxr_javadoccomment">        assert( (boolean) equals2.invokeWithArguments("me", "me"));</em>
+<a class="jxr_linenumber" name="L750" href="#L750">750</a> <em class="jxr_javadoccomment">        assert(!(boolean) equals2.invokeWithArguments("me", "thee"));</em>
+<a class="jxr_linenumber" name="L751" href="#L751">751</a> <em class="jxr_javadoccomment">    }</em>
+<a class="jxr_linenumber" name="L752" href="#L752">752</a> <em class="jxr_javadoccomment">}</em>
+<a class="jxr_linenumber" name="L753" href="#L753">753</a> <em class="jxr_javadoccomment">MethodHandle caToString = publicLookup()</em>
+<a class="jxr_linenumber" name="L754" href="#L754">754</a> <em class="jxr_javadoccomment">  .findStatic(Arrays.class, "toString", methodType(String.class, char[].class));</em>
+<a class="jxr_linenumber" name="L755" href="#L755">755</a> <em class="jxr_javadoccomment">assertEquals("[A, B, C]", (String) caToString.invokeExact("ABC".toCharArray()));</em>
+<a class="jxr_linenumber" name="L756" href="#L756">756</a> <em class="jxr_javadoccomment">MethodHandle caString3 = caToString.asCollector(char[].class, 3);</em>
+<a class="jxr_linenumber" name="L757" href="#L757">757</a> <em class="jxr_javadoccomment">assertEquals("[A, B, C]", (String) caString3.invokeExact('A', 'B', 'C'));</em>
+<a class="jxr_linenumber" name="L758" href="#L758">758</a> <em class="jxr_javadoccomment">MethodHandle caToString2 = caString3.asSpreader(char[].class, 2);</em>
+<a class="jxr_linenumber" name="L759" href="#L759">759</a> <em class="jxr_javadoccomment">assertEquals("[A, B, C]", (String) caToString2.invokeExact('A', "BC".toCharArray()));</em>
+<a class="jxr_linenumber" name="L760" href="#L760">760</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;&lt;/blockquote&gt;</em>
+<a class="jxr_linenumber" name="L761" href="#L761">761</a> <em class="jxr_javadoccomment">     * @param arrayType usually {@code Object[]}, the type of the array argument from which to extract the spread arguments</em>
+<a class="jxr_linenumber" name="L762" href="#L762">762</a> <em class="jxr_javadoccomment">     * @param arrayLength the number of arguments to spread from an incoming array argument</em>
+<a class="jxr_linenumber" name="L763" href="#L763">763</a> <em class="jxr_javadoccomment">     * @return a new method handle which spreads its final array argument,</em>
+<a class="jxr_linenumber" name="L764" href="#L764">764</a> <em class="jxr_javadoccomment">     *         before calling the original method handle</em>
+<a class="jxr_linenumber" name="L765" href="#L765">765</a> <em class="jxr_javadoccomment">     * @throws NullPointerException if {@code arrayType} is a null reference</em>
+<a class="jxr_linenumber" name="L766" href="#L766">766</a> <em class="jxr_javadoccomment">     * @throws IllegalArgumentException if {@code arrayType} is not an array type</em>
+<a class="jxr_linenumber" name="L767" href="#L767">767</a> <em class="jxr_javadoccomment">     * @throws IllegalArgumentException if target does not have at least</em>
+<a class="jxr_linenumber" name="L768" href="#L768">768</a> <em class="jxr_javadoccomment">     *         {@code arrayLength} parameter types,</em>
+<a class="jxr_linenumber" name="L769" href="#L769">769</a> <em class="jxr_javadoccomment">     *         or if {@code arrayLength} is negative</em>
+<a class="jxr_linenumber" name="L770" href="#L770">770</a> <em class="jxr_javadoccomment">     * @throws WrongMethodTypeException if the implied {@code asType} call fails</em>
+<a class="jxr_linenumber" name="L771" href="#L771">771</a> <em class="jxr_javadoccomment">     * @see #asCollector</em>
+<a class="jxr_linenumber" name="L772" href="#L772">772</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L773" href="#L773">773</a>     <strong class="jxr_keyword">public</strong> MethodHandle asSpreader(Class&lt;?&gt; arrayType, <strong class="jxr_keyword">int</strong> arrayLength) {
+<a class="jxr_linenumber" name="L774" href="#L774">774</a>         asSpreaderChecks(arrayType, arrayLength);
+<a class="jxr_linenumber" name="L775" href="#L775">775</a>         <strong class="jxr_keyword">return</strong> MethodHandleImpl.spreadArguments(<strong class="jxr_keyword">this</strong>, arrayType, arrayLength);
+<a class="jxr_linenumber" name="L776" href="#L776">776</a>     }
+<a class="jxr_linenumber" name="L777" href="#L777">777</a> 
+<a class="jxr_linenumber" name="L778" href="#L778">778</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> asSpreaderChecks(Class&lt;?&gt; arrayType, <strong class="jxr_keyword">int</strong> arrayLength) {
+<a class="jxr_linenumber" name="L779" href="#L779">779</a>         spreadArrayChecks(arrayType, arrayLength);
+<a class="jxr_linenumber" name="L780" href="#L780">780</a>         <strong class="jxr_keyword">int</strong> nargs = type().parameterCount();
+<a class="jxr_linenumber" name="L781" href="#L781">781</a>         <strong class="jxr_keyword">if</strong> (nargs &lt; arrayLength || arrayLength &lt; 0)
+<a class="jxr_linenumber" name="L782" href="#L782">782</a>             <strong class="jxr_keyword">throw</strong> newIllegalArgumentException(<span class="jxr_string">"bad spread array length"</span>);
+<a class="jxr_linenumber" name="L783" href="#L783">783</a>         <strong class="jxr_keyword">if</strong> (arrayType != Object[].<strong class="jxr_keyword">class</strong> &amp;&amp; arrayLength != 0) {
+<a class="jxr_linenumber" name="L784" href="#L784">784</a>             <strong class="jxr_keyword">boolean</strong> sawProblem = false;
+<a class="jxr_linenumber" name="L785" href="#L785">785</a>             Class&lt;?&gt; arrayElement = arrayType.getComponentType();
+<a class="jxr_linenumber" name="L786" href="#L786">786</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = nargs - arrayLength; i &lt; nargs; i++) {
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>                 <strong class="jxr_keyword">if</strong> (!MethodType.canConvert(arrayElement, type().parameterType(i))) {
+<a class="jxr_linenumber" name="L788" href="#L788">788</a>                     sawProblem = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L789" href="#L789">789</a>                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>                 }
+<a class="jxr_linenumber" name="L791" href="#L791">791</a>             }
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>             <strong class="jxr_keyword">if</strong> (sawProblem) {
+<a class="jxr_linenumber" name="L793" href="#L793">793</a>                 ArrayList&lt;Class&lt;?&gt;&gt; ptypes = <strong class="jxr_keyword">new</strong> ArrayList&lt;Class&lt;?&gt;&gt;(type().parameterList());
+<a class="jxr_linenumber" name="L794" href="#L794">794</a>                 <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = nargs - arrayLength; i &lt; nargs; i++) {
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>                     ptypes.set(i, arrayElement);
+<a class="jxr_linenumber" name="L796" href="#L796">796</a>                 }
+<a class="jxr_linenumber" name="L797" href="#L797">797</a>                 <em class="jxr_comment">// elicit an error:</em>
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>                 <strong class="jxr_keyword">this</strong>.asType(MethodType.methodType(type().returnType(), ptypes));
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>             }
+<a class="jxr_linenumber" name="L800" href="#L800">800</a>         }
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>     }
+<a class="jxr_linenumber" name="L802" href="#L802">802</a> 
+<a class="jxr_linenumber" name="L803" href="#L803">803</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> spreadArrayChecks(Class&lt;?&gt; arrayType, <strong class="jxr_keyword">int</strong> arrayLength) {
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>         Class&lt;?&gt; arrayElement = arrayType.getComponentType();
+<a class="jxr_linenumber" name="L805" href="#L805">805</a>         <strong class="jxr_keyword">if</strong> (arrayElement == <strong class="jxr_keyword">null</strong>)
+<a class="jxr_linenumber" name="L806" href="#L806">806</a>             <strong class="jxr_keyword">throw</strong> newIllegalArgumentException(<span class="jxr_string">"not an array type"</span>, arrayType);
+<a class="jxr_linenumber" name="L807" href="#L807">807</a>         <strong class="jxr_keyword">if</strong> ((arrayLength &amp; 0x7F) != arrayLength) {
+<a class="jxr_linenumber" name="L808" href="#L808">808</a>             <strong class="jxr_keyword">if</strong> ((arrayLength &amp; 0xFF) != arrayLength)
+<a class="jxr_linenumber" name="L809" href="#L809">809</a>                 <strong class="jxr_keyword">throw</strong> newIllegalArgumentException(<span class="jxr_string">"array length is not legal"</span>, arrayLength);
+<a class="jxr_linenumber" name="L810" href="#L810">810</a>             assert(arrayLength &gt;= 128);
+<a class="jxr_linenumber" name="L811" href="#L811">811</a>             <strong class="jxr_keyword">if</strong> (arrayElement == <strong class="jxr_keyword">long</strong>.<strong class="jxr_keyword">class</strong> ||
+<a class="jxr_linenumber" name="L812" href="#L812">812</a>                 arrayElement == <strong class="jxr_keyword">double</strong>.<strong class="jxr_keyword">class</strong>)
+<a class="jxr_linenumber" name="L813" href="#L813">813</a>                 <strong class="jxr_keyword">throw</strong> newIllegalArgumentException(<span class="jxr_string">"array length is not legal for long[] or double[]"</span>, arrayLength);
+<a class="jxr_linenumber" name="L814" href="#L814">814</a>         }
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>     }
+<a class="jxr_linenumber" name="L816" href="#L816">816</a> 
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L818" href="#L818">818</a> <em class="jxr_javadoccomment">     * Makes an &lt;em&gt;array-collecting&lt;/em&gt; method handle, which accepts a given number of trailing</em>
+<a class="jxr_linenumber" name="L819" href="#L819">819</a> <em class="jxr_javadoccomment">     * positional arguments and collects them into an array argument.</em>
+<a class="jxr_linenumber" name="L820" href="#L820">820</a> <em class="jxr_javadoccomment">     * The new method handle adapts, as its &lt;i&gt;target&lt;/i&gt;,</em>
+<a class="jxr_linenumber" name="L821" href="#L821">821</a> <em class="jxr_javadoccomment">     * the current method handle.  The type of the adapter will be</em>
+<a class="jxr_linenumber" name="L822" href="#L822">822</a> <em class="jxr_javadoccomment">     * the same as the type of the target, except that a single trailing</em>
+<a class="jxr_linenumber" name="L823" href="#L823">823</a> <em class="jxr_javadoccomment">     * parameter (usually of type {@code arrayType}) is replaced by</em>
+<a class="jxr_linenumber" name="L824" href="#L824">824</a> <em class="jxr_javadoccomment">     * {@code arrayLength} parameters whose type is element type of {@code arrayType}.</em>
+<a class="jxr_linenumber" name="L825" href="#L825">825</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L826" href="#L826">826</a> <em class="jxr_javadoccomment">     * If the array type differs from the final argument type on the original target,</em>
+<a class="jxr_linenumber" name="L827" href="#L827">827</a> <em class="jxr_javadoccomment">     * the original target is adapted to take the array type directly,</em>
+<a class="jxr_linenumber" name="L828" href="#L828">828</a> <em class="jxr_javadoccomment">     * as if by a call to {@link #asType asType}.</em>
+<a class="jxr_linenumber" name="L829" href="#L829">829</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L830" href="#L830">830</a> <em class="jxr_javadoccomment">     * When called, the adapter replaces its trailing {@code arrayLength}</em>
+<a class="jxr_linenumber" name="L831" href="#L831">831</a> <em class="jxr_javadoccomment">     * arguments by a single new array of type {@code arrayType}, whose elements</em>
+<a class="jxr_linenumber" name="L832" href="#L832">832</a> <em class="jxr_javadoccomment">     * comprise (in order) the replaced arguments.</em>
+<a class="jxr_linenumber" name="L833" href="#L833">833</a> <em class="jxr_javadoccomment">     * Finally the target is called.</em>
+<a class="jxr_linenumber" name="L834" href="#L834">834</a> <em class="jxr_javadoccomment">     * What the target eventually returns is returned unchanged by the adapter.</em>
+<a class="jxr_linenumber" name="L835" href="#L835">835</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L836" href="#L836">836</a> <em class="jxr_javadoccomment">     * (The array may also be a shared constant when {@code arrayLength} is zero.)</em>
+<a class="jxr_linenumber" name="L837" href="#L837">837</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L838" href="#L838">838</a> <em class="jxr_javadoccomment">     * (&lt;em&gt;Note:&lt;/em&gt; The {@code arrayType} is often identical to the last</em>
+<a class="jxr_linenumber" name="L839" href="#L839">839</a> <em class="jxr_javadoccomment">     * parameter type of the original target.</em>
+<a class="jxr_linenumber" name="L840" href="#L840">840</a> <em class="jxr_javadoccomment">     * It is an explicit argument for symmetry with {@code asSpreader}, and also</em>
+<a class="jxr_linenumber" name="L841" href="#L841">841</a> <em class="jxr_javadoccomment">     * to allow the target to use a simple {@code Object} as its last parameter type.)</em>
+<a class="jxr_linenumber" name="L842" href="#L842">842</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L843" href="#L843">843</a> <em class="jxr_javadoccomment">     * In order to create a collecting adapter which is not restricted to a particular</em>
+<a class="jxr_linenumber" name="L844" href="#L844">844</a> <em class="jxr_javadoccomment">     * number of collected arguments, use {@link #asVarargsCollector asVarargsCollector} instead.</em>
+<a class="jxr_linenumber" name="L845" href="#L845">845</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L846" href="#L846">846</a> <em class="jxr_javadoccomment">     * Here are some examples of array-collecting method handles:</em>
+<a class="jxr_linenumber" name="L847" href="#L847">847</a> <em class="jxr_javadoccomment">     * &lt;blockquote&gt;&lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L848" href="#L848">848</a> <em class="jxr_javadoccomment">MethodHandle deepToString = publicLookup()</em>
+<a class="jxr_linenumber" name="L849" href="#L849">849</a> <em class="jxr_javadoccomment">  .findStatic(Arrays.class, "deepToString", methodType(String.class, Object[].class));</em>
+<a class="jxr_linenumber" name="L850" href="#L850">850</a> <em class="jxr_javadoccomment">assertEquals("[won]",   (String) deepToString.invokeExact(new Object[]{"won"}));</em>
+<a class="jxr_linenumber" name="L851" href="#L851">851</a> <em class="jxr_javadoccomment">MethodHandle ts1 = deepToString.asCollector(Object[].class, 1);</em>
+<a class="jxr_linenumber" name="L852" href="#L852">852</a> <em class="jxr_javadoccomment">assertEquals(methodType(String.class, Object.class), ts1.type());</em>
+<a class="jxr_linenumber" name="L853" href="#L853">853</a> <em class="jxr_javadoccomment">//assertEquals("[won]", (String) ts1.invokeExact(         new Object[]{"won"})); //FAIL</em>
+<a class="jxr_linenumber" name="L854" href="#L854">854</a> <em class="jxr_javadoccomment">assertEquals("[[won]]", (String) ts1.invokeExact((Object) new Object[]{"won"}));</em>
+<a class="jxr_linenumber" name="L855" href="#L855">855</a> <em class="jxr_javadoccomment">// arrayType can be a subtype of Object[]</em>
+<a class="jxr_linenumber" name="L856" href="#L856">856</a> <em class="jxr_javadoccomment">MethodHandle ts2 = deepToString.asCollector(String[].class, 2);</em>
+<a class="jxr_linenumber" name="L857" href="#L857">857</a> <em class="jxr_javadoccomment">assertEquals(methodType(String.class, String.class, String.class), ts2.type());</em>
+<a class="jxr_linenumber" name="L858" href="#L858">858</a> <em class="jxr_javadoccomment">assertEquals("[two, too]", (String) ts2.invokeExact("two", "too"));</em>
+<a class="jxr_linenumber" name="L859" href="#L859">859</a> <em class="jxr_javadoccomment">MethodHandle ts0 = deepToString.asCollector(Object[].class, 0);</em>
+<a class="jxr_linenumber" name="L860" href="#L860">860</a> <em class="jxr_javadoccomment">assertEquals("[]", (String) ts0.invokeExact());</em>
+<a class="jxr_linenumber" name="L861" href="#L861">861</a> <em class="jxr_javadoccomment">// collectors can be nested, Lisp-style</em>
+<a class="jxr_linenumber" name="L862" href="#L862">862</a> <em class="jxr_javadoccomment">MethodHandle ts22 = deepToString.asCollector(Object[].class, 3).asCollector(String[].class, 2);</em>
+<a class="jxr_linenumber" name="L863" href="#L863">863</a> <em class="jxr_javadoccomment">assertEquals("[A, B, [C, D]]", ((String) ts22.invokeExact((Object)'A', (Object)"B", "C", "D")));</em>
+<a class="jxr_linenumber" name="L864" href="#L864">864</a> <em class="jxr_javadoccomment">// arrayType can be any primitive array type</em>
+<a class="jxr_linenumber" name="L865" href="#L865">865</a> <em class="jxr_javadoccomment">MethodHandle bytesToString = publicLookup()</em>
+<a class="jxr_linenumber" name="L866" href="#L866">866</a> <em class="jxr_javadoccomment">  .findStatic(Arrays.class, "toString", methodType(String.class, byte[].class))</em>
+<a class="jxr_linenumber" name="L867" href="#L867">867</a> <em class="jxr_javadoccomment">  .asCollector(byte[].class, 3);</em>
+<a class="jxr_linenumber" name="L868" href="#L868">868</a> <em class="jxr_javadoccomment">assertEquals("[1, 2, 3]", (String) bytesToString.invokeExact((byte)1, (byte)2, (byte)3));</em>
+<a class="jxr_linenumber" name="L869" href="#L869">869</a> <em class="jxr_javadoccomment">MethodHandle longsToString = publicLookup()</em>
+<a class="jxr_linenumber" name="L870" href="#L870">870</a> <em class="jxr_javadoccomment">  .findStatic(Arrays.class, "toString", methodType(String.class, long[].class))</em>
+<a class="jxr_linenumber" name="L871" href="#L871">871</a> <em class="jxr_javadoccomment">  .asCollector(long[].class, 1);</em>
+<a class="jxr_linenumber" name="L872" href="#L872">872</a> <em class="jxr_javadoccomment">assertEquals("[123]", (String) longsToString.invokeExact((long)123));</em>
+<a class="jxr_linenumber" name="L873" href="#L873">873</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;&lt;/blockquote&gt;</em>
+<a class="jxr_linenumber" name="L874" href="#L874">874</a> <em class="jxr_javadoccomment">     * @param arrayType often {@code Object[]}, the type of the array argument which will collect the arguments</em>
+<a class="jxr_linenumber" name="L875" href="#L875">875</a> <em class="jxr_javadoccomment">     * @param arrayLength the number of arguments to collect into a new array argument</em>
+<a class="jxr_linenumber" name="L876" href="#L876">876</a> <em class="jxr_javadoccomment">     * @return a new method handle which collects some trailing argument</em>
+<a class="jxr_linenumber" name="L877" href="#L877">877</a> <em class="jxr_javadoccomment">     *         into an array, before calling the original method handle</em>
+<a class="jxr_linenumber" name="L878" href="#L878">878</a> <em class="jxr_javadoccomment">     * @throws NullPointerException if {@code arrayType} is a null reference</em>
+<a class="jxr_linenumber" name="L879" href="#L879">879</a> <em class="jxr_javadoccomment">     * @throws IllegalArgumentException if {@code arrayType} is not an array type</em>
+<a class="jxr_linenumber" name="L880" href="#L880">880</a> <em class="jxr_javadoccomment">     *         or {@code arrayType} is not assignable to this method handle's trailing parameter type,</em>
+<a class="jxr_linenumber" name="L881" href="#L881">881</a> <em class="jxr_javadoccomment">     *         or {@code arrayLength} is not a legal array size</em>
+<a class="jxr_linenumber" name="L882" href="#L882">882</a> <em class="jxr_javadoccomment">     * @throws WrongMethodTypeException if the implied {@code asType} call fails</em>
+<a class="jxr_linenumber" name="L883" href="#L883">883</a> <em class="jxr_javadoccomment">     * @see #asSpreader</em>
+<a class="jxr_linenumber" name="L884" href="#L884">884</a> <em class="jxr_javadoccomment">     * @see #asVarargsCollector</em>
+<a class="jxr_linenumber" name="L885" href="#L885">885</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L886" href="#L886">886</a>     <strong class="jxr_keyword">public</strong> MethodHandle asCollector(Class&lt;?&gt; arrayType, <strong class="jxr_keyword">int</strong> arrayLength) {
+<a class="jxr_linenumber" name="L887" href="#L887">887</a>         asCollectorChecks(arrayType, arrayLength);
+<a class="jxr_linenumber" name="L888" href="#L888">888</a>         MethodHandle collector = ValueConversions.varargsArray(arrayType, arrayLength);
+<a class="jxr_linenumber" name="L889" href="#L889">889</a>         <strong class="jxr_keyword">return</strong> MethodHandleImpl.collectArguments(<strong class="jxr_keyword">this</strong>, type.parameterCount()-1, collector);
+<a class="jxr_linenumber" name="L890" href="#L890">890</a>     }
+<a class="jxr_linenumber" name="L891" href="#L891">891</a> 
+<a class="jxr_linenumber" name="L892" href="#L892">892</a>     <em class="jxr_comment">// private API: return true if last param exactly matches arrayType</em>
+<a class="jxr_linenumber" name="L893" href="#L893">893</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> asCollectorChecks(Class&lt;?&gt; arrayType, <strong class="jxr_keyword">int</strong> arrayLength) {
+<a class="jxr_linenumber" name="L894" href="#L894">894</a>         spreadArrayChecks(arrayType, arrayLength);
+<a class="jxr_linenumber" name="L895" href="#L895">895</a>         <strong class="jxr_keyword">int</strong> nargs = type().parameterCount();
+<a class="jxr_linenumber" name="L896" href="#L896">896</a>         <strong class="jxr_keyword">if</strong> (nargs != 0) {
+<a class="jxr_linenumber" name="L897" href="#L897">897</a>             Class&lt;?&gt; lastParam = type().parameterType(nargs-1);
+<a class="jxr_linenumber" name="L898" href="#L898">898</a>             <strong class="jxr_keyword">if</strong> (lastParam == arrayType)  <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L899" href="#L899">899</a>             <strong class="jxr_keyword">if</strong> (lastParam.isAssignableFrom(arrayType))  <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L900" href="#L900">900</a>         }
+<a class="jxr_linenumber" name="L901" href="#L901">901</a>         <strong class="jxr_keyword">throw</strong> newIllegalArgumentException(<span class="jxr_string">"array type not assignable to trailing argument"</span>, <strong class="jxr_keyword">this</strong>, arrayType);
+<a class="jxr_linenumber" name="L902" href="#L902">902</a>     }
+<a class="jxr_linenumber" name="L903" href="#L903">903</a> 
+<a class="jxr_linenumber" name="L904" href="#L904">904</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L905" href="#L905">905</a> <em class="jxr_javadoccomment">     * Makes a &lt;em&gt;variable arity&lt;/em&gt; adapter which is able to accept</em>
+<a class="jxr_linenumber" name="L906" href="#L906">906</a> <em class="jxr_javadoccomment">     * any number of trailing positional arguments and collect them</em>
+<a class="jxr_linenumber" name="L907" href="#L907">907</a> <em class="jxr_javadoccomment">     * into an array argument.</em>
+<a class="jxr_linenumber" name="L908" href="#L908">908</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L909" href="#L909">909</a> <em class="jxr_javadoccomment">     * The type and behavior of the adapter will be the same as</em>
+<a class="jxr_linenumber" name="L910" href="#L910">910</a> <em class="jxr_javadoccomment">     * the type and behavior of the target, except that certain</em>
+<a class="jxr_linenumber" name="L911" href="#L911">911</a> <em class="jxr_javadoccomment">     * {@code invoke} and {@code asType} requests can lead to</em>
+<a class="jxr_linenumber" name="L912" href="#L912">912</a> <em class="jxr_javadoccomment">     * trailing positional arguments being collected into target's</em>
+<a class="jxr_linenumber" name="L913" href="#L913">913</a> <em class="jxr_javadoccomment">     * trailing parameter.</em>
+<a class="jxr_linenumber" name="L914" href="#L914">914</a> <em class="jxr_javadoccomment">     * Also, the last parameter type of the adapter will be</em>
+<a class="jxr_linenumber" name="L915" href="#L915">915</a> <em class="jxr_javadoccomment">     * {@code arrayType}, even if the target has a different</em>
+<a class="jxr_linenumber" name="L916" href="#L916">916</a> <em class="jxr_javadoccomment">     * last parameter type.</em>
+<a class="jxr_linenumber" name="L917" href="#L917">917</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L918" href="#L918">918</a> <em class="jxr_javadoccomment">     * This transformation may return {@code this} if the method handle is</em>
+<a class="jxr_linenumber" name="L919" href="#L919">919</a> <em class="jxr_javadoccomment">     * already of variable arity and its trailing parameter type</em>
+<a class="jxr_linenumber" name="L920" href="#L920">920</a> <em class="jxr_javadoccomment">     * is identical to {@code arrayType}.</em>
+<a class="jxr_linenumber" name="L921" href="#L921">921</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L922" href="#L922">922</a> <em class="jxr_javadoccomment">     * When called with {@link #invokeExact invokeExact}, the adapter invokes</em>
+<a class="jxr_linenumber" name="L923" href="#L923">923</a> <em class="jxr_javadoccomment">     * the target with no argument changes.</em>
+<a class="jxr_linenumber" name="L924" href="#L924">924</a> <em class="jxr_javadoccomment">     * (&lt;em&gt;Note:&lt;/em&gt; This behavior is different from a</em>
+<a class="jxr_linenumber" name="L925" href="#L925">925</a> <em class="jxr_javadoccomment">     * {@linkplain #asCollector fixed arity collector},</em>
+<a class="jxr_linenumber" name="L926" href="#L926">926</a> <em class="jxr_javadoccomment">     * since it accepts a whole array of indeterminate length,</em>
+<a class="jxr_linenumber" name="L927" href="#L927">927</a> <em class="jxr_javadoccomment">     * rather than a fixed number of arguments.)</em>
+<a class="jxr_linenumber" name="L928" href="#L928">928</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L929" href="#L929">929</a> <em class="jxr_javadoccomment">     * When called with plain, inexact {@link #invoke invoke}, if the caller</em>
+<a class="jxr_linenumber" name="L930" href="#L930">930</a> <em class="jxr_javadoccomment">     * type is the same as the adapter, the adapter invokes the target as with</em>
+<a class="jxr_linenumber" name="L931" href="#L931">931</a> <em class="jxr_javadoccomment">     * {@code invokeExact}.</em>
+<a class="jxr_linenumber" name="L932" href="#L932">932</a> <em class="jxr_javadoccomment">     * (This is the normal behavior for {@code invoke} when types match.)</em>
+<a class="jxr_linenumber" name="L933" href="#L933">933</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L934" href="#L934">934</a> <em class="jxr_javadoccomment">     * Otherwise, if the caller and adapter arity are the same, and the</em>
+<a class="jxr_linenumber" name="L935" href="#L935">935</a> <em class="jxr_javadoccomment">     * trailing parameter type of the caller is a reference type identical to</em>
+<a class="jxr_linenumber" name="L936" href="#L936">936</a> <em class="jxr_javadoccomment">     * or assignable to the trailing parameter type of the adapter,</em>
+<a class="jxr_linenumber" name="L937" href="#L937">937</a> <em class="jxr_javadoccomment">     * the arguments and return values are converted pairwise,</em>
+<a class="jxr_linenumber" name="L938" href="#L938">938</a> <em class="jxr_javadoccomment">     * as if by {@link #asType asType} on a fixed arity</em>
+<a class="jxr_linenumber" name="L939" href="#L939">939</a> <em class="jxr_javadoccomment">     * method handle.</em>
+<a class="jxr_linenumber" name="L940" href="#L940">940</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L941" href="#L941">941</a> <em class="jxr_javadoccomment">     * Otherwise, the arities differ, or the adapter's trailing parameter</em>
+<a class="jxr_linenumber" name="L942" href="#L942">942</a> <em class="jxr_javadoccomment">     * type is not assignable from the corresponding caller type.</em>
+<a class="jxr_linenumber" name="L943" href="#L943">943</a> <em class="jxr_javadoccomment">     * In this case, the adapter replaces all trailing arguments from</em>
+<a class="jxr_linenumber" name="L944" href="#L944">944</a> <em class="jxr_javadoccomment">     * the original trailing argument position onward, by</em>
+<a class="jxr_linenumber" name="L945" href="#L945">945</a> <em class="jxr_javadoccomment">     * a new array of type {@code arrayType}, whose elements</em>
+<a class="jxr_linenumber" name="L946" href="#L946">946</a> <em class="jxr_javadoccomment">     * comprise (in order) the replaced arguments.</em>
+<a class="jxr_linenumber" name="L947" href="#L947">947</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L948" href="#L948">948</a> <em class="jxr_javadoccomment">     * The caller type must provides as least enough arguments,</em>
+<a class="jxr_linenumber" name="L949" href="#L949">949</a> <em class="jxr_javadoccomment">     * and of the correct type, to satisfy the target's requirement for</em>
+<a class="jxr_linenumber" name="L950" href="#L950">950</a> <em class="jxr_javadoccomment">     * positional arguments before the trailing array argument.</em>
+<a class="jxr_linenumber" name="L951" href="#L951">951</a> <em class="jxr_javadoccomment">     * Thus, the caller must supply, at a minimum, {@code N-1} arguments,</em>
+<a class="jxr_linenumber" name="L952" href="#L952">952</a> <em class="jxr_javadoccomment">     * where {@code N} is the arity of the target.</em>
+<a class="jxr_linenumber" name="L953" href="#L953">953</a> <em class="jxr_javadoccomment">     * Also, there must exist conversions from the incoming arguments</em>
+<a class="jxr_linenumber" name="L954" href="#L954">954</a> <em class="jxr_javadoccomment">     * to the target's arguments.</em>
+<a class="jxr_linenumber" name="L955" href="#L955">955</a> <em class="jxr_javadoccomment">     * As with other uses of plain {@code invoke}, if these basic</em>
+<a class="jxr_linenumber" name="L956" href="#L956">956</a> <em class="jxr_javadoccomment">     * requirements are not fulfilled, a {@code WrongMethodTypeException}</em>
+<a class="jxr_linenumber" name="L957" href="#L957">957</a> <em class="jxr_javadoccomment">     * may be thrown.</em>
+<a class="jxr_linenumber" name="L958" href="#L958">958</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L959" href="#L959">959</a> <em class="jxr_javadoccomment">     * In all cases, what the target eventually returns is returned unchanged by the adapter.</em>
+<a class="jxr_linenumber" name="L960" href="#L960">960</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L961" href="#L961">961</a> <em class="jxr_javadoccomment">     * In the final case, it is exactly as if the target method handle were</em>
+<a class="jxr_linenumber" name="L962" href="#L962">962</a> <em class="jxr_javadoccomment">     * temporarily adapted with a {@linkplain #asCollector fixed arity collector}</em>
+<a class="jxr_linenumber" name="L963" href="#L963">963</a> <em class="jxr_javadoccomment">     * to the arity required by the caller type.</em>
+<a class="jxr_linenumber" name="L964" href="#L964">964</a> <em class="jxr_javadoccomment">     * (As with {@code asCollector}, if the array length is zero,</em>
+<a class="jxr_linenumber" name="L965" href="#L965">965</a> <em class="jxr_javadoccomment">     * a shared constant may be used instead of a new array.</em>
+<a class="jxr_linenumber" name="L966" href="#L966">966</a> <em class="jxr_javadoccomment">     * If the implied call to {@code asCollector} would throw</em>
+<a class="jxr_linenumber" name="L967" href="#L967">967</a> <em class="jxr_javadoccomment">     * an {@code IllegalArgumentException} or {@code WrongMethodTypeException},</em>
+<a class="jxr_linenumber" name="L968" href="#L968">968</a> <em class="jxr_javadoccomment">     * the call to the variable arity adapter must throw</em>
+<a class="jxr_linenumber" name="L969" href="#L969">969</a> <em class="jxr_javadoccomment">     * {@code WrongMethodTypeException}.)</em>
+<a class="jxr_linenumber" name="L970" href="#L970">970</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L971" href="#L971">971</a> <em class="jxr_javadoccomment">     * The behavior of {@link #asType asType} is also specialized for</em>
+<a class="jxr_linenumber" name="L972" href="#L972">972</a> <em class="jxr_javadoccomment">     * variable arity adapters, to maintain the invariant that</em>
+<a class="jxr_linenumber" name="L973" href="#L973">973</a> <em class="jxr_javadoccomment">     * plain, inexact {@code invoke} is always equivalent to an {@code asType}</em>
+<a class="jxr_linenumber" name="L974" href="#L974">974</a> <em class="jxr_javadoccomment">     * call to adjust the target type, followed by {@code invokeExact}.</em>
+<a class="jxr_linenumber" name="L975" href="#L975">975</a> <em class="jxr_javadoccomment">     * Therefore, a variable arity adapter responds</em>
+<a class="jxr_linenumber" name="L976" href="#L976">976</a> <em class="jxr_javadoccomment">     * to an {@code asType} request by building a fixed arity collector,</em>
+<a class="jxr_linenumber" name="L977" href="#L977">977</a> <em class="jxr_javadoccomment">     * if and only if the adapter and requested type differ either</em>
+<a class="jxr_linenumber" name="L978" href="#L978">978</a> <em class="jxr_javadoccomment">     * in arity or trailing argument type.</em>
+<a class="jxr_linenumber" name="L979" href="#L979">979</a> <em class="jxr_javadoccomment">     * The resulting fixed arity collector has its type further adjusted</em>
+<a class="jxr_linenumber" name="L980" href="#L980">980</a> <em class="jxr_javadoccomment">     * (if necessary) to the requested type by pairwise conversion,</em>
+<a class="jxr_linenumber" name="L981" href="#L981">981</a> <em class="jxr_javadoccomment">     * as if by another application of {@code asType}.</em>
+<a class="jxr_linenumber" name="L982" href="#L982">982</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L983" href="#L983">983</a> <em class="jxr_javadoccomment">     * When a method handle is obtained by executing an {@code ldc} instruction</em>
+<a class="jxr_linenumber" name="L984" href="#L984">984</a> <em class="jxr_javadoccomment">     * of a {@code CONSTANT_MethodHandle} constant, and the target method is marked</em>
+<a class="jxr_linenumber" name="L985" href="#L985">985</a> <em class="jxr_javadoccomment">     * as a variable arity method (with the modifier bit {@code 0x0080}),</em>
+<a class="jxr_linenumber" name="L986" href="#L986">986</a> <em class="jxr_javadoccomment">     * the method handle will accept multiple arities, as if the method handle</em>
+<a class="jxr_linenumber" name="L987" href="#L987">987</a> <em class="jxr_javadoccomment">     * constant were created by means of a call to {@code asVarargsCollector}.</em>
+<a class="jxr_linenumber" name="L988" href="#L988">988</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L989" href="#L989">989</a> <em class="jxr_javadoccomment">     * In order to create a collecting adapter which collects a predetermined</em>
+<a class="jxr_linenumber" name="L990" href="#L990">990</a> <em class="jxr_javadoccomment">     * number of arguments, and whose type reflects this predetermined number,</em>
+<a class="jxr_linenumber" name="L991" href="#L991">991</a> <em class="jxr_javadoccomment">     * use {@link #asCollector asCollector} instead.</em>
+<a class="jxr_linenumber" name="L992" href="#L992">992</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L993" href="#L993">993</a> <em class="jxr_javadoccomment">     * No method handle transformations produce new method handles with</em>
+<a class="jxr_linenumber" name="L994" href="#L994">994</a> <em class="jxr_javadoccomment">     * variable arity, unless they are documented as doing so.</em>
+<a class="jxr_linenumber" name="L995" href="#L995">995</a> <em class="jxr_javadoccomment">     * Therefore, besides {@code asVarargsCollector},</em>
+<a class="jxr_linenumber" name="L996" href="#L996">996</a> <em class="jxr_javadoccomment">     * all methods in {@code MethodHandle} and {@code MethodHandles}</em>
+<a class="jxr_linenumber" name="L997" href="#L997">997</a> <em class="jxr_javadoccomment">     * will return a method handle with fixed arity,</em>
+<a class="jxr_linenumber" name="L998" href="#L998">998</a> <em class="jxr_javadoccomment">     * except in the cases where they are specified to return their original</em>
+<a class="jxr_linenumber" name="L999" href="#L999">999</a> <em class="jxr_javadoccomment">     * operand (e.g., {@code asType} of the method handle's own type).</em>
+<a class="jxr_linenumber" name="L1000" href="#L1000">1000</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1001" href="#L1001">1001</a> <em class="jxr_javadoccomment">     * Calling {@code asVarargsCollector} on a method handle which is already</em>
+<a class="jxr_linenumber" name="L1002" href="#L1002">1002</a> <em class="jxr_javadoccomment">     * of variable arity will produce a method handle with the same type and behavior.</em>
+<a class="jxr_linenumber" name="L1003" href="#L1003">1003</a> <em class="jxr_javadoccomment">     * It may (or may not) return the original variable arity method handle.</em>
+<a class="jxr_linenumber" name="L1004" href="#L1004">1004</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1005" href="#L1005">1005</a> <em class="jxr_javadoccomment">     * Here is an example, of a list-making variable arity method handle:</em>
+<a class="jxr_linenumber" name="L1006" href="#L1006">1006</a> <em class="jxr_javadoccomment">     * &lt;blockquote&gt;&lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L1007" href="#L1007">1007</a> <em class="jxr_javadoccomment">MethodHandle deepToString = publicLookup()</em>
+<a class="jxr_linenumber" name="L1008" href="#L1008">1008</a> <em class="jxr_javadoccomment">  .findStatic(Arrays.class, "deepToString", methodType(String.class, Object[].class));</em>
+<a class="jxr_linenumber" name="L1009" href="#L1009">1009</a> <em class="jxr_javadoccomment">MethodHandle ts1 = deepToString.asVarargsCollector(Object[].class);</em>
+<a class="jxr_linenumber" name="L1010" href="#L1010">1010</a> <em class="jxr_javadoccomment">assertEquals("[won]",   (String) ts1.invokeExact(    new Object[]{"won"}));</em>
+<a class="jxr_linenumber" name="L1011" href="#L1011">1011</a> <em class="jxr_javadoccomment">assertEquals("[won]",   (String) ts1.invoke(         new Object[]{"won"}));</em>
+<a class="jxr_linenumber" name="L1012" href="#L1012">1012</a> <em class="jxr_javadoccomment">assertEquals("[won]",   (String) ts1.invoke(                      "won" ));</em>
+<a class="jxr_linenumber" name="L1013" href="#L1013">1013</a> <em class="jxr_javadoccomment">assertEquals("[[won]]", (String) ts1.invoke((Object) new Object[]{"won"}));</em>
+<a class="jxr_linenumber" name="L1014" href="#L1014">1014</a> <em class="jxr_javadoccomment">// findStatic of Arrays.asList(...) produces a variable arity method handle:</em>
+<a class="jxr_linenumber" name="L1015" href="#L1015">1015</a> <em class="jxr_javadoccomment">MethodHandle asList = publicLookup()</em>
+<a class="jxr_linenumber" name="L1016" href="#L1016">1016</a> <em class="jxr_javadoccomment">  .findStatic(Arrays.class, "asList", methodType(List.class, Object[].class));</em>
+<a class="jxr_linenumber" name="L1017" href="#L1017">1017</a> <em class="jxr_javadoccomment">assertEquals(methodType(List.class, Object[].class), asList.type());</em>
+<a class="jxr_linenumber" name="L1018" href="#L1018">1018</a> <em class="jxr_javadoccomment">assert(asList.isVarargsCollector());</em>
+<a class="jxr_linenumber" name="L1019" href="#L1019">1019</a> <em class="jxr_javadoccomment">assertEquals("[]", asList.invoke().toString());</em>
+<a class="jxr_linenumber" name="L1020" href="#L1020">1020</a> <em class="jxr_javadoccomment">assertEquals("[1]", asList.invoke(1).toString());</em>
+<a class="jxr_linenumber" name="L1021" href="#L1021">1021</a> <em class="jxr_javadoccomment">assertEquals("[two, too]", asList.invoke("two", "too").toString());</em>
+<a class="jxr_linenumber" name="L1022" href="#L1022">1022</a> <em class="jxr_javadoccomment">String[] argv = { "three", "thee", "tee" };</em>
+<a class="jxr_linenumber" name="L1023" href="#L1023">1023</a> <em class="jxr_javadoccomment">assertEquals("[three, thee, tee]", asList.invoke(argv).toString());</em>
+<a class="jxr_linenumber" name="L1024" href="#L1024">1024</a> <em class="jxr_javadoccomment">assertEquals("[three, thee, tee]", asList.invoke((Object[])argv).toString());</em>
+<a class="jxr_linenumber" name="L1025" href="#L1025">1025</a> <em class="jxr_javadoccomment">List ls = (List) asList.invoke((Object)argv);</em>
+<a class="jxr_linenumber" name="L1026" href="#L1026">1026</a> <em class="jxr_javadoccomment">assertEquals(1, ls.size());</em>
+<a class="jxr_linenumber" name="L1027" href="#L1027">1027</a> <em class="jxr_javadoccomment">assertEquals("[three, thee, tee]", Arrays.toString((Object[])ls.get(0)));</em>
+<a class="jxr_linenumber" name="L1028" href="#L1028">1028</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;&lt;/blockquote&gt;</em>
+<a class="jxr_linenumber" name="L1029" href="#L1029">1029</a> <em class="jxr_javadoccomment">     * &lt;p style="font-size:smaller;"&gt;</em>
+<a class="jxr_linenumber" name="L1030" href="#L1030">1030</a> <em class="jxr_javadoccomment">     * &lt;em&gt;Discussion:&lt;/em&gt;</em>
+<a class="jxr_linenumber" name="L1031" href="#L1031">1031</a> <em class="jxr_javadoccomment">     * These rules are designed as a dynamically-typed variation</em>
+<a class="jxr_linenumber" name="L1032" href="#L1032">1032</a> <em class="jxr_javadoccomment">     * of the Java rules for variable arity methods.</em>
+<a class="jxr_linenumber" name="L1033" href="#L1033">1033</a> <em class="jxr_javadoccomment">     * In both cases, callers to a variable arity method or method handle</em>
+<a class="jxr_linenumber" name="L1034" href="#L1034">1034</a> <em class="jxr_javadoccomment">     * can either pass zero or more positional arguments, or else pass</em>
+<a class="jxr_linenumber" name="L1035" href="#L1035">1035</a> <em class="jxr_javadoccomment">     * pre-collected arrays of any length.  Users should be aware of the</em>
+<a class="jxr_linenumber" name="L1036" href="#L1036">1036</a> <em class="jxr_javadoccomment">     * special role of the final argument, and of the effect of a</em>
+<a class="jxr_linenumber" name="L1037" href="#L1037">1037</a> <em class="jxr_javadoccomment">     * type match on that final argument, which determines whether</em>
+<a class="jxr_linenumber" name="L1038" href="#L1038">1038</a> <em class="jxr_javadoccomment">     * or not a single trailing argument is interpreted as a whole</em>
+<a class="jxr_linenumber" name="L1039" href="#L1039">1039</a> <em class="jxr_javadoccomment">     * array or a single element of an array to be collected.</em>
+<a class="jxr_linenumber" name="L1040" href="#L1040">1040</a> <em class="jxr_javadoccomment">     * Note that the dynamic type of the trailing argument has no</em>
+<a class="jxr_linenumber" name="L1041" href="#L1041">1041</a> <em class="jxr_javadoccomment">     * effect on this decision, only a comparison between the symbolic</em>
+<a class="jxr_linenumber" name="L1042" href="#L1042">1042</a> <em class="jxr_javadoccomment">     * type descriptor of the call site and the type descriptor of the method handle.)</em>
+<a class="jxr_linenumber" name="L1043" href="#L1043">1043</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L1044" href="#L1044">1044</a> <em class="jxr_javadoccomment">     * @param arrayType often {@code Object[]}, the type of the array argument which will collect the arguments</em>
+<a class="jxr_linenumber" name="L1045" href="#L1045">1045</a> <em class="jxr_javadoccomment">     * @return a new method handle which can collect any number of trailing arguments</em>
+<a class="jxr_linenumber" name="L1046" href="#L1046">1046</a> <em class="jxr_javadoccomment">     *         into an array, before calling the original method handle</em>
+<a class="jxr_linenumber" name="L1047" href="#L1047">1047</a> <em class="jxr_javadoccomment">     * @throws NullPointerException if {@code arrayType} is a null reference</em>
+<a class="jxr_linenumber" name="L1048" href="#L1048">1048</a> <em class="jxr_javadoccomment">     * @throws IllegalArgumentException if {@code arrayType} is not an array type</em>
+<a class="jxr_linenumber" name="L1049" href="#L1049">1049</a> <em class="jxr_javadoccomment">     *         or {@code arrayType} is not assignable to this method handle's trailing parameter type</em>
+<a class="jxr_linenumber" name="L1050" href="#L1050">1050</a> <em class="jxr_javadoccomment">     * @see #asCollector</em>
+<a class="jxr_linenumber" name="L1051" href="#L1051">1051</a> <em class="jxr_javadoccomment">     * @see #isVarargsCollector</em>
+<a class="jxr_linenumber" name="L1052" href="#L1052">1052</a> <em class="jxr_javadoccomment">     * @see #asFixedArity</em>
+<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a>     <strong class="jxr_keyword">public</strong> MethodHandle asVarargsCollector(Class&lt;?&gt; arrayType) {
+<a class="jxr_linenumber" name="L1055" href="#L1055">1055</a>         Class&lt;?&gt; arrayElement = arrayType.getComponentType();
+<a class="jxr_linenumber" name="L1056" href="#L1056">1056</a>         <strong class="jxr_keyword">boolean</strong> lastMatch = asCollectorChecks(arrayType, 0);
+<a class="jxr_linenumber" name="L1057" href="#L1057">1057</a>         <strong class="jxr_keyword">if</strong> (isVarargsCollector() &amp;&amp; lastMatch)
+<a class="jxr_linenumber" name="L1058" href="#L1058">1058</a>             <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L1059" href="#L1059">1059</a>         <strong class="jxr_keyword">return</strong> AdapterMethodHandle.makeVarargsCollector(<strong class="jxr_keyword">this</strong>, arrayType);
+<a class="jxr_linenumber" name="L1060" href="#L1060">1060</a>     }
+<a class="jxr_linenumber" name="L1061" href="#L1061">1061</a> 
+<a class="jxr_linenumber" name="L1062" href="#L1062">1062</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1063" href="#L1063">1063</a> <em class="jxr_javadoccomment">     * Determines if this method handle</em>
+<a class="jxr_linenumber" name="L1064" href="#L1064">1064</a> <em class="jxr_javadoccomment">     * supports {@linkplain #asVarargsCollector variable arity} calls.</em>
+<a class="jxr_linenumber" name="L1065" href="#L1065">1065</a> <em class="jxr_javadoccomment">     * Such method handles arise from the following sources:</em>
+<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a> <em class="jxr_javadoccomment">     * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a> <em class="jxr_javadoccomment">     * &lt;li&gt;a call to {@linkplain #asVarargsCollector asVarargsCollector}</em>
+<a class="jxr_linenumber" name="L1068" href="#L1068">1068</a> <em class="jxr_javadoccomment">     * &lt;li&gt;a call to a {@linkplain java.lang.invoke.MethodHandles.Lookup lookup method}</em>
+<a class="jxr_linenumber" name="L1069" href="#L1069">1069</a> <em class="jxr_javadoccomment">     *     which resolves to a variable arity Java method or constructor</em>
+<a class="jxr_linenumber" name="L1070" href="#L1070">1070</a> <em class="jxr_javadoccomment">     * &lt;li&gt;an {@code ldc} instruction of a {@code CONSTANT_MethodHandle}</em>
+<a class="jxr_linenumber" name="L1071" href="#L1071">1071</a> <em class="jxr_javadoccomment">     *     which resolves to a variable arity Java method or constructor</em>
+<a class="jxr_linenumber" name="L1072" href="#L1072">1072</a> <em class="jxr_javadoccomment">     * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L1073" href="#L1073">1073</a> <em class="jxr_javadoccomment">     * @return true if this method handle accepts more than one arity of plain, inexact {@code invoke} calls</em>
+<a class="jxr_linenumber" name="L1074" href="#L1074">1074</a> <em class="jxr_javadoccomment">     * @see #asVarargsCollector</em>
+<a class="jxr_linenumber" name="L1075" href="#L1075">1075</a> <em class="jxr_javadoccomment">     * @see #asFixedArity</em>
+<a class="jxr_linenumber" name="L1076" href="#L1076">1076</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1077" href="#L1077">1077</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> isVarargsCollector() {
+<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a>         <strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a>     }
+<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a> 
+<a class="jxr_linenumber" name="L1081" href="#L1081">1081</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1082" href="#L1082">1082</a> <em class="jxr_javadoccomment">     * Makes a &lt;em&gt;fixed arity&lt;/em&gt; method handle which is otherwise</em>
+<a class="jxr_linenumber" name="L1083" href="#L1083">1083</a> <em class="jxr_javadoccomment">     * equivalent to the the current method handle.</em>
+<a class="jxr_linenumber" name="L1084" href="#L1084">1084</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1085" href="#L1085">1085</a> <em class="jxr_javadoccomment">     * If the current method handle is not of</em>
+<a class="jxr_linenumber" name="L1086" href="#L1086">1086</a> <em class="jxr_javadoccomment">     * {@linkplain #asVarargsCollector variable arity},</em>
+<a class="jxr_linenumber" name="L1087" href="#L1087">1087</a> <em class="jxr_javadoccomment">     * the current method handle is returned.</em>
+<a class="jxr_linenumber" name="L1088" href="#L1088">1088</a> <em class="jxr_javadoccomment">     * This is true even if the current method handle</em>
+<a class="jxr_linenumber" name="L1089" href="#L1089">1089</a> <em class="jxr_javadoccomment">     * could not be a valid input to {@code asVarargsCollector}.</em>
+<a class="jxr_linenumber" name="L1090" href="#L1090">1090</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a> <em class="jxr_javadoccomment">     * Otherwise, the resulting fixed-arity method handle has the same</em>
+<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a> <em class="jxr_javadoccomment">     * type and behavior of the current method handle,</em>
+<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a> <em class="jxr_javadoccomment">     * except that {@link #isVarargsCollector isVarargsCollector}</em>
+<a class="jxr_linenumber" name="L1094" href="#L1094">1094</a> <em class="jxr_javadoccomment">     * will be false.</em>
+<a class="jxr_linenumber" name="L1095" href="#L1095">1095</a> <em class="jxr_javadoccomment">     * The fixed-arity method handle may (or may not) be the</em>
+<a class="jxr_linenumber" name="L1096" href="#L1096">1096</a> <em class="jxr_javadoccomment">     * a previous argument to {@code asVarargsCollector}.</em>
+<a class="jxr_linenumber" name="L1097" href="#L1097">1097</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1098" href="#L1098">1098</a> <em class="jxr_javadoccomment">     * Here is an example, of a list-making variable arity method handle:</em>
+<a class="jxr_linenumber" name="L1099" href="#L1099">1099</a> <em class="jxr_javadoccomment">     * &lt;blockquote&gt;&lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L1100" href="#L1100">1100</a> <em class="jxr_javadoccomment">MethodHandle asListVar = publicLookup()</em>
+<a class="jxr_linenumber" name="L1101" href="#L1101">1101</a> <em class="jxr_javadoccomment">  .findStatic(Arrays.class, "asList", methodType(List.class, Object[].class))</em>
+<a class="jxr_linenumber" name="L1102" href="#L1102">1102</a> <em class="jxr_javadoccomment">  .asVarargsCollector(Object[].class);</em>
+<a class="jxr_linenumber" name="L1103" href="#L1103">1103</a> <em class="jxr_javadoccomment">MethodHandle asListFix = asListVar.asFixedArity();</em>
+<a class="jxr_linenumber" name="L1104" href="#L1104">1104</a> <em class="jxr_javadoccomment">assertEquals("[1]", asListVar.invoke(1).toString());</em>
+<a class="jxr_linenumber" name="L1105" href="#L1105">1105</a> <em class="jxr_javadoccomment">Exception caught = null;</em>
+<a class="jxr_linenumber" name="L1106" href="#L1106">1106</a> <em class="jxr_javadoccomment">try { asListFix.invoke((Object)1); }</em>
+<a class="jxr_linenumber" name="L1107" href="#L1107">1107</a> <em class="jxr_javadoccomment">catch (Exception ex) { caught = ex; }</em>
+<a class="jxr_linenumber" name="L1108" href="#L1108">1108</a> <em class="jxr_javadoccomment">assert(caught instanceof ClassCastException);</em>
+<a class="jxr_linenumber" name="L1109" href="#L1109">1109</a> <em class="jxr_javadoccomment">assertEquals("[two, too]", asListVar.invoke("two", "too").toString());</em>
+<a class="jxr_linenumber" name="L1110" href="#L1110">1110</a> <em class="jxr_javadoccomment">try { asListFix.invoke("two", "too"); }</em>
+<a class="jxr_linenumber" name="L1111" href="#L1111">1111</a> <em class="jxr_javadoccomment">catch (Exception ex) { caught = ex; }</em>
+<a class="jxr_linenumber" name="L1112" href="#L1112">1112</a> <em class="jxr_javadoccomment">assert(caught instanceof WrongMethodTypeException);</em>
+<a class="jxr_linenumber" name="L1113" href="#L1113">1113</a> <em class="jxr_javadoccomment">Object[] argv = { "three", "thee", "tee" };</em>
+<a class="jxr_linenumber" name="L1114" href="#L1114">1114</a> <em class="jxr_javadoccomment">assertEquals("[three, thee, tee]", asListVar.invoke(argv).toString());</em>
+<a class="jxr_linenumber" name="L1115" href="#L1115">1115</a> <em class="jxr_javadoccomment">assertEquals("[three, thee, tee]", asListFix.invoke(argv).toString());</em>
+<a class="jxr_linenumber" name="L1116" href="#L1116">1116</a> <em class="jxr_javadoccomment">assertEquals(1, ((List) asListVar.invoke((Object)argv)).size());</em>
+<a class="jxr_linenumber" name="L1117" href="#L1117">1117</a> <em class="jxr_javadoccomment">assertEquals("[three, thee, tee]", asListFix.invoke((Object)argv).toString());</em>
+<a class="jxr_linenumber" name="L1118" href="#L1118">1118</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;&lt;/blockquote&gt;</em>
+<a class="jxr_linenumber" name="L1119" href="#L1119">1119</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L1120" href="#L1120">1120</a> <em class="jxr_javadoccomment">     * @return a new method handle which accepts only a fixed number of arguments</em>
+<a class="jxr_linenumber" name="L1121" href="#L1121">1121</a> <em class="jxr_javadoccomment">     * @see #asVarargsCollector</em>
+<a class="jxr_linenumber" name="L1122" href="#L1122">1122</a> <em class="jxr_javadoccomment">     * @see #isVarargsCollector</em>
+<a class="jxr_linenumber" name="L1123" href="#L1123">1123</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1124" href="#L1124">1124</a>     <strong class="jxr_keyword">public</strong> MethodHandle asFixedArity() {
+<a class="jxr_linenumber" name="L1125" href="#L1125">1125</a>         assert(!isVarargsCollector());
+<a class="jxr_linenumber" name="L1126" href="#L1126">1126</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L1127" href="#L1127">1127</a>     }
+<a class="jxr_linenumber" name="L1128" href="#L1128">1128</a> 
+<a class="jxr_linenumber" name="L1129" href="#L1129">1129</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1130" href="#L1130">1130</a> <em class="jxr_javadoccomment">     * Binds a value {@code x} to the first argument of a method handle, without invoking it.</em>
+<a class="jxr_linenumber" name="L1131" href="#L1131">1131</a> <em class="jxr_javadoccomment">     * The new method handle adapts, as its &lt;i&gt;target&lt;/i&gt;,</em>
+<a class="jxr_linenumber" name="L1132" href="#L1132">1132</a> <em class="jxr_javadoccomment">     * the current method handle by binding it to the given argument.</em>
+<a class="jxr_linenumber" name="L1133" href="#L1133">1133</a> <em class="jxr_javadoccomment">     * The type of the bound handle will be</em>
+<a class="jxr_linenumber" name="L1134" href="#L1134">1134</a> <em class="jxr_javadoccomment">     * the same as the type of the target, except that a single leading</em>
+<a class="jxr_linenumber" name="L1135" href="#L1135">1135</a> <em class="jxr_javadoccomment">     * reference parameter will be omitted.</em>
+<a class="jxr_linenumber" name="L1136" href="#L1136">1136</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1137" href="#L1137">1137</a> <em class="jxr_javadoccomment">     * When called, the bound handle inserts the given value {@code x}</em>
+<a class="jxr_linenumber" name="L1138" href="#L1138">1138</a> <em class="jxr_javadoccomment">     * as a new leading argument to the target.  The other arguments are</em>
+<a class="jxr_linenumber" name="L1139" href="#L1139">1139</a> <em class="jxr_javadoccomment">     * also passed unchanged.</em>
+<a class="jxr_linenumber" name="L1140" href="#L1140">1140</a> <em class="jxr_javadoccomment">     * What the target eventually returns is returned unchanged by the bound handle.</em>
+<a class="jxr_linenumber" name="L1141" href="#L1141">1141</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1142" href="#L1142">1142</a> <em class="jxr_javadoccomment">     * The reference {@code x} must be convertible to the first parameter</em>
+<a class="jxr_linenumber" name="L1143" href="#L1143">1143</a> <em class="jxr_javadoccomment">     * type of the target.</em>
+<a class="jxr_linenumber" name="L1144" href="#L1144">1144</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1145" href="#L1145">1145</a> <em class="jxr_javadoccomment">     * (&lt;em&gt;Note:&lt;/em&gt;  Because method handles are immutable, the target method handle</em>
+<a class="jxr_linenumber" name="L1146" href="#L1146">1146</a> <em class="jxr_javadoccomment">     * retains its original type and behavior.)</em>
+<a class="jxr_linenumber" name="L1147" href="#L1147">1147</a> <em class="jxr_javadoccomment">     * @param x  the value to bind to the first argument of the target</em>
+<a class="jxr_linenumber" name="L1148" href="#L1148">1148</a> <em class="jxr_javadoccomment">     * @return a new method handle which prepends the given value to the incoming</em>
+<a class="jxr_linenumber" name="L1149" href="#L1149">1149</a> <em class="jxr_javadoccomment">     *         argument list, before calling the original method handle</em>
+<a class="jxr_linenumber" name="L1150" href="#L1150">1150</a> <em class="jxr_javadoccomment">     * @throws IllegalArgumentException if the target does not have a</em>
+<a class="jxr_linenumber" name="L1151" href="#L1151">1151</a> <em class="jxr_javadoccomment">     *         leading parameter type that is a reference type</em>
+<a class="jxr_linenumber" name="L1152" href="#L1152">1152</a> <em class="jxr_javadoccomment">     * @throws ClassCastException if {@code x} cannot be converted</em>
+<a class="jxr_linenumber" name="L1153" href="#L1153">1153</a> <em class="jxr_javadoccomment">     *         to the leading parameter type of the target</em>
+<a class="jxr_linenumber" name="L1154" href="#L1154">1154</a> <em class="jxr_javadoccomment">     * @see MethodHandles#insertArguments</em>
+<a class="jxr_linenumber" name="L1155" href="#L1155">1155</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1156" href="#L1156">1156</a>     <strong class="jxr_keyword">public</strong> MethodHandle bindTo(Object x) {
+<a class="jxr_linenumber" name="L1157" href="#L1157">1157</a>         Class&lt;?&gt; ptype;
+<a class="jxr_linenumber" name="L1158" href="#L1158">1158</a>         <strong class="jxr_keyword">if</strong> (type().parameterCount() == 0 ||
+<a class="jxr_linenumber" name="L1159" href="#L1159">1159</a>             (ptype = type().parameterType(0)).isPrimitive())
+<a class="jxr_linenumber" name="L1160" href="#L1160">1160</a>             <strong class="jxr_keyword">throw</strong> newIllegalArgumentException(<span class="jxr_string">"no leading reference parameter"</span>, x);
+<a class="jxr_linenumber" name="L1161" href="#L1161">1161</a>         x = MethodHandles.checkValue(ptype, x);
+<a class="jxr_linenumber" name="L1162" href="#L1162">1162</a>         <em class="jxr_comment">// Cf. MethodHandles.insertArguments for the following logic:</em>
+<a class="jxr_linenumber" name="L1163" href="#L1163">1163</a>         MethodHandle bmh = MethodHandleImpl.bindReceiver(<strong class="jxr_keyword">this</strong>, x);
+<a class="jxr_linenumber" name="L1164" href="#L1164">1164</a>         <strong class="jxr_keyword">if</strong> (bmh != <strong class="jxr_keyword">null</strong>)  <strong class="jxr_keyword">return</strong> bmh;
+<a class="jxr_linenumber" name="L1165" href="#L1165">1165</a>         <strong class="jxr_keyword">return</strong> MethodHandleImpl.bindArgument(<strong class="jxr_keyword">this</strong>, 0, x);
+<a class="jxr_linenumber" name="L1166" href="#L1166">1166</a>     }
+<a class="jxr_linenumber" name="L1167" href="#L1167">1167</a> 
+<a class="jxr_linenumber" name="L1168" href="#L1168">1168</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1169" href="#L1169">1169</a> <em class="jxr_javadoccomment">     * Returns a string representation of the method handle,</em>
+<a class="jxr_linenumber" name="L1170" href="#L1170">1170</a> <em class="jxr_javadoccomment">     * starting with the string {@code "MethodHandle"} and</em>
+<a class="jxr_linenumber" name="L1171" href="#L1171">1171</a> <em class="jxr_javadoccomment">     * ending with the string representation of the method handle's type.</em>
+<a class="jxr_linenumber" name="L1172" href="#L1172">1172</a> <em class="jxr_javadoccomment">     * In other words, this method returns a string equal to the value of:</em>
+<a class="jxr_linenumber" name="L1173" href="#L1173">1173</a> <em class="jxr_javadoccomment">     * &lt;blockquote&gt;&lt;pre&gt;</em>
+<a class="jxr_linenumber" name="L1174" href="#L1174">1174</a> <em class="jxr_javadoccomment">     * "MethodHandle" + type().toString()</em>
+<a class="jxr_linenumber" name="L1175" href="#L1175">1175</a> <em class="jxr_javadoccomment">     * &lt;/pre&gt;&lt;/blockquote&gt;</em>
+<a class="jxr_linenumber" name="L1176" href="#L1176">1176</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L1177" href="#L1177">1177</a> <em class="jxr_javadoccomment">     * (&lt;em&gt;Note:&lt;/em&gt;  Future releases of this API may add further information</em>
+<a class="jxr_linenumber" name="L1178" href="#L1178">1178</a> <em class="jxr_javadoccomment">     * to the string representation.</em>
+<a class="jxr_linenumber" name="L1179" href="#L1179">1179</a> <em class="jxr_javadoccomment">     * Therefore, the present syntax should not be parsed by applications.)</em>
+<a class="jxr_linenumber" name="L1180" href="#L1180">1180</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L1181" href="#L1181">1181</a> <em class="jxr_javadoccomment">     * @return a string representation of the method handle</em>
+<a class="jxr_linenumber" name="L1182" href="#L1182">1182</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L1183" href="#L1183">1183</a>     @Override
+<a class="jxr_linenumber" name="L1184" href="#L1184">1184</a>     <strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L1185" href="#L1185">1185</a>         <strong class="jxr_keyword">if</strong> (DEBUG_METHOD_HANDLE_NAMES)  <strong class="jxr_keyword">return</strong> debugString();
+<a class="jxr_linenumber" name="L1186" href="#L1186">1186</a>         <strong class="jxr_keyword">return</strong> <span class="jxr_string">"MethodHandle"</span>+type;
+<a class="jxr_linenumber" name="L1187" href="#L1187">1187</a>     }
+<a class="jxr_linenumber" name="L1188" href="#L1188">1188</a> 
+<a class="jxr_linenumber" name="L1189" href="#L1189">1189</a>     <em class="jxr_comment">/*non-public*/</em>
+<a class="jxr_linenumber" name="L1190" href="#L1190">1190</a>     String debugString() {
+<a class="jxr_linenumber" name="L1191" href="#L1191">1191</a>         <strong class="jxr_keyword">return</strong> getNameString(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L1192" href="#L1192">1192</a>     }
+<a class="jxr_linenumber" name="L1193" href="#L1193">1193</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

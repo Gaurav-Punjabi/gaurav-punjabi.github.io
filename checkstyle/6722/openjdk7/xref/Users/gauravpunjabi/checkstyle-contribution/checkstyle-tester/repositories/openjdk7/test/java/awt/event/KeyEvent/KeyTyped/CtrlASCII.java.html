@@ -1,0 +1,453 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>CtrlASCII xref</title>
+<link type="text/css" rel="stylesheet" href="../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright (c) 2007, Oracle and/or its affiliates. All rights reserved.</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * This code is free software; you can redistribute it and/or modify it</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * under the terms of the GNU General Public License version 2 only, as</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * published by the Free Software Foundation.</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * This code is distributed in the hope that it will be useful, but WITHOUT</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * version 2 for more details (a copy is included in the LICENSE file that</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * accompanied this code).</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * You should have received a copy of the GNU General Public License version</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * 2 along with this work; if not, write to the Free Software Foundation,</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA</em>
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * or visit www.oracle.com if you need additional information or have any</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * questions.</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_comment"> * test</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_comment"> * @bug 6497426</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_comment"> * @summary Tests that pressing of Ctrl+ascii mostly fires KEY_TYPED with a Unicode control symbols</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_comment"> * @author Yuri.Nesterenko@... area=awt.keyboard</em>
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_comment"> * @run applet CtrlASCII.html</em>
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_comment">// Note there is no @ in front of test above.  This is so that the</em>
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_comment">//  harness will not mistake this file as a test file.  It should</em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_comment">//  only see the html file as a test file. (the harness runs all</em>
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_comment">//  valid test files, so it would run this test twice if this file</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_comment">//  were valid as well as the html file.)</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_comment">// Also, note the area= after Your Name in the author tag.  Here, you</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_comment">//  should put which functional area the test falls in.  See the</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_comment">//  AWT-core home page -&gt; test areas and/or -&gt; AWT team  for a list of</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_comment">//  areas.</em>
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_comment">// Note also the 'RobotLWTest.html' in the run tag.  This should</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_comment">//  be changed to the name of the test.</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment"> * CtrlASCII.java</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment"> * @summary Tests that pressing of Ctrl+ascii mostly fires KEY_TYPED with a Unicode control symbols</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> java.applet.Applet;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">import</strong> java.awt.*;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <strong class="jxr_keyword">import</strong> java.awt.event.*;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">import</strong> java.util.*;
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_comment">// In this test, a key listener for KEY_TYPED checks if a character typed has</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_comment">// a correspondent keycode in an initially filled hashtable.</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_comment">// If it does not, test fails. If character was produced by</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_comment">// pressing a wrong key still listed in the hashtable, test cannot detect it.</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_comment">// Under MS Windows, unlike X Window, some Ctrl+Ascii keystrokes don't</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_comment">// produce a unicode character, so there will be no KEY_TYPED and no problem.</em>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_comment">// Test doesn't try to verify Ctrl+deadkey behavior.</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_comment">//</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> CtrlASCII <strong class="jxr_keyword">extends</strong> Applet <strong class="jxr_keyword">implements</strong> KeyListener
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  {
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>      <em class="jxr_comment">// Declare things used in the test, like buttons and labels here</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>      <strong class="jxr_keyword">static</strong> Hashtable&lt;Character, Integer&gt; keycharHash = <strong class="jxr_keyword">new</strong> Hashtable&lt;Character, Integer&gt;();
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> testFailed = false;
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>      <em class="jxr_comment">//Frame frame;</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>      TextField tf;
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>      Robot robot;
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>      <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> fillHash( <strong class="jxr_keyword">boolean</strong> isMSWindows ) {
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x20         , KeyEvent.VK_SPACE        );                      <em class="jxr_comment">/*32,x20*/</em> <em class="jxr_comment">/*' ' */</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x21         , KeyEvent.VK_EXCLAMATION_MARK        );           <em class="jxr_comment">/*33,x21*/</em> <em class="jxr_comment">/*'!' fr*/</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x22         , KeyEvent.VK_QUOTEDBL        );                   <em class="jxr_comment">/*34,x22*/</em> <em class="jxr_comment">/*'&quot;' fr*/</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x23         , KeyEvent.VK_NUMBER_SIGN        );                <em class="jxr_comment">/*35,x23*/</em> <em class="jxr_comment">/*'#' de*/</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x24         , KeyEvent.VK_DOLLAR        );                      <em class="jxr_comment">/*36,x24*/</em> <em class="jxr_comment">/*'$', de_CH*/</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>          <em class="jxr_comment">//keycharHash.put('%',                                  (char)0x25        );                                  /*37,x25*/ /*no VK, cannot test*/</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x26    , KeyEvent.VK_AMPERSAND        );                  <em class="jxr_comment">/*38,x26*/</em> <em class="jxr_comment">/*'&amp;', fr*/</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x27    , KeyEvent.VK_QUOTE        );                      <em class="jxr_comment">/*39,x27*/</em> <em class="jxr_comment">/*''', fr*/</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x28    , KeyEvent.VK_LEFT_PARENTHESIS        );           <em class="jxr_comment">/*40,x28*/</em> <em class="jxr_comment">/*'(', fr*/</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x29    , KeyEvent.VK_RIGHT_PARENTHESIS        );           <em class="jxr_comment">/*41,x29*/</em> <em class="jxr_comment">/*')', fr*/</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x2a    , KeyEvent.VK_ASTERISK        );                    <em class="jxr_comment">/*42,x2a*/</em> <em class="jxr_comment">/*'*', fr*/</em>
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x2b    , KeyEvent.VK_PLUS        );                        <em class="jxr_comment">/*43,x2b*/</em> <em class="jxr_comment">/*'+', de*/</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x2c    , KeyEvent.VK_COMMA        );                       <em class="jxr_comment">/*44,x2c*/</em>  <em class="jxr_comment">/*','*/</em>
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x2d    , KeyEvent.VK_MINUS        );                       <em class="jxr_comment">/*45,x2d*/</em> <em class="jxr_comment">/*'-'*/</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x2e    , KeyEvent.VK_PERIOD        );                      <em class="jxr_comment">/*46,x2e*/</em> <em class="jxr_comment">/*'.'*/</em>
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x2f    , KeyEvent.VK_SLASH        );                       <em class="jxr_comment">/*47,x2f*/</em> <em class="jxr_comment">/*'/'*/</em>
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x30    , KeyEvent.VK_0        );                           <em class="jxr_comment">/*48,x30*/</em>
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x31    , KeyEvent.VK_1        );                           <em class="jxr_comment">/*49,x31*/</em>
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x32    , KeyEvent.VK_2        );                           <em class="jxr_comment">/*50,x32*/</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x33    , KeyEvent.VK_3        );                           <em class="jxr_comment">/*51,x33*/</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x34    , KeyEvent.VK_4        );                           <em class="jxr_comment">/*52,x34*/</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x35    , KeyEvent.VK_5        );                           <em class="jxr_comment">/*53,x35*/</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>          keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x36    , KeyEvent.VK_6        );                           <em class="jxr_comment">/*54,x36*/</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x37    , KeyEvent.VK_7        );                           <em class="jxr_comment">/*55,x37*/</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x38    , KeyEvent.VK_8        );                           <em class="jxr_comment">/*56,x38*/</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x39    , KeyEvent.VK_9        );                           <em class="jxr_comment">/*57,x39*/</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x3a    , KeyEvent.VK_COLON        );                       <em class="jxr_comment">/*58,x3a*/</em> <em class="jxr_comment">/*':', fr*/</em>
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x3b    , KeyEvent.VK_SEMICOLON        );                   <em class="jxr_comment">/*59,x3b*/</em> <em class="jxr_comment">/*';'*/</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x3c    , KeyEvent.VK_LESS        );                        <em class="jxr_comment">/*60,x3c*/</em> <em class="jxr_comment">/*'&lt;' us 102*/</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x3d    , KeyEvent.VK_EQUALS        );                      <em class="jxr_comment">/*61,x3d*/</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x3e    , KeyEvent.VK_GREATER        );                     <em class="jxr_comment">/*62,x3e*/</em> <em class="jxr_comment">/*'&gt;' ?????? where???*/</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>             <em class="jxr_comment">// Javadoc says: "there is no keycode for the question mark because</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>             <em class="jxr_comment">// there is no keyboard for which it appears on the primary layer."</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>             <em class="jxr_comment">// Well, it's Lithuanian standard.</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>         <em class="jxr_comment">//keycharHash.put('?',                                 (char)0x3f        );                                   /*63,x3f*/ /*no VK, cannot test*/</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x40   , KeyEvent.VK_AT        );                          <em class="jxr_comment">/*64,x40*/</em> <em class="jxr_comment">/*'@' ?????? where???*/</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x1    , KeyEvent.VK_A        );                             <em class="jxr_comment">/*65,x41*/</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x2    , KeyEvent.VK_B        );                            <em class="jxr_comment">/*66,x42*/</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x3    , KeyEvent.VK_C        );                            <em class="jxr_comment">/*67,x43*/</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x4    , KeyEvent.VK_D        );                            <em class="jxr_comment">/*68,x44*/</em>
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x5    , KeyEvent.VK_E        );                            <em class="jxr_comment">/*69,x45*/</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x6    , KeyEvent.VK_F        );                            <em class="jxr_comment">/*70,x46*/</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x7    , KeyEvent.VK_G        );                            <em class="jxr_comment">/*71,x47*/</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x8    , KeyEvent.VK_H        );                            <em class="jxr_comment">/*72,x48*/</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x9    , KeyEvent.VK_I        );                            <em class="jxr_comment">/*73,x49*/</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0xa    , KeyEvent.VK_J        );                            <em class="jxr_comment">/*74,x4a*/</em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0xb    , KeyEvent.VK_K        );                            <em class="jxr_comment">/*75,x4b*/</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0xc    , KeyEvent.VK_L        );                            <em class="jxr_comment">/*76,x4c*/</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0xd    , KeyEvent.VK_M        );                            <em class="jxr_comment">/*77,x4d*/</em>
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0xe    , KeyEvent.VK_N        );                            <em class="jxr_comment">/*78,x4e*/</em>
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0xf    , KeyEvent.VK_O        );                            <em class="jxr_comment">/*79,x4f*/</em>
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x10   , KeyEvent.VK_P        );                           <em class="jxr_comment">/*80,x50*/</em>
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x11   , KeyEvent.VK_Q        );                           <em class="jxr_comment">/*81,x51*/</em>
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x12   , KeyEvent.VK_R        );                           <em class="jxr_comment">/*82,x52*/</em>
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x13   , KeyEvent.VK_S        );                           <em class="jxr_comment">/*83,x53*/</em>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x14   , KeyEvent.VK_T        );                           <em class="jxr_comment">/*84,x54*/</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x15   , KeyEvent.VK_U        );                           <em class="jxr_comment">/*85,x55*/</em>
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x16   , KeyEvent.VK_V        );                           <em class="jxr_comment">/*86,x56*/</em>
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x17   , KeyEvent.VK_W        );                           <em class="jxr_comment">/*87,x57*/</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x18   , KeyEvent.VK_X        );                           <em class="jxr_comment">/*88,x58*/</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x19   , KeyEvent.VK_Y        );                           <em class="jxr_comment">/*89,x59*/</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x1a   , KeyEvent.VK_Z        );                           <em class="jxr_comment">/*90,x5a*/</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 
+<a class="jxr_linenumber" name="L140" href="#L140">140</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x1b   , KeyEvent.VK_OPEN_BRACKET        );             <em class="jxr_comment">/*91,x5b*/</em> <em class="jxr_comment">/*'['*/</em>
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x1c   , KeyEvent.VK_BACK_SLASH        );               <em class="jxr_comment">/*92,x5c*/</em> <em class="jxr_comment">/*'\'*/</em>
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x1d   , KeyEvent.VK_CLOSE_BRACKET        );            <em class="jxr_comment">/*93,x5d*/</em> <em class="jxr_comment">/*']'*/</em>
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x5e   , KeyEvent.VK_CIRCUMFLEX        );               <em class="jxr_comment">/*94,x5e*/</em>  <em class="jxr_comment">/*'^' ?? nodead fr, de??*/</em>
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x1f   , KeyEvent.VK_UNDERSCORE        );               <em class="jxr_comment">/*95,x5f*/</em>  <em class="jxr_comment">/*'_' fr*/</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x60   , KeyEvent.VK_BACK_QUOTE        );               <em class="jxr_comment">/*96,x60*/</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>         <em class="jxr_javadoccomment">/********* Same as uppercase*/</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x1         , KeyEvent.VK_a        );/*97,x61*/</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x2         , KeyEvent.VK_b        );/*98,x62*/</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x3         , KeyEvent.VK_c        );/*99,x63*/</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x4         , KeyEvent.VK_d        );/*100,x64*/</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x5         , KeyEvent.VK_e        );/*101,x65*/</em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x6         , KeyEvent.VK_f        );/*102,x66*/</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x7         , KeyEvent.VK_g        );/*103,x67*/</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x8         , KeyEvent.VK_h        );/*104,x68*/</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x9         , KeyEvent.VK_i        );/*105,x69*/</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a>         <em class="jxr_comment">//keycharHash.put(  (char)0xa         , KeyEvent.VK_j        );/*106,x6a*/</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>         <em class="jxr_comment">//keycharHash.put(  (char)0xb         , KeyEvent.VK_k        );/*107,x6b*/</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>         <em class="jxr_comment">//keycharHash.put(  (char)0xc         , KeyEvent.VK_l        );/*108,x6c*/</em>
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>         <em class="jxr_comment">//keycharHash.put(  (char)0xd         , KeyEvent.VK_m        );/*109,x6d*/</em>
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>         <em class="jxr_comment">//keycharHash.put(  (char)0xe         , KeyEvent.VK_n        );/*110,x6e*/</em>
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>         <em class="jxr_comment">//keycharHash.put(  (char)0xf         , KeyEvent.VK_o        );/*111,x6f*/</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x10        , KeyEvent.VK_p        );/*112,x70*/</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x11        , KeyEvent.VK_q        );/*113,x71*/</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x12        , KeyEvent.VK_r        );/*114,x72*/</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x13        , KeyEvent.VK_s        );/*115,x73*/</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x14        , KeyEvent.VK_t        );/*116,x74*/</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x15        , KeyEvent.VK_u        );/*117,x75*/</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x16        , KeyEvent.VK_v        );/*118,x76*/</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x17        , KeyEvent.VK_w        );/*119,x77*/</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x18        , KeyEvent.VK_x        );/*120,x78*/</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x19        , KeyEvent.VK_y        );/*121,x79*/</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x1a        , KeyEvent.VK_z        );/*122,x7a*/</em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 
+<a class="jxr_linenumber" name="L174" href="#L174">174</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x7b      , KeyEvent.VK_BRACELEFT        );             <em class="jxr_comment">/*123,x7b*/</em> <em class="jxr_comment">/*'{' la (Latin American)*/</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x1c        , KeyEvent.VK_|        );                   /*124,x7c*/ /* no VK, cannot test*/</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a>         keycharHash.put(    (<strong class="jxr_keyword">char</strong>)0x7d      , KeyEvent.VK_BRACERIGHT        );            <em class="jxr_comment">/*125,x7d*/</em> <em class="jxr_comment">/*'}' la */</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a>         <em class="jxr_comment">//keycharHash.put(  (char)0x1e        , KeyEvent.VK_~        );                   /*126,x7e*/ /* no VK, cannot test*/</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>     }
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> main(String[] args) {
+<a class="jxr_linenumber" name="L182" href="#L182">182</a>         CtrlASCII test = <strong class="jxr_keyword">new</strong> CtrlASCII();
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>         test.init();
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>         test.start();
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>     }
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> init()
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>     {
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>         <em class="jxr_comment">//Create instructions for the user here, as well as set up</em>
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>         <em class="jxr_comment">// the environment -- set the layout manager, add buttons,</em>
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>         <em class="jxr_comment">// etc.</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>         <em class="jxr_comment">// XXX test for MS Windows</em>
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>         fillHash( false );
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>         <strong class="jxr_keyword">this</strong>.setLayout (<strong class="jxr_keyword">new</strong> BorderLayout ());
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>         String[] instructions =
+<a class="jxr_linenumber" name="L197" href="#L197">197</a>         {
+<a class="jxr_linenumber" name="L198" href="#L198">198</a>             <span class="jxr_string">"This is an AUTOMATIC test"</span>,
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>             <span class="jxr_string">"simply wait until it is done"</span>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a>         };
+<a class="jxr_linenumber" name="L201" href="#L201">201</a>         Sysout.createDialog( );
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>         Sysout.printInstructions( instructions );
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 
+<a class="jxr_linenumber" name="L204" href="#L204">204</a>     }<em class="jxr_comment">//End  init()</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> 
+<a class="jxr_linenumber" name="L206" href="#L206">206</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> start ()
+<a class="jxr_linenumber" name="L207" href="#L207">207</a>     {
+<a class="jxr_linenumber" name="L208" href="#L208">208</a>         <em class="jxr_comment">//Get things going.  Request focus, set size, et cetera</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> 
+<a class="jxr_linenumber" name="L210" href="#L210">210</a>         setSize(400,300);
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>         setVisible(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>         <em class="jxr_comment">//What would normally go into main() will probably go here.</em>
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>         <em class="jxr_comment">//Use System.out.println for diagnostic messages that you want</em>
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>         <em class="jxr_comment">//to read after the test is done.</em>
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>         <em class="jxr_comment">//Use Sysout.println for messages you want the tester to read.</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>         String original = <span class="jxr_string">"0123456789"</span>;
+<a class="jxr_linenumber" name="L219" href="#L219">219</a>         tf = <strong class="jxr_keyword">new</strong> TextField(original, 20);
+<a class="jxr_linenumber" name="L220" href="#L220">220</a>         <strong class="jxr_keyword">this</strong>.add(tf);
+<a class="jxr_linenumber" name="L221" href="#L221">221</a>         tf.addKeyListener(<strong class="jxr_keyword">this</strong>);
+<a class="jxr_linenumber" name="L222" href="#L222">222</a>         validate();
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 
+<a class="jxr_linenumber" name="L224" href="#L224">224</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L225" href="#L225">225</a>             robot = <strong class="jxr_keyword">new</strong> Robot();
+<a class="jxr_linenumber" name="L226" href="#L226">226</a>             robot.setAutoWaitForIdle(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>             robot.setAutoDelay(100);
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> 
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>             robot.waitForIdle();
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> 
+<a class="jxr_linenumber" name="L231" href="#L231">231</a>             <em class="jxr_comment">// wait for focus, etc.  (Hack.)</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>             robot.delay(2000);
+<a class="jxr_linenumber" name="L233" href="#L233">233</a>             <strong class="jxr_keyword">this</strong>.requestFocus();
+<a class="jxr_linenumber" name="L234" href="#L234">234</a>             tf.requestFocusInWindow();
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> 
+<a class="jxr_linenumber" name="L236" href="#L236">236</a>             Point pt = getLocationOnScreen();
+<a class="jxr_linenumber" name="L237" href="#L237">237</a>             robot.mouseMove( pt.x+100, pt.y+100 );
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>             robot.delay(2000);
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>             robot.mousePress( InputEvent.BUTTON1_MASK );
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>             robot.mouseRelease( InputEvent.BUTTON1_MASK );
+<a class="jxr_linenumber" name="L241" href="#L241">241</a>             Enumeration&lt;Integer&gt; enuElem = keycharHash.elements();
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> 
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>             <strong class="jxr_keyword">int</strong> kc;
+<a class="jxr_linenumber" name="L244" href="#L244">244</a>             <strong class="jxr_keyword">while</strong>( enuElem.hasMoreElements()) {
+<a class="jxr_linenumber" name="L245" href="#L245">245</a>                 kc = enuElem.nextElement();
+<a class="jxr_linenumber" name="L246" href="#L246">246</a>                 punchCtrlKey( robot, kc );
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>             }
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>             robot.delay(500);
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>         } <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L250" href="#L250">250</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(<span class="jxr_string">"The test was not completed.\n\n"</span> + e);
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>         }
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>         <strong class="jxr_keyword">if</strong>( testFailed ) {
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(<span class="jxr_string">"The test failed.\n\n"</span>);
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>         }
+<a class="jxr_linenumber" name="L255" href="#L255">255</a>         Sysout.println(<span class="jxr_string">"Success\n"</span>);
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> 
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>     }<em class="jxr_comment">// start()</em>
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> punchCtrlKey( Robot ro, <strong class="jxr_keyword">int</strong> keyCode ) {
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>         ro.keyPress(KeyEvent.VK_CONTROL);
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>         ro.keyPress(keyCode);
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>         ro.keyRelease(keyCode);
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>         ro.keyRelease(KeyEvent.VK_CONTROL);
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>         ro.delay(200);
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>     }
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> keyPressed(KeyEvent evt)
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>     {
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>         <em class="jxr_comment">//printKey(evt);</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>     }
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> keyTyped(KeyEvent evt)
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>     {
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>         printKey(evt);
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>         <strong class="jxr_keyword">char</strong> keych = evt.getKeyChar();
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>         <strong class="jxr_keyword">if</strong>( !keycharHash.containsKey( keych ) ) {
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>             System.out.println(<span class="jxr_string">"Unexpected keychar: "</span>+keych);
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>             Sysout.println(<span class="jxr_string">"Unexpected keychar: "</span>+keych);
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>             testFailed = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>         }
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>     }
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> 
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> keyReleased(KeyEvent evt)
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>     {
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>         <em class="jxr_comment">//printKey(evt);</em>
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>     }
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> printKey(KeyEvent evt)
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>     {
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>         <strong class="jxr_keyword">switch</strong>(evt.getID())
+<a class="jxr_linenumber" name="L289" href="#L289">289</a>         {
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>           <strong class="jxr_keyword">case</strong> KeyEvent.KEY_TYPED:
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>           <strong class="jxr_keyword">case</strong> KeyEvent.KEY_PRESSED:
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>           <strong class="jxr_keyword">case</strong> KeyEvent.KEY_RELEASED:
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>             <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>           <strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L295" href="#L295">295</a>             System.out.println(<span class="jxr_string">"Other Event "</span>);
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>             Sysout.println(<span class="jxr_string">"Other Event "</span>);
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>         }
+<a class="jxr_linenumber" name="L299" href="#L299">299</a>         System.out.print(<span class="jxr_string">" 0x"</span>+ Integer.toHexString(evt.getKeyChar()));
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>         Sysout.println    (<span class="jxr_string">" 0x"</span>+ Integer.toHexString(evt.getKeyChar()));
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>     }
+<a class="jxr_linenumber" name="L302" href="#L302">302</a> 
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> }<em class="jxr_comment">// class CtrlASCII</em>
+<a class="jxr_linenumber" name="L304" href="#L304">304</a> 
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> <em class="jxr_javadoccomment">/****************************************************</em>
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> <em class="jxr_javadoccomment"> Standard Test Machinery</em>
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> <em class="jxr_javadoccomment"> DO NOT modify anything below -- it's a standard</em>
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> <em class="jxr_javadoccomment">  chunk of code whose purpose is to make user</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> <em class="jxr_javadoccomment">  interaction uniform, and thereby make it simpler</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> <em class="jxr_javadoccomment">  to read and understand someone else's test.</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> <em class="jxr_javadoccomment"> ****************************************************/</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> <em class="jxr_javadoccomment"> This is part of the standard test machinery.</em>
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> <em class="jxr_javadoccomment"> It creates a dialog (with the instructions), and is the interface</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> <em class="jxr_javadoccomment">  for sending text messages to the user.</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> <em class="jxr_javadoccomment"> To print the instructions, send an array of strings to Sysout.createDialog</em>
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> <em class="jxr_javadoccomment">  WithInstructions method.  Put one line of instructions per array entry.</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> <em class="jxr_javadoccomment"> To display a message for the tester to see, simply call Sysout.println</em>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> <em class="jxr_javadoccomment">  with the string to be displayed.</em>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> <em class="jxr_javadoccomment"> This mimics System.out.println but works within the test harness as well</em>
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> <em class="jxr_javadoccomment">  as standalone.</em>
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> <strong class="jxr_keyword">class</strong> Sysout
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>  {
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>    <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> TestDialog dialog;
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> createDialogWithInstructions( String[] instructions )
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>     {
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>       dialog = <strong class="jxr_keyword">new</strong> TestDialog( <strong class="jxr_keyword">new</strong> Frame(), <span class="jxr_string">"Instructions"</span> );
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>       dialog.printInstructions( instructions );
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>       dialog.show();
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>       println( <span class="jxr_string">"Any messages for the tester will display here."</span> );
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>     }
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> createDialog( )
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>     {
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>       dialog = <strong class="jxr_keyword">new</strong> TestDialog( <strong class="jxr_keyword">new</strong> Frame(), <span class="jxr_string">"Instructions"</span> );
+<a class="jxr_linenumber" name="L341" href="#L341">341</a>       String[] defInstr = { <span class="jxr_string">"Instructions will appear here. "</span>, <span class="jxr_string">""</span> } ;
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>       dialog.printInstructions( defInstr );
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>       dialog.show();
+<a class="jxr_linenumber" name="L344" href="#L344">344</a>       println( <span class="jxr_string">"Any messages for the tester will display here."</span> );
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>     }
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> printInstructions( String[] instructions )
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>     {
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>       dialog.printInstructions( instructions );
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>     }
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> println( String messageIn )
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>     {
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>       dialog.displayMessage( messageIn );
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>     }
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>  }<em class="jxr_comment">// Sysout  class</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> <em class="jxr_javadoccomment">  This is part of the standard test machinery.  It provides a place for the</em>
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> <em class="jxr_javadoccomment">   test instructions to be displayed, and a place for interactive messages</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> <em class="jxr_javadoccomment">   to the user to be displayed.</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> <em class="jxr_javadoccomment">  To have the test instructions displayed, see Sysout.</em>
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> <em class="jxr_javadoccomment">  To have a message to the user be displayed, see Sysout.</em>
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_javadoccomment">  Do not call anything in this dialog directly.</em>
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> <em class="jxr_javadoccomment">  */</em>
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> <strong class="jxr_keyword">class</strong> TestDialog <strong class="jxr_keyword">extends</strong> Dialog
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>  {
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 
+<a class="jxr_linenumber" name="L372" href="#L372">372</a>    TextArea instructionsText;
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>    TextArea messageText;
+<a class="jxr_linenumber" name="L374" href="#L374">374</a>    <strong class="jxr_keyword">int</strong> maxStringLength = 80;
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> 
+<a class="jxr_linenumber" name="L376" href="#L376">376</a>    <em class="jxr_comment">//DO NOT call this directly, go through Sysout</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a>    <strong class="jxr_keyword">public</strong> TestDialog( Frame frame, String name )
+<a class="jxr_linenumber" name="L378" href="#L378">378</a>     {
+<a class="jxr_linenumber" name="L379" href="#L379">379</a>       <strong class="jxr_keyword">super</strong>( frame, name );
+<a class="jxr_linenumber" name="L380" href="#L380">380</a>       <strong class="jxr_keyword">int</strong> scrollBoth = TextArea.SCROLLBARS_BOTH;
+<a class="jxr_linenumber" name="L381" href="#L381">381</a>       instructionsText = <strong class="jxr_keyword">new</strong> TextArea( <span class="jxr_string">""</span>, 15, maxStringLength, scrollBoth );
+<a class="jxr_linenumber" name="L382" href="#L382">382</a>       add( <span class="jxr_string">"North"</span>, instructionsText );
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> 
+<a class="jxr_linenumber" name="L384" href="#L384">384</a>       messageText = <strong class="jxr_keyword">new</strong> TextArea( <span class="jxr_string">""</span>, 5, maxStringLength, scrollBoth );
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>       add(<span class="jxr_string">"South"</span>, messageText);
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> 
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>       pack();
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 
+<a class="jxr_linenumber" name="L389" href="#L389">389</a>       show();
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>     }<em class="jxr_comment">// TestDialog()</em>
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> 
+<a class="jxr_linenumber" name="L392" href="#L392">392</a>    <em class="jxr_comment">//DO NOT call this directly, go through Sysout</em>
+<a class="jxr_linenumber" name="L393" href="#L393">393</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> printInstructions( String[] instructions )
+<a class="jxr_linenumber" name="L394" href="#L394">394</a>     {
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>       <em class="jxr_comment">//Clear out any current instructions</em>
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>       instructionsText.setText( <span class="jxr_string">""</span> );
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> 
+<a class="jxr_linenumber" name="L398" href="#L398">398</a>       <em class="jxr_comment">//Go down array of instruction strings</em>
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> 
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>       String printStr, remainingStr;
+<a class="jxr_linenumber" name="L401" href="#L401">401</a>       <strong class="jxr_keyword">for</strong>( <strong class="jxr_keyword">int</strong> i=0; i &lt; instructions.length; i++ )
+<a class="jxr_linenumber" name="L402" href="#L402">402</a>        {
+<a class="jxr_linenumber" name="L403" href="#L403">403</a>          <em class="jxr_comment">//chop up each into pieces maxSringLength long</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>          remainingStr = instructions[ i ];
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>          <strong class="jxr_keyword">while</strong>( remainingStr.length() &gt; 0 )
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>           {
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>             <em class="jxr_comment">//if longer than max then chop off first max chars to print</em>
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>             <strong class="jxr_keyword">if</strong>( remainingStr.length() &gt;= maxStringLength )
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>              {
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>                <em class="jxr_comment">//Try to chop on a word boundary</em>
+<a class="jxr_linenumber" name="L411" href="#L411">411</a>                <strong class="jxr_keyword">int</strong> posOfSpace = remainingStr.
+<a class="jxr_linenumber" name="L412" href="#L412">412</a>                   lastIndexOf( ' ', maxStringLength - 1 );
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> 
+<a class="jxr_linenumber" name="L414" href="#L414">414</a>                <strong class="jxr_keyword">if</strong>( posOfSpace &lt;= 0 ) posOfSpace = maxStringLength - 1;
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> 
+<a class="jxr_linenumber" name="L416" href="#L416">416</a>                printStr = remainingStr.substring( 0, posOfSpace + 1 );
+<a class="jxr_linenumber" name="L417" href="#L417">417</a>                remainingStr = remainingStr.substring( posOfSpace + 1 );
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>              }
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>             <em class="jxr_comment">//else just print</em>
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>             <strong class="jxr_keyword">else</strong>
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>              {
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>                printStr = remainingStr;
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>                remainingStr = <span class="jxr_string">""</span>;
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>              }
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>             instructionsText.append( printStr + <span class="jxr_string">"\n"</span> );
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> 
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>           }<em class="jxr_comment">// while</em>
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> 
+<a class="jxr_linenumber" name="L430" href="#L430">430</a>        }<em class="jxr_comment">// for</em>
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> 
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>     }<em class="jxr_comment">//printInstructions()</em>
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> 
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>    <em class="jxr_comment">//DO NOT call this directly, go through Sysout</em>
+<a class="jxr_linenumber" name="L435" href="#L435">435</a>    <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> displayMessage( String messageIn )
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>     {
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>       messageText.append( messageIn + <span class="jxr_string">"\n"</span> );
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>     }
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> 
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>  }<em class="jxr_comment">// TestDialog  class</em>
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

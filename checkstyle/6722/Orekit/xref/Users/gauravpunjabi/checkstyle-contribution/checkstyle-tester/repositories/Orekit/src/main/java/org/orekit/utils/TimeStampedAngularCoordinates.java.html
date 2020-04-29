@@ -1,0 +1,388 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>TimeStampedAngularCoordinates xref</title>
+<link type="text/css" rel="stylesheet" href="../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/* Copyright 2002-2016 CS Systèmes d'Information</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Licensed to CS Systèmes d'Information (CS) under one or more</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> * contributor license agreements.  See the NOTICE file distributed with</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * this work for additional information regarding copyright ownership.</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * CS licenses this file to You under the Apache License, Version 2.0</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * (the "License"); you may not use this file except in compliance with</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * the License.  You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> *   <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * limitations under the License.</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">package</strong> org.orekit.utils;
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> java.util.Collection;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> org.hipparchus.analysis.differentiation.DerivativeStructure;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> org.hipparchus.analysis.interpolation.HermiteInterpolator;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> org.hipparchus.geometry.euclidean.threed.FieldRotation;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> org.hipparchus.geometry.euclidean.threed.Rotation;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> org.hipparchus.geometry.euclidean.threed.RotationConvention;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.hipparchus.geometry.euclidean.threed.Vector3D;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.hipparchus.util.FastMath;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.hipparchus.util.MathArrays;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.orekit.errors.OrekitException;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.orekit.errors.OrekitInternalError;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.orekit.errors.OrekitMessages;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.orekit.time.AbsoluteDate;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.orekit.time.TimeStamped;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment">/** {@link TimeStamped time-stamped} version of {@link AngularCoordinates}.</em>
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;Instances of this class are guaranteed to be immutable.&lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_javadoccomment"> * @author Luc Maisonobe</em>
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment"> * @since 7.0</em>
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> TimeStampedAngularCoordinates <strong class="jxr_keyword">extends</strong> AngularCoordinates <strong class="jxr_keyword">implements</strong> TimeStamped {
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>      <em class="jxr_javadoccomment">/** Serializable UID. */</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> serialVersionUID = 20140723L;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>      <em class="jxr_javadoccomment">/** The date. */</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> AbsoluteDate date;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>      <em class="jxr_javadoccomment">/** Builds a rotation/rotation rate pair.</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment">     * @param date coordinates date</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment">     * @param rotation rotation</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment">     * @param rotationRate rotation rate Ω (rad/s)</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment">     * @param rotationAcceleration rotation acceleration dΩ/dt (rad²/s²)</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>      <strong class="jxr_keyword">public</strong> TimeStampedAngularCoordinates(<strong class="jxr_keyword">final</strong> AbsoluteDate date,
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>                                           <strong class="jxr_keyword">final</strong> Rotation rotation,
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>                                           <strong class="jxr_keyword">final</strong> Vector3D rotationRate,
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>                                           <strong class="jxr_keyword">final</strong> Vector3D rotationAcceleration) {
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>          <strong class="jxr_keyword">super</strong>(rotation, rotationRate, rotationAcceleration);
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>          <strong class="jxr_keyword">this</strong>.date = date;
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>      }
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>      <em class="jxr_javadoccomment">/** Build the rotation that transforms a pair of pv coordinates into another pair.</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment">     * &lt;p&gt;&lt;em&gt;WARNING&lt;/em&gt;! This method requires much more stringent assumptions on</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment">     * its parameters than the similar {@link Rotation#Rotation(Vector3D, Vector3D,</em>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment">     * Vector3D, Vector3D) constructor} from the {@link Rotation Rotation} class.</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment">     * As far as the Rotation constructor is concerned, the {@code v₂} vector from</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment">     * the second pair can be slightly misaligned. The Rotation constructor will</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment">     * compensate for this misalignment and create a rotation that ensure {@code</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment">     * v₁ = r(u₁)} and {@code v₂ ∈ plane (r(u₁), r(u₂))}. &lt;em&gt;THIS IS NOT</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment">     * TRUE ANYMORE IN THIS CLASS&lt;/em&gt;! As derivatives are involved and must be</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_javadoccomment">     * preserved, this constructor works &lt;em&gt;only&lt;/em&gt; if the two pairs are fully</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment">     * consistent, i.e. if a rotation exists that fulfill all the requirements: {@code</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment">     * v₁ = r(u₁)}, {@code v₂ = r(u₂)}, {@code dv₁/dt = dr(u₁)/dt}, {@code dv₂/dt</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment">     * = dr(u₂)/dt}, {@code d²v₁/dt² = d²r(u₁)/dt²}, {@code d²v₂/dt² = d²r(u₂)/dt²}.&lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment">     * @param date coordinates date</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment">     * @param u1 first vector of the origin pair</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment">     * @param u2 second vector of the origin pair</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment">     * @param v1 desired image of u1 by the rotation</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  <em class="jxr_javadoccomment">     * @param v2 desired image of u2 by the rotation</em>
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  <em class="jxr_javadoccomment">     * @param tolerance relative tolerance factor used to check singularities</em>
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment">     * @exception OrekitException if the vectors components cannot be converted to</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment">     * {@link DerivativeStructure} with proper order</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>      <strong class="jxr_keyword">public</strong> TimeStampedAngularCoordinates(<strong class="jxr_keyword">final</strong> AbsoluteDate date,
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>                                           <strong class="jxr_keyword">final</strong> PVCoordinates u1, <strong class="jxr_keyword">final</strong> PVCoordinates u2,
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>                                           <strong class="jxr_keyword">final</strong> PVCoordinates v1, <strong class="jxr_keyword">final</strong> PVCoordinates v2,
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>                                           <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> tolerance)
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>          <strong class="jxr_keyword">throws</strong> OrekitException {
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>          <strong class="jxr_keyword">super</strong>(u1, u2, v1, v2, tolerance);
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>          <strong class="jxr_keyword">this</strong>.date = date;
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>      }
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>      <em class="jxr_javadoccomment">/** Build one of the rotations that transform one pv coordinates into another one.</em>
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  <em class="jxr_javadoccomment">     * &lt;p&gt;Except for a possible scale factor, if the instance were</em>
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">     * applied to the vector u it will produce the vector v. There is an</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">     * infinite number of such rotations, this constructor choose the</em>
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">     * one with the smallest associated angle (i.e. the one whose axis</em>
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">     * is orthogonal to the (u, v) plane). If u and v are collinear, an</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">     * arbitrary rotation axis is chosen.&lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">     * @param date coordinates date</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> <em class="jxr_javadoccomment">     * @param u origin vector</em>
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">     * @param v desired image of u by the rotation</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">     * @exception OrekitException if the vectors components cannot be converted to</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">     * {@link DerivativeStructure} with proper order</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>     <strong class="jxr_keyword">public</strong> TimeStampedAngularCoordinates(<strong class="jxr_keyword">final</strong> AbsoluteDate date,
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>                                          <strong class="jxr_keyword">final</strong> PVCoordinates u, <strong class="jxr_keyword">final</strong> PVCoordinates v)
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>         <strong class="jxr_keyword">throws</strong> OrekitException {
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>         <strong class="jxr_keyword">super</strong>(u, v);
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>         <strong class="jxr_keyword">this</strong>.date = date;
+<a class="jxr_linenumber" name="L115" href="#L115">115</a>     }
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>     <em class="jxr_javadoccomment">/** Builds a TimeStampedAngularCoordinates from  a {@link FieldRotation}&amp;lt;{@link DerivativeStructure}&amp;gt;.</em>
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">     * The rotation components must have time as their only derivation parameter and</em>
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment">     * have consistent derivation orders.</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment">     * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">     * @param date coordinates date</em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">     * @param r rotation with time-derivatives embedded within the coordinates</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a>     <strong class="jxr_keyword">public</strong> TimeStampedAngularCoordinates(<strong class="jxr_keyword">final</strong> AbsoluteDate date,
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>                                          <strong class="jxr_keyword">final</strong> FieldRotation&lt;DerivativeStructure&gt; r) {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>         <strong class="jxr_keyword">super</strong>(r);
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>         <strong class="jxr_keyword">this</strong>.date = date;
+<a class="jxr_linenumber" name="L129" href="#L129">129</a>     }
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>     <em class="jxr_javadoccomment">/** {@inheritDoc} */</em>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>     <strong class="jxr_keyword">public</strong> AbsoluteDate getDate() {
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>         <strong class="jxr_keyword">return</strong> date;
+<a class="jxr_linenumber" name="L134" href="#L134">134</a>     }
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>     <em class="jxr_javadoccomment">/** Revert a rotation/rotation rate pair.</em>
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_javadoccomment">     * Build a pair which reverse the effect of another pair.</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_javadoccomment">     * @return a new pair whose effect is the reverse of the effect</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_javadoccomment">     * of the instance</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>     <strong class="jxr_keyword">public</strong> TimeStampedAngularCoordinates revert() {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TimeStampedAngularCoordinates(date,
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>                                                  getRotation().revert(),
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>                                                  getRotation().applyInverseTo(getRotationRate().negate()),
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>                                                  getRotation().applyInverseTo(getRotationAcceleration().negate()));
+<a class="jxr_linenumber" name="L146" href="#L146">146</a>     }
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 
+<a class="jxr_linenumber" name="L148" href="#L148">148</a>     <em class="jxr_javadoccomment">/** Get a time-shifted state.</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> <em class="jxr_javadoccomment">     * The state can be slightly shifted to close dates. This shift is based on</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> <em class="jxr_javadoccomment">     * a simple linear model. It is &lt;em&gt;not&lt;/em&gt; intended as a replacement for</em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> <em class="jxr_javadoccomment">     * proper attitude propagation but should be sufficient for either small</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> <em class="jxr_javadoccomment">     * time shifts or coarse accuracy.</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_javadoccomment">     * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> <em class="jxr_javadoccomment">     * @param dt time shift in seconds</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> <em class="jxr_javadoccomment">     * @return a new state, shifted with respect to the instance (which is immutable)</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>     <strong class="jxr_keyword">public</strong> TimeStampedAngularCoordinates shiftedBy(<strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> dt) {
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>         <strong class="jxr_keyword">final</strong> AngularCoordinates sac = <strong class="jxr_keyword">super</strong>.shiftedBy(dt);
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TimeStampedAngularCoordinates(date.shiftedBy(dt),
+<a class="jxr_linenumber" name="L161" href="#L161">161</a>                                                  sac.getRotation(), sac.getRotationRate(), sac.getRotationAcceleration());
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 
+<a class="jxr_linenumber" name="L163" href="#L163">163</a>     }
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 
+<a class="jxr_linenumber" name="L165" href="#L165">165</a>     <em class="jxr_javadoccomment">/** Add an offset from the instance.</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> <em class="jxr_javadoccomment">     * We consider here that the offset rotation is applied first and the</em>
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> <em class="jxr_javadoccomment">     * instance is applied afterward. Note that angular coordinates do &lt;em&gt;not&lt;/em&gt;</em>
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> <em class="jxr_javadoccomment">     * commute under this operation, i.e. {@code a.addOffset(b)} and {@code</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> <em class="jxr_javadoccomment">     * b.addOffset(a)} lead to &lt;em&gt;different&lt;/em&gt; results in most cases.</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> <em class="jxr_javadoccomment">     * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> <em class="jxr_javadoccomment">     * The two methods {@link #addOffset(AngularCoordinates) addOffset} and</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment">     * {@link #subtractOffset(AngularCoordinates) subtractOffset} are designed</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment">     * so that round trip applications are possible. This means that both {@code</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment">     * ac1.subtractOffset(ac2).addOffset(ac2)} and {@code</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">     * ac1.addOffset(ac2).subtractOffset(ac2)} return angular coordinates equal to ac1.</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">     * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> <em class="jxr_javadoccomment">     * @param offset offset to subtract</em>
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> <em class="jxr_javadoccomment">     * @return new instance, with offset subtracted</em>
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> <em class="jxr_javadoccomment">     * @see #subtractOffset(AngularCoordinates)</em>
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L183" href="#L183">183</a>     @Override
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>     <strong class="jxr_keyword">public</strong> TimeStampedAngularCoordinates addOffset(<strong class="jxr_keyword">final</strong> AngularCoordinates offset) {
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>         <strong class="jxr_keyword">final</strong> Vector3D rOmega    = getRotation().applyTo(offset.getRotationRate());
+<a class="jxr_linenumber" name="L186" href="#L186">186</a>         <strong class="jxr_keyword">final</strong> Vector3D rOmegaDot = getRotation().applyTo(offset.getRotationAcceleration());
+<a class="jxr_linenumber" name="L187" href="#L187">187</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TimeStampedAngularCoordinates(date,
+<a class="jxr_linenumber" name="L188" href="#L188">188</a>                                                  getRotation().compose(offset.getRotation(), RotationConvention.VECTOR_OPERATOR),
+<a class="jxr_linenumber" name="L189" href="#L189">189</a>                                                  getRotationRate().add(rOmega),
+<a class="jxr_linenumber" name="L190" href="#L190">190</a>                                                  <strong class="jxr_keyword">new</strong> Vector3D( 1.0, getRotationAcceleration(),
+<a class="jxr_linenumber" name="L191" href="#L191">191</a>                                                                1.0, rOmegaDot,
+<a class="jxr_linenumber" name="L192" href="#L192">192</a>                                                               -1.0, Vector3D.crossProduct(getRotationRate(), rOmega)));
+<a class="jxr_linenumber" name="L193" href="#L193">193</a>     }
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> 
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>     <em class="jxr_javadoccomment">/** Subtract an offset from the instance.</em>
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_javadoccomment">     * We consider here that the offset rotation is applied first and the</em>
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_javadoccomment">     * instance is applied afterward. Note that angular coordinates do &lt;em&gt;not&lt;/em&gt;</em>
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_javadoccomment">     * commute under this operation, i.e. {@code a.subtractOffset(b)} and {@code</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment">     * b.subtractOffset(a)} lead to &lt;em&gt;different&lt;/em&gt; results in most cases.</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_javadoccomment">     * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> <em class="jxr_javadoccomment">     * The two methods {@link #addOffset(AngularCoordinates) addOffset} and</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> <em class="jxr_javadoccomment">     * {@link #subtractOffset(AngularCoordinates) subtractOffset} are designed</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_javadoccomment">     * so that round trip applications are possible. This means that both {@code</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">     * ac1.subtractOffset(ac2).addOffset(ac2)} and {@code</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment">     * ac1.addOffset(ac2).subtractOffset(ac2)} return angular coordinates equal to ac1.</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">     * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_javadoccomment">     * @param offset offset to subtract</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> <em class="jxr_javadoccomment">     * @return new instance, with offset subtracted</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> <em class="jxr_javadoccomment">     * @see #addOffset(AngularCoordinates)</em>
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>     @Override
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>     <strong class="jxr_keyword">public</strong> TimeStampedAngularCoordinates subtractOffset(<strong class="jxr_keyword">final</strong> AngularCoordinates offset) {
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>         <strong class="jxr_keyword">return</strong> addOffset(offset.revert());
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>     }
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 
+<a class="jxr_linenumber" name="L218" href="#L218">218</a>     <em class="jxr_javadoccomment">/** Interpolate angular coordinates.</em>
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> <em class="jxr_javadoccomment">     * The interpolated instance is created by polynomial Hermite interpolation</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> <em class="jxr_javadoccomment">     * on Rodrigues vector ensuring rotation rate remains the exact derivative of rotation.</em>
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> <em class="jxr_javadoccomment">     * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> <em class="jxr_javadoccomment">     * This method is based on Sergei Tanygin's paper &lt;a</em>
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> <em class="jxr_javadoccomment">     * href="<a href="http://www.agi.com/downloads/resources/white-papers/Attitude-interpolation.pdf" target="alexandria_uri">http://www.agi.com/downloads/resources/white-papers/Attitude-interpolation.pdf</a>"&gt;Attitude</em>
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> <em class="jxr_javadoccomment">     * Interpolation&lt;/a&gt;, changing the norm of the vector to match the modified Rodrigues</em>
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> <em class="jxr_javadoccomment">     * vector as described in Malcolm D. Shuster's paper &lt;a</em>
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> <em class="jxr_javadoccomment">     * href="<a href="http://www.ladispe.polito.it/corsi/Meccatronica/02JHCOR/2011-12/Slides/Shuster_Pub_1993h_J_Repsurv_scan.pdf" target="alexandria_uri">http://www.ladispe.polito.it/corsi/Meccatronica/02JHCOR/2011-12/Slides/Shuster_Pub_1993h_J_Repsurv_scan.pdf</a>"&gt;A</em>
+<a class="jxr_linenumber" name="L229" href="#L229">229</a> <em class="jxr_javadoccomment">     * Survey of Attitude Representations&lt;/a&gt;. This change avoids the singularity at π.</em>
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> <em class="jxr_javadoccomment">     * There is still a singularity at 2π, which is handled by slightly offsetting all rotations</em>
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> <em class="jxr_javadoccomment">     * when this singularity is detected. Another change is that the mean linear motion</em>
+<a class="jxr_linenumber" name="L232" href="#L232">232</a> <em class="jxr_javadoccomment">     * is first removed before interpolation and added back after interpolation. This allows</em>
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> <em class="jxr_javadoccomment">     * to use interpolation even when the sample covers much more than one turn and even</em>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> <em class="jxr_javadoccomment">     * when sample points are separated by more than one turn.</em>
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> <em class="jxr_javadoccomment">     * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> <em class="jxr_javadoccomment">     * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> <em class="jxr_javadoccomment">     * Note that even if first and second time derivatives (rotation rates and acceleration)</em>
+<a class="jxr_linenumber" name="L238" href="#L238">238</a> <em class="jxr_javadoccomment">     * from sample can be ignored, the interpolated instance always includes</em>
+<a class="jxr_linenumber" name="L239" href="#L239">239</a> <em class="jxr_javadoccomment">     * interpolated derivatives. This feature can be used explicitly to</em>
+<a class="jxr_linenumber" name="L240" href="#L240">240</a> <em class="jxr_javadoccomment">     * compute these derivatives when it would be too complex to compute them</em>
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> <em class="jxr_javadoccomment">     * from an analytical formula: just compute a few sample points from the</em>
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> <em class="jxr_javadoccomment">     * explicit formula and set the derivatives to zero in these sample points,</em>
+<a class="jxr_linenumber" name="L243" href="#L243">243</a> <em class="jxr_javadoccomment">     * then use interpolation to add derivatives consistent with the rotations.</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> <em class="jxr_javadoccomment">     * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> <em class="jxr_javadoccomment">     * @param date interpolation date</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_javadoccomment">     * @param filter filter for derivatives from the sample to use in interpolation</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_javadoccomment">     * @param sample sample points on which interpolation should be done</em>
+<a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_javadoccomment">     * @return a new position-velocity, interpolated at specified date</em>
+<a class="jxr_linenumber" name="L249" href="#L249">249</a> <em class="jxr_javadoccomment">     * @exception OrekitException if the number of point is too small for interpolating</em>
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L251" href="#L251">251</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> TimeStampedAngularCoordinates interpolate(<strong class="jxr_keyword">final</strong> AbsoluteDate date,
+<a class="jxr_linenumber" name="L252" href="#L252">252</a>                                                             <strong class="jxr_keyword">final</strong> AngularDerivativesFilter filter,
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>                                                             <strong class="jxr_keyword">final</strong> Collection&lt;TimeStampedAngularCoordinates&gt; sample)
+<a class="jxr_linenumber" name="L254" href="#L254">254</a>         <strong class="jxr_keyword">throws</strong> OrekitException {
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> 
+<a class="jxr_linenumber" name="L256" href="#L256">256</a>         <em class="jxr_comment">// set up safety elements for 2π singularity avoidance</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> epsilon   = 2 * FastMath.PI / sample.size();
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> threshold = FastMath.min(-(1.0 - 1.0e-4), -FastMath.cos(epsilon / 4));
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> 
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>         <em class="jxr_comment">// set up a linear model canceling mean rotation rate</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a>         <strong class="jxr_keyword">final</strong> Vector3D meanRate;
+<a class="jxr_linenumber" name="L262" href="#L262">262</a>         <strong class="jxr_keyword">if</strong> (filter != AngularDerivativesFilter.USE_R) {
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>             Vector3D sum = Vector3D.ZERO;
+<a class="jxr_linenumber" name="L264" href="#L264">264</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">final</strong> TimeStampedAngularCoordinates datedAC : sample) {
+<a class="jxr_linenumber" name="L265" href="#L265">265</a>                 sum = sum.add(datedAC.getRotationRate());
+<a class="jxr_linenumber" name="L266" href="#L266">266</a>             }
+<a class="jxr_linenumber" name="L267" href="#L267">267</a>             meanRate = <strong class="jxr_keyword">new</strong> Vector3D(1.0 / sample.size(), sum);
+<a class="jxr_linenumber" name="L268" href="#L268">268</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>             <strong class="jxr_keyword">if</strong> (sample.size() &lt; 2) {
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>                 <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> OrekitException(OrekitMessages.NOT_ENOUGH_DATA_FOR_INTERPOLATION,
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>                                           sample.size());
+<a class="jxr_linenumber" name="L272" href="#L272">272</a>             }
+<a class="jxr_linenumber" name="L273" href="#L273">273</a>             Vector3D sum = Vector3D.ZERO;
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>             TimeStampedAngularCoordinates previous = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L275" href="#L275">275</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">final</strong> TimeStampedAngularCoordinates datedAC : sample) {
+<a class="jxr_linenumber" name="L276" href="#L276">276</a>                 <strong class="jxr_keyword">if</strong> (previous != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L277" href="#L277">277</a>                     sum = sum.add(estimateRate(previous.getRotation(), datedAC.getRotation(),
+<a class="jxr_linenumber" name="L278" href="#L278">278</a>                                                datedAC.date.durationFrom(previous.date)));
+<a class="jxr_linenumber" name="L279" href="#L279">279</a>                 }
+<a class="jxr_linenumber" name="L280" href="#L280">280</a>                 previous = datedAC;
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>             }
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>             meanRate = <strong class="jxr_keyword">new</strong> Vector3D(1.0 / (sample.size() - 1), sum);
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>         }
+<a class="jxr_linenumber" name="L284" href="#L284">284</a>         TimeStampedAngularCoordinates offset =
+<a class="jxr_linenumber" name="L285" href="#L285">285</a>             <strong class="jxr_keyword">new</strong> TimeStampedAngularCoordinates(date, Rotation.IDENTITY, meanRate, Vector3D.ZERO);
+<a class="jxr_linenumber" name="L286" href="#L286">286</a> 
+<a class="jxr_linenumber" name="L287" href="#L287">287</a>         <strong class="jxr_keyword">boolean</strong> restart = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L288" href="#L288">288</a>         <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; restart &amp;&amp; i &lt; sample.size() + 2; ++i) {
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> 
+<a class="jxr_linenumber" name="L290" href="#L290">290</a>             <em class="jxr_comment">// offset adaptation parameters</em>
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>             restart = false;
+<a class="jxr_linenumber" name="L292" href="#L292">292</a> 
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>             <em class="jxr_comment">// set up an interpolator taking derivatives into account</em>
+<a class="jxr_linenumber" name="L294" href="#L294">294</a>             <strong class="jxr_keyword">final</strong> HermiteInterpolator interpolator = <strong class="jxr_keyword">new</strong> HermiteInterpolator();
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> 
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>             <em class="jxr_comment">// add sample points</em>
+<a class="jxr_linenumber" name="L297" href="#L297">297</a>             <strong class="jxr_keyword">double</strong> sign = +1.0;
+<a class="jxr_linenumber" name="L298" href="#L298">298</a>             Rotation previous = Rotation.IDENTITY;
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> 
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>             <strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">final</strong> TimeStampedAngularCoordinates ac : sample) {
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>                 <em class="jxr_comment">// remove linear offset from the current coordinates</em>
+<a class="jxr_linenumber" name="L303" href="#L303">303</a>                 <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> dt = ac.date.durationFrom(date);
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>                 <strong class="jxr_keyword">final</strong> TimeStampedAngularCoordinates fixed = ac.subtractOffset(offset.shiftedBy(dt));
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> 
+<a class="jxr_linenumber" name="L306" href="#L306">306</a>                 <em class="jxr_comment">// make sure all interpolated points will be on the same branch</em>
+<a class="jxr_linenumber" name="L307" href="#L307">307</a>                 <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong> dot = MathArrays.linearCombination(fixed.getRotation().getQ0(), previous.getQ0(),
+<a class="jxr_linenumber" name="L308" href="#L308">308</a>                                                                 fixed.getRotation().getQ1(), previous.getQ1(),
+<a class="jxr_linenumber" name="L309" href="#L309">309</a>                                                                 fixed.getRotation().getQ2(), previous.getQ2(),
+<a class="jxr_linenumber" name="L310" href="#L310">310</a>                                                                 fixed.getRotation().getQ3(), previous.getQ3());
+<a class="jxr_linenumber" name="L311" href="#L311">311</a>                 sign = FastMath.copySign(1.0, dot * sign);
+<a class="jxr_linenumber" name="L312" href="#L312">312</a>                 previous = fixed.getRotation();
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>                 <em class="jxr_comment">// check modified Rodrigues vector singularity</em>
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>                 <strong class="jxr_keyword">if</strong> (fixed.getRotation().getQ0() * sign &lt; threshold) {
+<a class="jxr_linenumber" name="L316" href="#L316">316</a>                     <em class="jxr_comment">// the sample point is close to a modified Rodrigues vector singularity</em>
+<a class="jxr_linenumber" name="L317" href="#L317">317</a>                     <em class="jxr_comment">// we need to change the linear offset model to avoid this</em>
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>                     restart = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L319" href="#L319">319</a>                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L320" href="#L320">320</a>                 }
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>                 <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">double</strong>[][] rodrigues = fixed.getModifiedRodrigues(sign);
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>                 <strong class="jxr_keyword">switch</strong> (filter) {
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>                     <strong class="jxr_keyword">case</strong> USE_RRA:
+<a class="jxr_linenumber" name="L325" href="#L325">325</a>                         <em class="jxr_comment">// populate sample with rotation, rotation rate and acceleration data</em>
+<a class="jxr_linenumber" name="L326" href="#L326">326</a>                         interpolator.addSamplePoint(dt, rodrigues[0], rodrigues[1], rodrigues[2]);
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L328" href="#L328">328</a>                     <strong class="jxr_keyword">case</strong> USE_RR:
+<a class="jxr_linenumber" name="L329" href="#L329">329</a>                         <em class="jxr_comment">// populate sample with rotation and rotation rate data</em>
+<a class="jxr_linenumber" name="L330" href="#L330">330</a>                         interpolator.addSamplePoint(dt, rodrigues[0], rodrigues[1]);
+<a class="jxr_linenumber" name="L331" href="#L331">331</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L332" href="#L332">332</a>                     <strong class="jxr_keyword">case</strong> USE_R:
+<a class="jxr_linenumber" name="L333" href="#L333">333</a>                         <em class="jxr_comment">// populate sample with rotation data only</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>                         interpolator.addSamplePoint(dt, rodrigues[0]);
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>                     <strong class="jxr_keyword">default</strong> :
+<a class="jxr_linenumber" name="L337" href="#L337">337</a>                         <em class="jxr_comment">// this should never happen</em>
+<a class="jxr_linenumber" name="L338" href="#L338">338</a>                         <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> OrekitInternalError(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>                 }
+<a class="jxr_linenumber" name="L340" href="#L340">340</a>             }
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 
+<a class="jxr_linenumber" name="L342" href="#L342">342</a>             <strong class="jxr_keyword">if</strong> (restart) {
+<a class="jxr_linenumber" name="L343" href="#L343">343</a>                 <em class="jxr_comment">// interpolation failed, some intermediate rotation was too close to 2π</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a>                 <em class="jxr_comment">// we need to offset all rotations to avoid the singularity</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a>                 offset = offset.addOffset(<strong class="jxr_keyword">new</strong> AngularCoordinates(<strong class="jxr_keyword">new</strong> Rotation(Vector3D.PLUS_I,
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>                                                                               epsilon,
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>                                                                               RotationConvention.VECTOR_OPERATOR),
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>                                                                  Vector3D.ZERO, Vector3D.ZERO));
+<a class="jxr_linenumber" name="L349" href="#L349">349</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L350" href="#L350">350</a>                 <em class="jxr_comment">// interpolation succeeded with the current offset</em>
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>                 <strong class="jxr_keyword">final</strong> DerivativeStructure zero = <strong class="jxr_keyword">new</strong> DerivativeStructure(1, 2, 0, 0.0);
+<a class="jxr_linenumber" name="L352" href="#L352">352</a>                 <strong class="jxr_keyword">final</strong> DerivativeStructure[] p = interpolator.value(zero);
+<a class="jxr_linenumber" name="L353" href="#L353">353</a>                 <strong class="jxr_keyword">final</strong> AngularCoordinates ac = createFromModifiedRodrigues(<strong class="jxr_keyword">new</strong> <strong class="jxr_keyword">double</strong>[][] {
+<a class="jxr_linenumber" name="L354" href="#L354">354</a>                     {
+<a class="jxr_linenumber" name="L355" href="#L355">355</a>                         p[0].getValue(),              p[1].getValue(),              p[2].getValue()
+<a class="jxr_linenumber" name="L356" href="#L356">356</a>                     }, {
+<a class="jxr_linenumber" name="L357" href="#L357">357</a>                         p[0].getPartialDerivative(1), p[1].getPartialDerivative(1), p[2].getPartialDerivative(1)
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>                     }, {
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>                         p[0].getPartialDerivative(2), p[1].getPartialDerivative(2), p[2].getPartialDerivative(2)
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>                     }
+<a class="jxr_linenumber" name="L361" href="#L361">361</a>                 });
+<a class="jxr_linenumber" name="L362" href="#L362">362</a>                 <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> TimeStampedAngularCoordinates(offset.getDate(),
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>                                                          ac.getRotation(),
+<a class="jxr_linenumber" name="L364" href="#L364">364</a>                                                          ac.getRotationRate(),
+<a class="jxr_linenumber" name="L365" href="#L365">365</a>                                                          ac.getRotationAcceleration()).addOffset(offset);
+<a class="jxr_linenumber" name="L366" href="#L366">366</a>             }
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> 
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>         }
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> 
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>         <em class="jxr_comment">// this should never happen</em>
+<a class="jxr_linenumber" name="L371" href="#L371">371</a>         <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> OrekitInternalError(<strong class="jxr_keyword">null</strong>);
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> 
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>     }
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>

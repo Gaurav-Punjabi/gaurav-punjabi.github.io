@@ -1,0 +1,943 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>WeblogicDeploymentTool xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../../../stylesheet.css" />
+</head>
+<body>
+<pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> *  Licensed to the Apache Software Foundation (ASF) under one or more</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *  contributor license agreements.  See the NOTICE file distributed with</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> *  this work for additional information regarding copyright ownership.</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> *  The ASF licenses this file to You under the Apache License, Version 2.0</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> *  (the "License"); you may not use this file except in compliance with</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> *  the License.  You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> *  Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *  distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *  See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> *  limitations under the License.</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">package</strong> org.apache.tools.ant.taskdefs.optional.ejb;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  <strong class="jxr_keyword">import</strong> java.io.File;
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> java.io.FileInputStream;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <strong class="jxr_keyword">import</strong> java.io.FileOutputStream;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.io.InputStream;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.util.Enumeration;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> java.util.Hashtable;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.Iterator;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.Vector;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.jar.JarEntry;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> java.util.jar.JarFile;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> java.util.jar.JarOutputStream;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> javax.xml.parsers.SAXParser;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> javax.xml.parsers.SAXParserFactory;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.apache.tools.ant.AntClassLoader;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.apache.tools.ant.BuildException;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.apache.tools.ant.Project;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.apache.tools.ant.taskdefs.Java;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.apache.tools.ant.types.Environment;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.apache.tools.ant.types.Path;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.apache.tools.ant.util.FileUtils;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.xml.sax.InputSource;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment">    The weblogic element is used to control the weblogic.ejbc compiler for</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment">    generating weblogic EJB jars. Prior to Ant 1.3, the method of locating CMP</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">    descriptors was to use the ejbjar naming convention. So if your ejb-jar was</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">    called, Customer-ejb-jar.xml, your weblogic descriptor was called Customer-</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment">    weblogic-ejb-jar.xml and your CMP descriptor had to be Customer-weblogic-cmp-</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment">    rdbms-jar.xml. In addition, the &amp;lt;type-storage&amp;gt; element in the weblogic</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment">    descriptor had to be set to the standard name META-INF/weblogic-cmp-rdbms-</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  <em class="jxr_javadoccomment">    jar.xml, as that is where the CMP descriptor was mapped to in the generated</em>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment">    jar.</em>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment">*/</em>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> WeblogicDeploymentTool <strong class="jxr_keyword">extends</strong> GenericDeploymentTool {
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>      <em class="jxr_javadoccomment">/** EJB11 id */</em>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String PUBLICID_EJB11
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>           = <span class="jxr_string">"-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 1.1//EN"</span>;
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>      <em class="jxr_javadoccomment">/** EJB20 id */</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String PUBLICID_EJB20
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>           = <span class="jxr_string">"-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 2.0//EN"</span>;
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>      <em class="jxr_javadoccomment">/** Weblogic 5.1.0 id */</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String PUBLICID_WEBLOGIC_EJB510
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>           = <span class="jxr_string">"-//BEA Systems, Inc.//DTD WebLogic 5.1.0 EJB//EN"</span>;
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>      <em class="jxr_javadoccomment">/** Weblogic 6.0.0 id */</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String PUBLICID_WEBLOGIC_EJB600
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>           = <span class="jxr_string">"-//BEA Systems, Inc.//DTD WebLogic 6.0.0 EJB//EN"</span>;
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>      <em class="jxr_javadoccomment">/** Weblogic 7.0.0 id */</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>      <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String PUBLICID_WEBLOGIC_EJB700
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>           = <span class="jxr_string">"-//BEA Systems, Inc.//DTD WebLogic 7.0.0 EJB//EN"</span>;
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>      <em class="jxr_javadoccomment">/** Weblogic 5.1 dtd location */</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String DEFAULT_WL51_EJB11_DTD_LOCATION
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>           = <span class="jxr_string">"/weblogic/ejb/deployment/xml/ejb-jar.dtd"</span>;
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>      <em class="jxr_javadoccomment">/** Weblogic 6.0 ejb 1.1 dtd location */</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String DEFAULT_WL60_EJB11_DTD_LOCATION
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>           = <span class="jxr_string">"/weblogic/ejb20/dd/xml/ejb11-jar.dtd"</span>;
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>      <em class="jxr_javadoccomment">/** Weblogic 6.0 ejb 2.0 dtd location */</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String DEFAULT_WL60_EJB20_DTD_LOCATION
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>           = <span class="jxr_string">"/weblogic/ejb20/dd/xml/ejb20-jar.dtd"</span>;
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String DEFAULT_WL51_DTD_LOCATION
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>           = <span class="jxr_string">"/weblogic/ejb/deployment/xml/weblogic-ejb-jar.dtd"</span>;
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String DEFAULT_WL60_51_DTD_LOCATION
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>           = <span class="jxr_string">"/weblogic/ejb20/dd/xml/weblogic510-ejb-jar.dtd"</span>;
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String DEFAULT_WL60_DTD_LOCATION
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>           = <span class="jxr_string">"/weblogic/ejb20/dd/xml/weblogic600-ejb-jar.dtd"</span>;
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String DEFAULT_WL70_DTD_LOCATION
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>           = <span class="jxr_string">"/weblogic/ejb20/dd/xml/weblogic700-ejb-jar.dtd"</span>;
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String DEFAULT_COMPILER = <span class="jxr_string">"default"</span>;
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String WL_DD = <span class="jxr_string">"weblogic-ejb-jar.xml"</span>;
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String WL_CMP_DD = <span class="jxr_string">"weblogic-cmp-rdbms-jar.xml"</span>;
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String COMPILER_EJB11 = <span class="jxr_string">"weblogic.ejbc"</span>;
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String COMPILER_EJB20 = <span class="jxr_string">"weblogic.ejbc20"</span>;
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>      <em class="jxr_javadoccomment">/** File utilities instance for copying jars */</em>
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>      <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> FileUtils FILE_UTILS = FileUtils.getFileUtils();
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 
+<a class="jxr_linenumber" name="L101" href="#L101">101</a>     <em class="jxr_javadoccomment">/** Instance variable that stores the suffix for the weblogic jarfile. */</em>
+<a class="jxr_linenumber" name="L102" href="#L102">102</a>     <strong class="jxr_keyword">private</strong> String jarSuffix = <span class="jxr_string">".jar"</span>;
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
+<a class="jxr_linenumber" name="L104" href="#L104">104</a>     <em class="jxr_javadoccomment">/** Instance variable that stores the location of the weblogic DTD file. */</em>
+<a class="jxr_linenumber" name="L105" href="#L105">105</a>     <strong class="jxr_keyword">private</strong> String weblogicDTD;
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>     <em class="jxr_javadoccomment">/** Instance variable that stores the location of the ejb 1.1 DTD file. */</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>     <strong class="jxr_keyword">private</strong> String ejb11DTD;
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>     <em class="jxr_javadoccomment">/** Instance variable that determines whether generic ejb jars are kept. */</em>
+<a class="jxr_linenumber" name="L111" href="#L111">111</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> keepgenerated = false;
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 
+<a class="jxr_linenumber" name="L113" href="#L113">113</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">     * Instance variable that stores the fully qualified classname of the</em>
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment">     * weblogic EJBC compiler</em>
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L117" href="#L117">117</a>     <strong class="jxr_keyword">private</strong> String ejbcClass = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 
+<a class="jxr_linenumber" name="L119" href="#L119">119</a>     <strong class="jxr_keyword">private</strong> String additionalArgs = <span class="jxr_string">""</span>;
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 
+<a class="jxr_linenumber" name="L121" href="#L121">121</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">     * additional args to pass to the spawned jvm</em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a>     <strong class="jxr_keyword">private</strong> String additionalJvmArgs = <span class="jxr_string">""</span>;
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 
+<a class="jxr_linenumber" name="L126" href="#L126">126</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> keepGeneric = false;
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>     <strong class="jxr_keyword">private</strong> String compiler = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 
+<a class="jxr_linenumber" name="L130" href="#L130">130</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> alwaysRebuild = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 
+<a class="jxr_linenumber" name="L132" href="#L132">132</a>     <em class="jxr_javadoccomment">/** controls whether ejbc is run on the generated jar */</em>
+<a class="jxr_linenumber" name="L133" href="#L133">133</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> noEJBC = false;
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>     <em class="jxr_javadoccomment">/** Indicates if the old CMP location convention is to be used.  */</em>
+<a class="jxr_linenumber" name="L136" href="#L136">136</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> newCMP = false;
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>     <em class="jxr_javadoccomment">/** The classpath to the weblogic classes. */</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a>     <strong class="jxr_keyword">private</strong> Path wlClasspath = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 
+<a class="jxr_linenumber" name="L141" href="#L141">141</a>     <em class="jxr_javadoccomment">/** System properties for the JVM. */</em>
+<a class="jxr_linenumber" name="L142" href="#L142">142</a>     <strong class="jxr_keyword">private</strong> Vector sysprops = <strong class="jxr_keyword">new</strong> Vector();
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 
+<a class="jxr_linenumber" name="L144" href="#L144">144</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment">     * The weblogic.StdoutSeverityLevel to use when running the JVM that</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment">     * executes ejbc. Set to 16 to avoid the warnings about EJB Home and</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">     * Remotes being in the classpath</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>     <strong class="jxr_keyword">private</strong> Integer jvmDebugLevel = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 
+<a class="jxr_linenumber" name="L151" href="#L151">151</a>     <strong class="jxr_keyword">private</strong> File outputDir;
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 
+<a class="jxr_linenumber" name="L153" href="#L153">153</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_javadoccomment">     * Add a nested sysproperty element.</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> <em class="jxr_javadoccomment">     * @param sysp the element to add.</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L157" href="#L157">157</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addSysproperty(Environment.Variable sysp) {
+<a class="jxr_linenumber" name="L158" href="#L158">158</a>         sysprops.add(sysp);
+<a class="jxr_linenumber" name="L159" href="#L159">159</a>     }
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 
+<a class="jxr_linenumber" name="L162" href="#L162">162</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment">     * Get the classpath to the weblogic classpaths.</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> <em class="jxr_javadoccomment">     * @return the classpath to configure.</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L166" href="#L166">166</a>     <strong class="jxr_keyword">public</strong> Path createWLClasspath() {
+<a class="jxr_linenumber" name="L167" href="#L167">167</a>         <strong class="jxr_keyword">if</strong> (wlClasspath == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L168" href="#L168">168</a>             wlClasspath = <strong class="jxr_keyword">new</strong> Path(getTask().getProject());
+<a class="jxr_linenumber" name="L169" href="#L169">169</a>         }
+<a class="jxr_linenumber" name="L170" href="#L170">170</a>         <strong class="jxr_keyword">return</strong> wlClasspath.createPath();
+<a class="jxr_linenumber" name="L171" href="#L171">171</a>     }
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 
+<a class="jxr_linenumber" name="L173" href="#L173">173</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment">     * If set ejbc will use this directory as the output</em>
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment">     * destination rather than a jar file. This allows for the</em>
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment">     * generation of &amp;quot;exploded&amp;quot; jars.</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">     * @param outputDir the directory to be used.</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setOutputDir(File outputDir) {
+<a class="jxr_linenumber" name="L180" href="#L180">180</a>         <strong class="jxr_keyword">this</strong>.outputDir = outputDir;
+<a class="jxr_linenumber" name="L181" href="#L181">181</a>     }
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 
+<a class="jxr_linenumber" name="L184" href="#L184">184</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">     * Optional classpath to WL6.0.</em>
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> <em class="jxr_javadoccomment">     * Weblogic 6.0 will give a warning if the home and remote interfaces</em>
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> <em class="jxr_javadoccomment">     * of a bean are on the system classpath used to run weblogic.ejbc.</em>
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> <em class="jxr_javadoccomment">     * In that case, the standard weblogic classes should be set with</em>
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> <em class="jxr_javadoccomment">     * this attribute (or equivalent nested element) and the</em>
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> <em class="jxr_javadoccomment">     * home and remote interfaces located with the standard classpath</em>
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> <em class="jxr_javadoccomment">     * attribute.</em>
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> <em class="jxr_javadoccomment">     * @param wlClasspath the path to be used.</em>
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L194" href="#L194">194</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setWLClasspath(Path wlClasspath) {
+<a class="jxr_linenumber" name="L195" href="#L195">195</a>         <strong class="jxr_keyword">this</strong>.wlClasspath = wlClasspath;
+<a class="jxr_linenumber" name="L196" href="#L196">196</a>     }
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> 
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> 
+<a class="jxr_linenumber" name="L199" href="#L199">199</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment">     * The compiler (switch &lt;code&gt;-compiler&lt;/code&gt;) to use; optional.</em>
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_javadoccomment">     * This allows for the selection of a different compiler</em>
+<a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">     * to be used for the compilation of the generated Java</em>
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> <em class="jxr_javadoccomment">     * files. This could be set, for example, to Jikes to</em>
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> <em class="jxr_javadoccomment">     * compile with the Jikes compiler. If this is not set</em>
+<a class="jxr_linenumber" name="L205" href="#L205">205</a> <em class="jxr_javadoccomment">     * and the &lt;code&gt;build.compiler&lt;/code&gt; property is set</em>
+<a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">     * to jikes, the Jikes compiler will be used. If this</em>
+<a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment">     * is not desired, the value &amp;quot;&lt;code&gt;default&lt;/code&gt;&amp;quot;</em>
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">     * may be given to use the default compiler.</em>
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_javadoccomment">     * @param compiler the compiler to be used.</em>
+<a class="jxr_linenumber" name="L210" href="#L210">210</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L211" href="#L211">211</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setCompiler(String compiler) {
+<a class="jxr_linenumber" name="L212" href="#L212">212</a>         <strong class="jxr_keyword">this</strong>.compiler = compiler;
+<a class="jxr_linenumber" name="L213" href="#L213">213</a>     }
+<a class="jxr_linenumber" name="L214" href="#L214">214</a> 
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 
+<a class="jxr_linenumber" name="L216" href="#L216">216</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> <em class="jxr_javadoccomment">     * Set the rebuild flag to false to only update changes in the jar rather</em>
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> <em class="jxr_javadoccomment">     * than rerunning ejbc; optional, default true.</em>
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> <em class="jxr_javadoccomment">     * This flag controls whether weblogic.ejbc is always</em>
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> <em class="jxr_javadoccomment">     * invoked to build the jar file. In certain circumstances,</em>
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> <em class="jxr_javadoccomment">     * such as when only a bean class has been changed, the jar</em>
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> <em class="jxr_javadoccomment">     * can be generated by merely replacing the changed classes</em>
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> <em class="jxr_javadoccomment">     * and not rerunning ejbc. Setting this to false will reduce</em>
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> <em class="jxr_javadoccomment">     * the time to run ejbjar.</em>
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> <em class="jxr_javadoccomment">     * @param rebuild a &lt;code&gt;boolean&lt;/code&gt; value.</em>
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L227" href="#L227">227</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setRebuild(<strong class="jxr_keyword">boolean</strong> rebuild) {
+<a class="jxr_linenumber" name="L228" href="#L228">228</a>         <strong class="jxr_keyword">this</strong>.alwaysRebuild = rebuild;
+<a class="jxr_linenumber" name="L229" href="#L229">229</a>     }
+<a class="jxr_linenumber" name="L230" href="#L230">230</a> 
+<a class="jxr_linenumber" name="L231" href="#L231">231</a> 
+<a class="jxr_linenumber" name="L232" href="#L232">232</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> <em class="jxr_javadoccomment">     * Sets the weblogic.StdoutSeverityLevel to use when running the JVM that</em>
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> <em class="jxr_javadoccomment">     * executes ejbc; optional. Set to 16 to avoid the warnings about EJB Home and</em>
+<a class="jxr_linenumber" name="L235" href="#L235">235</a> <em class="jxr_javadoccomment">     * Remotes being in the classpath</em>
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> <em class="jxr_javadoccomment">     * @param jvmDebugLevel the value to use.</em>
+<a class="jxr_linenumber" name="L237" href="#L237">237</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L238" href="#L238">238</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setJvmDebugLevel(Integer jvmDebugLevel) {
+<a class="jxr_linenumber" name="L239" href="#L239">239</a>         <strong class="jxr_keyword">this</strong>.jvmDebugLevel = jvmDebugLevel;
+<a class="jxr_linenumber" name="L240" href="#L240">240</a>     }
+<a class="jxr_linenumber" name="L241" href="#L241">241</a> 
+<a class="jxr_linenumber" name="L242" href="#L242">242</a> 
+<a class="jxr_linenumber" name="L243" href="#L243">243</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> <em class="jxr_javadoccomment">     * Get the debug level.</em>
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> <em class="jxr_javadoccomment">     * @return the jvm debug level (may be null).</em>
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L247" href="#L247">247</a>     <strong class="jxr_keyword">public</strong> Integer getJvmDebugLevel() {
+<a class="jxr_linenumber" name="L248" href="#L248">248</a>         <strong class="jxr_keyword">return</strong> jvmDebugLevel;
+<a class="jxr_linenumber" name="L249" href="#L249">249</a>     }
+<a class="jxr_linenumber" name="L250" href="#L250">250</a> 
+<a class="jxr_linenumber" name="L251" href="#L251">251</a> 
+<a class="jxr_linenumber" name="L252" href="#L252">252</a> 
+<a class="jxr_linenumber" name="L253" href="#L253">253</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> <em class="jxr_javadoccomment">     * Setter used to store the suffix for the generated weblogic jar file.</em>
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L256" href="#L256">256</a> <em class="jxr_javadoccomment">     * @param inString the string to use as the suffix.</em>
+<a class="jxr_linenumber" name="L257" href="#L257">257</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L258" href="#L258">258</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setSuffix(String inString) {
+<a class="jxr_linenumber" name="L259" href="#L259">259</a>         <strong class="jxr_keyword">this</strong>.jarSuffix = inString;
+<a class="jxr_linenumber" name="L260" href="#L260">260</a>     }
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> 
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> 
+<a class="jxr_linenumber" name="L263" href="#L263">263</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">     * controls whether the generic file used as input to</em>
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_javadoccomment">     * ejbc is retained; defaults to false</em>
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> <em class="jxr_javadoccomment">     * @param inValue true for keep generic</em>
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L269" href="#L269">269</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setKeepgeneric(<strong class="jxr_keyword">boolean</strong> inValue) {
+<a class="jxr_linenumber" name="L270" href="#L270">270</a>         <strong class="jxr_keyword">this</strong>.keepGeneric = inValue;
+<a class="jxr_linenumber" name="L271" href="#L271">271</a>     }
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> 
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 
+<a class="jxr_linenumber" name="L274" href="#L274">274</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> <em class="jxr_javadoccomment">     * Controls whether weblogic will keep the generated Java</em>
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> <em class="jxr_javadoccomment">     * files used to build the class files added to the</em>
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> <em class="jxr_javadoccomment">     * jar. This can be useful when debugging; default is false.</em>
+<a class="jxr_linenumber" name="L278" href="#L278">278</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L279" href="#L279">279</a> <em class="jxr_javadoccomment">     * @param inValue either 'true' or 'false'</em>
+<a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L281" href="#L281">281</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setKeepgenerated(String inValue) {
+<a class="jxr_linenumber" name="L282" href="#L282">282</a>         <strong class="jxr_keyword">this</strong>.keepgenerated = Boolean.valueOf(inValue).booleanValue();
+<a class="jxr_linenumber" name="L283" href="#L283">283</a>     }
+<a class="jxr_linenumber" name="L284" href="#L284">284</a> 
+<a class="jxr_linenumber" name="L285" href="#L285">285</a> 
+<a class="jxr_linenumber" name="L286" href="#L286">286</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L287" href="#L287">287</a> <em class="jxr_javadoccomment">     * Any optional extra arguments pass to the weblogic.ejbc</em>
+<a class="jxr_linenumber" name="L288" href="#L288">288</a> <em class="jxr_javadoccomment">     * tool.</em>
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> <em class="jxr_javadoccomment">     * @param args extra arguments to pass to the ejbc tool.</em>
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L291" href="#L291">291</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setArgs(String args) {
+<a class="jxr_linenumber" name="L292" href="#L292">292</a>         <strong class="jxr_keyword">this</strong>.additionalArgs = args;
+<a class="jxr_linenumber" name="L293" href="#L293">293</a>     }
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> 
+<a class="jxr_linenumber" name="L295" href="#L295">295</a> 
+<a class="jxr_linenumber" name="L296" href="#L296">296</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L297" href="#L297">297</a> <em class="jxr_javadoccomment">     * Set any additional arguments to pass to the weblogic JVM; optional.</em>
+<a class="jxr_linenumber" name="L298" href="#L298">298</a> <em class="jxr_javadoccomment">     * @param args the arguments to be passed to the JVM</em>
+<a class="jxr_linenumber" name="L299" href="#L299">299</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L300" href="#L300">300</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setJvmargs(String args) {
+<a class="jxr_linenumber" name="L301" href="#L301">301</a>         <strong class="jxr_keyword">this</strong>.additionalJvmArgs = args;
+<a class="jxr_linenumber" name="L302" href="#L302">302</a>     }
+<a class="jxr_linenumber" name="L303" href="#L303">303</a> 
+<a class="jxr_linenumber" name="L304" href="#L304">304</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L305" href="#L305">305</a> <em class="jxr_javadoccomment">     * Set the classname of the ejbc compiler;  optional</em>
+<a class="jxr_linenumber" name="L306" href="#L306">306</a> <em class="jxr_javadoccomment">     * Normally ejbjar determines</em>
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> <em class="jxr_javadoccomment">     * the appropriate class based on the DTD used for the EJB. The EJB 2.0 compiler</em>
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> <em class="jxr_javadoccomment">     * featured in weblogic 6 has, however, been deprecated in version 7. When</em>
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> <em class="jxr_javadoccomment">     * using with version 7 this attribute should be set to</em>
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> <em class="jxr_javadoccomment">     * &amp;quot;weblogic.ejbc&amp;quot; to avoid the deprecation warning.</em>
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> <em class="jxr_javadoccomment">     * @param ejbcClass the name of the class to use.</em>
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L313" href="#L313">313</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setEjbcClass(String ejbcClass) {
+<a class="jxr_linenumber" name="L314" href="#L314">314</a>         <strong class="jxr_keyword">this</strong>.ejbcClass = ejbcClass;
+<a class="jxr_linenumber" name="L315" href="#L315">315</a>     }
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> 
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 
+<a class="jxr_linenumber" name="L318" href="#L318">318</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> <em class="jxr_javadoccomment">     * Get the ejbc compiler class.</em>
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> <em class="jxr_javadoccomment">     * @return the name of the ejbc compiler class.</em>
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L322" href="#L322">322</a>     <strong class="jxr_keyword">public</strong> String getEjbcClass() {
+<a class="jxr_linenumber" name="L323" href="#L323">323</a>         <strong class="jxr_keyword">return</strong> ejbcClass;
+<a class="jxr_linenumber" name="L324" href="#L324">324</a>     }
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 
+<a class="jxr_linenumber" name="L327" href="#L327">327</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> <em class="jxr_javadoccomment">     * &lt;b&gt;Deprecated&lt;/b&gt;. Defines the location of the ejb-jar DTD in</em>
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> <em class="jxr_javadoccomment">     *  the weblogic class hierarchy. Should not be needed, and the</em>
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> <em class="jxr_javadoccomment">     * nested &amp;lt;dtd&amp;gt; element is recommended when it is.</em>
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> <em class="jxr_javadoccomment">     * @param inString the string to use as the DTD location.</em>
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L334" href="#L334">334</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setWeblogicdtd(String inString) {
+<a class="jxr_linenumber" name="L335" href="#L335">335</a>         setEJBdtd(inString);
+<a class="jxr_linenumber" name="L336" href="#L336">336</a>     }
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> 
+<a class="jxr_linenumber" name="L339" href="#L339">339</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> <em class="jxr_javadoccomment">     * &lt;b&gt;Deprecated&lt;/b&gt;. Defines the location of weblogic DTD in</em>
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> <em class="jxr_javadoccomment">     *  the weblogic class hierarchy. Should not be needed, and the</em>
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> <em class="jxr_javadoccomment">     * nested &amp;lt;dtd&amp;gt; element is recommended when it is.</em>
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> <em class="jxr_javadoccomment">     * @param inString the string to use as the DTD location.</em>
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L346" href="#L346">346</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setWLdtd(String inString) {
+<a class="jxr_linenumber" name="L347" href="#L347">347</a>         <strong class="jxr_keyword">this</strong>.weblogicDTD = inString;
+<a class="jxr_linenumber" name="L348" href="#L348">348</a>     }
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 
+<a class="jxr_linenumber" name="L351" href="#L351">351</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> <em class="jxr_javadoccomment">     * &lt;b&gt;Deprecated&lt;/b&gt;. Defines the location of Sun's EJB DTD in</em>
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> <em class="jxr_javadoccomment">     *  the weblogic class hierarchy. Should not be needed, and the</em>
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> <em class="jxr_javadoccomment">     * nested &amp;lt;dtd&amp;gt; element is recommended when it is.</em>
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> <em class="jxr_javadoccomment">     * @param inString the string to use as the DTD location.</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setEJBdtd(String inString) {
+<a class="jxr_linenumber" name="L359" href="#L359">359</a>         <strong class="jxr_keyword">this</strong>.ejb11DTD = inString;
+<a class="jxr_linenumber" name="L360" href="#L360">360</a>     }
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> 
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> 
+<a class="jxr_linenumber" name="L363" href="#L363">363</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> <em class="jxr_javadoccomment">     * Set the value of the oldCMP scheme. This is an antonym for newCMP</em>
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> <em class="jxr_javadoccomment">     * @ant.attribute ignore="true'</em>
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> <em class="jxr_javadoccomment">     * @param oldCMP a &lt;code&gt;boolean&lt;/code&gt; value.</em>
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L368" href="#L368">368</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setOldCMP(<strong class="jxr_keyword">boolean</strong> oldCMP) {
+<a class="jxr_linenumber" name="L369" href="#L369">369</a>         <strong class="jxr_keyword">this</strong>.newCMP = !oldCMP;
+<a class="jxr_linenumber" name="L370" href="#L370">370</a>     }
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> 
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> 
+<a class="jxr_linenumber" name="L373" href="#L373">373</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> <em class="jxr_javadoccomment">     * If this is set to true, the new method for locating</em>
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> <em class="jxr_javadoccomment">     * CMP descriptors will be used; optional, default false.</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> <em class="jxr_javadoccomment">     * &lt;P&gt;</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_javadoccomment">     * The old CMP scheme locates the</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment">     * weblogic CMP descriptor based on the naming convention where the</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_javadoccomment">     * weblogic CMP file is expected to be named with the bean name as the</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> <em class="jxr_javadoccomment">     * prefix. Under this scheme the name of the CMP descriptor does not match</em>
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> <em class="jxr_javadoccomment">     * the name actually used in the main weblogic EJB descriptor. Also,</em>
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> <em class="jxr_javadoccomment">     * descriptors which contain multiple CMP references could not be used.</em>
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> <em class="jxr_javadoccomment">     * @param newCMP a &lt;code&gt;boolean&lt;/code&gt; value.</em>
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L385" href="#L385">385</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setNewCMP(<strong class="jxr_keyword">boolean</strong> newCMP) {
+<a class="jxr_linenumber" name="L386" href="#L386">386</a>         <strong class="jxr_keyword">this</strong>.newCMP = newCMP;
+<a class="jxr_linenumber" name="L387" href="#L387">387</a>     }
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 
+<a class="jxr_linenumber" name="L390" href="#L390">390</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> <em class="jxr_javadoccomment">     * Do not EJBC the jar after it has been put together;</em>
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> <em class="jxr_javadoccomment">     * optional, default false</em>
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> <em class="jxr_javadoccomment">     * @param noEJBC a &lt;code&gt;boolean&lt;/code&gt; value.</em>
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L395" href="#L395">395</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setNoEJBC(<strong class="jxr_keyword">boolean</strong> noEJBC) {
+<a class="jxr_linenumber" name="L396" href="#L396">396</a>         <strong class="jxr_keyword">this</strong>.noEJBC = noEJBC;
+<a class="jxr_linenumber" name="L397" href="#L397">397</a>     }
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> 
+<a class="jxr_linenumber" name="L400" href="#L400">400</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> <em class="jxr_javadoccomment">     * Register the DTDs.</em>
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> <em class="jxr_javadoccomment">     * @param handler the handler to use.</em>
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L404" href="#L404">404</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> registerKnownDTDs(DescriptorHandler handler) {
+<a class="jxr_linenumber" name="L405" href="#L405">405</a>         <em class="jxr_comment">// register all the known DTDs</em>
+<a class="jxr_linenumber" name="L406" href="#L406">406</a>         handler.registerDTD(PUBLICID_EJB11, DEFAULT_WL51_EJB11_DTD_LOCATION);
+<a class="jxr_linenumber" name="L407" href="#L407">407</a>         handler.registerDTD(PUBLICID_EJB11, DEFAULT_WL60_EJB11_DTD_LOCATION);
+<a class="jxr_linenumber" name="L408" href="#L408">408</a>         handler.registerDTD(PUBLICID_EJB11, ejb11DTD);
+<a class="jxr_linenumber" name="L409" href="#L409">409</a>         handler.registerDTD(PUBLICID_EJB20, DEFAULT_WL60_EJB20_DTD_LOCATION);
+<a class="jxr_linenumber" name="L410" href="#L410">410</a>     }
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> 
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> 
+<a class="jxr_linenumber" name="L413" href="#L413">413</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> <em class="jxr_javadoccomment">     * Get the weblogic descriptor handler.</em>
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> <em class="jxr_javadoccomment">     * @param srcDir the source directory.</em>
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> <em class="jxr_javadoccomment">     * @return the descriptor.</em>
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L418" href="#L418">418</a>     <strong class="jxr_keyword">protected</strong> DescriptorHandler getWeblogicDescriptorHandler(<strong class="jxr_keyword">final</strong> File srcDir) {
+<a class="jxr_linenumber" name="L419" href="#L419">419</a>         DescriptorHandler handler =
+<a class="jxr_linenumber" name="L420" href="#L420">420</a>             <strong class="jxr_keyword">new</strong> DescriptorHandler(getTask(), srcDir) {
+<a class="jxr_linenumber" name="L421" href="#L421">421</a>                 <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> processElement() {
+<a class="jxr_linenumber" name="L422" href="#L422">422</a>                     <strong class="jxr_keyword">if</strong> (currentElement.equals(<span class="jxr_string">"type-storage"</span>)) {
+<a class="jxr_linenumber" name="L423" href="#L423">423</a>                         <em class="jxr_comment">// Get the filename of vendor specific descriptor</em>
+<a class="jxr_linenumber" name="L424" href="#L424">424</a>                         String fileNameWithMETA = currentText;
+<a class="jxr_linenumber" name="L425" href="#L425">425</a>                         <em class="jxr_comment">//trim the META_INF\ off of the file name</em>
+<a class="jxr_linenumber" name="L426" href="#L426">426</a>                         String fileName
+<a class="jxr_linenumber" name="L427" href="#L427">427</a>                              = fileNameWithMETA.substring(META_DIR.length(),
+<a class="jxr_linenumber" name="L428" href="#L428">428</a>                             fileNameWithMETA.length());
+<a class="jxr_linenumber" name="L429" href="#L429">429</a>                         File descriptorFile = <strong class="jxr_keyword">new</strong> File(srcDir, fileName);
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> 
+<a class="jxr_linenumber" name="L431" href="#L431">431</a>                         ejbFiles.put(fileNameWithMETA, descriptorFile);
+<a class="jxr_linenumber" name="L432" href="#L432">432</a>                     }
+<a class="jxr_linenumber" name="L433" href="#L433">433</a>                 }
+<a class="jxr_linenumber" name="L434" href="#L434">434</a>             };
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> 
+<a class="jxr_linenumber" name="L436" href="#L436">436</a>         handler.registerDTD(PUBLICID_WEBLOGIC_EJB510, DEFAULT_WL51_DTD_LOCATION);
+<a class="jxr_linenumber" name="L437" href="#L437">437</a>         handler.registerDTD(PUBLICID_WEBLOGIC_EJB510, DEFAULT_WL60_51_DTD_LOCATION);
+<a class="jxr_linenumber" name="L438" href="#L438">438</a>         handler.registerDTD(PUBLICID_WEBLOGIC_EJB600, DEFAULT_WL60_DTD_LOCATION);
+<a class="jxr_linenumber" name="L439" href="#L439">439</a>         handler.registerDTD(PUBLICID_WEBLOGIC_EJB700, DEFAULT_WL70_DTD_LOCATION);
+<a class="jxr_linenumber" name="L440" href="#L440">440</a>         handler.registerDTD(PUBLICID_WEBLOGIC_EJB510, weblogicDTD);
+<a class="jxr_linenumber" name="L441" href="#L441">441</a>         handler.registerDTD(PUBLICID_WEBLOGIC_EJB600, weblogicDTD);
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 
+<a class="jxr_linenumber" name="L443" href="#L443">443</a>         <strong class="jxr_keyword">for</strong> (Iterator i = getConfig().dtdLocations.iterator(); i.hasNext();) {
+<a class="jxr_linenumber" name="L444" href="#L444">444</a>             EjbJar.DTDLocation dtdLocation = (EjbJar.DTDLocation) i.next();
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> 
+<a class="jxr_linenumber" name="L446" href="#L446">446</a>             handler.registerDTD(dtdLocation.getPublicId(), dtdLocation.getLocation());
+<a class="jxr_linenumber" name="L447" href="#L447">447</a>         }
+<a class="jxr_linenumber" name="L448" href="#L448">448</a>         <strong class="jxr_keyword">return</strong> handler;
+<a class="jxr_linenumber" name="L449" href="#L449">449</a>     }
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> 
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> 
+<a class="jxr_linenumber" name="L452" href="#L452">452</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> <em class="jxr_javadoccomment">     * Add any vendor specific files which should be included in the EJB Jar.</em>
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> <em class="jxr_javadoccomment">     * @param ejbFiles the hash table to be populated.</em>
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> <em class="jxr_javadoccomment">     * @param ddPrefix the prefix to use.</em>
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L457" href="#L457">457</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> addVendorFiles(Hashtable ejbFiles, String ddPrefix) {
+<a class="jxr_linenumber" name="L458" href="#L458">458</a>         File weblogicDD = <strong class="jxr_keyword">new</strong> File(getConfig().descriptorDir, ddPrefix + WL_DD);
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> 
+<a class="jxr_linenumber" name="L460" href="#L460">460</a>         <strong class="jxr_keyword">if</strong> (weblogicDD.exists()) {
+<a class="jxr_linenumber" name="L461" href="#L461">461</a>             ejbFiles.put(META_DIR + WL_DD,
+<a class="jxr_linenumber" name="L462" href="#L462">462</a>                 weblogicDD);
+<a class="jxr_linenumber" name="L463" href="#L463">463</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L464" href="#L464">464</a>             log(<span class="jxr_string">"Unable to locate weblogic deployment descriptor. "</span>
+<a class="jxr_linenumber" name="L465" href="#L465">465</a>                 + <span class="jxr_string">"It was expected to be in "</span>
+<a class="jxr_linenumber" name="L466" href="#L466">466</a>                 + weblogicDD.getPath(), Project.MSG_WARN);
+<a class="jxr_linenumber" name="L467" href="#L467">467</a>             <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L468" href="#L468">468</a>         }
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> 
+<a class="jxr_linenumber" name="L470" href="#L470">470</a>         <strong class="jxr_keyword">if</strong> (!newCMP) {
+<a class="jxr_linenumber" name="L471" href="#L471">471</a>             log(<span class="jxr_string">"The old method for locating CMP files has been DEPRECATED."</span>, Project.MSG_VERBOSE);
+<a class="jxr_linenumber" name="L472" href="#L472">472</a>             log(<span class="jxr_string">"Please adjust your weblogic descriptor and set "</span>
+<a class="jxr_linenumber" name="L473" href="#L473">473</a>                 + <span class="jxr_string">"newCMP=\&quot;true\&quot; to use the new CMP descriptor "</span>
+<a class="jxr_linenumber" name="L474" href="#L474">474</a>                 + <span class="jxr_string">"inclusion mechanism. "</span>, Project.MSG_VERBOSE);
+<a class="jxr_linenumber" name="L475" href="#L475">475</a>             <em class="jxr_comment">// The the weblogic cmp deployment descriptor</em>
+<a class="jxr_linenumber" name="L476" href="#L476">476</a>             File weblogicCMPDD = <strong class="jxr_keyword">new</strong> File(getConfig().descriptorDir, ddPrefix + WL_CMP_DD);
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> 
+<a class="jxr_linenumber" name="L478" href="#L478">478</a>             <strong class="jxr_keyword">if</strong> (weblogicCMPDD.exists()) {
+<a class="jxr_linenumber" name="L479" href="#L479">479</a>                 ejbFiles.put(META_DIR + WL_CMP_DD,
+<a class="jxr_linenumber" name="L480" href="#L480">480</a>                     weblogicCMPDD);
+<a class="jxr_linenumber" name="L481" href="#L481">481</a>             }
+<a class="jxr_linenumber" name="L482" href="#L482">482</a>         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L483" href="#L483">483</a>             <em class="jxr_comment">// now that we have the weblogic descriptor, we parse the file</em>
+<a class="jxr_linenumber" name="L484" href="#L484">484</a>             <em class="jxr_comment">// to find other descriptors needed to deploy the bean.</em>
+<a class="jxr_linenumber" name="L485" href="#L485">485</a>             <em class="jxr_comment">// this could be the weblogic-cmp-rdbms.xml or any other O/R</em>
+<a class="jxr_linenumber" name="L486" href="#L486">486</a>             <em class="jxr_comment">// mapping tool descriptors.</em>
+<a class="jxr_linenumber" name="L487" href="#L487">487</a>             <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L488" href="#L488">488</a>                 File ejbDescriptor = (File) ejbFiles.get(META_DIR + EJB_DD);
+<a class="jxr_linenumber" name="L489" href="#L489">489</a>                 SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> 
+<a class="jxr_linenumber" name="L491" href="#L491">491</a>                 saxParserFactory.setValidating(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> 
+<a class="jxr_linenumber" name="L493" href="#L493">493</a>                 SAXParser saxParser = saxParserFactory.newSAXParser();
+<a class="jxr_linenumber" name="L494" href="#L494">494</a>                 DescriptorHandler handler
+<a class="jxr_linenumber" name="L495" href="#L495">495</a>                     = getWeblogicDescriptorHandler(ejbDescriptor.getParentFile());
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> 
+<a class="jxr_linenumber" name="L497" href="#L497">497</a>                 saxParser.parse(<strong class="jxr_keyword">new</strong> InputSource
+<a class="jxr_linenumber" name="L498" href="#L498">498</a>                     (<strong class="jxr_keyword">new</strong> FileInputStream(weblogicDD)),
+<a class="jxr_linenumber" name="L499" href="#L499">499</a>                         handler);
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> 
+<a class="jxr_linenumber" name="L501" href="#L501">501</a>                 Hashtable ht = handler.getFiles();
+<a class="jxr_linenumber" name="L502" href="#L502">502</a>                 Enumeration e = ht.keys();
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 
+<a class="jxr_linenumber" name="L504" href="#L504">504</a>                 <strong class="jxr_keyword">while</strong> (e.hasMoreElements()) {
+<a class="jxr_linenumber" name="L505" href="#L505">505</a>                     String key = (String) e.nextElement();
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> 
+<a class="jxr_linenumber" name="L507" href="#L507">507</a>                     ejbFiles.put(key, ht.get(key));
+<a class="jxr_linenumber" name="L508" href="#L508">508</a>                 }
+<a class="jxr_linenumber" name="L509" href="#L509">509</a>             } <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L510" href="#L510">510</a>                 String msg = <span class="jxr_string">"Exception while adding Vendor specific files: "</span> + e.toString();
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> 
+<a class="jxr_linenumber" name="L512" href="#L512">512</a>                 <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> BuildException(msg, e);
+<a class="jxr_linenumber" name="L513" href="#L513">513</a>             }
+<a class="jxr_linenumber" name="L514" href="#L514">514</a>         }
+<a class="jxr_linenumber" name="L515" href="#L515">515</a>     }
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> 
+<a class="jxr_linenumber" name="L517" href="#L517">517</a> 
+<a class="jxr_linenumber" name="L518" href="#L518">518</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> <em class="jxr_javadoccomment">     * Get the vendor specific name of the Jar that will be output. The</em>
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> <em class="jxr_javadoccomment">     * modification date of this jar will be checked against the dependent</em>
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> <em class="jxr_javadoccomment">     * bean classes.</em>
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L523" href="#L523">523</a>     File getVendorOutputJarFile(String baseName) {
+<a class="jxr_linenumber" name="L524" href="#L524">524</a>         <strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> File(getDestDir(), baseName + jarSuffix);
+<a class="jxr_linenumber" name="L525" href="#L525">525</a>     }
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> 
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> 
+<a class="jxr_linenumber" name="L528" href="#L528">528</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> <em class="jxr_javadoccomment">     * Helper method invoked by execute() for each WebLogic jar to be built.</em>
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> <em class="jxr_javadoccomment">     * Encapsulates the logic of constructing a java task for calling</em>
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> <em class="jxr_javadoccomment">     * weblogic.ejbc and executing it.</em>
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L533" href="#L533">533</a> <em class="jxr_javadoccomment">     * @param sourceJar java.io.File representing the source (EJB1.1) jarfile.</em>
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> <em class="jxr_javadoccomment">     * @param destJar java.io.File representing the destination, WebLogic</em>
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> <em class="jxr_javadoccomment">     *      jarfile.</em>
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L537" href="#L537">537</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> buildWeblogicJar(File sourceJar, File destJar, String publicId) {
+<a class="jxr_linenumber" name="L538" href="#L538">538</a>         Java javaTask = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> 
+<a class="jxr_linenumber" name="L540" href="#L540">540</a>         <strong class="jxr_keyword">if</strong> (noEJBC) {
+<a class="jxr_linenumber" name="L541" href="#L541">541</a>             <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L542" href="#L542">542</a>                 FILE_UTILS.copyFile(sourceJar, destJar);
+<a class="jxr_linenumber" name="L543" href="#L543">543</a>                 <strong class="jxr_keyword">if</strong> (!keepgenerated) {
+<a class="jxr_linenumber" name="L544" href="#L544">544</a>                     sourceJar.delete();
+<a class="jxr_linenumber" name="L545" href="#L545">545</a>                 }
+<a class="jxr_linenumber" name="L546" href="#L546">546</a>                 <strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L547" href="#L547">547</a>             } <strong class="jxr_keyword">catch</strong> (IOException e) {
+<a class="jxr_linenumber" name="L548" href="#L548">548</a>                 <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> BuildException(<span class="jxr_string">"Unable to write EJB jar"</span>, e);
+<a class="jxr_linenumber" name="L549" href="#L549">549</a>             }
+<a class="jxr_linenumber" name="L550" href="#L550">550</a>         }
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> 
+<a class="jxr_linenumber" name="L552" href="#L552">552</a>         String ejbcClassName = ejbcClass;
+<a class="jxr_linenumber" name="L553" href="#L553">553</a> 
+<a class="jxr_linenumber" name="L554" href="#L554">554</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L555" href="#L555">555</a>             javaTask = <strong class="jxr_keyword">new</strong> Java(getTask());
+<a class="jxr_linenumber" name="L556" href="#L556">556</a>             javaTask.setTaskName(<span class="jxr_string">"ejbc"</span>);
+<a class="jxr_linenumber" name="L557" href="#L557">557</a> 
+<a class="jxr_linenumber" name="L558" href="#L558">558</a>             javaTask.createJvmarg().setLine(additionalJvmArgs);
+<a class="jxr_linenumber" name="L559" href="#L559">559</a>             <strong class="jxr_keyword">if</strong> (!(sysprops.isEmpty())) {
+<a class="jxr_linenumber" name="L560" href="#L560">560</a>                 <strong class="jxr_keyword">for</strong> (Enumeration en = sysprops.elements(); en.hasMoreElements();) {
+<a class="jxr_linenumber" name="L561" href="#L561">561</a>                     Environment.Variable entry
+<a class="jxr_linenumber" name="L562" href="#L562">562</a>                         = (Environment.Variable) en.nextElement();
+<a class="jxr_linenumber" name="L563" href="#L563">563</a>                     javaTask.addSysproperty(entry);
+<a class="jxr_linenumber" name="L564" href="#L564">564</a>                 }
+<a class="jxr_linenumber" name="L565" href="#L565">565</a>             }
+<a class="jxr_linenumber" name="L566" href="#L566">566</a> 
+<a class="jxr_linenumber" name="L567" href="#L567">567</a>             <strong class="jxr_keyword">if</strong> (getJvmDebugLevel() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L568" href="#L568">568</a>                 javaTask.createJvmarg().setLine(<span class="jxr_string">" -Dweblogic.StdoutSeverityLevel="</span> + jvmDebugLevel);
+<a class="jxr_linenumber" name="L569" href="#L569">569</a>             }
+<a class="jxr_linenumber" name="L570" href="#L570">570</a> 
+<a class="jxr_linenumber" name="L571" href="#L571">571</a>             <strong class="jxr_keyword">if</strong> (ejbcClassName == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L572" href="#L572">572</a>                 <em class="jxr_comment">// try to determine it from publicId</em>
+<a class="jxr_linenumber" name="L573" href="#L573">573</a>                 <strong class="jxr_keyword">if</strong> (PUBLICID_EJB11.equals(publicId)) {
+<a class="jxr_linenumber" name="L574" href="#L574">574</a>                     ejbcClassName = COMPILER_EJB11;
+<a class="jxr_linenumber" name="L575" href="#L575">575</a>                 } <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (PUBLICID_EJB20.equals(publicId)) {
+<a class="jxr_linenumber" name="L576" href="#L576">576</a>                     ejbcClassName = COMPILER_EJB20;
+<a class="jxr_linenumber" name="L577" href="#L577">577</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L578" href="#L578">578</a>                     log(<span class="jxr_string">"Unrecognized publicId "</span> + publicId
+<a class="jxr_linenumber" name="L579" href="#L579">579</a>                         + <span class="jxr_string">" - using EJB 1.1 compiler"</span>, Project.MSG_WARN);
+<a class="jxr_linenumber" name="L580" href="#L580">580</a>                     ejbcClassName = COMPILER_EJB11;
+<a class="jxr_linenumber" name="L581" href="#L581">581</a>                 }
+<a class="jxr_linenumber" name="L582" href="#L582">582</a>             }
+<a class="jxr_linenumber" name="L583" href="#L583">583</a> 
+<a class="jxr_linenumber" name="L584" href="#L584">584</a>             javaTask.setClassname(ejbcClassName);
+<a class="jxr_linenumber" name="L585" href="#L585">585</a>             javaTask.createArg().setLine(additionalArgs);
+<a class="jxr_linenumber" name="L586" href="#L586">586</a>             <strong class="jxr_keyword">if</strong> (keepgenerated) {
+<a class="jxr_linenumber" name="L587" href="#L587">587</a>                 javaTask.createArg().setValue(<span class="jxr_string">"-keepgenerated"</span>);
+<a class="jxr_linenumber" name="L588" href="#L588">588</a>             }
+<a class="jxr_linenumber" name="L589" href="#L589">589</a>             <strong class="jxr_keyword">if</strong> (compiler == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L590" href="#L590">590</a>                 <em class="jxr_comment">// try to use the compiler specified by build.compiler.</em>
+<a class="jxr_linenumber" name="L591" href="#L591">591</a>                 <em class="jxr_comment">// Right now we are just going to allow Jikes</em>
+<a class="jxr_linenumber" name="L592" href="#L592">592</a>                 String buildCompiler
+<a class="jxr_linenumber" name="L593" href="#L593">593</a>                     = getTask().getProject().getProperty(<span class="jxr_string">"build.compiler"</span>);
+<a class="jxr_linenumber" name="L594" href="#L594">594</a> 
+<a class="jxr_linenumber" name="L595" href="#L595">595</a>                 <strong class="jxr_keyword">if</strong> (buildCompiler != <strong class="jxr_keyword">null</strong> &amp;&amp; buildCompiler.equals(<span class="jxr_string">"jikes"</span>)) {
+<a class="jxr_linenumber" name="L596" href="#L596">596</a>                     javaTask.createArg().setValue(<span class="jxr_string">"-compiler"</span>);
+<a class="jxr_linenumber" name="L597" href="#L597">597</a>                     javaTask.createArg().setValue(<span class="jxr_string">"jikes"</span>);
+<a class="jxr_linenumber" name="L598" href="#L598">598</a>                 }
+<a class="jxr_linenumber" name="L599" href="#L599">599</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L600" href="#L600">600</a>                 <strong class="jxr_keyword">if</strong> (!compiler.equals(DEFAULT_COMPILER)) {
+<a class="jxr_linenumber" name="L601" href="#L601">601</a>                     javaTask.createArg().setValue(<span class="jxr_string">"-compiler"</span>);
+<a class="jxr_linenumber" name="L602" href="#L602">602</a>                     javaTask.createArg().setLine(compiler);
+<a class="jxr_linenumber" name="L603" href="#L603">603</a>                 }
+<a class="jxr_linenumber" name="L604" href="#L604">604</a>             }
+<a class="jxr_linenumber" name="L605" href="#L605">605</a> 
+<a class="jxr_linenumber" name="L606" href="#L606">606</a>             Path combinedClasspath = getCombinedClasspath();
+<a class="jxr_linenumber" name="L607" href="#L607">607</a>             <strong class="jxr_keyword">if</strong> (wlClasspath != <strong class="jxr_keyword">null</strong> &amp;&amp; combinedClasspath != <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L608" href="#L608">608</a>                  &amp;&amp; combinedClasspath.toString().trim().length() &gt; 0) {
+<a class="jxr_linenumber" name="L609" href="#L609">609</a>                 javaTask.createArg().setValue(<span class="jxr_string">"-classpath"</span>);
+<a class="jxr_linenumber" name="L610" href="#L610">610</a>                 javaTask.createArg().setPath(combinedClasspath);
+<a class="jxr_linenumber" name="L611" href="#L611">611</a>             }
+<a class="jxr_linenumber" name="L612" href="#L612">612</a> 
+<a class="jxr_linenumber" name="L613" href="#L613">613</a>             javaTask.createArg().setValue(sourceJar.getPath());
+<a class="jxr_linenumber" name="L614" href="#L614">614</a>             <strong class="jxr_keyword">if</strong> (outputDir == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L615" href="#L615">615</a>                 javaTask.createArg().setValue(destJar.getPath());
+<a class="jxr_linenumber" name="L616" href="#L616">616</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L617" href="#L617">617</a>                 javaTask.createArg().setValue(outputDir.getPath());
+<a class="jxr_linenumber" name="L618" href="#L618">618</a>             }
+<a class="jxr_linenumber" name="L619" href="#L619">619</a> 
+<a class="jxr_linenumber" name="L620" href="#L620">620</a>             Path classpath = wlClasspath;
+<a class="jxr_linenumber" name="L621" href="#L621">621</a> 
+<a class="jxr_linenumber" name="L622" href="#L622">622</a>             <strong class="jxr_keyword">if</strong> (classpath == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L623" href="#L623">623</a>                 classpath = getCombinedClasspath();
+<a class="jxr_linenumber" name="L624" href="#L624">624</a>             }
+<a class="jxr_linenumber" name="L625" href="#L625">625</a> 
+<a class="jxr_linenumber" name="L626" href="#L626">626</a>             javaTask.setFork(<strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L627" href="#L627">627</a>             <strong class="jxr_keyword">if</strong> (classpath != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L628" href="#L628">628</a>                 javaTask.setClasspath(classpath);
+<a class="jxr_linenumber" name="L629" href="#L629">629</a>             }
+<a class="jxr_linenumber" name="L630" href="#L630">630</a> 
+<a class="jxr_linenumber" name="L631" href="#L631">631</a>             log(<span class="jxr_string">"Calling "</span> + ejbcClassName + <span class="jxr_string">" for "</span> + sourceJar.toString(),
+<a class="jxr_linenumber" name="L632" href="#L632">632</a>                 Project.MSG_VERBOSE);
+<a class="jxr_linenumber" name="L633" href="#L633">633</a> 
+<a class="jxr_linenumber" name="L634" href="#L634">634</a>             <strong class="jxr_keyword">if</strong> (javaTask.executeJava() != 0) {
+<a class="jxr_linenumber" name="L635" href="#L635">635</a>                 <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> BuildException(<span class="jxr_string">"Ejbc reported an error"</span>);
+<a class="jxr_linenumber" name="L636" href="#L636">636</a>             }
+<a class="jxr_linenumber" name="L637" href="#L637">637</a>         } <strong class="jxr_keyword">catch</strong> (Exception e) {
+<a class="jxr_linenumber" name="L638" href="#L638">638</a>             <em class="jxr_comment">// Have to catch this because of the semantics of calling main()</em>
+<a class="jxr_linenumber" name="L639" href="#L639">639</a>             String msg = <span class="jxr_string">"Exception while calling "</span> + ejbcClassName
+<a class="jxr_linenumber" name="L640" href="#L640">640</a>                 + <span class="jxr_string">". Details: "</span> + e.toString();
+<a class="jxr_linenumber" name="L641" href="#L641">641</a> 
+<a class="jxr_linenumber" name="L642" href="#L642">642</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> BuildException(msg, e);
+<a class="jxr_linenumber" name="L643" href="#L643">643</a>         }
+<a class="jxr_linenumber" name="L644" href="#L644">644</a>     }
+<a class="jxr_linenumber" name="L645" href="#L645">645</a> 
+<a class="jxr_linenumber" name="L646" href="#L646">646</a> 
+<a class="jxr_linenumber" name="L647" href="#L647">647</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L648" href="#L648">648</a> <em class="jxr_javadoccomment">     * Method used to encapsulate the writing of the JAR file. Iterates over</em>
+<a class="jxr_linenumber" name="L649" href="#L649">649</a> <em class="jxr_javadoccomment">     * the filenames/java.io.Files in the Hashtable stored on the instance</em>
+<a class="jxr_linenumber" name="L650" href="#L650">650</a> <em class="jxr_javadoccomment">     * variable ejbFiles.</em>
+<a class="jxr_linenumber" name="L651" href="#L651">651</a> <em class="jxr_javadoccomment">     * @param baseName the base name.</em>
+<a class="jxr_linenumber" name="L652" href="#L652">652</a> <em class="jxr_javadoccomment">     * @param jarFile the jar file to populate.</em>
+<a class="jxr_linenumber" name="L653" href="#L653">653</a> <em class="jxr_javadoccomment">     * @param files   the hash table of files to write.</em>
+<a class="jxr_linenumber" name="L654" href="#L654">654</a> <em class="jxr_javadoccomment">     * @param publicId the id to use.</em>
+<a class="jxr_linenumber" name="L655" href="#L655">655</a> <em class="jxr_javadoccomment">     * @throws BuildException if there is a problem.</em>
+<a class="jxr_linenumber" name="L656" href="#L656">656</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L657" href="#L657">657</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> writeJar(String baseName, File jarFile, Hashtable files,
+<a class="jxr_linenumber" name="L658" href="#L658">658</a>                             String publicId) <strong class="jxr_keyword">throws</strong> BuildException {
+<a class="jxr_linenumber" name="L659" href="#L659">659</a>         <em class="jxr_comment">// need to create a generic jar first.</em>
+<a class="jxr_linenumber" name="L660" href="#L660">660</a>         File genericJarFile = <strong class="jxr_keyword">super</strong>.getVendorOutputJarFile(baseName);
+<a class="jxr_linenumber" name="L661" href="#L661">661</a> 
+<a class="jxr_linenumber" name="L662" href="#L662">662</a>         <strong class="jxr_keyword">super</strong>.writeJar(baseName, genericJarFile, files, publicId);
+<a class="jxr_linenumber" name="L663" href="#L663">663</a> 
+<a class="jxr_linenumber" name="L664" href="#L664">664</a>         <strong class="jxr_keyword">if</strong> (alwaysRebuild || isRebuildRequired(genericJarFile, jarFile)) {
+<a class="jxr_linenumber" name="L665" href="#L665">665</a>             buildWeblogicJar(genericJarFile, jarFile, publicId);
+<a class="jxr_linenumber" name="L666" href="#L666">666</a>         }
+<a class="jxr_linenumber" name="L667" href="#L667">667</a>         <strong class="jxr_keyword">if</strong> (!keepGeneric) {
+<a class="jxr_linenumber" name="L668" href="#L668">668</a>             log(<span class="jxr_string">"deleting generic jar "</span> + genericJarFile.toString(),
+<a class="jxr_linenumber" name="L669" href="#L669">669</a>                 Project.MSG_VERBOSE);
+<a class="jxr_linenumber" name="L670" href="#L670">670</a>             genericJarFile.delete();
+<a class="jxr_linenumber" name="L671" href="#L671">671</a>         }
+<a class="jxr_linenumber" name="L672" href="#L672">672</a>     }
+<a class="jxr_linenumber" name="L673" href="#L673">673</a> 
+<a class="jxr_linenumber" name="L674" href="#L674">674</a> 
+<a class="jxr_linenumber" name="L675" href="#L675">675</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L676" href="#L676">676</a> <em class="jxr_javadoccomment">     * Called to validate that the tool parameters have been configured.</em>
+<a class="jxr_linenumber" name="L677" href="#L677">677</a> <em class="jxr_javadoccomment">     * @throws BuildException if there is an error.</em>
+<a class="jxr_linenumber" name="L678" href="#L678">678</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L679" href="#L679">679</a>     <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateConfigured() <strong class="jxr_keyword">throws</strong> BuildException {
+<a class="jxr_linenumber" name="L680" href="#L680">680</a>         <strong class="jxr_keyword">super</strong>.validateConfigured();
+<a class="jxr_linenumber" name="L681" href="#L681">681</a>     }
+<a class="jxr_linenumber" name="L682" href="#L682">682</a> 
+<a class="jxr_linenumber" name="L683" href="#L683">683</a> 
+<a class="jxr_linenumber" name="L684" href="#L684">684</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L685" href="#L685">685</a> <em class="jxr_javadoccomment">     * Helper method to check to see if a weblogic EBJ1.1 jar needs to be</em>
+<a class="jxr_linenumber" name="L686" href="#L686">686</a> <em class="jxr_javadoccomment">     * rebuilt using ejbc. Called from writeJar it sees if the "Bean" classes</em>
+<a class="jxr_linenumber" name="L687" href="#L687">687</a> <em class="jxr_javadoccomment">     * are the only thing that needs to be updated and either updates the Jar</em>
+<a class="jxr_linenumber" name="L688" href="#L688">688</a> <em class="jxr_javadoccomment">     * with the Bean classfile or returns true, saying that the whole weblogic</em>
+<a class="jxr_linenumber" name="L689" href="#L689">689</a> <em class="jxr_javadoccomment">     * jar needs to be regened with ejbc. This allows faster build times for</em>
+<a class="jxr_linenumber" name="L690" href="#L690">690</a> <em class="jxr_javadoccomment">     * working developers. &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L691" href="#L691">691</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L692" href="#L692">692</a> <em class="jxr_javadoccomment">     * The way weblogic ejbc works is it creates wrappers for the publicly</em>
+<a class="jxr_linenumber" name="L693" href="#L693">693</a> <em class="jxr_javadoccomment">     * defined methods as they are exposed in the remote interface. If the</em>
+<a class="jxr_linenumber" name="L694" href="#L694">694</a> <em class="jxr_javadoccomment">     * actual bean changes without changing the the method signatures then</em>
+<a class="jxr_linenumber" name="L695" href="#L695">695</a> <em class="jxr_javadoccomment">     * only the bean classfile needs to be updated and the rest of the</em>
+<a class="jxr_linenumber" name="L696" href="#L696">696</a> <em class="jxr_javadoccomment">     * weblogic jar file can remain the same. If the Interfaces, ie. the</em>
+<a class="jxr_linenumber" name="L697" href="#L697">697</a> <em class="jxr_javadoccomment">     * method signatures change or if the xml deployment descriptors changed,</em>
+<a class="jxr_linenumber" name="L698" href="#L698">698</a> <em class="jxr_javadoccomment">     * the whole jar needs to be rebuilt with ejbc. This is not strictly true</em>
+<a class="jxr_linenumber" name="L699" href="#L699">699</a> <em class="jxr_javadoccomment">     * for the xml files. If the JNDI name changes then the jar doesnt have to</em>
+<a class="jxr_linenumber" name="L700" href="#L700">700</a> <em class="jxr_javadoccomment">     * be rebuild, but if the resources references change then it does. At</em>
+<a class="jxr_linenumber" name="L701" href="#L701">701</a> <em class="jxr_javadoccomment">     * this point the weblogic jar gets rebuilt if the xml files change at</em>
+<a class="jxr_linenumber" name="L702" href="#L702">702</a> <em class="jxr_javadoccomment">     * all.</em>
+<a class="jxr_linenumber" name="L703" href="#L703">703</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L704" href="#L704">704</a> <em class="jxr_javadoccomment">     * @param genericJarFile java.io.File The generic jar file.</em>
+<a class="jxr_linenumber" name="L705" href="#L705">705</a> <em class="jxr_javadoccomment">     * @param weblogicJarFile java.io.File The weblogic jar file to check to</em>
+<a class="jxr_linenumber" name="L706" href="#L706">706</a> <em class="jxr_javadoccomment">     *      see if it needs to be rebuilt.</em>
+<a class="jxr_linenumber" name="L707" href="#L707">707</a> <em class="jxr_javadoccomment">     * @return true if the jar needs to be rebuilt.</em>
+<a class="jxr_linenumber" name="L708" href="#L708">708</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L709" href="#L709">709</a>     <em class="jxr_comment">// CheckStyle:MethodLength OFF - this will no be fixed</em>
+<a class="jxr_linenumber" name="L710" href="#L710">710</a>     <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> isRebuildRequired(File genericJarFile, File weblogicJarFile) {
+<a class="jxr_linenumber" name="L711" href="#L711">711</a>         <strong class="jxr_keyword">boolean</strong> rebuild = false;
+<a class="jxr_linenumber" name="L712" href="#L712">712</a> 
+<a class="jxr_linenumber" name="L713" href="#L713">713</a>         JarFile genericJar = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L714" href="#L714">714</a>         JarFile wlJar = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L715" href="#L715">715</a>         File newWLJarFile = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L716" href="#L716">716</a>         JarOutputStream newJarStream = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L717" href="#L717">717</a>         ClassLoader genericLoader = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L718" href="#L718">718</a> 
+<a class="jxr_linenumber" name="L719" href="#L719">719</a>         <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L720" href="#L720">720</a>             log(<span class="jxr_string">"Checking if weblogic Jar needs to be rebuilt for jar "</span> + weblogicJarFile.getName(),
+<a class="jxr_linenumber" name="L721" href="#L721">721</a>                 Project.MSG_VERBOSE);
+<a class="jxr_linenumber" name="L722" href="#L722">722</a>             <em class="jxr_comment">// Only go forward if the generic and the weblogic file both exist</em>
+<a class="jxr_linenumber" name="L723" href="#L723">723</a>             <strong class="jxr_keyword">if</strong> (genericJarFile.exists() &amp;&amp; genericJarFile.isFile()
+<a class="jxr_linenumber" name="L724" href="#L724">724</a>                  &amp;&amp; weblogicJarFile.exists() &amp;&amp; weblogicJarFile.isFile()) {
+<a class="jxr_linenumber" name="L725" href="#L725">725</a>                 <em class="jxr_comment">//open jar files</em>
+<a class="jxr_linenumber" name="L726" href="#L726">726</a>                 genericJar = <strong class="jxr_keyword">new</strong> JarFile(genericJarFile);
+<a class="jxr_linenumber" name="L727" href="#L727">727</a>                 wlJar = <strong class="jxr_keyword">new</strong> JarFile(weblogicJarFile);
+<a class="jxr_linenumber" name="L728" href="#L728">728</a> 
+<a class="jxr_linenumber" name="L729" href="#L729">729</a>                 Hashtable genericEntries = <strong class="jxr_keyword">new</strong> Hashtable();
+<a class="jxr_linenumber" name="L730" href="#L730">730</a>                 Hashtable wlEntries = <strong class="jxr_keyword">new</strong> Hashtable();
+<a class="jxr_linenumber" name="L731" href="#L731">731</a>                 Hashtable replaceEntries = <strong class="jxr_keyword">new</strong> Hashtable();
+<a class="jxr_linenumber" name="L732" href="#L732">732</a> 
+<a class="jxr_linenumber" name="L733" href="#L733">733</a>                 <em class="jxr_comment">//get the list of generic jar entries</em>
+<a class="jxr_linenumber" name="L734" href="#L734">734</a>                 <strong class="jxr_keyword">for</strong> (Enumeration e = genericJar.entries(); e.hasMoreElements();) {
+<a class="jxr_linenumber" name="L735" href="#L735">735</a>                     JarEntry je = (JarEntry) e.nextElement();
+<a class="jxr_linenumber" name="L736" href="#L736">736</a> 
+<a class="jxr_linenumber" name="L737" href="#L737">737</a>                     genericEntries.put(je.getName().replace('&#92;&#92;', '/'), je);
+<a class="jxr_linenumber" name="L738" href="#L738">738</a>                 }
+<a class="jxr_linenumber" name="L739" href="#L739">739</a>                 <em class="jxr_comment">//get the list of weblogic jar entries</em>
+<a class="jxr_linenumber" name="L740" href="#L740">740</a>                 <strong class="jxr_keyword">for</strong> (Enumeration e = wlJar.entries(); e.hasMoreElements();) {
+<a class="jxr_linenumber" name="L741" href="#L741">741</a>                     JarEntry je = (JarEntry) e.nextElement();
+<a class="jxr_linenumber" name="L742" href="#L742">742</a> 
+<a class="jxr_linenumber" name="L743" href="#L743">743</a>                     wlEntries.put(je.getName(), je);
+<a class="jxr_linenumber" name="L744" href="#L744">744</a>                 }
+<a class="jxr_linenumber" name="L745" href="#L745">745</a> 
+<a class="jxr_linenumber" name="L746" href="#L746">746</a>                 <em class="jxr_comment">//Cycle Through generic and make sure its in weblogic</em>
+<a class="jxr_linenumber" name="L747" href="#L747">747</a>                 genericLoader = getClassLoaderFromJar(genericJarFile);
+<a class="jxr_linenumber" name="L748" href="#L748">748</a> 
+<a class="jxr_linenumber" name="L749" href="#L749">749</a>                 <strong class="jxr_keyword">for</strong> (Enumeration e = genericEntries.keys(); e.hasMoreElements();) {
+<a class="jxr_linenumber" name="L750" href="#L750">750</a>                     String filepath = (String) e.nextElement();
+<a class="jxr_linenumber" name="L751" href="#L751">751</a> 
+<a class="jxr_linenumber" name="L752" href="#L752">752</a>                     <strong class="jxr_keyword">if</strong> (wlEntries.containsKey(filepath)) {
+<a class="jxr_linenumber" name="L753" href="#L753">753</a>                         <em class="jxr_comment">// File name/path match</em>
+<a class="jxr_linenumber" name="L754" href="#L754">754</a> 
+<a class="jxr_linenumber" name="L755" href="#L755">755</a>                         <em class="jxr_comment">// Check files see if same</em>
+<a class="jxr_linenumber" name="L756" href="#L756">756</a>                         JarEntry genericEntry = (JarEntry) genericEntries.get(filepath);
+<a class="jxr_linenumber" name="L757" href="#L757">757</a>                         JarEntry wlEntry = (JarEntry) wlEntries.get(filepath);
+<a class="jxr_linenumber" name="L758" href="#L758">758</a> 
+<a class="jxr_linenumber" name="L759" href="#L759">759</a>                         <strong class="jxr_keyword">if</strong> ((genericEntry.getCrc() != wlEntry.getCrc())
+<a class="jxr_linenumber" name="L760" href="#L760">760</a>                             || (genericEntry.getSize() != wlEntry.getSize())) {
+<a class="jxr_linenumber" name="L761" href="#L761">761</a> 
+<a class="jxr_linenumber" name="L762" href="#L762">762</a>                             <strong class="jxr_keyword">if</strong> (genericEntry.getName().endsWith(<span class="jxr_string">".class"</span>)) {
+<a class="jxr_linenumber" name="L763" href="#L763">763</a>                                 <em class="jxr_comment">//File are different see if its an object or an interface</em>
+<a class="jxr_linenumber" name="L764" href="#L764">764</a>                                 String classname
+<a class="jxr_linenumber" name="L765" href="#L765">765</a>                                     = genericEntry.getName()
+<a class="jxr_linenumber" name="L766" href="#L766">766</a>                                     .replace(File.separatorChar, '.')
+<a class="jxr_linenumber" name="L767" href="#L767">767</a>                                     .replace('/', '.');
+<a class="jxr_linenumber" name="L768" href="#L768">768</a> 
+<a class="jxr_linenumber" name="L769" href="#L769">769</a>                                 classname = classname.substring(0, classname.lastIndexOf(<span class="jxr_string">".class"</span>));
+<a class="jxr_linenumber" name="L770" href="#L770">770</a> 
+<a class="jxr_linenumber" name="L771" href="#L771">771</a>                                 Class genclass = genericLoader.loadClass(classname);
+<a class="jxr_linenumber" name="L772" href="#L772">772</a> 
+<a class="jxr_linenumber" name="L773" href="#L773">773</a>                                 <strong class="jxr_keyword">if</strong> (genclass.isInterface()) {
+<a class="jxr_linenumber" name="L774" href="#L774">774</a>                                     <em class="jxr_comment">//Interface changed   rebuild jar.</em>
+<a class="jxr_linenumber" name="L775" href="#L775">775</a>                                     log(<span class="jxr_string">"Interface "</span> + genclass.getName()
+<a class="jxr_linenumber" name="L776" href="#L776">776</a>                                         + <span class="jxr_string">" has changed"</span>, Project.MSG_VERBOSE);
+<a class="jxr_linenumber" name="L777" href="#L777">777</a>                                     rebuild = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L778" href="#L778">778</a>                                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L779" href="#L779">779</a>                                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L780" href="#L780">780</a>                                     <em class="jxr_comment">//Object class Changed   update it.</em>
+<a class="jxr_linenumber" name="L781" href="#L781">781</a>                                     replaceEntries.put(filepath, genericEntry);
+<a class="jxr_linenumber" name="L782" href="#L782">782</a>                                 }
+<a class="jxr_linenumber" name="L783" href="#L783">783</a>                             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L784" href="#L784">784</a>                                 <em class="jxr_comment">// is it the manifest. If so ignore it</em>
+<a class="jxr_linenumber" name="L785" href="#L785">785</a>                                 <strong class="jxr_keyword">if</strong> (!genericEntry.getName().equals(<span class="jxr_string">"META-INF/MANIFEST.MF"</span>)) {
+<a class="jxr_linenumber" name="L786" href="#L786">786</a>                                     <em class="jxr_comment">//File other then class changed   rebuild</em>
+<a class="jxr_linenumber" name="L787" href="#L787">787</a>                                     log(<span class="jxr_string">"Non class file "</span> + genericEntry.getName()
+<a class="jxr_linenumber" name="L788" href="#L788">788</a>                                         + <span class="jxr_string">" has changed"</span>, Project.MSG_VERBOSE);
+<a class="jxr_linenumber" name="L789" href="#L789">789</a>                                     rebuild = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L790" href="#L790">790</a>                                     <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L791" href="#L791">791</a>                                 }
+<a class="jxr_linenumber" name="L792" href="#L792">792</a>                             }
+<a class="jxr_linenumber" name="L793" href="#L793">793</a>                         }
+<a class="jxr_linenumber" name="L794" href="#L794">794</a>                     } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L795" href="#L795">795</a>                         <em class="jxr_comment">// a file doesnt exist rebuild</em>
+<a class="jxr_linenumber" name="L796" href="#L796">796</a> 
+<a class="jxr_linenumber" name="L797" href="#L797">797</a>                         log(<span class="jxr_string">"File "</span> + filepath + <span class="jxr_string">" not present in weblogic jar"</span>,
+<a class="jxr_linenumber" name="L798" href="#L798">798</a>                             Project.MSG_VERBOSE);
+<a class="jxr_linenumber" name="L799" href="#L799">799</a>                         rebuild = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L800" href="#L800">800</a>                         <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L801" href="#L801">801</a>                     }
+<a class="jxr_linenumber" name="L802" href="#L802">802</a>                 }
+<a class="jxr_linenumber" name="L803" href="#L803">803</a> 
+<a class="jxr_linenumber" name="L804" href="#L804">804</a>                 <strong class="jxr_keyword">if</strong> (!rebuild) {
+<a class="jxr_linenumber" name="L805" href="#L805">805</a>                     log(<span class="jxr_string">"No rebuild needed - updating jar"</span>, Project.MSG_VERBOSE);
+<a class="jxr_linenumber" name="L806" href="#L806">806</a>                     newWLJarFile = <strong class="jxr_keyword">new</strong> File(weblogicJarFile.getAbsolutePath() + <span class="jxr_string">".temp"</span>);
+<a class="jxr_linenumber" name="L807" href="#L807">807</a>                     <strong class="jxr_keyword">if</strong> (newWLJarFile.exists()) {
+<a class="jxr_linenumber" name="L808" href="#L808">808</a>                         newWLJarFile.delete();
+<a class="jxr_linenumber" name="L809" href="#L809">809</a>                     }
+<a class="jxr_linenumber" name="L810" href="#L810">810</a> 
+<a class="jxr_linenumber" name="L811" href="#L811">811</a>                     newJarStream = <strong class="jxr_keyword">new</strong> JarOutputStream(<strong class="jxr_keyword">new</strong> FileOutputStream(newWLJarFile));
+<a class="jxr_linenumber" name="L812" href="#L812">812</a>                     newJarStream.setLevel(0);
+<a class="jxr_linenumber" name="L813" href="#L813">813</a> 
+<a class="jxr_linenumber" name="L814" href="#L814">814</a>                     <em class="jxr_comment">//Copy files from old weblogic jar</em>
+<a class="jxr_linenumber" name="L815" href="#L815">815</a>                     <strong class="jxr_keyword">for</strong> (Enumeration e = wlEntries.elements(); e.hasMoreElements();) {
+<a class="jxr_linenumber" name="L816" href="#L816">816</a>                         byte[] buffer = <strong class="jxr_keyword">new</strong> byte[DEFAULT_BUFFER_SIZE];
+<a class="jxr_linenumber" name="L817" href="#L817">817</a>                         <strong class="jxr_keyword">int</strong> bytesRead;
+<a class="jxr_linenumber" name="L818" href="#L818">818</a>                         InputStream is;
+<a class="jxr_linenumber" name="L819" href="#L819">819</a>                         JarEntry je = (JarEntry) e.nextElement();
+<a class="jxr_linenumber" name="L820" href="#L820">820</a> 
+<a class="jxr_linenumber" name="L821" href="#L821">821</a>                         <strong class="jxr_keyword">if</strong> (je.getCompressedSize() == -1
+<a class="jxr_linenumber" name="L822" href="#L822">822</a>                             || je.getCompressedSize() == je.getSize()) {
+<a class="jxr_linenumber" name="L823" href="#L823">823</a>                             newJarStream.setLevel(0);
+<a class="jxr_linenumber" name="L824" href="#L824">824</a>                         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L825" href="#L825">825</a>                             newJarStream.setLevel(JAR_COMPRESS_LEVEL);
+<a class="jxr_linenumber" name="L826" href="#L826">826</a>                         }
+<a class="jxr_linenumber" name="L827" href="#L827">827</a> 
+<a class="jxr_linenumber" name="L828" href="#L828">828</a>                         <em class="jxr_comment">// Update with changed Bean class</em>
+<a class="jxr_linenumber" name="L829" href="#L829">829</a>                         <strong class="jxr_keyword">if</strong> (replaceEntries.containsKey(je.getName())) {
+<a class="jxr_linenumber" name="L830" href="#L830">830</a>                             log(<span class="jxr_string">"Updating Bean class from generic Jar "</span>
+<a class="jxr_linenumber" name="L831" href="#L831">831</a>                                 + je.getName(), Project.MSG_VERBOSE);
+<a class="jxr_linenumber" name="L832" href="#L832">832</a>                             <em class="jxr_comment">// Use the entry from the generic jar</em>
+<a class="jxr_linenumber" name="L833" href="#L833">833</a>                             je = (JarEntry) replaceEntries.get(je.getName());
+<a class="jxr_linenumber" name="L834" href="#L834">834</a>                             is = genericJar.getInputStream(je);
+<a class="jxr_linenumber" name="L835" href="#L835">835</a>                         } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L836" href="#L836">836</a>                             <em class="jxr_comment">//use fle from original weblogic jar</em>
+<a class="jxr_linenumber" name="L837" href="#L837">837</a> 
+<a class="jxr_linenumber" name="L838" href="#L838">838</a>                             is = wlJar.getInputStream(je);
+<a class="jxr_linenumber" name="L839" href="#L839">839</a>                         }
+<a class="jxr_linenumber" name="L840" href="#L840">840</a>                         newJarStream.putNextEntry(<strong class="jxr_keyword">new</strong> JarEntry(je.getName()));
+<a class="jxr_linenumber" name="L841" href="#L841">841</a> 
+<a class="jxr_linenumber" name="L842" href="#L842">842</a>                         <strong class="jxr_keyword">while</strong> ((bytesRead = is.read(buffer)) != -1) {
+<a class="jxr_linenumber" name="L843" href="#L843">843</a>                             newJarStream.write(buffer, 0, bytesRead);
+<a class="jxr_linenumber" name="L844" href="#L844">844</a>                         }
+<a class="jxr_linenumber" name="L845" href="#L845">845</a>                         is.close();
+<a class="jxr_linenumber" name="L846" href="#L846">846</a>                     }
+<a class="jxr_linenumber" name="L847" href="#L847">847</a>                 } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L848" href="#L848">848</a>                     log(<span class="jxr_string">"Weblogic Jar rebuild needed due to changed "</span>
+<a class="jxr_linenumber" name="L849" href="#L849">849</a>                          + <span class="jxr_string">"interface or XML"</span>, Project.MSG_VERBOSE);
+<a class="jxr_linenumber" name="L850" href="#L850">850</a>                 }
+<a class="jxr_linenumber" name="L851" href="#L851">851</a>             } <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L852" href="#L852">852</a>                 rebuild = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L853" href="#L853">853</a>             }
+<a class="jxr_linenumber" name="L854" href="#L854">854</a>         } <strong class="jxr_keyword">catch</strong> (ClassNotFoundException cnfe) {
+<a class="jxr_linenumber" name="L855" href="#L855">855</a>             String cnfmsg = <span class="jxr_string">"ClassNotFoundException while processing ejb-jar file"</span>
+<a class="jxr_linenumber" name="L856" href="#L856">856</a>                  + <span class="jxr_string">". Details: "</span>
+<a class="jxr_linenumber" name="L857" href="#L857">857</a>                  + cnfe.getMessage();
+<a class="jxr_linenumber" name="L858" href="#L858">858</a> 
+<a class="jxr_linenumber" name="L859" href="#L859">859</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> BuildException(cnfmsg, cnfe);
+<a class="jxr_linenumber" name="L860" href="#L860">860</a>         } <strong class="jxr_keyword">catch</strong> (IOException ioe) {
+<a class="jxr_linenumber" name="L861" href="#L861">861</a>             String msg = <span class="jxr_string">"IOException while processing ejb-jar file "</span>
+<a class="jxr_linenumber" name="L862" href="#L862">862</a>                  + <span class="jxr_string">". Details: "</span>
+<a class="jxr_linenumber" name="L863" href="#L863">863</a>                  + ioe.getMessage();
+<a class="jxr_linenumber" name="L864" href="#L864">864</a> 
+<a class="jxr_linenumber" name="L865" href="#L865">865</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> BuildException(msg, ioe);
+<a class="jxr_linenumber" name="L866" href="#L866">866</a>         } <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L867" href="#L867">867</a>             <em class="jxr_comment">// need to close files and perhaps rename output</em>
+<a class="jxr_linenumber" name="L868" href="#L868">868</a>             <strong class="jxr_keyword">if</strong> (genericJar != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L869" href="#L869">869</a>                 <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L870" href="#L870">870</a>                     genericJar.close();
+<a class="jxr_linenumber" name="L871" href="#L871">871</a>                 } <strong class="jxr_keyword">catch</strong> (IOException closeException) {
+<a class="jxr_linenumber" name="L872" href="#L872">872</a>                     <em class="jxr_comment">// empty</em>
+<a class="jxr_linenumber" name="L873" href="#L873">873</a>                 }
+<a class="jxr_linenumber" name="L874" href="#L874">874</a>             }
+<a class="jxr_linenumber" name="L875" href="#L875">875</a> 
+<a class="jxr_linenumber" name="L876" href="#L876">876</a>             <strong class="jxr_keyword">if</strong> (wlJar != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L877" href="#L877">877</a>                 <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L878" href="#L878">878</a>                     wlJar.close();
+<a class="jxr_linenumber" name="L879" href="#L879">879</a>                 } <strong class="jxr_keyword">catch</strong> (IOException closeException) {
+<a class="jxr_linenumber" name="L880" href="#L880">880</a>                     <em class="jxr_comment">// empty</em>
+<a class="jxr_linenumber" name="L881" href="#L881">881</a>                 }
+<a class="jxr_linenumber" name="L882" href="#L882">882</a>             }
+<a class="jxr_linenumber" name="L883" href="#L883">883</a> 
+<a class="jxr_linenumber" name="L884" href="#L884">884</a>             <strong class="jxr_keyword">if</strong> (newJarStream != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L885" href="#L885">885</a>                 <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L886" href="#L886">886</a>                     newJarStream.close();
+<a class="jxr_linenumber" name="L887" href="#L887">887</a>                 } <strong class="jxr_keyword">catch</strong> (IOException closeException) {
+<a class="jxr_linenumber" name="L888" href="#L888">888</a>                     <em class="jxr_comment">// empty</em>
+<a class="jxr_linenumber" name="L889" href="#L889">889</a>                 }
+<a class="jxr_linenumber" name="L890" href="#L890">890</a> 
+<a class="jxr_linenumber" name="L891" href="#L891">891</a>                 <strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L892" href="#L892">892</a>                     FILE_UTILS.rename(newWLJarFile, weblogicJarFile);
+<a class="jxr_linenumber" name="L893" href="#L893">893</a>                 } <strong class="jxr_keyword">catch</strong> (IOException renameException) {
+<a class="jxr_linenumber" name="L894" href="#L894">894</a>                     log(renameException.getMessage(), Project.MSG_WARN);
+<a class="jxr_linenumber" name="L895" href="#L895">895</a>                     rebuild = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L896" href="#L896">896</a>                 }
+<a class="jxr_linenumber" name="L897" href="#L897">897</a>             }
+<a class="jxr_linenumber" name="L898" href="#L898">898</a>             <strong class="jxr_keyword">if</strong> (genericLoader != <strong class="jxr_keyword">null</strong>
+<a class="jxr_linenumber" name="L899" href="#L899">899</a>                 &amp;&amp; genericLoader instanceof AntClassLoader) {
+<a class="jxr_linenumber" name="L900" href="#L900">900</a>                 AntClassLoader loader = (AntClassLoader) genericLoader;
+<a class="jxr_linenumber" name="L901" href="#L901">901</a>                 loader.cleanup();
+<a class="jxr_linenumber" name="L902" href="#L902">902</a>             }
+<a class="jxr_linenumber" name="L903" href="#L903">903</a>         }
+<a class="jxr_linenumber" name="L904" href="#L904">904</a> 
+<a class="jxr_linenumber" name="L905" href="#L905">905</a>         <strong class="jxr_keyword">return</strong> rebuild;
+<a class="jxr_linenumber" name="L906" href="#L906">906</a>     }
+<a class="jxr_linenumber" name="L907" href="#L907">907</a> 
+<a class="jxr_linenumber" name="L908" href="#L908">908</a> 
+<a class="jxr_linenumber" name="L909" href="#L909">909</a>     <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L910" href="#L910">910</a> <em class="jxr_javadoccomment">     * Helper method invoked by isRebuildRequired to get a ClassLoader for a</em>
+<a class="jxr_linenumber" name="L911" href="#L911">911</a> <em class="jxr_javadoccomment">     * Jar File passed to it.</em>
+<a class="jxr_linenumber" name="L912" href="#L912">912</a> <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="L913" href="#L913">913</a> <em class="jxr_javadoccomment">     * @param classjar java.io.File representing jar file to get classes from.</em>
+<a class="jxr_linenumber" name="L914" href="#L914">914</a> <em class="jxr_javadoccomment">     * @return the classloader for the jarfile.</em>
+<a class="jxr_linenumber" name="L915" href="#L915">915</a> <em class="jxr_javadoccomment">     * @throws IOException if there is a problem.</em>
+<a class="jxr_linenumber" name="L916" href="#L916">916</a> <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L917" href="#L917">917</a>     <strong class="jxr_keyword">protected</strong> ClassLoader getClassLoaderFromJar(File classjar) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L918" href="#L918">918</a>         Path lookupPath = <strong class="jxr_keyword">new</strong> Path(getTask().getProject());
+<a class="jxr_linenumber" name="L919" href="#L919">919</a> 
+<a class="jxr_linenumber" name="L920" href="#L920">920</a>         lookupPath.setLocation(classjar);
+<a class="jxr_linenumber" name="L921" href="#L921">921</a> 
+<a class="jxr_linenumber" name="L922" href="#L922">922</a>         Path classpath = getCombinedClasspath();
+<a class="jxr_linenumber" name="L923" href="#L923">923</a> 
+<a class="jxr_linenumber" name="L924" href="#L924">924</a>         <strong class="jxr_keyword">if</strong> (classpath != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L925" href="#L925">925</a>             lookupPath.append(classpath);
+<a class="jxr_linenumber" name="L926" href="#L926">926</a>         }
+<a class="jxr_linenumber" name="L927" href="#L927">927</a> 
+<a class="jxr_linenumber" name="L928" href="#L928">928</a>         <strong class="jxr_keyword">return</strong> getTask().getProject().createClassLoader(lookupPath);
+<a class="jxr_linenumber" name="L929" href="#L929">929</a>     }
+<a class="jxr_linenumber" name="L930" href="#L930">930</a> }
+</pre>
+<hr/>
+<div id="footer"></div>
+</body>
+</html>
